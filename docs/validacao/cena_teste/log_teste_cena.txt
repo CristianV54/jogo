@@ -1,0 +1,53 @@
+T  0.1  jog=(   0.0,    0.0)  fag=(  -3.7,  0.0,   -3.7)  dist= 5.19  anim=Walk  voo=false  anim_player=Walk
+T  0.5  jog=(   0.0,    0.0)  fag=(  -2.8,  0.0,   -2.8)  dist= 3.91  anim=Walk  voo=false  anim_player=Walk
+T  1.0  jog=(   0.0,    0.0)  fag=(  -2.1,  0.0,   -2.1)  dist= 2.97  anim=Idle  voo=false  anim_player=Idle
+CAPTURA 1_andando
+T  1.5  jog=(   0.0,    0.0)  fag=(  -2.1,  0.0,   -2.1)  dist= 2.97  anim=Idle  voo=false  anim_player=Idle
+T  2.0  jog=(   0.0,    0.0)  fag=(  -2.1,  0.0,   -2.1)  dist= 2.97  anim=Idle  voo=false  anim_player=Idle
+T  2.5  jog=(   0.0,   -2.0)  fag=(  -2.1,  0.0,   -2.1)  dist= 2.11  anim=Idle  voo=false  anim_player=Idle
+T  3.0  jog=(   0.0,   -4.0)  fag=(  -2.1,  0.0,   -2.1)  dist= 2.83  anim=Idle  voo=false  anim_player=Idle
+T  3.5  jog=(   0.0,   -6.0)  fag=(  -1.3,  0.0,   -3.3)  dist= 2.99  anim=Walk  voo=false  anim_player=Walk
+T  4.0  jog=(   0.0,   -8.0)  fag=(  -0.7,  0.0,   -5.0)  dist= 3.12  anim=Walk  voo=false  anim_player=Walk
+T  4.5  jog=(   0.0,  -10.0)  fag=(  -0.4,  0.0,   -6.7)  dist= 3.34  anim=Walk  voo=false  anim_player=Walk
+CAPTURA 2_juntos_andando
+T  5.0  jog=(   0.0,  -12.0)  fag=(  -0.3,  0.0,   -8.4)  dist= 3.58  anim=Walk  voo=false  anim_player=Walk
+T  5.5  jog=(   0.0,  -15.5)  fag=(  -0.2,  0.0,  -10.2)  dist= 5.33  anim=Walk  voo=false  anim_player=Walk
+T  6.0  jog=(   0.0,  -19.0)  fag=(  -0.1,  0.0,  -11.9)  dist= 7.08  anim=Walk  voo=false  anim_player=Walk
+T  6.5  jog=(   0.0,  -22.5)  fag=(  -0.1,  0.0,  -13.7)  dist= 8.83  anim=Walk  voo=false  anim_player=Walk
+T  7.0  jog=(   0.0,  -26.0)  fag=(  -0.1,  0.0,  -17.1)  dist= 8.91  anim=Run   voo=false  anim_player=Run
+T  7.5  jog=(   0.0,  -29.5)  fag=(  -0.0,  0.0,  -20.6)  dist= 8.93  anim=Run   voo=false  anim_player=Run
+T  8.0  jog=(   0.0,  -33.0)  fag=(  -0.0,  0.0,  -24.1)  dist= 8.88  anim=Run   voo=false  anim_player=Run
+T  8.5  jog=(   0.0,  -36.5)  fag=(  -0.0,  0.0,  -27.6)  dist= 8.89  anim=Run   voo=false  anim_player=Run
+CAPTURA 3_correndo
+T  9.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -31.1)  dist= 8.91  anim=Run   voo=false  anim_player=Run
+T  9.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -32.8)  dist= 7.16  anim=Walk  voo=false  anim_player=Walk
+T 10.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -34.6)  dist= 5.41  anim=Walk  voo=false  anim_player=Walk
+T 10.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -36.3)  dist= 3.66  anim=Walk  voo=false  anim_player=Walk
+T 11.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -37.0)  dist= 2.96  anim=Idle  voo=false  anim_player=Idle
+T 11.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -37.0)  dist= 2.96  anim=Idle  voo=false  anim_player=Idle
+CAPTURA 4_parado
+T 12.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -37.0)  dist= 2.96  anim=Idle  voo=false  anim_player=Idle
+T 12.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -37.0)  dist= 2.96  anim=Idle  voo=false  anim_player=Idle
+T 13.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  0.0,  -37.0)  dist= 2.96  anim=Idle  voo=true  anim_player=Idle
+T 13.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  1.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 14.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  2.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 14.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  2.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 15.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  2.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 15.5  jog=(   0.0,  -40.0)  fag=(  -0.0,  2.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+CAPTURA 5_voando
+T 16.0  jog=(   0.0,  -40.0)  fag=(  -0.0,  2.5,  -37.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 16.5  jog=(   0.0,  -42.0)  fag=(  -0.0,  2.5,  -39.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 17.0  jog=(   0.0,  -44.0)  fag=(  -0.0,  2.5,  -41.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 17.5  jog=(   0.0,  -46.0)  fag=(  -0.0,  2.5,  -43.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 18.0  jog=(   0.0,  -48.0)  fag=(  -0.0,  2.5,  -45.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 18.5  jog=(   0.0,  -50.0)  fag=(  -0.0,  2.5,  -47.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+T 19.0  jog=(   0.0,  -52.0)  fag=(  -0.0,  2.5,  -49.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+CAPTURA 6_voando_seguindo
+T 19.5  jog=(   0.0,  -54.0)  fag=(  -0.0,  2.5,  -51.0)  dist= 2.96  anim=Fly   voo=true  anim_player=Fly
+ANIMACOES_VISTAS ["Walk", "Idle", "Run", "Fly"] | altura_max_voo 2.5 | altura_max_no_chao 0.0 | dist_parado_max 3.0 | jogador_avancou 53.9
+  PASSOU Fagulha mostrou Idle, Walk, Run e Fly
+  PASSOU Jogador andou para frente (-Z) mais de 30 m
+  PASSOU Fagulha parado nunca ficou a mais de 3,5 m
+  PASSOU Fagulha ficou no chão (y <= 0,01) até o voo
+  PASSOU Fagulha subiu a pelo menos 2,3 m no voo
+RESULTADO TUDO PASSOU

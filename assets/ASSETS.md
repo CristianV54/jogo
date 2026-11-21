@@ -20,3 +20,13 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
   - Animações de combate e reação: mordida, garra, cauda, fogo, rugido, dano, morte, decolar, pousar, pular, curvas.
   - Pesos nas juntas conferidos só em poucas poses.
   - Textura pintada à mão (hoje é cor de vértice).
+
+## PLACEHOLDER_Torin (provisório, NÃO é asset final)
+
+- **O que é:** cápsula magenta de 1,8 m com uma caixa na frente, só para testar câmera e movimento. Nó `PLACEHOLDER_Torin` e `PLACEHOLDER_Torin_frente` em `scenes/jogador/jogador.tscn`.
+- **Por que existe:** o modelo do Torin ainda não foi decidido (de onde vem). A cor é magenta de propósito, para ninguém confundir com modelo final.
+- **Pendência:** substituir por um humanoide real, com rig e animações (parado, andando, correndo), validado e registrado aqui. Enquanto isso, nenhuma tarefa que dependa do Torin conta como concluída.
+
+## Cena de teste (cenário de depuração)
+
+- `scenes/teste/cena_teste.tscn`: chão plano, céu procedural, 4 pilares `MARCO_*` (só para ver o movimento), câmera 3ª pessoa, Torin provisório e Fagulha. Nada disso é arte final.

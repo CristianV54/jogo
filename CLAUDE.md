@@ -87,4 +87,6 @@ ReinoDeCinzas/
 - Projeto Godot criado na raiz (`project.godot`). Primeiro asset validado: `assets/models/criaturas/fagulha/fagulha.glb` (movimento base: Walk, Run, Idle, Fly em loop). Detalhes e pendências em `assets/ASSETS.md`. Ferramentas em `tools/fagulha/`, evidências em `docs/validacao/fagulha/`.
 - `wip/` é laboratório e fica fora do Godot (`wip/.gdignore`): ali ficam o esboço de dragão esculpido por código (descartado em favor da base rigada) e os testes antigos. Não apagar sem o usuário pedir.
 - Referências de anatomia (só leitura, nunca copiar a malha): dragões em `/Volumes/Extreme SSD/JOGO/modelos-3d/baixados_usuario/dragoes/` e em `~/Downloads`.
-- Próximo: **Bloco 1** (cena de teste com câmera 3ª pessoa, chão e o Fagulha andando e voando) e, em paralelo, o modelo do Torin (decisão aberta: de onde vem). Depois: proporção de filhote e animações de combate do Fagulha.
+- Cena de teste montada e validada (`scenes/teste/cena_teste.tscn`): câmera em 3ª pessoa (`scripts/camera`), jogador com WASD e Shift (`scripts/jogador`), Fagulha que segue o jogador e voa com a tecla F (`scripts/criaturas`). Teste automático: `godot --path . --resolution 1280x720 --script res://tools/teste_cena.gd` (log e capturas em `docs/validacao/cena_teste/`).
+- O Torin é um `PLACEHOLDER_Torin` (cápsula magenta) registrado em `assets/ASSETS.md`. Decisão aberta: de onde vem o modelo do Torin.
+- Próximo: modelo real do Torin (com rig e animações de andar e correr); depois proporção de filhote e animações de combate do Fagulha.

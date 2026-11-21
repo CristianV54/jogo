@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/jogador/jogador.gd" id="1"]
+
+[sub_resource type="CapsuleShape3D" id="2"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="3"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="4"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="5"]
+size = Vector3(0.2, 0.2, 0.4)
+
+[node name="Jogador" type="CharacterBody3D"]
+script = ExtResource("1")
+
+[node name="Colisao" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("2")
+
+[node name="PLACEHOLDER_Torin" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("3")
+surface_material_override/0 = SubResource("4")
+
+[node name="PLACEHOLDER_Torin_frente" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -0.4)
+mesh = SubResource("5")
+surface_material_override/0 = SubResource("4")

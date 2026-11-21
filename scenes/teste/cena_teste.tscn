@@ -1,0 +1,79 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/jogador/jogador.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/fagulha.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera/camera_terceira_pessoa.gd" id="3"]
+
+[sub_resource type="ProceduralSkyMaterial" id="4"]
+
+[sub_resource type="Sky" id="5"]
+sky_material = SubResource("4")
+
+[sub_resource type="Environment" id="6"]
+background_mode = 2
+sky = SubResource("5")
+ambient_light_source = 3
+
+[sub_resource type="BoxShape3D" id="7"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="PlaneMesh" id="8"]
+size = Vector2(200, 200)
+
+[sub_resource type="StandardMaterial3D" id="9"]
+albedo_color = Color(0.36, 0.5, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="10"]
+size = Vector3(1, 3, 1)
+
+[node name="CenaTeste" type="Node3D"]
+
+[node name="Ambiente" type="WorldEnvironment" parent="."]
+environment = SubResource("6")
+
+[node name="Sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Chao" type="StaticBody3D" parent="."]
+
+[node name="Colisao" type="CollisionShape3D" parent="Chao"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("7")
+
+[node name="Superficie" type="MeshInstance3D" parent="Chao"]
+mesh = SubResource("8")
+surface_material_override/0 = SubResource("9")
+
+[node name="MARCO_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -10)
+mesh = SubResource("10")
+
+[node name="MARCO_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.5, -10)
+mesh = SubResource("10")
+
+[node name="MARCO_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, -25)
+mesh = SubResource("10")
+
+[node name="MARCO_4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.5, -25)
+mesh = SubResource("10")
+
+[node name="Camera" type="Node3D" parent="." node_paths=PackedStringArray("alvo")]
+script = ExtResource("3")
+alvo = NodePath("../Jogador")
+
+[node name="Braco" type="SpringArm3D" parent="Camera"]
+margin = 0.3
+
+[node name="Lente" type="Camera3D" parent="Camera/Braco"]
+current = true
+
+[node name="Jogador" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1")]
+camera = NodePath("../Camera")
+
+[node name="Fagulha" parent="." node_paths=PackedStringArray("alvo") instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -4)
+alvo = NodePath("../Jogador")
