@@ -1,0 +1,4 @@
+# cache do Godot e saídas de teste
+.godot/
+tools/**/cap_*.png
+*.tmp

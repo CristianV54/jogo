@@ -1,0 +1,90 @@
+# Sangue e Escamas (título provisório; pasta: ReinoDeCinzas)
+
+Jogo de ação/RPG em 3ª pessoa, medieval, com dragões. Combate no centro, com evolução de armas e armaduras.
+Idioma de trabalho: português do Brasil. Explicar arquitetura em linguagem direta.
+
+## Fundação (aprovada)
+
+- **Motor:** Godot 4.7.2 (GDScript), instalado via Homebrew. Comando `godot` no terminal.
+- **Blender:** 5.3.0 em `/Applications/Blender.app` (para modelar e ajustar assets).
+- **Estilo visual único:** 3D suave pintado. Nenhum outro estilo misturado (nada de low-poly chapado, voxel ou realista).
+- **Câmera:** 3ª pessoa.
+- **Gênero:** ação/RPG com combate central, forja de armas e armaduras, libertação de territórios, chefes colossais.
+- **Referências de tom (só inspiração, nunca cópia de personagem, cena ou nome):** lealdade e ruptura de bando (Red Dead Redemption 2), vínculo com dragão (Como Treinar o Seu Dragão), evolução e território (ARK), combate e chefes (God of War, Ne Zha 2).
+
+## História
+
+- **Mundo:** o Império de Drakkar caça e acorrenta os dragões antigos com artefatos de ferro negro para alimentar uma máquina de guerra. Os dragões não são monstros irracionais: são enlouquecidos e escravizados pelos obeliscos e pelos generais do Império.
+- **Protagonista:** Torin, jovem comum, sem título nem linhagem, criado como batedor e lenhador num bando de exilados na fronteira selvagem.
+- **Bando:** vive nas florestas e montanhas. Liderado por Vane, que começa protegendo o grupo, mas enlouquece de ambição por roubar o poder dos dragões para si.
+- **Virada:** numa caçada, Torin encontra um dragão jovem ferido, Fagulha, e descobre a verdade sobre os dragões.
+- **Escalada:** Torin começa do zero, evolui armas e armaduras, liberta territórios selvagens, enfrenta chefes colossais (generais encouraçados, bestas guardiãs, dragões corrompidos) e desafia tanto o Império quanto a traição dentro do bando.
+
+## Nomes
+
+- **Protagonista:** Torin
+- **Local inicial:** Refúgio do Pinhal (acampamento do bando)
+- **Líder do bando (mentor que vira rival):** Vane
+- **Ferreira e aliada:** Brenn
+- **Dragão aliado jovem:** Fagulha
+- **Império:** Império de Drakkar
+- **Chefes principais, em ordem:**
+  1. Brutamontes Gorath (guardião da floresta/mina inicial)
+  2. General Kaelor (comandante da fronteira do Império)
+  3. Ignis-Maw (dragão ancestral corrompido pelo ferro negro)
+  4. Imperador Solon (chefe final, castelo central)
+
+Mudou um nome? Atualizar aqui e varrer o projeto inteiro. Nomes de outros lugares, bestas comuns e NPCs menores ainda não foram definidos: propor e aprovar antes de usar.
+
+## Regras de trabalho
+
+### Arquitetura
+- Modular e limpa: um sistema por vez (jogador, câmera, combate, inimigo, inventário, forja...). Cada sistema numa pasta própria, com uma responsabilidade clara.
+- Sem código morto, sem remendo em cima de remendo. Achou código morto? Avisar, não apagar sozinho.
+- Mínimo de código que resolve. Nada de abstração para coisa usada uma vez.
+- Comunicação entre sistemas por sinais do Godot, não por referência direta a nós distantes.
+- Antes de tocar em código, ler o que já existe. Nunca presumir estrutura.
+
+### Modelos 3D e animações
+- Só entram no jogo assets **validados**, dentro de `assets/models/` (um subdiretório por tipo: `personagens/`, `criaturas/`, `armas/`, `cenario/`).
+- Cada asset novo ganha uma linha em `assets/ASSETS.md`: origem (Blender, baixado de onde, gerado), licença, estilo conferido, e se tem rig/animações.
+- Formato preferido: `.glb`. Animações embutidas no arquivo, **ativadas de forma explícita no código** (nome da animação no `AnimationPlayer`, nunca depender do autoplay).
+- Nunca improvisar geometria complexa por conta própria. Se faltar um asset, parar e dizer: "falta o modelo X". Proibido placeholder escondido (caixa, cápsula) fingindo ser o modelo final.
+- Se for preciso um stand-in temporário, ele fica **visível e nomeado** como `PLACEHOLDER_...`, listado em `assets/ASSETS.md` como pendência, e nunca conta como tarefa concluída.
+- Modelar no Blender e pesquisar modelos no navegador é permitido. Baixar arquivo só com OK do usuário. Todo asset novo tem que passar no estilo "3D suave pintado" antes de entrar.
+
+### Verificação (nada é "pronto" sem prova)
+- Nunca marcar tarefa como concluída sem verificação real: rodar o jogo/cena, ler os **logs** e tirar **captura de tela direcionada** do que foi mudado.
+- Mostrar a saída ao usuário. "Parece pronto" não é pronto.
+- Declarar sempre o método: li o código, rodei, ou olhei a captura.
+- Erro? Atacar a causa raiz. Nunca suprimir erro ou aviso para o build passar.
+- Achou defeito na captura? Corrigir e capturar de novo antes de entregar.
+
+### Ritmo
+- Trabalhar em **blocos pequenos e testáveis**. Cada bloco tem critério de sucesso escrito antes de começar.
+- Salvar o progresso a cada etapa aprovada (commit em português, descritivo). Nunca commitar direto na `main`: criar branch antes de mexer.
+- Trabalho que toca vários arquivos: plano primeiro, esperar aprovação.
+- Se existir mais de uma interpretação do pedido, apresentar todas. Nunca escolher em silêncio.
+
+## Estrutura prevista (criada só quando o bloco precisar)
+
+```
+ReinoDeCinzas/
+  CLAUDE.md
+  project.godot
+  assets/
+    ASSETS.md
+    models/{personagens,criaturas,armas,cenario}/
+    audio/
+  scenes/
+  scripts/
+  docs/
+```
+
+## Estado atual
+
+- Fundação, história e nomes aprovados. Godot e Blender conferidos.
+- Projeto Godot criado na raiz (`project.godot`). Primeiro asset validado: `assets/models/criaturas/fagulha/fagulha.glb` (movimento base: Walk, Run, Idle, Fly em loop). Detalhes e pendências em `assets/ASSETS.md`. Ferramentas em `tools/fagulha/`, evidências em `docs/validacao/fagulha/`.
+- `wip/` é laboratório e fica fora do Godot (`wip/.gdignore`): ali ficam o esboço de dragão esculpido por código (descartado em favor da base rigada) e os testes antigos. Não apagar sem o usuário pedir.
+- Referências de anatomia (só leitura, nunca copiar a malha): dragões em `/Volumes/Extreme SSD/JOGO/modelos-3d/baixados_usuario/dragoes/` e em `~/Downloads`.
+- Próximo: **Bloco 1** (cena de teste com câmera 3ª pessoa, chão e o Fagulha andando e voando) e, em paralelo, o modelo do Torin (decisão aberta: de onde vem). Depois: proporção de filhote e animações de combate do Fagulha.
