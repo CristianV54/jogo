@@ -2,3 +2,5 @@
 .godot/
 tools/**/cap_*.png
 *.tmp
+tools/capturas/
+tools/fagulha/cap_*.png.import
