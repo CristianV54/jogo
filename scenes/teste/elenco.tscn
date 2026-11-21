@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/personagens/torin.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/vane.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/brenn.tscn" id="3"]
+
+[node name="Elenco" type="Node3D"]
+
+[node name="Torin" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0, 0)
+
+[node name="Vane" parent="." instance=ExtResource("2")]
+
+[node name="Brenn" parent="." instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0, 0)

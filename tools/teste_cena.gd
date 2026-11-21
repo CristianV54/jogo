@@ -15,6 +15,7 @@ var cam_lateral: Camera3D
 var t := 0.0
 var proximo_log := 0.0
 var vistas := {}              # animações do Fagulha que apareceram
+var vistas_torin := {}         # animações do Torin que apareceram
 var altura_max_voo := 0.0
 var altura_max_no_chao := 0.0  # maior altura enquanto NÃO estava no modo voo (deve ser ~0)
 var dist_parado_max := 0.0     # maior distância vista enquanto ele estava em Idle no chão
@@ -72,6 +73,7 @@ func _roteiro() -> void:
 func _medir() -> void:
 	var d := Vector2(fag.global_position.x - jog.global_position.x, fag.global_position.z - jog.global_position.z).length()
 	vistas[fag.animacao_atual] = true
+	vistas_torin[jog.animacao_atual] = true
 	if fag.modo_voo:
 		altura_max_voo = max(altura_max_voo, fag.global_position.y)
 	else:
@@ -110,11 +112,13 @@ func _resultado() -> void:
 	var avancou: float = z_inicial - jog.global_position.z
 	var checks := {
 		"Fagulha mostrou Idle, Walk, Run e Fly": vistas.has("Idle") and vistas.has("Walk") and vistas.has("Run") and vistas.has("Fly"),
+		"Torin mostrou Idle, Jog_Fwd e Sprint": vistas_torin.has("Idle") and vistas_torin.has("Jog_Fwd") and vistas_torin.has("Sprint"),
 		"Jogador andou para frente (-Z) mais de 30 m": avancou > 30.0,
 		"Fagulha parado nunca ficou a mais de 3,5 m": dist_parado_max <= 3.5,
 		"Fagulha ficou no chão (y <= 0,01) até o voo": altura_max_no_chao <= 0.01,
 		"Fagulha subiu a pelo menos 2,3 m no voo": altura_max_voo >= 2.3,
 	}
+	print("ANIMACOES_TORIN ", vistas_torin.keys())
 	print("ANIMACOES_VISTAS ", vistas.keys(), " | altura_max_voo ", snapped(altura_max_voo, 0.01), " | altura_max_no_chao ",
 		snapped(altura_max_no_chao, 0.001), " | dist_parado_max ", snapped(dist_parado_max, 0.01), " | jogador_avancou ", snapped(avancou, 0.1))
 	var tudo := true

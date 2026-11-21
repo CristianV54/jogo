@@ -88,5 +88,5 @@ ReinoDeCinzas/
 - `wip/` é laboratório e fica fora do Godot (`wip/.gdignore`): ali ficam o esboço de dragão esculpido por código (descartado em favor da base rigada) e os testes antigos. Não apagar sem o usuário pedir.
 - Referências de anatomia (só leitura, nunca copiar a malha): dragões em `/Volumes/Extreme SSD/JOGO/modelos-3d/baixados_usuario/dragoes/` e em `~/Downloads`.
 - Cena de teste montada e validada (`scenes/teste/cena_teste.tscn`): câmera em 3ª pessoa (`scripts/camera`), jogador com WASD e Shift (`scripts/jogador`), Fagulha que segue o jogador e voa com a tecla F (`scripts/criaturas`). Teste automático: `godot --path . --resolution 1280x720 --script res://tools/teste_cena.gd` (log e capturas em `docs/validacao/cena_teste/`).
-- O Torin é um `PLACEHOLDER_Torin` (cápsula magenta) registrado em `assets/ASSETS.md`. Decisão aberta: de onde vem o modelo do Torin.
-- Próximo: modelo real do Torin (com rig e animações de andar e correr); depois proporção de filhote e animações de combate do Fagulha.
+- Fase A concluída: Torin, Vane e Brenn são humanoides reais (pacotes CC0 do Quaternius: base, trajes, animações), com o mesmo esqueleto de 65 ossos e 43 animações compartilhadas. O `PLACEHOLDER_Torin` foi substituído. Registro em `assets/ASSETS.md`; geração em `tools/personagens/`.
+- Próximo: terreno e Refúgio do Pinhal (Fase B), criaturas, chefes e Fagulha (Fase C), combate e fluxo entre áreas (Fase D).

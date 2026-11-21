@@ -1,6 +1,7 @@
 class_name Jogador
 extends CharacterBody3D
-## Corpo do jogador: anda e corre em relação à direção da câmera (WASD, Shift).
+## Corpo do jogador (Torin): anda e corre em relação à direção da câmera (WASD, Shift).
+## O visual é o Torin real; o modelo olha para +Z, então o nó Visual fica girado 180° para olhar para a frente do jogador (-Z).
 ## A entrada pode ser forçada por código, só para os testes automáticos.
 
 @export var camera: CameraTerceiraPessoa
@@ -11,6 +12,9 @@ extends CharacterBody3D
 
 var entrada_forcada := Vector2.ZERO   # x: direita(+), y: trás(+). Zero = usa o teclado.
 var correndo_forcado := false
+var animacao_atual := ""
+
+@onready var visual: Humanoide = $Visual
 
 
 func _physics_process(delta: float) -> void:
@@ -27,6 +31,18 @@ func _physics_process(delta: float) -> void:
 
 	if direcao.length() > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-direcao.x, -direcao.z), giro * delta)
+	_animar(direcao.length(), correndo)
+
+
+func _animar(movimento: float, correndo: bool) -> void:
+	var nome := "Idle"
+	if not is_on_floor():
+		nome = "Jump"
+	elif movimento > 0.01:
+		nome = "Sprint" if correndo else "Jog_Fwd"
+	if nome != animacao_atual:
+		visual.tocar(nome)
+		animacao_atual = nome
 
 
 func _ler_entrada() -> Vector2:
