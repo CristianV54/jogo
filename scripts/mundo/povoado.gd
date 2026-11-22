@@ -165,8 +165,8 @@ func _movel(nome_m: String, p: Vector2, giro := 0.0) -> void:
 
 
 func _lavrador(nome_n: String, cena: String, campo: Vector2, falas: PackedStringArray) -> void:
-	var a := campo + dir * -4.0
-	var b := campo + dir * 4.0
+	var a := campo + dir * -6.0
+	var b := campo + dir * 6.0
 	_npc(nome_n, "Lavrador", cena, a, falas, [
 		{"fazer": "Interact", "seg": 9.0, "olhar": campo + para_longe * 3.0}, {"ir": b, "vel": 1.1},
 		{"fazer": "Interact", "seg": 9.0, "olhar": campo + para_longe * 3.0}, {"ir": a, "vel": 1.1}])
@@ -177,10 +177,10 @@ func _lavrador(nome_n: String, cena: String, campo: Vector2, falas: PackedString
 func _fazenda() -> void:
 	_casa("CasaDaFazenda", _p(0.0, 4.0), 3, 3, REF.ESTILO_MADEIRA)
 	_casa("Celeiro", _p(-22.0, 10.0), 4, 4, REF.ESTILO_MADEIRA, "deposito")
-	var c1 := _p(14.0, 26.0)
-	var c2 := _p(-8.0, 30.0)
-	_plantacao(c1, 10.0, 7.0)
-	_plantacao(c2, 10.0, 7.0)
+	var c1 := _p(30.0, 34.0)
+	var c2 := _p(0.0, 60.0)
+	_plantacao(c1, 24.0, 16.0)
+	_plantacao(c2, 28.0, 16.0)
 	VilaRefugio._poco(Vector3(_p(10.0, 8.0).x, 0.0, _p(10.0, 8.0).y))
 	_curral(_p(-26.0, 30.0), 14.0, 10.0, [["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["ovelha", "Ovelha", "ovelha", 1.0, {"carne": [1, 2], "la": [1, 2]}]])
 	for k in 4:
@@ -198,10 +198,10 @@ func _vila() -> void:
 	_casa("Ferraria", _p(-14.0, 26.0), 3, 3, REF.ESTILO_PEDRA, "forja")
 	_casa("Casa3", _p(14.0, 28.0), 3, 2, REF.ESTILO_MADEIRA)
 	VilaRefugio._poco(Vector3(_p(0.0, 16.0).x, 0.0, _p(0.0, 16.0).y))
-	var c1 := _p(-34.0, 40.0)
-	var c2 := _p(30.0, 44.0)
-	_plantacao(c1, 10.0, 7.0)
-	_plantacao(c2, 10.0, 7.0)
+	var c1 := _p(-34.0, 42.0)
+	var c2 := _p(30.0, 46.0)
+	_plantacao(c1, 22.0, 14.0)
+	_plantacao(c2, 22.0, 14.0)
 	_curral(_p(0.0, 48.0), 16.0, 10.0, [["porco", "Porco", "porco", 1.0, {"carne": [2, 3]}], ["porco", "Porco", "porco", 1.0, {"carne": [2, 3]}], ["cavalo", "Cavalo", "cavalo", 1.0, {"carne": [2, 3], "couro": [1, 1]}]])
 	_movel("Table_Large", _p(-6.0, 14.0))
 	_movel("Bench", _p(-6.0, 12.0), 90.0)

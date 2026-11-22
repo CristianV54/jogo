@@ -252,13 +252,13 @@ static func _poco(c: Vector3) -> Array:
 
 
 static func _horta(centro: Vector3) -> Array:
-	_cerca_retangular(centro, 17.0, 12.0, "s", 3.2)
+	_cerca_retangular(centro, 20.0, 13.0, "s", 3.2)
 	var plantacao := Plantacao.new()
-	plantacao.largura = 11.0
-	plantacao.profundidade = 8.0
+	plantacao.largura = 14.0
+	plantacao.profundidade = 9.0
 	plantacao.position = Vector3(centro.x, _y(centro.x, centro.z), centro.z)
 	_area.add_child(plantacao)
-	return [Vector2(centro.x, centro.z), 11.5]
+	return [Vector2(centro.x, centro.z), 13.5]
 
 
 static func _canil(c: Vector3) -> Array:

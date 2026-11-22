@@ -13,6 +13,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	Clima.registrar_globais()
+	set_meta("raio_capim", Vector2(largura, profundidade).length() / 2.0 + 3.0)   # o capim do mundo não nasce aqui
 	_rng.seed = 5
 	_terra()
 	_fileiras()
@@ -33,21 +34,33 @@ func _mat(cor: Color) -> StandardMaterial3D:
 
 
 func _terra() -> void:
-	var chao := MeshInstance3D.new()   # terra revolvida, mais escura que o capim em volta
+	var chao := MeshInstance3D.new()   # terra batida de fundo: aparece nas trilhas entre os talhões
 	var b := BoxMesh.new()
 	b.size = Vector3(largura, 0.06, profundidade)
-	b.material = _mat(Color(0.22, 0.14, 0.09))
+	b.material = _mat(Color(0.36, 0.26, 0.16))
 	chao.mesh = b
 	chao.position.y = 0.03
 	add_child(chao)
-	for i in int(profundidade / ESPACO_FILEIRA):   # sulcos: um camalhão por fileira
-		var z := -profundidade / 2.0 + 0.6 + i * ESPACO_FILEIRA
+
+
+## Faixa de terra revolvida de um talhão (mais escura que a trilha) com sulcos para os cultivos de fileira.
+func _terra_do_talhao(x0: float, larg: float, sulcos: bool) -> void:
+	var t := MeshInstance3D.new()
+	var tb := BoxMesh.new()
+	tb.size = Vector3(larg, 0.08, profundidade - 1.0)
+	tb.material = _mat(Color(0.2, 0.13, 0.08))
+	t.mesh = tb
+	t.position = Vector3(x0 + larg / 2.0, 0.05, 0.0)
+	add_child(t)
+	if not sulcos:
+		return
+	for i in int((profundidade - 1.0) / 0.9):
 		var s := MeshInstance3D.new()
 		var sb := BoxMesh.new()
-		sb.size = Vector3(largura - 0.6, 0.16, 0.55)
-		sb.material = _mat(Color(0.3, 0.19, 0.11) if i % 2 == 0 else Color(0.26, 0.16, 0.1))
+		sb.size = Vector3(larg - 0.3, 0.16, 0.45)
+		sb.material = _mat(Color(0.3, 0.19, 0.11) if i % 2 == 0 else Color(0.25, 0.16, 0.1))
 		s.mesh = sb
-		s.position = Vector3(0.0, 0.1, z)
+		s.position = Vector3(x0 + larg / 2.0, 0.1, -profundidade / 2.0 + 1.0 + i * 0.9)
 		add_child(s)
 
 
@@ -66,13 +79,13 @@ func _malha_trigo() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var base_cor := Color(0.5, 0.45, 0.14)
 	var ponta := Color(0.92, 0.76, 0.26)
-	for k in 6:
-		var a := k * TAU / 6.0 + 0.3
-		var r := 0.07 + (k % 2) * 0.05
+	for k in 7:
+		var a := k * TAU / 7.0 + 0.3
+		var r := 0.05 + (k % 2) * 0.05
 		var dir := Vector3(cos(a), 0.0, sin(a))
 		var lado := Vector3(-dir.z, 0.0, dir.x) * 0.025
 		var raiz := dir * r
-		var topo := raiz + dir * 0.07 + Vector3(0.0, 0.85 + (k % 3) * 0.08, 0.0)
+		var topo := raiz + dir * 0.07 + Vector3(0.0, 1.0 + (k % 3) * 0.1, 0.0)
 		_tri(st, raiz - lado, base_cor, raiz + lado, base_cor, topo, ponta)
 		var espiga := topo + Vector3(0.0, 0.17, 0.0)   # espiga dourada no topo
 		_tri(st, topo - lado * 1.8, ponta, topo + lado * 1.8, ponta, espiga, Color(0.98, 0.84, 0.35))
@@ -116,11 +129,12 @@ func _malha_verdura() -> ArrayMesh:
 	return st.commit()
 
 
-func _material_vento(forca: float) -> ShaderMaterial:
+func _material_vento(forca: float, tinta := Color(1, 1, 1)) -> ShaderMaterial:
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
 render_mode cull_disabled;
 uniform float forca = 0.08;
+uniform vec3 tinta = vec3(1.0);
 global uniform float vento_forca;
 void vertex() {
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -130,13 +144,14 @@ void vertex() {
 	VERTEX.z += cos(t * 0.8) * forca * 0.6 * vento_forca * h;
 }
 void fragment() {
-	ALBEDO = COLOR.rgb;
+	ALBEDO = COLOR.rgb * tinta;
 	ROUGHNESS = 1.0;
 }
 """
 	var m := ShaderMaterial.new()
 	m.shader = sh
 	m.set_shader_parameter("forca", forca)
+	m.set_shader_parameter("tinta", Vector3(tinta.r, tinta.g, tinta.b))
 	return m
 
 
@@ -151,64 +166,87 @@ func _espalhar(malha: Mesh, mat: Material, transf: Array[Transform3D], nome: Str
 	inst.name = nome
 	inst.multimesh = mm
 	inst.material_override = mat
+	inst.visibility_range_end = 160.0
+	inst.visibility_range_end_margin = 20.0
 	add_child(inst)
 
 
+## Divide o campo em talhões lado a lado (trilha de 1 m entre eles), cada um com um cultivo só e bem denso, como numa
+## fazenda de verdade: trigo maduro (dourado), trigo novo (verde), milho alto, repolho, verduras, abóboras e terra em pousio.
 func _fileiras() -> void:
-	var trigo: Array[Transform3D] = []
-	var milho: Array[Transform3D] = []
-	var verdura: Array[Transform3D] = []
-	var repolho: Array[Transform3D] = []
-	var folha_repolho: Array[Transform3D] = []
-	var abobora: Array[Transform3D] = []
-	var tipos := ["trigo", "trigo", "milho", "repolho", "verdura", "abobora", "trigo", "verdura"]
-	var n := int(profundidade / ESPACO_FILEIRA)
+	var n := maxi(1, int(round(largura / 7.0)))
+	var larg_t := (largura - (n - 1) * 1.0 - 1.0) / n
+	var ordem := ["trigo", "milho", "trigo", "repolho", "trigo_novo", "verdura", "pousio", "abobora", "trigo", "milho"]
+	var grupos: Dictionary = {}
+	var primeiro := _rng.randi() % ordem.size()
 	for i in n:
-		var z := -profundidade / 2.0 + 0.6 + i * ESPACO_FILEIRA
-		var tipo: String = tipos[i % tipos.size()]
-		var passo: float = {"trigo": 0.22, "milho": 0.55, "repolho": 0.6, "verdura": 0.4, "abobora": 1.1}[tipo]
-		var x := -largura / 2.0 + 0.6
-		while x < largura / 2.0 - 0.5:
-			var p := Vector3(x + _rng.randf_range(-0.05, 0.05), 0.16, z + _rng.randf_range(-0.12, 0.12))
-			var giro := Basis(Vector3.UP, _rng.randf() * TAU)
-			var esc := _rng.randf_range(0.85, 1.2)
-			match tipo:
-				"trigo":
-					trigo.append(Transform3D(giro.scaled(Vector3(esc, esc, esc)), p))
-				"milho":
-					milho.append(Transform3D(giro.scaled(Vector3(esc, esc * _rng.randf_range(0.85, 1.1), esc)), p))
-				"verdura":
-					verdura.append(Transform3D(giro.scaled(Vector3(esc, esc, esc)), p))
-				"repolho":
-					repolho.append(Transform3D(Basis().scaled(Vector3(esc, esc * 0.8, esc)), p + Vector3(0, 0.2, 0)))
-					folha_repolho.append(Transform3D(Basis().scaled(Vector3(esc, 1.0, esc)), p + Vector3(0, 0.08, 0)))
-				"abobora":
-					abobora.append(Transform3D(giro.scaled(Vector3(esc * 1.2, esc, esc * 1.2)), p + Vector3(0, 0.22, 0)))
-			x += passo
-	_espalhar(_malha_trigo(), _material_vento(0.09), trigo, "Trigo")
-	_espalhar(_malha_milho(), _material_vento(0.07), milho, "Milho")
-	_espalhar(_malha_verdura(), _material_vento(0.05), verdura, "Verduras")
-	var cabeca := SphereMesh.new()
-	cabeca.radius = 0.26
-	cabeca.height = 0.52
-	cabeca.radial_segments = 8
-	cabeca.rings = 4
-	cabeca.material = _mat(Color(0.28, 0.48, 0.2))
-	_espalhar(cabeca, null, repolho, "Repolhos")
-	var disco := CylinderMesh.new()   # folhas externas, mais escuras, abertas em volta da cabeça
-	disco.top_radius = 0.42
-	disco.bottom_radius = 0.46
-	disco.height = 0.05
-	disco.radial_segments = 8
-	disco.material = _mat(Color(0.14, 0.3, 0.11))
-	_espalhar(disco, null, folha_repolho, "FolhasDoRepolho")
-	var fruto := SphereMesh.new()
-	fruto.radius = 0.3
-	fruto.height = 0.5
-	fruto.radial_segments = 8
-	fruto.rings = 4
-	fruto.material = _mat(Color(0.7, 0.3, 0.06))
-	_espalhar(fruto, null, abobora, "Aboboras")
+		var tipo: String = ordem[(primeiro + i) % ordem.size()]
+		var x0 := -largura / 2.0 + 0.5 + i * (larg_t + 1.0)
+		_terra_do_talhao(x0, larg_t, tipo != "trigo" and tipo != "trigo_novo" and tipo != "milho")
+		var passo: float = {"trigo": 0.16, "trigo_novo": 0.16, "milho": 0.5, "repolho": 0.62, "verdura": 0.34, "abobora": 1.15, "pousio": 99.0}[tipo]
+		if not grupos.has(tipo):
+			grupos[tipo] = []
+		var lista: Array = grupos[tipo]
+		var z := -profundidade / 2.0 + 1.0
+		var fila := 0
+		while z < profundidade / 2.0 - 0.9:
+			var x := x0 + 0.3
+			while x < x0 + larg_t - 0.25:
+				var p := Vector3(x + _rng.randf_range(-0.07, 0.07), 0.14, z + _rng.randf_range(-0.07, 0.07))
+				var giro := Basis(Vector3.UP, _rng.randf() * TAU)
+				var esc := _rng.randf_range(0.85, 1.25)
+				match tipo:
+					"trigo", "trigo_novo":
+						lista.append(Transform3D(giro.scaled(Vector3(esc, esc * _rng.randf_range(0.9, 1.25), esc)), p))
+					"milho":
+						lista.append(Transform3D(giro.scaled(Vector3(esc, esc * _rng.randf_range(0.85, 1.15), esc)), p))
+					"verdura":
+						lista.append(Transform3D(giro.scaled(Vector3(esc, esc, esc)), p))
+					"repolho":
+						lista.append(Transform3D(Basis().scaled(Vector3(esc, esc * 0.8, esc)), p + Vector3(0, 0.2, 0)))
+					"abobora":
+						lista.append(Transform3D(giro.scaled(Vector3(esc * 1.2, esc, esc * 1.2)), p + Vector3(0, 0.22, 0)))
+				x += passo if tipo != "trigo" and tipo != "trigo_novo" else passo
+			z += 0.9 if tipo in ["repolho", "verdura", "abobora", "pousio"] else (0.16 if tipo.begins_with("trigo") else 0.5)
+			fila += 1
+	for tipo in grupos:
+		var lista: Array[Transform3D] = []
+		lista.assign(grupos[tipo])
+		match tipo:
+			"trigo":
+				_espalhar(_malha_trigo(), _material_vento(0.09), lista, "TrigoMaduro")
+			"trigo_novo":
+				_espalhar(_malha_trigo(), _material_vento(0.09, Color(0.55, 0.78, 0.38)), lista, "TrigoNovo")
+			"milho":
+				_espalhar(_malha_milho(), _material_vento(0.07), lista, "Milho")
+			"verdura":
+				_espalhar(_malha_verdura(), _material_vento(0.05), lista, "Verduras")
+			"repolho":
+				var cabeca := SphereMesh.new()
+				cabeca.radius = 0.26
+				cabeca.height = 0.52
+				cabeca.radial_segments = 8
+				cabeca.rings = 4
+				cabeca.material = _mat(Color(0.28, 0.48, 0.2))
+				_espalhar(cabeca, null, lista, "Repolhos")
+				var disco := CylinderMesh.new()   # folhas externas, mais escuras, abertas em volta da cabeça
+				disco.top_radius = 0.42
+				disco.bottom_radius = 0.46
+				disco.height = 0.05
+				disco.radial_segments = 8
+				disco.material = _mat(Color(0.14, 0.3, 0.11))
+				var folhas: Array[Transform3D] = []
+				for t in lista:
+					folhas.append(Transform3D(t.basis, t.origin - Vector3(0, 0.12, 0)))
+				_espalhar(disco, null, folhas, "FolhasDoRepolho")
+			"abobora":
+				var fruto := SphereMesh.new()
+				fruto.radius = 0.3
+				fruto.height = 0.5
+				fruto.radial_segments = 8
+				fruto.rings = 4
+				fruto.material = _mat(Color(0.7, 0.3, 0.06))
+				_espalhar(fruto, null, lista, "Aboboras")
 
 
 # ---------------------------------------------------------------- vida em volta
