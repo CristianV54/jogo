@@ -1,7 +1,8 @@
 extends SceneTree
 # Põe os animais lado a lado, toca uma animação em cada um, mede altura/comprimento e fotografa.
 #   godot --path . --resolution 1600x700 --script res://tools/ver_animais.gd -- Walk
-const ANIMAIS := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali"]
+var ANIMAIS := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali"]
+var _perto := false
 var _modelos := {}
 
 
@@ -10,6 +11,9 @@ func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		anim = args[0]
+	if args.size() > 1 and args[1] == "perto":
+		_perto = true
+		ANIMAIS = ["lobo", "javali"]
 	var env := WorldEnvironment.new()
 	var e := Environment.new()
 	e.background_mode = Environment.BG_COLOR
@@ -30,18 +34,18 @@ func _init() -> void:
 	mt.albedo_color = Color(0.4, 0.5, 0.35)
 	chao.material_override = mt
 	root.add_child(chao)
-	var x := -10.0
+	var x := 0.0 if _perto else -10.0
 	for nome in ANIMAIS:
 		var caminho: String = "res://assets/models/criaturas/%s/%s.glb" % [nome, nome]
 		if not ResourceLoader.exists(caminho):
 			continue
 		var n: Node3D = load(caminho).instantiate()
 		n.position = Vector3(x, 0, 0)
-		n.rotation_degrees.y = 90.0   # de perfil, andando para +X
+		n.rotation_degrees.y = 40.0 if _perto else 90.0   # de perfil (ou três quartos), andando para +X
 		n.name = nome
 		root.add_child(n)
 		_modelos[nome] = n
-		x += 3.4
+		x += 2.6 if _perto else 3.4
 	_rodar.call_deferred(anim)
 
 
@@ -68,10 +72,10 @@ func _rodar(anim: String) -> void:
 	cam.fov = 40
 	root.add_child(cam)
 	cam.current = true
-	cam.global_position = Vector3(0, 2.2, 15)
-	cam.look_at(Vector3(0, 0.9, 0))
+	cam.global_position = Vector3(1.3, 1.2, 4.6) if _perto else Vector3(0, 2.2, 15)
+	cam.look_at(Vector3(1.3, 0.45, 0) if _perto else Vector3(0, 0.9, 0))
 	for i in 20:
 		await process_frame
-	root.get_viewport().get_texture().get_image().save_png("tools/capturas/animais_%s.png" % anim)
+	root.get_viewport().get_texture().get_image().save_png("tools/capturas/animais_%s%s.png" % [anim, "_perto" if _perto else ""])
 	print("ANIMAIS_OK")
 	quit(0)

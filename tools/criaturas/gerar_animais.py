@@ -128,6 +128,66 @@ def montar(nome_saida, arquivo, cores, ajuste=None):
     exportar(nome_saida)
 
 
+def material(nome, rgb):
+    m = bpy.data.materials.new(nome)
+    m.use_nodes = True
+    b = m.node_tree.nodes.get("Principled BSDF")
+    b.inputs["Base Color"].default_value = (*rgb, 1)
+    b.inputs["Alpha"].default_value = 1.0
+    return m
+
+
+def peca(arm, osso, mat, prim, **kw):
+    """Cria uma peça (cone etc.) em coordenadas do mundo do Blender e a prende ao osso, para acompanhar a animação."""
+    prim(**kw)
+    o = bpy.context.active_object
+    o.data.materials.append(mat)
+    o.parent = arm
+    o.matrix_parent_inverse = arm.matrix_world.inverted()
+    vg = o.vertex_groups.new(name=osso)
+    vg.add(list(range(len(o.data.vertices))), 1.0, "REPLACE")
+    mod = o.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    return o
+
+
+def cone(arm, osso, mat, base, ponta, raio1, raio2, vertices=8):
+    """Cone/tronco de cone que vai do ponto 'base' ao ponto 'ponta' (mundo do Blender)."""
+    from mathutils import Vector
+    b, p = Vector(base), Vector(ponta)
+    eixo = p - b
+    meio = (b + p) / 2
+    rot = Vector((0, 0, 1)).rotation_difference(eixo.normalized()).to_euler()
+    return peca(arm, osso, mat, bpy.ops.mesh.primitive_cone_add, vertices=vertices, radius1=raio1, radius2=raio2,
+                depth=eixo.length, location=meio, rotation=rot)
+
+
+def ajuste_lobo(arm):
+    """Cachorro (pug) vira lobo: focinho comprido, nariz, orelhas em pé e rabo cheio. Frente é -Y, alto é +Z."""
+    pelo = bpy.data.materials["Beige"]
+    escuro = material("LoboNariz", (0.02, 0.02, 0.025))
+    cone(arm, "Head", pelo, (0, -1.85, 2.15), (0, -2.6, 2.1), 0.24, 0.1)
+    peca(arm, "Head", escuro, bpy.ops.mesh.primitive_uv_sphere_add, segments=8, ring_count=6, radius=0.1, location=(0, -2.62, 2.1))
+    for lado in (-1, 1):
+        cone(arm, "Head", pelo, (lado * 0.36, -1.45, 2.55), (lado * 0.5, -1.5, 3.2), 0.2, 0.02, 5)
+    cone(arm, "Hips", pelo, (0, 1.4, 1.6), (0, 1.95, 0.7), 0.2, 0.05)
+
+
+def ajuste_javali(arm):
+    """Porco vira javali: presas de marfim, nariz escuro e crina de cerdas no dorso."""
+    corpo = [o for o in bpy.data.objects if o.type == "MESH" and o.parent == arm][0]
+    pts = [corpo.matrix_world @ v.co for v in corpo.data.vertices]
+    marfim = material("JavaliPresa", (0.6, 0.52, 0.36))
+    cerda = material("JavaliCerda", (0.015, 0.01, 0.008))
+    for lado in (-1, 1):
+        cone(arm, "Head", marfim, (lado * 0.42, -4.75, 2.05), (lado * 0.62, -5.2, 2.95), 0.13, 0.02, 6)
+    for i in range(7):
+        y = -1.2 + i * 0.55
+        zmax = max(p.z for p in pts if abs(p.x) < 1.2 and abs(p.y - y) < 0.7)
+        osso = "Torso" if y < 0.45 else "Hips"
+        cone(arm, osso, cerda, (0, y, zmax - 0.15), (0, y + 0.1, zmax + 0.55), 0.17, 0.02, 5)
+
+
 def listar():
     cena_vazia()
     for a in ("Cow", "Horse", "Sheep", "Pig", "Pug"):
@@ -145,5 +205,5 @@ else:
     montar("porco", "Pig", {})
     montar("cao", "Pug", {})
     # PLACEHOLDER_: lobo é o cachorro (Pug) em cinza e javali é o porco em marrom escuro, agora com andar, corrida e morte de verdade
-    montar("lobo", "Pug", {"Beige": (0.18, 0.18, 0.2), "Brown": (0.05, 0.05, 0.06)})
-    montar("javali", "Pig", {"Material": (0.02, 0.015, 0.01), "Material.003": (0.06, 0.04, 0.03)})
+    montar("lobo", "Pug", {"Beige": (0.18, 0.18, 0.2), "Brown": (0.05, 0.05, 0.06)}, ajuste_lobo)
+    montar("javali", "Pig", {"Material": (0.02, 0.015, 0.01), "Material.003": (0.06, 0.04, 0.03)}, ajuste_javali)
