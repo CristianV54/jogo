@@ -135,3 +135,12 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Armadilha corrigida:** `AnimatableBody3D` vem com `sync_to_physics` ligado e, quando o pai é movido por código, a posição física fica atrasada (0,4 a 0,6 m): o jogador atravessava os animais que já tinham andado. Desligado em `Solidos.corpo_movel`.
 - **Auditoria:** `tools/auditar_colisao.gd` lista toda malha grande sem colisão por área. Sobra só as venezianas abertas das janelas de Ferrogris (decoração fina colada à parede).
 - **Teste:** `tools/teste_solidos.gd` (jogador anda contra cada coisa e mede a menor distância; passou 3 vezes seguidas).
+
+## Pessoas com vida: rotinas de trabalho (22/11/2026)
+
+- **Sistema:** `scripts/personagens/npc.gd` ganhou `rotina`, uma lista de passos repetida para sempre: `ir` (anda até um ponto, toca Walk, desvia de gente e animal com raios), `fazer` (repete uma animação por N segundos, olhando para um ponto) e `esperar` (parado numa animação). A rotina para enquanto o jogador conversa com o NPC e quando ele leva um golpe, e retoma depois.
+- **Rotinas no Refúgio:** Brenn martela a bigorna ao lado da forja (porrete como martelo), descansa, dá uma volta e volta; Dorn corta lenha no cepo (machado) e leva ao monte; Tessa mexe o caldeirão perto da fogueira e vai buscar ingredientes; Orin patrulha a cerca leste e vigia; Mira vai ao limite do bosque, agacha para rastrear e volta; Vane anda até a fogueira, conversa e volta à casa.
+- **Peças novas:** bigorna e caldeirão do pacote de móveis (CC0), cepo (cilindro de madeira, geometria simples), porrete e machado já existentes. O **porrete faz papel de martelo** (não há modelo de martelo): trocar quando houver. O machado (`simpleaxe`) e o porrete foram calibrados para a mão com `tools/medir_arma.gd` (giro 0,0,-90, empunhadura no meio do cabo).
+- **Corpo sólido móvel:** os NPCs agora usam `AnimatableBody3D` (como os animais), pois andam.
+- **Limites:** os NPCs não entram nas casas (as portas só abrem para o jogador), não há ciclo de dia e noite, e não reagem uns aos outros. A animação de martelar/cortar é o golpe de espada repetido (não há animação própria de ofício).
+- **Teste:** `tools/teste_rotinas.gd` (sem janela, tempo 8x, 50 s de jogo): cada NPC anda, toca as animações certas e não fica preso.

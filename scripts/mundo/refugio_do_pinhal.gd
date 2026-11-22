@@ -26,6 +26,7 @@ func _ready() -> void:
 	_cerca()
 	_fogueira()
 	_adereços()
+	_postos_de_trabalho()
 	_chao_vivo()
 	_npcs()
 	_animais()
@@ -283,8 +284,10 @@ func _adereços() -> void:
 	solidos.add_child(lenha)
 
 
-func _npc(nome_npc: String, papel: String, cena: String, pos: Vector3, anim: String, falas: PackedStringArray, olhar_para: Vector3 = Vector3.ZERO) -> Npc:
+func _npc(nome_npc: String, papel: String, cena: String, pos: Vector3, anim: String, falas: PackedStringArray, olhar_para: Vector3 = Vector3.ZERO, rotina: Array = []) -> Npc:
 	var n := Npc.new()
+	n.rotina = rotina
+	n.altura_em = altura_em
 	n.nome = nome_npc
 	n.papel = papel
 	n.falas = falas
@@ -297,21 +300,69 @@ func _npc(nome_npc: String, papel: String, cena: String, pos: Vector3, anim: Str
 	return n
 
 
+## Onde cada um trabalha: bigorna do Brenn (ao lado da forja), cepo do Dorn (perto da lenha), caldeirão da Tessa (perto da fogueira).
+const BIGORNA := Vector3(-22.5, 0.0, -1.5)
+const CEPO := Vector3(23.6, 0.0, -24.2)
+const CALDEIRAO := Vector3(2.6, 0.0, 2.2)
+
+
+func _postos_de_trabalho() -> void:
+	var solidos := StaticBody3D.new()
+	solidos.name = "SolidosDosPostos"
+	add_child(solidos)
+	ConstrutorCasa._movel(self, solidos, "Anvil", BIGORNA.x, BIGORNA.z, 90.0, altura_em(BIGORNA.x, BIGORNA.z))
+	ConstrutorCasa._movel(self, solidos, "Cauldron", CALDEIRAO.x, CALDEIRAO.z, 0.0, altura_em(CALDEIRAO.x, CALDEIRAO.z))
+	var cepo := MeshInstance3D.new()   # cepo de cortar lenha: tronco curto de madeira
+	cepo.name = "CepoDoDorn"
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.3
+	cil.bottom_radius = 0.34
+	cil.height = 0.55
+	cil.radial_segments = 8
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.42, 0.28, 0.16)
+	mat.roughness = 1.0
+	cil.material = mat
+	cepo.mesh = cil
+	cepo.position = Vector3(CEPO.x, altura_em(CEPO.x, CEPO.z) + 0.275, CEPO.z)
+	add_child(cepo)
+	var cs := CollisionShape3D.new()
+	var cs_forma := CylinderShape3D.new()
+	cs_forma.radius = 0.34
+	cs_forma.height = 0.55
+	cs.shape = cs_forma
+	cs.position = cepo.position
+	solidos.add_child(cs)
+
+
 func _npcs() -> void:
 	_npc("Vane", "Líder do bando", "res://scenes/personagens/vane.tscn", Vector3(0, 0, -19.0), "Idle",
-		PackedStringArray(["Torin. Os dragões voltaram a rondar a fronteira.", "Quem sobrevive aqui, sobrevive junto. Lembre disso."]))
-	_npc("Brenn", "Ferreira", "res://scenes/personagens/brenn.tscn", Vector3(-21.0, 0, -4.0), "Idle",
-		PackedStringArray(["Traga couro, ferro e carvão que eu melhoro essa lâmina.", "Ferro bom não se compra, se arranca da mina."]))
+		PackedStringArray(["Torin. Os dragões voltaram a rondar a fronteira.", "Quem sobrevive aqui, sobrevive junto. Lembre disso."]), Vector3.ZERO,
+		[{"esperar": 5.0, "anim": "Idle"}, {"ir": Vector3(0, 0, -5.0), "vel": 1.4}, {"esperar": 7.0, "anim": "Idle_Talking", "olhar": Vector3.ZERO},
+		 {"ir": Vector3(0, 0, -19.0), "vel": 1.4}])
+	_npc("Brenn", "Ferreira", "res://scenes/personagens/brenn.tscn", Vector3(-21.3, 0, -1.5), "Idle",
+		PackedStringArray(["Traga couro, ferro e carvão que eu melhoro essa lâmina.", "Ferro bom não se compra, se arranca da mina."]), BIGORNA,
+		[{"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"esperar": 3.0, "anim": "Idle_Talking"},
+		 {"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"ir": Vector3(-20.0, 0, -5.5)},
+		 {"esperar": 2.5, "anim": "Idle", "olhar": Vector3(-27, 0, -4)}, {"ir": Vector3(-21.3, 0, -1.5)}])
 	_npc("Orin", "Vigia", "res://scenes/personagens/orin.tscn", Vector3(35.0, 0, 7.0), "Idle",
 		PackedStringArray(["Fico de olho na estrada de Ferrogris. Patrulhas do Império passam por lá.", "Se ouvir asas, corra para a fogueira."]),
-		Vector3(60, 0, 0))
-	_npc("Tessa", "Cozinheira", "res://scenes/personagens/tessa.tscn", Vector3(3.2, 0, 3.0), "Idle_Talking",
-		PackedStringArray(["Sopa quente para quem volta da caçada.", "Você está magro, Torin. Coma."]))
-	_npc("Dorn", "Lenhador", "res://scenes/personagens/dorn.tscn", Vector3(21.0, 0, -23.5), "Idle",
-		PackedStringArray(["Esses pinheiros seguram o telhado do mundo.", "A trilha do norte leva à mina. Cuidado com o Gorath."]),
-		Vector3(21, 0, 0))
+		Vector3(60, 0, 0),
+		[{"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, 7)}, {"ir": Vector3(33.5, 0, 13.0), "vel": 1.3}, {"ir": Vector3(31.0, 0, 18.5), "vel": 1.3},
+		 {"esperar": 6.0, "anim": "Idle", "olhar": Vector3(50, 0, 24)}, {"ir": Vector3(33.5, 0, 13.0), "vel": 1.3}, {"ir": Vector3(35.0, 0, 7.0), "vel": 1.3}])
+	_npc("Tessa", "Cozinheira", "res://scenes/personagens/tessa.tscn", Vector3(3.9, 0, 2.2), "Idle_Talking",
+		PackedStringArray(["Sopa quente para quem volta da caçada.", "Você está magro, Torin. Coma."]), CALDEIRAO,
+		[{"fazer": "Interact", "seg": 7.0, "olhar": CALDEIRAO}, {"fazer": "PickUp_Table", "seg": 2.5, "olhar": CALDEIRAO},
+		 {"esperar": 3.0, "anim": "Idle_Talking", "olhar": CALDEIRAO}, {"ir": Vector3(6.0, 0, 6.5)},
+		 {"esperar": 2.5, "anim": "PickUp_Table", "olhar": Vector3(8, 0, 8)}, {"ir": Vector3(3.9, 0, 2.2)}])
+	_npc("Dorn", "Lenhador", "res://scenes/personagens/dorn.tscn", Vector3(22.4, 0, -24.2), "Idle",
+		PackedStringArray(["Esses pinheiros seguram o telhado do mundo.", "A trilha do norte leva à mina. Cuidado com o Gorath."]), CEPO,
+		[{"fazer": "Sword_Attack", "seg": 10.0, "olhar": CEPO}, {"ir": Vector3(20.4, 0, -24.6)},
+		 {"esperar": 3.0, "anim": "PickUp_Table", "olhar": Vector3(20.3, 0, -26.0)}, {"ir": Vector3(22.4, 0, -24.2)}])
 	_npc("Mira", "Caçadora", "res://scenes/personagens/mira.tscn", Vector3(-12.0, 0, 14.0), "Crouch_Idle",
-		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]))
+		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]), Vector3.ZERO,
+		[{"ir": Vector3(-26.0, 0, 18.0), "vel": 1.3}, {"esperar": 7.0, "anim": "Crouch_Idle", "olhar": Vector3(-60, 0, 22)},
+		 {"ir": Vector3(-12.0, 0, 14.0), "vel": 1.3}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(-12, 0, 30)}])
 
 
 const NOMES_DE_ANIMAIS := {"vaca": "Vaca", "cavalo": "Cavalo", "ovelha": "Ovelha", "porco": "Porco", "cao": "Cão"}

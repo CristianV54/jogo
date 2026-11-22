@@ -209,6 +209,7 @@ func interagir() -> void:
 		if _dialogo_indice >= _dialogo_npc.falas.size():
 			hud.fechar_dialogo()
 			jogador.travado = false
+			_dialogo_npc.retomar()
 			return
 		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _dialogo_npc.falas[_dialogo_indice])
 		return
@@ -224,4 +225,5 @@ func interagir() -> void:
 	_dialogo_indice = 0
 	jogador.travado = true
 	n.olhar_para(jogador.global_position)
+	n.pausar()
 	hud.dialogo(n.nome + " (" + n.papel + ")", n.falas[0])

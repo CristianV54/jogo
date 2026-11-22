@@ -1,11 +1,17 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/personagens/humanoide.gd" id="1"]
 [ext_resource type="PackedScene" path="res://assets/models/personagens/dorn/dorn.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/armas/simpleaxe.glb" id="3"]
 
 [node name="Dorn" type="Node3D"]
 script = ExtResource("1")
 cor_cabelo = Color(0.36, 0.24, 0.12, 1)
 escala_corpo = 1.03
+arma_cena = ExtResource("3")
+arma_escala = 0.28
+arma_giro = Vector3(0, 0, -90)
+arma_deslocamento = Vector3(-0.017, 0.098, 0.006)
+arma_empunhadura = Vector3(0, -1.0, 0)
 
 [node name="Modelo" parent="." instance=ExtResource("2")]
