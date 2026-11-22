@@ -27,6 +27,7 @@ func _ready() -> void:
 	_fogueira()
 	_adereços()
 	_npcs()
+	_animais()
 	_saidas()
 
 
@@ -297,6 +298,32 @@ func _npcs() -> void:
 		Vector3(21, 0, 0))
 	_npc("Mira", "Caçadora", "res://scenes/personagens/mira.tscn", Vector3(-12.0, 0, 14.0), "Crouch_Idle",
 		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]))
+
+
+func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> void:
+	var a := AnimalVila.new()
+	a.name = arquivo.capitalize()
+	a.modelo = load("res://assets/models/criaturas/%s/%s.glb" % [arquivo, arquivo])
+	a.raio_vagar = raio
+	a.velocidade = velocidade
+	a.altura_em = altura_em
+	a.position = Vector3(pos.x, altura_em(pos.x, pos.z), pos.z)
+	a.rotation.y = _rng.randf() * TAU
+	add_child(a)
+
+
+func _animais() -> void:
+	# pasto ao sul (entre as cabanas 2 e 3), chiqueiro a oeste da casa do Vane, cavalos a oeste, cão perto da forja
+	_animal("vaca", Vector3(-4, 0, 31), 5.0, 0.9)
+	_animal("vaca", Vector3(5, 0, 32), 5.0, 0.9)
+	_animal("ovelha", Vector3(0, 0, 28), 5.0, 0.8)
+	_animal("ovelha", Vector3(-6, 0, 33), 5.0, 0.8)
+	_animal("ovelha", Vector3(7, 0, 29), 5.0, 0.8)
+	_animal("porco", Vector3(-16, 0, -28), 3.0, 0.8)
+	_animal("porco", Vector3(-14, 0, -30), 3.0, 0.8)
+	_animal("cavalo", Vector3(-33, 0, 12), 4.0, 1.3)
+	_animal("cavalo", Vector3(-31, 0, 16), 4.0, 1.3)
+	_animal("cao", Vector3(-17, 0, -6), 3.0, 1.4)
 
 
 func _saidas() -> void:

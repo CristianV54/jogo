@@ -73,7 +73,16 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 ## criaturas/ (Filhote de Asa, Ignis-Maw, Javali, Lobo)
 
 - **Filhote de Asa e Ignis-Maw:** o mesmo dragão rigado do Fagulha (origem e licença ainda por confirmar, ver Fagulha) com outras paletas de cor de vértice (`PALETA=verde` e `PALETA=corrompido` em `tools/fagulha/preparar_fagulha.py`). Escalas medidas: Filhote de Asa 1,8 m de envergadura; Ignis-Maw 24,4 m de envergadura, 4,9 m de altura (escala_visual 8). Têm Idle, Walk, Run e Fly de verdade; não têm animação de ataque nem de morte (o ataque é uma investida, a morte é tombar e afundar).
-- **PLACEHOLDER_ Javali Couraçado e PLACEHOLDER_ Lobo-cinza:** são o porco e o cachorro do pacote *Farm Animals* (Quaternius, CC0) tingidos de marrom e cinza. **Só têm Idle e Jump**: andam deslizando e atacam "pulando". Substituir por animais rigados de verdade (lobo e javali com andar, correr, atacar e morrer).
+- **PLACEHOLDER_ Javali Couraçado e PLACEHOLDER_ Lobo-cinza (atualizado 21/11/2026):** continuam sendo o porco e o cachorro (pug) do pacote *Farm Animals* tingidos (marrom escuro e cinza), mas agora têm Idle, Walk, Run, Jump e Death de verdade (animação transplantada da vaca, ver abaixo). O lobo ainda tem cara de pug: falta modelo de lobo (focinho comprido, orelhas pontudas). O javali ainda não tem presas.
+
+## criaturas/ animais de vila e fazenda (vaca, cavalo, ovelha, porco, cão)
+
+- **Origem e licença:** *Farm Animals* do Quaternius (CC0, catálogo `pacotes_livres/CATALOGO.md` do SSD), FBX convertido por `tools/criaturas/gerar_animais.py` (Blender, só leitura do original). Estilo: low-poly de cores chapadas, o mesmo do kit de cenário.
+- **Animações:** vaca e cavalo vêm com Idle, Walk, WalkSlow, Run, Jump e Death. Ovelha, porco, cão, lobo e javali só vinham com Idle e Jump; como o esqueleto é o mesmo (muda só a cauda), a rotação de cada osso do Walk, WalkSlow, Run e Death da vaca é copiada quadro a quadro. Isso dá um andar de quadrúpede plausível, mas não é afinado para cada espécie (pé pode deslizar um pouco).
+- **Correção necessária:** os materiais do FBX vêm com alfa 0 (o animal fica invisível no Godot); o script força alfa 1 e opaco.
+- **Escala (`nodes/root_scale` no `.import`):** vaca 0,27 (1,4 m), cavalo 0,28 (1,9 m), ovelha 0,23 (1,0 m), porco 0,17 (0,8 m), cão 0,57 (0,6 m), lobo 0,7, javali 0,2.
+- **No jogo:** `scripts/criaturas/animal_vila.gd` (perambula e para, sem colisão), colocados em `refugio_do_pinhal.gd` (`_animais()`): 2 vacas e 3 ovelhas no pasto sul, 2 porcos a oeste da casa do Vane, 2 cavalos a oeste, 1 cão perto da forja. Velocidades de passo estimadas a olho, não calibradas contra o ciclo da animação.
+- **Ainda não existem:** galinha, cervo, urso, coelho, aves, peixes, aranha, wyvern menor, cão de guerra do Império. No Downloads há `Free+Pack+-+Lowpoly+Animal` (urso, gato, cabra, canguru etc., sem rig nem animação, licença não conferida) e `horse.glb` do Sketchfab (28 animações, licença não conferida), ainda não usados.
 
 ## Jogo (Fases B a D): o que existe e o que é provisório
 

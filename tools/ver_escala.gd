@@ -32,7 +32,26 @@ func _init() -> void:
 		if n is Fagulha:
 			n.alvo = null
 	_rodar.call_deferred()
+var _orbita: Camera3D
+var _t := 0.0
+
+
+func _process(delta: float) -> bool:
+	if _orbita:
+		_t += delta * 0.12
+		var centro := Vector3(14, 4, 0)
+		_orbita.global_position = centro + Vector3(sin(_t) * 60.0, 12.0, cos(_t) * 60.0)
+		_orbita.look_at(centro)
+	return false
+
+
 func _rodar() -> void:
+	if "--ficar" in OS.get_cmdline_user_args():
+		_orbita = Camera3D.new()
+		_orbita.fov = 50
+		root.add_child(_orbita)
+		_orbita.current = true
+		return
 	for n in root.get_children():
 		if n is Node3D and not (n is MeshInstance3D) and not (n is DirectionalLight3D):
 			var mn := Vector3(1e9, 1e9, 1e9)
