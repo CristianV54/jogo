@@ -11,6 +11,6 @@ id_chefe = "solon"
 cena_chefe = ExtResource("2")
 comuns = PackedStringArray("res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/guarda_imperial.tscn")
 destino_volta = "cratera_ignis"
-spawn_volta = "Entrada"
+spawn_volta = "DeValdoria"
 destino_proximo = ""
 semente = 41

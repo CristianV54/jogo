@@ -82,24 +82,6 @@ func _muralhas() -> void:
 
 # ---------------------------------------------------------------- pátio externo
 
-func _edificio(nome_ed: String, pos: Vector2, giro: float, estilo: Dictionary, placa: String, interior := "deposito") -> void:
-	var casa := ConstrutorCasa.montar(4, 3, estilo, true, interior)
-	casa.name = nome_ed
-	casa.position = Vector3(pos.x, altura_em(pos.x, pos.y), pos.y)
-	casa.rotation.y = giro
-	add_child(casa)
-	var x_porta: float = casa.get_meta("x_porta")
-	var meia_z := float(casa.get_meta("linhas"))
-	var rotulo := Label3D.new()
-	rotulo.text = placa
-	rotulo.font_size = 40
-	rotulo.pixel_size = 0.0045
-	rotulo.outline_size = 8
-	rotulo.modulate = Color(0.95, 0.85, 0.6)
-	rotulo.position = Vector3(x_porta, 2.9, meia_z + 0.35)
-	casa.add_child(rotulo)
-
-
 func _guarda(pos: Vector2, com_chave := false, nome_g := "Guarda de Ferrogris") -> void:
 	_inimigo("res://scenes/inimigos/guarda_imperial.tscn", Vector3(pos.x, _y(pos) + 0.2, pos.y), nome_g, "guarda_ferrogris", {"chave": [1, 1]} if com_chave else {})
 

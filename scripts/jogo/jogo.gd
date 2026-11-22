@@ -19,9 +19,10 @@ const REQUISITOS := {
 	"valdoria": "ignis_maw",
 }
 ## Missão que precisa estar concluída para o Halk abrir a passagem.
-const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1"}
+const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1", "valdoria": "C4-M4"}
 const MENSAGEM_REQUISITO := {
 	"bosque_velado": "Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).",
+	"valdoria": "A estrada para Valdoria só abre com a lâmina final: leve o minério vulcânico e a escama à Brenn (A Lâmina Forjada no Fogo).",
 	"fronteira_ferrogris": "A ponte está quebrada e o vau é vigiado. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento).",
 }
 const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "solon": "Imperador Solon"}
@@ -71,7 +72,9 @@ func _ready() -> void:
 		if id == "C1-M4":
 			liberar_fagulha()
 		elif id == "C3-M1":
-			_reforcar_equipamento())
+			_reforcar_equipamento()
+		elif id == "C4-M4":
+			_forjar_lamina_final())
 	fagulha.alvo = null   # a Fagulha começa ferida na clareira do pinhal
 	fagulha.montaria.ativa = false
 	ir_para("refugio_do_pinhal", "Principal")
@@ -151,7 +154,10 @@ func _ao_derrotar_chefe(id: String) -> void:
 			dica = "\nO portal para a Cratera de Ignis se abriu."
 		"ignis_maw":
 			dica = "\nO portal para Valdoria se abriu."
-	hud.mensagem("%s foi derrotado%s" % [NOMES_DOS_CHEFES.get(id, id), dica], 4.5)
+	if id == "ignis_maw":
+		hud.mensagem("Ignis-Maw está livre!\nAs correntes caíram. Pegue a escama e leve à Brenn.", 4.5)
+	else:
+		hud.mensagem("%s foi derrotado%s" % [NOMES_DOS_CHEFES.get(id, id), dica], 4.5)
 	chefe_derrotado.emit(id)
 	if id == "solon":
 		hud.mensagem("Fim da base jogável. O destino dos dragões está nas suas mãos.", 0.0)
@@ -223,6 +229,12 @@ func _reforcar_equipamento() -> void:
 	jogador.vida = jogador.vida_max
 	hud.definir_vida(jogador.vida, jogador.vida_max)
 	hud.mensagem("Equipamento reforçado pela Brenn: golpe +8, vida máxima +20.", 5.0)
+
+
+## A Brenn entrega a lâmina final (C4-M4): mais dano de golpe.
+func _forjar_lamina_final() -> void:
+	jogador.dano_golpe += 14
+	hud.mensagem("Lâmina forjada no fogo: golpe +14.", 5.0)
 
 
 ## Cena de diálogo sem NPC específico: `linhas` é uma lista de [nome, texto]; E avança; no fim chama `ao_fim`.

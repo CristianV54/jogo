@@ -39,6 +39,8 @@ func _init() -> void:
 		root.add_child(chao)
 	var area: Node = load(args[0]).instantiate()
 	root.add_child(area)
+	if "acordar" in args and area.has_method("_acordar_ignis"):   # mostra o chefe e as âncoras
+		area.call_deferred("_acordar_ignis")
 	cam = Camera3D.new()
 	cam.fov = 62
 	cam.far = 1500.0

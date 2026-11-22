@@ -140,3 +140,27 @@ for dz, dx in ((0.04, -0.07), (0.04, 0.07), (0.12, 0.0)):
     f = objeto(CUBO, listra, size=1.0, location=(dx, 0, dz + 0.0))
     f.scale = (0.125, 0.04, 0.072)
 juntar_e_exportar("aco_imperial")
+
+# minério vulcânico: dois blocos de basalto com veios de brasa
+novo()
+basalto = material("Basalto", (0.12, 0.1, 0.1))
+brasa = material("Brasa", (0.95, 0.32, 0.05))
+a = objeto(CUBO, basalto, size=1.0, location=(0, 0, 0.09))
+a.scale = (0.26, 0.2, 0.18)
+a.rotation_euler = (0.1, 0.2, 0.5)
+b = objeto(CUBO, basalto, size=1.0, location=(0.12, 0.05, 0.22))
+b.scale = (0.16, 0.14, 0.14)
+b.rotation_euler = (0.3, 0.1, 0.9)
+for dx in (-0.05, 0.06):
+    v = objeto(CUBO, brasa, size=1.0, location=(dx, -0.09, 0.12))
+    v.scale = (0.03, 0.04, 0.12)
+    v.rotation_euler = (0, 0.4, dx * 6)
+juntar_e_exportar("minerio_vulcanico")
+
+# escama ancestral: escama larga, avermelhada, com aro dourado
+novo()
+escama = material("Escama", (0.62, 0.1, 0.08))
+ouro = material("AroOuro", (0.8, 0.62, 0.2))
+objeto(C, ouro, vertices=6, radius=0.2, depth=0.03, location=(0, 0, 0.12), rotation=(math.pi / 2, 0, 0))
+objeto(C, escama, vertices=6, radius=0.17, depth=0.05, location=(0, 0, 0.12), rotation=(math.pi / 2, 0, 0))
+juntar_e_exportar("escama_ancestral")

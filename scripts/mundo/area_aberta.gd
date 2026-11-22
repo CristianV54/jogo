@@ -17,13 +17,13 @@ func _y(p: Vector2) -> float:
 	return altura_em(p.x, p.y)
 
 
-func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], caminho: PackedVector2Array, cor_grama: Color, cor_mata: Color) -> void:
+func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], caminho: PackedVector2Array, cor_grama: Color, cor_mata: Color, clareira := 1.0) -> void:
 	terreno = Terreno.new()
 	terreno.name = "Terreno"
 	terreno.tamanho = tam
 	terreno.semente = semente
 	terreno.amplitude = amplitude
-	terreno.clareira_raio = 1.0
+	terreno.clareira_raio = clareira   # raio grande = chão perfeitamente plano
 	terreno.cor_grama = cor_grama
 	terreno.cor_mata = cor_mata
 	terreno.cor_terra = Color(0.36, 0.3, 0.22)
@@ -171,6 +171,25 @@ func _torre_de_vigia(pos: Vector2, altura := 9.0) -> Vector3:
 		for dz in [-2.7, 2.7]:
 			VilaRefugio._caixa(Vector3(pos.x + dx, y + altura + 1.0, pos.y + dz), Vector3(0.6, 1.6, 0.6), pedra)
 	return Vector3(pos.x, y + altura + 0.3, pos.y)
+
+
+## Prédio do ConstrutorCasa (com interior) com uma placa sobre a porta.
+func _edificio(nome_ed: String, pos: Vector2, giro: float, estilo: Dictionary, placa: String, interior := "deposito") -> void:
+	var casa := ConstrutorCasa.montar(4, 4, estilo, true, interior)
+	casa.name = nome_ed
+	casa.position = Vector3(pos.x, altura_em(pos.x, pos.y), pos.y)
+	casa.rotation.y = giro
+	add_child(casa)
+	var x_porta: float = casa.get_meta("x_porta")
+	var meia_z := float(casa.get_meta("linhas"))
+	var rotulo := Label3D.new()
+	rotulo.text = placa
+	rotulo.font_size = 40
+	rotulo.pixel_size = 0.0045
+	rotulo.outline_size = 8
+	rotulo.modulate = Color(0.95, 0.85, 0.6)
+	rotulo.position = Vector3(x_porta, 2.9, meia_z + 0.35)
+	casa.add_child(rotulo)
 
 
 # ---------------------------------------------------------------- gente

@@ -5,7 +5,7 @@ extends RefCounted
 ## "visitar" (alvo = id de uma ZonaDeEvento) e "entregar" (alvo = NPC; "item" = o que gastar do inventário).
 ## Nenhuma missão conclui por proximidade: só por contagem real de eventos.
 
-const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes", 3: "Capítulo III: Ruptura e Fortaleza de Ferrogris"}
+const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes", 3: "Capítulo III: Ruptura e Fortaleza de Ferrogris", 4: "Capítulo IV: Cratera de Ignis"}
 ## Ordem em que o quadro de avisos oferece as missões do capítulo.
 const ORDEM_CAP1 := ["C1-M1", "C1-M2", "C1-M3", "C1-M4"]
 ## No capítulo II as missões são oferecidas pelos NPCs (Elda e Sava) ou começam em cadeia.
@@ -177,5 +177,60 @@ const MISSOES := {
 		],
 		"recompensa": {"itens": {"couro": 2}, "texto": "O portão dos fundos se abre para a Cratera de Ignis"},
 		"encerramento": "Kaelor tomba sem gritar. O portão dos fundos da fortaleza se abre: o caminho segue para a Cratera de Ignis.",
+	},
+	"C4-M1": {
+		"capitulo": 4,
+		"titulo": "Travessia da Brasa",
+		"requer": "C3-M4",
+		"auto_apos": "C3-M4",
+		"objetivos": [
+			{"id": "minerios", "texto": "Coletar 4 minérios vulcânicos (calor e fumaça no caminho)", "tipo": "coletar", "alvo": "minerio_vulcanico", "qtd": 4},
+			{"id": "alojamento", "texto": "Chegar ao alojamento dos trabalhadores", "tipo": "visitar", "alvo": "alojamento_ignis", "qtd": 1},
+		],
+		"recompensa": {"itens": {"maca": 2}, "texto": "Você atravessou a Cratera"},
+		"encerramento": "O calor aperta, mas o alojamento está de pé. Os trabalhadores sabem como as forjas negras mantêm Ignis-Maw acorrentado.",
+		"dialogos": {
+			"tarn": ["Você veio pela ponte de basalto? Então já viu o que o Império construiu sobre o vulcão.", "Três forjas negras alimentam as correntes de Ignis-Maw. Desligue as três, uma de cada vez, e as correntes enfraquecem."],
+		},
+	},
+	"C4-M2": {
+		"capitulo": 4,
+		"titulo": "Desativar as Forjas Negras",
+		"requer": "C4-M1",
+		"auto_apos": "C4-M1",
+		"objetivos": [
+			{"id": "fornalhas", "texto": "Desligar as 3 fornalhas (válvulas, canos, runas)", "tipo": "interagir", "alvo": "fornalha_apagada", "qtd": 3},
+		],
+		"recompensa": {"itens": {"carne": 2}, "texto": "As forjas negras se apagaram"},
+		"encerramento": "As três forjas apagam e as correntes afrouxam. Algo enorme se mexe na caldeira ancestral, ao norte.",
+		"dialogos": {
+			"tarn": ["Cada fornalha tem o seu truque: válvulas de vapor, canos de lava e runas que pedem ordem.", "Quando as três apagarem, Ignis-Maw acorda de vez. Esteja pronto."],
+		},
+	},
+	"C4-M3": {
+		"capitulo": 4,
+		"titulo": "O Colosso Acorrentado",
+		"requer": "C4-M2",
+		"auto_apos": "C4-M2",
+		"objetivos": [
+			{"id": "ancoras", "texto": "Quebrar as 4 âncoras do Ignis-Maw (cuidado com fogo, cauda e ondas de calor)", "tipo": "destruir", "alvo": "ancora", "qtd": 4},
+		],
+		"recompensa": {"itens": {"maca": 3}, "texto": "Ignis-Maw está livre"},
+		"encerramento": "A última âncora cai. Ignis-Maw ruge, ergue-se e voa para longe, derrubando parte das forjas. Uma escama ancestral ficou na arena.",
+	},
+	"C4-M4": {
+		"capitulo": 4,
+		"titulo": "A Lâmina Forjada no Fogo",
+		"requer": "C4-M3",
+		"auto_apos": "C4-M3",
+		"objetivos": [
+			{"id": "minerios", "texto": "Entregar 4 minérios vulcânicos à Brenn", "tipo": "entregar", "alvo": "brenn", "item": "minerio_vulcanico", "qtd": 4},
+			{"id": "escama", "texto": "Entregar a escama ancestral à Brenn", "tipo": "entregar", "alvo": "brenn", "item": "escama_ancestral", "qtd": 1},
+		],
+		"recompensa": {"itens": {"maca": 3}, "texto": "Lâmina final: golpe +14"},
+		"encerramento": "Brenn: \"Minério vulcânico e escama de dragão livre. Essa lâmina não foi feita para o Império, Torin. Foi feita para acabar com ele. Valdoria espera ao norte.\"",
+		"dialogos": {
+			"brenn": ["Trouxe tudo? Quatro minérios vulcânicos e a escama. Dá cá, vou acender a forja de campo.", "Ferro Negro, brasa e escama de dragão livre: é a única liga que o obelisco não consegue dobrar."],
+		},
 	},
 }

@@ -3,7 +3,7 @@ extends RefCounted
 ## Catálogo dos itens do jogo: nome, descrição, modelo 3D (usado no chão e no ícone do inventário) e efeito.
 ## `cura` > 0: o item é comestível e recupera essa vida ao ser usado.
 
-const ORDEM := ["maca", "raiz", "carne", "couro", "la", "presa", "minerio_bruto", "chave", "aco_imperial"]
+const ORDEM := ["maca", "raiz", "carne", "couro", "la", "presa", "minerio_bruto", "chave", "aco_imperial", "minerio_vulcanico", "escama_ancestral"]
 
 const DADOS := {
 	"raiz": {
@@ -22,6 +22,18 @@ const DADOS := {
 		"nome": "Aço Imperial",
 		"descricao": "Barras de aço do depósito de Ferrogris, marcadas com a listra do Império. Brenn dá valor a isso (ainda sem uso).",
 		"modelo": "res://assets/models/itens/aco_imperial/aco_imperial.glb",
+		"cura": 0,
+	},
+	"minerio_vulcanico": {
+		"nome": "Minério vulcânico",
+		"descricao": "Basalto com veios de brasa, tirado da Cratera de Ignis. A Brenn precisa de quatro para a lâmina final.",
+		"modelo": "res://assets/models/itens/minerio_vulcanico/minerio_vulcanico.glb",
+		"cura": 0,
+	},
+	"escama_ancestral": {
+		"nome": "Escama ancestral",
+		"descricao": "Escama que Ignis-Maw soltou ao se libertar. Ainda está morna. A Brenn sabe forjar com ela.",
+		"modelo": "res://assets/models/itens/escama_ancestral/escama_ancestral.glb",
 		"cura": 0,
 	},
 	"chave": {
