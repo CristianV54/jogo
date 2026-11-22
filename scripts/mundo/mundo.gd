@@ -153,6 +153,11 @@ func _planejar() -> void:
 			var trilha := Terreno.curva([p["centro"], meio, melhor], 4.0)
 			trilhas.append(trilha)
 			terreno.estradas_mundo.append(trilha)
+	Costa.protegidos.clear()   # a costa recua perto de regiões e povoados
+	for id in MundoDados.REGIOES:
+		Costa.protegidos.append([MundoDados.centro(id), float(MundoDados.REGIOES[id]["meia"]) * 1.42 + 20.0])
+	for pid in povoados:
+		Costa.protegidos.append([povoados[pid]["centro"], float(povoados[pid]["raio"]) * 1.1 + 20.0])
 	terreno.preparar()   # depois de todas as estradas, trilhas e áreas aplanadas
 
 
@@ -422,6 +427,37 @@ func _barreiras() -> void:
 		barreiras[b["id"]] = bar
 
 
+## Mar em volta da costa: plano de água e uma fileira de paredes invisíveis um pouco antes da água funda.
+func _mar() -> void:
+	var lim := MundoDados.LIMITES
+	var plano := MeshInstance3D.new()
+	plano.name = "Mar"
+	var pm := PlaneMesh.new()
+	pm.size = lim.size + Vector2(600.0, 600.0)
+	plano.mesh = pm
+	plano.material_override = Terreno.material_agua()
+	plano.position = Vector3(lim.get_center().x, Costa.NIVEL_MAR, lim.get_center().y)
+	plano.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(plano)
+	var n := 0
+	var x := lim.position.x
+	while x <= lim.end.x:
+		var z := lim.position.y
+		while z <= lim.end.y:
+			var d := Costa.distancia(x, z)
+			if d > 3.0 and d < 9.5:
+				var cs := CollisionShape3D.new()
+				var caixa := BoxShape3D.new()
+				caixa.size = Vector3(8.0, 14.0, 8.0)
+				cs.shape = caixa
+				cs.position = Vector3(x, terreno.altura_em(x, z) + 4.0, z)
+				_paredes.add_child(cs)
+				n += 1
+			z += 6.0
+		x += 6.0
+	print("Mundo: costa com ", n, " blocos de parede")
+
+
 ## Cristas de rocha (muralhas naturais com vão só onde há barreira) e a borda do mundo.
 func _cristas() -> void:
 	var rocha := FabricaNatureza.pedra(3.0)
@@ -464,6 +500,7 @@ func _cristas() -> void:
 				var base := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, h, e))
 				transf.append(Transform3D(base, Vector3(q.x, terreno.altura_em(q.x, q.y) - 1.0, q.y)))
 				t += 13.0
+	_mar()
 	var lim := MundoDados.LIMITES
 	for lado in [[Vector2(lim.position.x, lim.get_center().y), Vector2(4, lim.size.y)], [Vector2(lim.end.x, lim.get_center().y), Vector2(4, lim.size.y)], [Vector2(lim.get_center().x, lim.position.y), Vector2(lim.size.x, 4)], [Vector2(lim.get_center().x, lim.end.y), Vector2(lim.size.x, 4)]]:
 		var cs := CollisionShape3D.new()
@@ -513,7 +550,7 @@ func _floresta() -> void:
 			var dens := smoothstep(0.38, 0.78, rng_f.get_noise_2d(x, z) * 0.5 + 0.5)   # bosques e clareiras
 			if _rng.randf() > dens * 0.85 + 0.06:
 				continue
-			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0:
+			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
 			var no_povoado := false
 			for pid in povoados:
@@ -534,6 +571,13 @@ func _floresta() -> void:
 	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa em pergaminho: a mata esverdeia o papel
 	for gz in gh:
 		for gx in gw:
+			var costa := Costa.distancia(lim.position.x + gx * 20.0, lim.position.y + gz * 20.0)
+			if costa < 0.0:
+				img.set_pixel(gx, gz, Color(0.45, 0.62, 0.66))
+				continue
+			if costa < 14.0:
+				img.set_pixel(gx, gz, Color(0.93, 0.87, 0.67))
+				continue
 			img.set_pixel(gx, gz, Color(0.85, 0.77, 0.58).lerp(Color(0.5, 0.58, 0.36), clampf(mata[gz * gw + gx] / 6.0, 0.0, 1.0)))
 	mapa_floresta = ImageTexture.create_from_image(img)
 	var malha := FabricaNatureza.pinheiro()

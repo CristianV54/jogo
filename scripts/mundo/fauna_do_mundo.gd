@@ -89,7 +89,7 @@ func _na_estrada(id: String, lista: Array) -> void:
 ## Perto de uma serra de rocha ou da borda do mundo bicho nenhum nasce (ficaria dentro da pedra).
 func _perto_de_barreira(p: Vector2) -> bool:
 	var lim := MundoDados.LIMITES
-	if not lim.grow(-12.0).has_point(p):
+	if not lim.grow(-12.0).has_point(p) or Costa.distancia(p.x, p.y) < 20.0:
 		return true
 	for c in MundoDados.CRISTAS:
 		var a: Vector2 = c["de"]

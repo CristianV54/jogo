@@ -45,10 +45,11 @@ func _ready() -> void:
 	tam = 300.0
 	_rng.seed = 97
 	_ambiente()
-	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.28, 0.28), Color(0.25, 0.23, 0.23), 260.0)
+	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.45, 0.22), Color(0.26, 0.4, 0.2), 260.0)
 	_horizonte(Color(0.38, 0.36, 0.4), 140.0, true)
 	_plataforma()
 	_muralhas()
+	_rochedo()
 	_patio_externo()
 	_galeria_e_prisao()
 	_patio_do_duelo()
@@ -109,10 +110,50 @@ func _muralhas() -> void:
 	_muralha(Vector2(-LADO, SUL_Z), Vector2(-LADO, NORTE_Z), 9.0, cor)
 	_muralha(Vector2(LADO, SUL_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
 	_muralha(Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
-	for t in [Vector2(-16.0, SUL_Z), Vector2(16.0, SUL_Z), Vector2(-LADO, SUL_Z), Vector2(LADO, SUL_Z), Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z)]:
+	for t in [Vector2(-16.0, SUL_Z), Vector2(16.0, SUL_Z)]:   # torres do portão
 		_torre_de_vigia(t, 11.0)
+	var ardosia := VilaRefugio._mat(Color(0.28, 0.32, 0.5))
+	for t in [Vector2(-LADO, SUL_Z), Vector2(LADO, SUL_Z), Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z)]:   # torres dos cantos: altas, com telhado em ponta
+		_torre_de_vigia(t, 20.0)
+		var cone := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.1
+		cm.bottom_radius = 4.6
+		cm.height = 9.0
+		cm.radial_segments = 8
+		cm.material = ardosia
+		cone.mesh = cm
+		cone.position = Vector3(t.x, _y(t) + 20.0 + 4.5, t.y)
+		add_child(cone)
 	for x in range(-60, 61, 20):
 		_bandeira(Vector2(float(x), SUL_Z - 4.0), COR_DRAKKAR)
+
+
+## O castelo fica sobre um afloramento de rocha: blocos enormes em volta da plataforma, com a rampa do portão livre.
+func _rochedo() -> void:
+	var e := 0
+	for camada in 2:
+		var fora := 8.0 + camada * 9.0
+		var x0 := -LADO - fora
+		var x1 := LADO + fora
+		var z0 := NORTE_Z - fora
+		var z1 := SUL_Z + fora * 0.5
+		var passo := 9.5 - camada * 1.0
+		var pontos: Array[Vector2] = []
+		var x := x0
+		while x <= x1:
+			pontos.append(Vector2(x, z0))
+			if absf(x) > 22.0 + camada * 8.0:   # o portão e a escadaria ficam abertos
+				pontos.append(Vector2(x, z1))
+			x += passo
+		var z := z0
+		while z <= z1:
+			pontos.append(Vector2(x0, z))
+			pontos.append(Vector2(x1, z))
+			z += passo
+		for p in pontos:
+			e += 1
+			_rocha(p + Vector2(_rng.randf_range(-2.0, 2.0), _rng.randf_range(-2.0, 2.0)), _rng.randf_range(6.5, 11.5) + camada * 2.0, true, 300.0 + e)
 
 
 # ---------------------------------------------------------------- pátio externo

@@ -115,6 +115,9 @@ func _altura_crua(x: float, z: float) -> float:
 	if melhor < 7.0:
 		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
+	var costa := Costa.distancia(x, z)
+	if costa < 30.0:   # o chão desce até o mar
+		h = lerpf(h, -5.0, smoothstep(26.0, 2.0, costa))
 	return h
 
 
@@ -138,12 +141,15 @@ func cor_do_mundo(x: float, z: float) -> Color:
 	c = c.lerp(cinza, smoothstep(-800.0, -1000.0, z))
 	c = c.lerp(vulcao, smoothstep(-1050.0, -1250.0, z))
 	c = c.lerp(ocre, smoothstep(-1550.0, -1750.0, z))
-	c = c.lerp(cinza, smoothstep(-2000.0, -2150.0, z))
+	c = c.lerp(Color(0.3, 0.45, 0.22), smoothstep(-1950.0, -2100.0, z))   # os campos em volta do castelo são verdes e cuidados
 	return c * (0.9 + 0.2 * (_ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5))
 
 
 func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 	var c := cor_do_mundo(x, z)
+	var costa := Costa.distancia(x, z)
+	if costa < 24.0:   # praia de areia, mais escura onde a água molha
+		c = c.lerp(Color(0.84, 0.76, 0.56).lerp(Color(0.6, 0.52, 0.38), smoothstep(12.0, 2.0, costa)), smoothstep(24.0, 14.0, costa))
 	c = c.lerp(Color(0.42, 0.42, 0.4), smoothstep(0.2, 0.42, 1.0 - n.y))
 	c = c.lerp(Color(0.45, 0.34, 0.22), 1.0 - smoothstep(1.6, 4.2, distancia_caminho(x, z)))
 	var dr := distancia_rio(x, z)

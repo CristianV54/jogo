@@ -86,6 +86,7 @@ func _densidade(x: float, z: float) -> float:
 	d = lerpf(d, 0.22, smoothstep(-800.0, -1000.0, z))
 	d = lerpf(d, 0.07, smoothstep(-1050.0, -1250.0, z))
 	d = lerpf(d, 0.4, smoothstep(-1550.0, -1750.0, z))
+	d = lerpf(d, 0.95, smoothstep(-1900.0, -2050.0, z))
 	return d * (0.55 + 0.9 * (_ruido.get_noise_2d(x, z) * 0.5 + 0.5))
 
 
@@ -117,7 +118,7 @@ func _construir(k: Vector2i) -> MultiMeshInstance3D:
 		if ter == null:
 			continue
 		var q: Vector2 = par[1]
-		if ter.distancia_caminho(q.x, q.y) < 2.4 or ter.na_agua(q.x, q.y, 1.6):
+		if ter.distancia_caminho(q.x, q.y) < 2.4 or ter.na_agua(q.x, q.y, 1.6) or Costa.distancia(p.x, p.y) < 7.0:
 			continue
 		var y := ter.altura_em(q.x, q.y)
 		var s := rng.randf_range(1.1, 2.3)

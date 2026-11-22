@@ -205,6 +205,18 @@ func _agua(r: Dictionary) -> MeshInstance3D:
 				st.set_normal(Vector3.UP)
 				st.set_uv(Vector2(v[1], v[2]))
 				st.add_vertex(v[0])
+	var mat := material_agua()
+	var mi := MeshInstance3D.new()
+	mi.name = "AguaDoRio"
+	mi.mesh = st.commit()
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_pedras_da_margem(mi, r)
+	return mi
+
+
+## Material da água (rios e mar): cor por profundidade lida do buffer de profundidade, espuma onde o chão encosta.
+static func material_agua() -> ShaderMaterial:
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
 render_mode cull_disabled, depth_draw_opaque, specular_schlick_ggx;
@@ -230,13 +242,7 @@ void fragment() {
 """
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
-	var mi := MeshInstance3D.new()
-	mi.name = "AguaDoRio"
-	mi.mesh = st.commit()
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_pedras_da_margem(mi, r)
-	return mi
+	return mat
 
 
 ## Pedras e seixos nas duas margens, como num rio de verdade (só visual, sem colisão; o vau fica limpo).
