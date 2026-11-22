@@ -53,6 +53,7 @@ func _ready() -> void:
 	_espera = randf_range(0.5, 4.0)
 	vida = vida_max
 	add_to_group("atingiveis")
+	add_to_group("animais")
 	if montavel:
 		montaria = Montaria.new()
 		montaria.nome = nome

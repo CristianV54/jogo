@@ -148,6 +148,8 @@ func ir_para(destino: String, spawn: String) -> void:
 	area = mundo.regioes[destino]
 	area_nome = destino
 	var t := mundo.spawn_global(destino, spawn)
+	jogador.global_position = t.origin   # perto do destino para as regiões vizinhas ligarem agora
+	mundo.atualizar_atividade()
 	var pos := t.origin
 	pos.y = area.altura_em(pos.x - area.position.x, pos.z - area.position.z) + area.position.y + 0.3
 	jogador.global_position = pos

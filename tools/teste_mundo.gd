@@ -81,7 +81,7 @@ func _rodar() -> void:
 			print("    [debug] ", n.nome, " pos=", n.position, " casa=", n.casa, " dist=", snappedf(Vector2(n.position.x - n.casa.x, n.position.z - n.casa.z).length(), 0.1))
 	marcar("Chegam à porta da casa", perto_de_casa >= em_casa - 1 and perto_de_casa > 0, "%d de %d" % [perto_de_casa, em_casa])
 	clima.definir_hora(9.0)
-	await create_timer(2.0).timeout
+	await create_timer(3.5).timeout   # cada NPC confere o relógio a cada 1,5 a 2,5 s
 	var voltaram := campos.npcs.filter(func(n): return not n._recolhido).size()
 	marcar("De manhã voltam ao trabalho", voltaram == campos.npcs.size(), "%d de %d" % [voltaram, campos.npcs.size()])
 	clima.forcar_tempo(Clima.Tempo.TEMPESTADE)

@@ -19,6 +19,10 @@ var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio, tipo,
 var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var _rng := RandomNumberGenerator.new()
+var _t_atividade := 0.0
+const RAIO_ATIVO := 230.0    # regiões e povoados mais longe que isto ficam parados e invisíveis (fogueiras, gente e bichos custam CPU)
+const RAIO_FAUNA := 200.0
+const RAIO_ANIMACAO := 60.0  # gente e bichos mais longe que isto não animam nem aparecem
 
 
 # ---------------------------------------------------------------- ajudas para as áreas
@@ -211,6 +215,68 @@ func _colher_estilo(id: String, a: AreaBase) -> void:
 	if sol:
 		a.remove_child(sol)
 		sol.queue_free()
+
+
+# ---------------------------------------------------------------- só o que está perto roda
+
+func _process(delta: float) -> void:
+	_t_atividade -= delta
+	if _t_atividade <= 0.0:
+		_t_atividade = 0.5
+		atualizar_atividade()
+
+
+## Liga o que está perto do jogador e desliga o que está longe: áreas inteiras, povoados e bichos soltos. O mundo todo
+## ligado ao mesmo tempo (centenas de fogueiras com partículas, gente e bichos) deixava o jogo a 6 quadros por segundo.
+func atualizar_atividade() -> void:
+	var jog := get_tree().get_first_node_in_group("jogador") as Node3D
+	if jog == null:
+		return
+	var p := Vector2(jog.global_position.x, jog.global_position.z)
+	for id in regioes:
+		var r := MundoDados.retangulo(id)
+		var dx := maxf(maxf(r.position.x - p.x, p.x - r.end.x), 0.0)
+		var dz := maxf(maxf(r.position.y - p.y, p.y - r.end.y), 0.0)
+		_ligar(regioes[id], sqrt(dx * dx + dz * dz) < RAIO_ATIVO)
+	for pid in povoados:
+		if povoados[pid].has("no"):
+			_ligar(povoados[pid]["no"], p.distance_to(povoados[pid]["centro"]) < RAIO_ATIVO)
+	if fauna:
+		for c in fauna.get_children():
+			var n3 := c as Node3D
+			if n3:
+				_ligar(n3, p.distance_to(Vector2(n3.global_position.x, n3.global_position.z)) < RAIO_FAUNA)
+
+
+	# Animações só perto: no renderizador de compatibilidade cada malha com esqueleto sincroniza com a GPU a cada quadro
+	# (~1 ms cada no Mac), então gente e bichos longe ficam parados e escondidos.
+	for grupo in ["npcs", "inimigos", "animais"]:
+		for e in get_tree().get_nodes_in_group(grupo):
+			var n3 := e as Node3D
+			if n3 == null or not n3.is_inside_tree():
+				continue
+			var d := p.distance_to(Vector2(n3.global_position.x, n3.global_position.z))
+			var perto: bool = d < (RAIO_ANIMACAO + 20.0 if bool(n3.get_meta("anim_ligada", true)) else RAIO_ANIMACAO)
+			if perto != bool(n3.get_meta("anim_ligada", true)):
+				n3.set_meta("anim_ligada", perto)
+				_animacao(n3, perto)
+
+
+func _animacao(e: Node3D, ligada: bool) -> void:
+	if not e.has_meta("players"):
+		e.set_meta("players", e.find_children("*", "AnimationPlayer", true, false))
+	for ap in e.get_meta("players"):
+		if is_instance_valid(ap):
+			(ap as AnimationPlayer).active = ligada
+	for v in e.find_children("*", "MeshInstance3D", true, false):
+		(v as MeshInstance3D).visible = ligada
+
+
+func _ligar(no: Node3D, ligado: bool) -> void:
+	var modo := Node.PROCESS_MODE_INHERIT if ligado else Node.PROCESS_MODE_DISABLED
+	if no.process_mode != modo:
+		no.process_mode = modo
+		no.visible = ligado
 
 
 # ---------------------------------------------------------------- consultas

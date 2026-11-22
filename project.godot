@@ -6,4 +6,6 @@ run/main_scene="res://scenes/jogo.tscn"
 config/name="Sangue e Escamas"
 
 [rendering]
-renderer/rendering_method="gl_compatibility"
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver.macos="metal"

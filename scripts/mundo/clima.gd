@@ -321,23 +321,31 @@ func _aplicar() -> void:
 	RenderingServer.global_shader_parameter_set("vento_forca", 1.0 + escuro * 3.0 + chuva * 1.5)
 
 
-## Chuva (ruído suave) e trovão (estrondo grave que decai), gerados direto no buffer de áudio.
+## Chuva (ruído suave) e trovão (estrondo grave que decai), gerados direto no buffer de áudio. Só gera quando há o que tocar
+## e no máximo 800 amostras por quadro (encher o buffer inteiro com uma função por amostra travava o jogo).
 func _sons() -> void:
-	_encher(_chuva_som, func() -> float:
-		_chuva_fase = lerpf(_chuva_fase, _rng.randf() * 2.0 - 1.0, 0.35)
-		return _chuva_fase * 0.22 * chuva)
-	_encher(_trovao_som, func() -> float:
-		_trovao_amp = maxf(0.0, _trovao_amp - 0.00004)
-		return (_rng.randf() * 2.0 - 1.0) * _trovao_amp * _trovao_amp * 0.5)
-
-
-func _encher(p: AudioStreamPlayer, amostra: Callable) -> void:
-	var pb := p.get_stream_playback() as AudioStreamGeneratorPlayback
-	if pb == null:
-		return
-	var n := pb.get_frames_available()
-	var anterior := 0.0
-	for i in n:
-		var v: float = amostra.call()
-		anterior = lerpf(anterior, v, 0.5)   # tira o chiado agudo
-		pb.push_frame(Vector2(anterior, anterior))
+	if chuva > 0.03:
+		var pb := _chuva_som.get_stream_playback() as AudioStreamGeneratorPlayback
+		if pb:
+			var n := mini(pb.get_frames_available(), 800)
+			if n > 0:
+				var buf := PackedVector2Array()
+				buf.resize(n)
+				var amp := 0.22 * chuva
+				for i in n:
+					_chuva_fase = lerpf(_chuva_fase, _rng.randf() * 2.0 - 1.0, 0.35)
+					buf[i] = Vector2(_chuva_fase * amp, _chuva_fase * amp)
+				pb.push_buffer(buf)
+	if _trovao_amp > 0.001:
+		var pt := _trovao_som.get_stream_playback() as AudioStreamGeneratorPlayback
+		if pt:
+			var n := mini(pt.get_frames_available(), 800)
+			if n > 0:
+				var buf := PackedVector2Array()
+				buf.resize(n)
+				var anterior := 0.0
+				for i in n:
+					_trovao_amp = maxf(0.0, _trovao_amp - 0.00004)
+					anterior = lerpf(anterior, (_rng.randf() * 2.0 - 1.0) * _trovao_amp * _trovao_amp * 0.5, 0.5)
+					buf[i] = Vector2(anterior, anterior)
+				pt.push_buffer(buf)
