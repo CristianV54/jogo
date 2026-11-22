@@ -124,7 +124,7 @@ func _planejar() -> void:
 	terreno = TerrenoMundo.new()
 	terreno.name = "ChaoDoMundo"
 	terreno.limites = MundoDados.LIMITES
-	terreno.passo = 8.0
+	terreno.passo = 4.0   # 4 m: com 8 m um rio de 7 m de largura caía em 2 células e a margem virava serrilhado
 	terreno.semente = 4242
 	for id in MundoDados.REGIOES:
 		terreno.retangulos.append(MundoDados.retangulo(id))
@@ -392,7 +392,7 @@ func _pontes() -> void:
 					if _em_alguma_area(p):
 						continue
 					var dir := (est[i + 1] - est[i]).normalized()
-					var meia := (float(r["largura"]) / 2.0 + float(r["margem"]) * 0.85)
+					var meia := float(r["largura"]) / 2.0 + 1.4 + float(r["margem"]) + 0.5   # as pontas ficam já no chão sem mexida (depois da barranca e da margem do rio)
 					var a := p - dir * meia
 					var b := p + dir * meia
 					var ponte := PonteDeMadeira.new()

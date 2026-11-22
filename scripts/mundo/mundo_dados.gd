@@ -42,7 +42,7 @@ const RIOS := [
 	{"id": "cinzento_leste", "nome": "Rio Cinzento", "largura": 7.0, "margem": 8.0, "fundo": 1.5,
 		"pontos": [Vector2(78, 150), Vector2(180, 150), Vector2(280, 110), Vector2(360, 40), Vector2(400, -80), Vector2(404, -200), Vector2(404, -336.5)]},
 	{"id": "cinzento_fim", "nome": "Rio Cinzento", "largura": 6.0, "margem": 8.0, "fundo": 1.2,
-		"pontos": [Vector2(716, -337), Vector2(790, -400), Vector2(840, -520), Vector2(860, -640)]},
+		"pontos": [Vector2(690, -337), Vector2(740, -360), Vector2(790, -400), Vector2(840, -520), Vector2(860, -640)]},
 	{"id": "pomar", "nome": "Riacho do Moinho", "largura": 3.0, "margem": 6.0, "fundo": 0.7,
 		"pontos": [Vector2(-371, -420), Vector2(-371, -362), Vector2(-350, -132), Vector2(-340, -40), Vector2(-325, 40), Vector2(-305, 96)]},
 	{"id": "nevoa_oeste", "nome": "Riacho da Névoa", "largura": 3.8, "margem": 6.0, "fundo": 0.7,

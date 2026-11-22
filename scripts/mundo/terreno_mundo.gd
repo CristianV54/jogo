@@ -56,6 +56,27 @@ func gerar() -> void:
 			add_child(_agua(copia))
 
 
+## Uma ponta de rio encontra água se está perto de outro rio, da borda de uma região (onde o rio da região continua) ou do mar.
+func _ponta_encontra_agua(p: Vector2) -> bool:
+	if Costa.distancia(p.x, p.y) < 14.0:
+		return true
+	for r in retangulos:
+		var dx := maxf(maxf(r.position.x - p.x, p.x - r.end.x), 0.0)
+		var dz := maxf(maxf(r.position.y - p.y, p.y - r.end.y), 0.0)
+		if sqrt(dx * dx + dz * dz) < 8.0:
+			return true
+	for rio in rios:
+		var pts: PackedVector2Array = rio["pontos"]
+		if p == pts[0] or p == pts[pts.size() - 1]:
+			pass
+		var par := _eixo_mais_perto(p, pts)
+		if float(par[0]) < 1.0 and not (p.distance_to(pts[0]) < 0.5 or p.distance_to(pts[pts.size() - 1]) < 0.5):
+			return true   # o ponto está no meio de outro rio
+		if float(par[0]) < 14.0 and (p.distance_to(pts[0]) > 0.5 and p.distance_to(pts[pts.size() - 1]) > 0.5):
+			return true   # foz num rio maior
+	return false
+
+
 func _celula_dentro_de_area(c: Rect2) -> bool:
 	for r in retangulos:
 		if r.encloses(c):

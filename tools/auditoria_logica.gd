@@ -81,7 +81,11 @@ func _rodar() -> void:
 		if m.povoados[pid].has("no"):
 			m._ligar(m.povoados[pid]["no"], true)
 			donos.append([pid, m.povoados[pid]["no"]])
-	for i in 6:
+	if m.fauna:
+		for c in m.fauna.get_children():
+			if c is Node3D:
+				m._ligar(c, true)   # liga os bichos para conferir o nascimento de cada um
+	for i in 8:
 		await physics_frame
 	var espaco := jogo.get_world_3d().direct_space_state
 	var construcoes: Array = []   # {dono, nome, no, rect, campo}

@@ -110,7 +110,7 @@ func _agua(m: Mundo) -> void:
 			if not r.get("agua", true):
 				continue
 			var pts: PackedVector2Array = r["pontos"]
-			var meia: float = float(r["largura"]) / 2.0 + 5.0
+			var meia: float = float(r["largura"]) / 2.0 + 3.0
 			var flutuando := 0
 			var amostras := 0
 			var pior := 0.0
@@ -121,16 +121,17 @@ func _agua(m: Mundo) -> void:
 				var dir := (b - a).normalized()
 				var lado := Vector2(-dir.y, dir.x)
 				var y_agua: float = ter._altura_base(a.x, a.y) - 0.55
-				for o in [-1.0, -0.6, -0.3, 0.3, 0.6, 1.0]:
-					var p: Vector2 = a + lado * (o * meia)
-					amostras += 1
-					var h: float = ter.altura_em(p.x, p.y)
-					var falta: float = y_agua - h
-					if falta > 0.35:
-						flutuando += 1
-						if falta > pior:
-							pior = falta
-							onde = p + f[2]
+				for o in [-1.0, 1.0]:   # a borda da fita e 1,5 m além dela: o chão precisa estar na altura da água ou acima (margem), senão a água fica pendurada
+					for extra in [0.0, 1.5]:
+						var p: Vector2 = a + lado * (o * (meia + extra))
+						amostras += 1
+						var h: float = ter.altura_em(p.x, p.y)
+						var falta: float = y_agua - h
+						if falta > 0.3:
+							flutuando += 1
+							if falta > pior:
+								pior = falta
+								onde = p + f[2]
 			if flutuando > 0:
 				var sev := "CRITICO" if pior > 1.5 else "VISUAL"
 				_achado(sev, "água no ar sobre chão mais baixo", onde.x, onde.y, "%s/%s" % [f[1], r.get("nome", "rio")], "%d de %d amostras; pior %.1f m abaixo da faixa de água" % [flutuando, amostras, pior])

@@ -82,7 +82,7 @@ func _altura_base(x: float, z: float) -> float:
 	for p in planos:
 		var dx := x - p.x
 		var dz := z - p.y
-		var lim := p.z + 10.0
+		var lim := p.z + maxf(10.0, p.z * 0.5)   # a rampa até o plano do povoado é larga (metade do raio): dois metros de desnível em 10 m viravam degrau na grade de 4 m
 		if dx * dx + dz * dz < lim * lim:
 			h = lerpf(h, _altura_crua(p.x, p.y), 1.0 - smoothstep(p.z, lim, sqrt(dx * dx + dz * dz)))
 	if externa.is_valid():
@@ -132,17 +132,21 @@ func _aplicar_rio(r: Dictionary, p: Vector2, h: float) -> float:
 	var margem := float(r["margem"])
 	var par := _eixo_mais_perto(p, r["pontos"])
 	var d: float = par[0]
-	if d > meia + 3.5 + margem:
+	if d > meia + 1.4 + margem:
 		return h
 	var q: Vector2 = par[1]
 	var nivel := _altura_base(q.x, q.y) - 0.55
 	var fundo := float(r["fundo"])
 	for v in r.get("vaus", []):
 		fundo *= 1.0 - 0.85 * (1.0 - smoothstep(0.0, 7.0, q.distance_to(v)))   # o vau é raso
-	var leito := meia + 3.5   # o leito é mais largo que a água: com o chão em grade de 8 m um leito estreito sumia entre os vértices
+	var leito := meia + 1.4   # leito = fundo do rio até `meia`, mais uma barranca íngreme de 1,4 m que sobe acima da água (margem nítida, sem serrilhado)
+	if d <= meia:
+		return nivel - fundo * (1.0 - smoothstep(0.0, 1.0, d / meia)) - 0.15
 	if d <= leito:
-		return nivel - fundo * (1.0 - smoothstep(0.0, 1.0, d / leito)) - 0.15
-	return lerpf(nivel - 0.15, h, smoothstep(0.0, 1.0, (d - leito) / margem))
+		return lerpf(nivel - 0.15, nivel + 0.4, smoothstep(0.0, 1.0, (d - meia) / 1.4))
+	var t := (d - leito) / margem
+	var margem_alvo := lerpf(maxf(h, nivel + 0.4), h, t)   # (a barranca já sobe a nivel + 0,4)   # a margem nunca fica abaixo da água, nem do lado em que o terreno desce: sem água pendurada
+	return lerpf(nivel + 0.4, margem_alvo, smoothstep(0.0, 1.0, t))
 
 
 ## Distância ao eixo do rio com água mais perto (para pintar a lama da margem e não plantar árvore na água).
@@ -176,10 +180,16 @@ static func curva(ctrl: Array, passo := 3.0) -> PackedVector2Array:
 	return saida
 
 
+## A ponta de um rio encontra outra água (outro rio, a borda de uma região que continua o rio, o mar)? Aqui, no chão de uma
+## região: só quando a ponta está na borda do terreno, onde o rio do mundo continua. `TerrenoMundo` refina.
+func _ponta_encontra_agua(p: Vector2) -> bool:
+	return minf(tamanho / 2.0 - absf(p.x), tamanho / 2.0 - absf(p.y)) < 10.0
+
+
 ## Fita de água ao longo do eixo, 0,55 m abaixo do chão do eixo, com shader de correnteza e espuma na margem.
 func _agua(r: Dictionary) -> Node3D:
 	var pts: PackedVector2Array = r["pontos"]
-	var meia := float(r["largura"]) / 2.0 + 5.0   # larga de propósito: o chão esconde o excesso e a margem da água fica onde o chão cruza
+	var meia := float(r["largura"]) / 2.0 + 3.0   # a fita de água nunca é mais larga que o leito escavado (largura/2 + 3,5): dentro dele o chão está sempre abaixo da água
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var acumulado := 0.0
@@ -193,6 +203,17 @@ func _agua(r: Dictionary) -> Node3D:
 		var a := Vector3(pts[i].x + lado.x, y, pts[i].y + lado.y)
 		var b := Vector3(pts[i].x - lado.x, y, pts[i].y - lado.y)
 		anteriores.append([a, b, acumulado])
+	var total: float = anteriores[anteriores.size() - 1][2]
+	var fade_ini := not _ponta_encontra_agua(pts[0])   # ponta livre: a água afina e some em 14 m, em vez de acabar num corte reto
+	var fade_fim := not _ponta_encontra_agua(pts[pts.size() - 1])
+	for item in anteriores:
+		var s: float = item[2]
+		var alfa := 1.0
+		if fade_ini:
+			alfa *= smoothstep(0.0, 14.0, s)
+		if fade_fim:
+			alfa *= smoothstep(0.0, 14.0, total - s)
+		item.append(alfa)
 	var mat := material_agua()
 	var mat_longe := material_agua(false)
 	var raiz := Node3D.new()
@@ -209,10 +230,13 @@ func _agua(r: Dictionary) -> Node3D:
 			var b1: Vector3 = anteriores[i + 1][1]
 			var u0: float = anteriores[i][2]
 			var u1: float = anteriores[i + 1][2]
-			for tri in [[[a0, 0.0, u0], [b0, 1.0, u0], [a1, 0.0, u1]], [[b0, 1.0, u0], [b1, 1.0, u1], [a1, 0.0, u1]]]:
+			var al0: float = anteriores[i][3]
+			var al1: float = anteriores[i + 1][3]
+			for tri in [[[a0, 0.0, u0, al0], [b0, 1.0, u0, al0], [a1, 0.0, u1, al1]], [[b0, 1.0, u0, al0], [b1, 1.0, u1, al1], [a1, 0.0, u1, al1]]]:
 				for v in tri:
 					st2.set_normal(Vector3.UP)
 					st2.set_uv(Vector2(v[1], v[2]))
+					st2.set_color(Color(1.0, 1.0, 1.0, v[3]))
 					st2.add_vertex(v[0])
 		var mi := MeshInstance3D.new()
 		mi.name = "Pedaco%d" % (inicio / por_pedaco)
@@ -245,7 +269,7 @@ render_mode cull_disabled, specular_schlick_ggx;
 void fragment() {
 	float faixa = smoothstep(0.6, 0.98, sin(UV.y * 0.7 - TIME * 1.5 + sin(UV.x * 7.0 + TIME * 0.6) * 1.2));
 	ALBEDO = vec3(0.1, 0.42, 0.55) + faixa * 0.04;
-	ALPHA = 0.88;
+	ALPHA = 0.88 * COLOR.a;
 	ROUGHNESS = 0.1;
 }
 """
@@ -269,7 +293,8 @@ void fragment() {
 	c += faixa * 0.07 * (1.0 - smoothstep(0.0, 1.2, fundo));
 	float espuma = 1.0 - smoothstep(0.0, 0.16, fundo);         // espuma onde o chão encosta na água
 	ALBEDO = mix(c, vec3(0.9, 0.96, 0.97), espuma * 0.7);
-	ALPHA = clamp(0.35 + fundo * 0.9 + espuma * 0.4, 0.0, 0.92);
+	float borda_fita = smoothstep(1.0, 0.8, abs(UV.x - 0.5) * 2.0);   // a água esmaece nas bordas da fita: o contorno com o chão não vira serrilhado duro
+	ALPHA = clamp(0.35 + fundo * 0.9 + espuma * 0.4, 0.0, 0.92) * COLOR.a * borda_fita;
 	ROUGHNESS = 0.1;
 	SPECULAR = 0.7;
 }
