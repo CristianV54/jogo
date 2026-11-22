@@ -20,6 +20,7 @@ var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
+var capim: CapimDoMundo
 var mapa_floresta: ImageTexture   # onde há mata, para o mapa (tecla M)
 var _rng := RandomNumberGenerator.new()
 var _t_atividade := 0.0
@@ -110,6 +111,10 @@ func construir() -> void:
 	fauna.mundo = self
 	add_child(fauna)
 	fauna.povoar()
+	capim = CapimDoMundo.new()
+	capim.mundo = self
+	add_child(capim)
+	capim.iniciar()
 	progresso.emit("Pronto.")
 
 
