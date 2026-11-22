@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/ignis_maw_visual.tscn" id="2"]
+
+[node name="IgnisMaw" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Ignis-Maw"
+chefe = true
+vida_max = 700
+dano = 26
+velocidade = 5.0
+enfurece_em = 0.5
+escala_visual = 2.4
+raio_colisao = 1.7
+altura_colisao = 3.0
+alcance_ataque = 5.2
+alcance_visao = 30.0
+anim_andar = "Walk"
+anim_correr = "Run"
+anim_atacar = "Run"
+anim_dano = ""
+anim_morte = ""
+intervalo_ataque = 2.2

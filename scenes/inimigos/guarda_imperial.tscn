@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/guarda_imperial.tscn" id="2"]
+
+[node name="GuardaImperial" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Guarda Imperial"
+vida_max = 90
+dano = 10
+velocidade = 3.6
+anim_andar = "Walk"
+anim_correr = "Jog_Fwd"
+anim_atacar = "Sword_Attack"
+momento_do_ataque = 0.5
+intervalo_ataque = 2.0

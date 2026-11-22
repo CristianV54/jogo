@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/lobo_visual.tscn" id="2"]
+
+[node name="Lobo" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Lobo-cinza"
+vida_max = 40
+dano = 6
+velocidade = 5.4
+alcance_visao = 20.0
+escala_visual = 0.37
+raio_colisao = 0.45
+altura_colisao = 0.9
+anim_andar = "Idle"
+anim_correr = ""
+anim_atacar = "Jump"
+anim_dano = ""
+anim_morte = ""

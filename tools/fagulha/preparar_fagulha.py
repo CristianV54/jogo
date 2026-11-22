@@ -23,13 +23,18 @@ def mistura(c1, c2, t):
     return tuple(c1[i] * (1 - t) + c2[i] * t for i in range(3))
 
 
-TOPO = (0.40, 0.08, 0.05)
-FLANCO = (0.68, 0.21, 0.08)
-BARRIGA = (0.93, 0.74, 0.40)
-OSSO = (0.90, 0.82, 0.64)
-MEMB_PERTO = (0.55, 0.14, 0.07)
-MEMB_LONGE = (0.90, 0.44, 0.12)
-OLHO = (1.0, 0.62, 0.05)
+# Paletas: "fagulha" (ember, o aliado), "corrompido" (Ignis-Maw, escuro com brasa), "verde" (Filhote de Asa, selvagem)
+PALETAS = {
+    "fagulha": dict(TOPO=(0.40, 0.08, 0.05), FLANCO=(0.68, 0.21, 0.08), BARRIGA=(0.93, 0.74, 0.40), OSSO=(0.90, 0.82, 0.64),
+                    MEMB_PERTO=(0.55, 0.14, 0.07), MEMB_LONGE=(0.90, 0.44, 0.12), OLHO=(1.0, 0.62, 0.05)),
+    "corrompido": dict(TOPO=(0.05, 0.04, 0.06), FLANCO=(0.15, 0.1, 0.12), BARRIGA=(0.34, 0.12, 0.06), OSSO=(0.45, 0.4, 0.38),
+                       MEMB_PERTO=(0.1, 0.05, 0.07), MEMB_LONGE=(0.42, 0.1, 0.06), OLHO=(1.0, 0.12, 0.04)),
+    "verde": dict(TOPO=(0.12, 0.22, 0.1), FLANCO=(0.3, 0.42, 0.2), BARRIGA=(0.78, 0.74, 0.5), OSSO=(0.86, 0.82, 0.66),
+                  MEMB_PERTO=(0.2, 0.3, 0.14), MEMB_LONGE=(0.55, 0.62, 0.3), OLHO=(0.95, 0.85, 0.1)),
+}
+_P = PALETAS[os.environ.get("PALETA", "fagulha")]
+TOPO, FLANCO, BARRIGA, OSSO = _P["TOPO"], _P["FLANCO"], _P["BARRIGA"], _P["OSSO"]
+MEMB_PERTO, MEMB_LONGE, OLHO = _P["MEMB_PERTO"], _P["MEMB_LONGE"], _P["OLHO"]
 PUPILA = (0.02, 0.01, 0.01)
 
 # --- pesos por vértice: nome do grupo -> peso

@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/personagens/humanoide.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/personagens/solon/solon.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/armas/katana.glb" id="3"]
+
+[node name="Solon" type="Node3D"]
+script = ExtResource("1")
+tom_traje = Color(0.62, 0.3, 0.78, 1)
+cor_cabelo = Color(0.75, 0.7, 0.6, 1)
+arma_cena = ExtResource("3")
+arma_escala = 0.2
+arma_giro = Vector3(180, 0, 0)
+
+[node name="Modelo" parent="." instance=ExtResource("2")]

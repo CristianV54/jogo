@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/javali_visual.tscn" id="2"]
+
+[node name="Javali" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Javali Couraçado"
+vida_max = 70
+dano = 9
+velocidade = 4.2
+escala_visual = 0.15
+raio_colisao = 0.55
+altura_colisao = 0.9
+anim_andar = "Idle"
+anim_correr = ""
+anim_atacar = "Jump"
+anim_dano = ""
+anim_morte = ""

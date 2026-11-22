@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/jogo/jogo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/jogador/jogador.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/fagulha.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/camera/camera_terceira_pessoa.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/interface/hud.gd" id="5"]
+
+[node name="Jogo" type="Node3D"]
+script = ExtResource("1")
+
+[node name="AreaAtual" type="Node3D" parent="."]
+
+[node name="Camera" type="Node3D" parent="." node_paths=PackedStringArray("alvo")]
+script = ExtResource("4")
+alvo = NodePath("../Jogador")
+
+[node name="Braco" type="SpringArm3D" parent="Camera"]
+margin = 0.3
+
+[node name="Lente" type="Camera3D" parent="Camera/Braco"]
+current = true
+far = 600.0
+
+[node name="Jogador" parent="." instance=ExtResource("2")]
+
+[node name="Fagulha" parent="." node_paths=PackedStringArray("alvo") instance=ExtResource("3")]
+alvo = NodePath("../Jogador")
+
+[node name="Interface" type="CanvasLayer" parent="."]
+script = ExtResource("5")

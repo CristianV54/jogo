@@ -303,5 +303,5 @@ func _saidas() -> void:
 	_novo_spawn("Principal", Vector3(0, 0, 14), Vector3(0, 0, -30))
 	_novo_spawn("DoBosque", Vector3(0, 0, -43), Vector3(0, 0, 0))
 	_novo_spawn("DaFronteira", Vector3(43, 0, 0), Vector3(0, 0, 0))
-	_portal(Vector3(0, terreno.altura_em(0, -150), -150), "bosque_velado", "DoRefugio")
-	_portal(Vector3(150, terreno.altura_em(150, -1), -1), "fronteira_ferrogris", "DoRefugio").rotation.y = deg_to_rad(90.0)
+	_portal(Vector3(0, terreno.altura_em(0, -150), -150), "bosque_velado", "Entrada")
+	_portal(Vector3(150, terreno.altura_em(150, -1), -1), "fronteira_ferrogris", "Entrada").rotation.y = deg_to_rad(90.0)

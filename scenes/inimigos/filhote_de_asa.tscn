@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/filhote_de_asa_visual.tscn" id="2"]
+
+[node name="FilhoteDeAsa" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Filhote de Asa"
+vida_max = 50
+dano = 7
+velocidade = 4.6
+alcance_visao = 20.0
+escala_visual = 0.45
+raio_colisao = 0.6
+altura_colisao = 1.0
+anim_andar = "Walk"
+anim_correr = "Run"
+anim_atacar = "Run"
+anim_dano = ""
+anim_morte = ""

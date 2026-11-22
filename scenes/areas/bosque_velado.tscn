@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/mundo/arena_chefe.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/inimigos/gorath.tscn" id="2"]
+
+[node name="BosqueVelado" type="Node3D"]
+script = ExtResource("1")
+estilo = "mata"
+nome_da_area = "Bosque Velado"
+id_chefe = "gorath"
+cena_chefe = ExtResource("2")
+comuns = PackedStringArray("res://scenes/inimigos/lobo.tscn", "res://scenes/inimigos/lobo.tscn", "res://scenes/inimigos/javali.tscn", "res://scenes/inimigos/javali.tscn")
+destino_volta = "refugio_do_pinhal"
+spawn_volta = "DoBosque"
+destino_proximo = ""
+semente = 11

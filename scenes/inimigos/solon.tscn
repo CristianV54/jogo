@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/solon.tscn" id="2"]
+
+[node name="Solon" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Imperador Solon"
+chefe = true
+vida_max = 900
+dano = 20
+velocidade = 4.6
+enfurece_em = 0.5
+escala_visual = 1.25
+altura_colisao = 2.3
+alcance_ataque = 2.5
+anim_andar = "Walk"
+anim_correr = "Jog_Fwd"
+anim_atacar = "Sword_Attack"
+momento_do_ataque = 0.5
+intervalo_ataque = 1.4

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/gorath.tscn" id="2"]
+
+[node name="Gorath" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Brutamontes Gorath"
+chefe = true
+vida_max = 320
+dano = 18
+velocidade = 3.4
+enfurece_em = 0.5
+escala_visual = 1.75
+raio_colisao = 0.9
+altura_colisao = 3.2
+alcance_ataque = 2.8
+anim_andar = "Walk"
+anim_correr = "Jog_Fwd"
+anim_atacar = "Punch_Cross"
+intervalo_ataque = 2.0

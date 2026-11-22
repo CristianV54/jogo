@@ -55,3 +55,28 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - `scripts/mundo/fabrica_natureza.gd`: pinheiro, pedras, arbusto e toras gerados por código, pintados por vértice (sem textura), para manter um estilo só e permitir milhares de instâncias via MultiMesh. Não são arquivos de modelo; nada a baixar.
 - `scripts/mundo/terreno.gd`: terreno com clareira plana e colinas por ruído, cor por vértice (grama, mata, terra de caminho, pedra nas encostas).
 - **Pendência:** pinheiros e pedras são simples (poucos polígonos); sem variação de espécie, sem vento.
+
+## personagens/gorath, kaelor, solon (chefes humanos) e NPCs menores
+
+- **O que são:** Gorath (bruto, base Peasant escalada 1,75x, clava), Kaelor (traje Ranger tingido de aço, ombreira, espada longa, 1,2x), Solon (traje Ranger tingido de roxo imperial, ombreira, katana, 1,25x). NPCs: Dorn (lenhador), Orin (vigia), Tessa (cozinheira), Mira (caçadora, capuz).
+- **Origem e licença:** mesmos pacotes CC0 do Quaternius (base, trajes, cabelos). Gerados por `tools/personagens/gerar_todos.sh`.
+- **Tamanho de arquivo:** NPCs com texturas de 512 (3,7 a 6 MB), chefes com 768 (6,6 a 8,6 MB).
+- **Pendência:** os chefes são variações de cor e escala dos mesmos corpos: falta silhueta própria (armadura pesada do Kaelor, coroa e manto do Solon, tamanho e feições do Gorath). Revisão visual manual recomendada.
+
+## armas/ (shortsword, longsword, club, katana, simpleaxe)
+
+- **Origem:** *MedievalPack* do Quaternius (a licença CC0 consta no catálogo `pacotes_livres/CATALOGO.md` do SSD; o pacote em si não traz arquivo de licença). Convertidas de OBJ para glb por `tools/criaturas/converter_animais_e_armas.py`, com a textura religada.
+- **Calibração na mão (osso hand_r):** espadas e katana com giro (180, 0, 0); clava com giro (90, 0, 0). Escalas: curta 0,25, longa e katana 0,2, clava 0,32. Conferido por captura de 8 giros.
+- **Pendência:** `simpleaxe.glb` foi convertida e não é usada; não há escudo.
+
+## criaturas/ (Filhote de Asa, Ignis-Maw, Javali, Lobo)
+
+- **Filhote de Asa e Ignis-Maw:** o mesmo dragão rigado do Fagulha (origem e licença ainda por confirmar, ver Fagulha) com outras paletas de cor de vértice (`PALETA=verde` e `PALETA=corrompido` em `tools/fagulha/preparar_fagulha.py`). Têm Idle, Walk, Run e Fly de verdade; não têm animação de ataque nem de morte (o ataque é uma investida, a morte é tombar e afundar).
+- **PLACEHOLDER_ Javali Couraçado e PLACEHOLDER_ Lobo-cinza:** são o porco e o cachorro do pacote *Farm Animals* (Quaternius, CC0) tingidos de marrom e cinza. **Só têm Idle e Jump**: andam deslizando e atacam "pulando". Substituir por animais rigados de verdade (lobo e javali com andar, correr, atacar e morrer).
+
+## Jogo (Fases B a D): o que existe e o que é provisório
+
+- **Áreas:** Refúgio do Pinhal (hub, 6 NPCs, 2 portais), Bosque Velado (Gorath), Fortaleza de Ferrogris (Kaelor), Cratera de Ignis (Ignis-Maw) e Valdoria (Solon). As quatro arenas são geradas pelo mesmo `scripts/mundo/arena_chefe.gd` com estilos diferentes. Valdoria é só um pátio murado com um salão, não uma cidade.
+- **Progresso:** cada chefe derrotado libera o próximo caminho; sem o chefe a passagem fica bloqueada com aviso.
+- **Interface:** barras de vida, nome da área, diálogo e mensagens desenhados por código com a fonte padrão do Godot. Provisório: falta fonte, arte e identidade visual.
+- **Combate:** golpe de espada (J ou clique), rolamento com invulnerabilidade (Espaço), dano, reação, morte e recuperação lenta de vida. Um golpe só (`Sword_Attack`). Sem bloqueio, sem arco, sem magia, sem inventário nem forja.
