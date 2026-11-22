@@ -277,6 +277,13 @@ func montar(m: Montaria) -> void:
 		tw.tween_property(camera.braco, "spring_length", m.camera_distancia, 0.8)
 
 
+## Está a até `distancia` metros do chão? (pouso numa ladeira não conta como `is_on_floor`, mas dá para desmontar.)
+func perto_do_chao(distancia := 1.5) -> bool:
+	var q := PhysicsRayQueryParameters3D.create(global_position + Vector3(0.0, 0.3, 0.0), global_position + Vector3(0.0, -distancia, 0.0), 1)
+	q.exclude = [get_rid()]
+	return not get_world_3d().direct_space_state.intersect_ray(q).is_empty()
+
+
 ## Desce ao lado da criatura (no chão): o cavaleiro salta do assento (Sitting_Exit) até o chão.
 func desmontar() -> void:
 	if montaria == null:

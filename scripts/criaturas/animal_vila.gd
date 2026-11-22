@@ -60,7 +60,16 @@ func _physics_process(delta: float) -> void:
 		return
 	if _fuga > 0.0:
 		_fuga -= delta
-		position += _dir_fuga * velocidade * 4.0 * delta
+		if not _caminho_livre(_dir_fuga):   # bateu numa parede/cerca: tenta desviar para um lado, senão para de fugir
+			var lado := _dir_fuga.rotated(Vector3.UP, PI / 2.0)
+			if _caminho_livre(lado):
+				_dir_fuga = lado
+			elif _caminho_livre(-lado):
+				_dir_fuga = -lado
+			else:
+				_fuga = 0.0
+		if _fuga > 0.0:
+			position += _dir_fuga * velocidade * 4.0 * delta
 		rotation.y = lerp_angle(rotation.y, atan2(_dir_fuga.x, _dir_fuga.z), giro * 2.0 * delta)
 		_tocar("Run" if _tem("Run") else anim_andar)
 		if _fuga <= 0.0:
@@ -77,17 +86,44 @@ func _physics_process(delta: float) -> void:
 			_tocar(anim_parado)
 		else:
 			var direcao := ate.normalized()
-			position += direcao * velocidade * delta
-			rotation.y = lerp_angle(rotation.y, atan2(direcao.x, direcao.z), giro * delta)
+			if _caminho_livre(direcao):
+				position += direcao * velocidade * delta
+				rotation.y = lerp_angle(rotation.y, atan2(direcao.x, direcao.z), giro * delta)
+			else:   # algo no caminho: para e escolhe outro rumo depois
+				_andando = false
+				_espera = randf_range(1.0, 2.5)
+				_tocar(anim_parado)
 	else:
 		_espera -= delta
 		if _espera <= 0.0:
-			var ang := randf() * TAU
-			_destino = _casa + Vector3(cos(ang), 0.0, sin(ang)) * randf_range(0.4, 1.0) * raio_vagar
-			_andando = true
-			_tocar(anim_andar)
+			for tentativa in 6:   # só aceita um rumo cujo caminho está livre
+				var ang := randf() * TAU
+				var dir := Vector3(cos(ang), 0.0, sin(ang))
+				var dist := randf_range(0.4, 1.0) * raio_vagar
+				if _caminho_livre(dir, dist):
+					_destino = _casa + dir * dist
+					_andando = true
+					_tocar(anim_andar)
+					break
+			if not _andando:
+				_espera = randf_range(1.0, 2.5)
 	if altura_em.is_valid():
 		position.y = altura_em.call(position.x, position.z)
+
+
+## Há espaço para andar nessa direção? Três raios (centro e lados do corpo) contra o mundo (camada 1: paredes,
+## cercas, troncos, portas fechadas, terreno). `distancia` 0 = só a folga do corpo.
+func _caminho_livre(direcao: Vector3, distancia := 0.0) -> bool:
+	var alcance := maxf(distancia, 0.0) + maxf(raio_colisao, 0.5) + 0.6
+	var chao: float = altura_em.call(global_position.x, global_position.z) if altura_em.is_valid() else global_position.y
+	var lateral := direcao.cross(Vector3.UP).normalized() * 0.4
+	var espaco := get_world_3d().direct_space_state
+	for desvio in [-1.0, 0.0, 1.0]:
+		var de: Vector3 = Vector3(global_position.x, chao + 0.6, global_position.z) + lateral * desvio
+		var q := PhysicsRayQueryParameters3D.create(de, de + direcao * alcance, 1)
+		if not espaco.intersect_ray(q).is_empty():
+			return false
+	return true
 
 
 func receber_dano(quantidade: int, de: Node3D = null) -> void:

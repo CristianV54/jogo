@@ -133,7 +133,7 @@ func _process(_delta: float) -> void:
 		hud.dica("E   Falar com %s" % perto.nome)
 		return
 	if jogador.montaria:
-		hud.dica("E   Desmontar" if (not jogador.montaria.voa or jogador.is_on_floor()) else "Espaço sobe    C desce    Pouse para desmontar")
+		hud.dica("E   Desmontar" if (not jogador.montaria.voa or jogador.perto_do_chao()) else "Espaço sobe    C desce    Pouse para desmontar")
 		return
 	var montar := _montaria_mais_perto()
 	hud.dica("E   Montar %s" % montar.nome if montar else "")
@@ -171,7 +171,7 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 
 func interagir() -> void:
 	if jogador.montaria and not hud.dialogo_aberto:
-		if jogador.montaria.voa and not jogador.is_on_floor():
+		if jogador.montaria.voa and not jogador.perto_do_chao():
 			hud.mensagem("Pouse (tecla C) para desmontar.", 2.0)
 		else:
 			jogador.desmontar()

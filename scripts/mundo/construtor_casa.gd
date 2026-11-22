@@ -321,24 +321,44 @@ static func _material_do_kit(nome_peca: String) -> StandardMaterial3D:
 
 
 static func _forja(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> void:
-	# fornalha de pedra com brasa (geometria simples, sem modelo próprio), bigorna, bancada, arsenal
-	var fornalha := _caixa(casa, "Fornalha", Vector3(-ix + 0.75, 0.0, -iz + 0.6), Vector3(1.5, 1.1, 1.1), Color(0.34, 0.33, 0.34))
+	# forja de pedra (geometria simples com a pedra do kit): base, borda, leito de brasas, painel de fundo, pilares,
+	# coifa e chaminé até o teto. Bigorna, bancada e arsenal vêm do pacote de móveis.
+	var hx := -ix + 0.75
+	var hz := -iz + 0.6
 	var pedra := _material_do_kit("Floor_UnevenBrick")
+	var partes: Array[MeshInstance3D] = []
+	partes.append(_caixa(casa, "Fornalha", Vector3(hx, 0.0, hz), Vector3(1.5, 0.95, 1.1), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "BordaFrente", Vector3(hx, 0.95, hz + 0.46), Vector3(1.5, 0.12, 0.18), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "BordaFundo", Vector3(hx, 0.95, hz - 0.46), Vector3(1.5, 0.12, 0.18), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "BordaEsq", Vector3(hx - 0.66, 0.95, hz), Vector3(0.18, 0.12, 0.74), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "BordaDir", Vector3(hx + 0.66, 0.95, hz), Vector3(0.18, 0.12, 0.74), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "PainelDeFundo", Vector3(hx, 1.07, hz - 0.5), Vector3(1.5, 0.8, 0.12), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "PilarEsq", Vector3(hx - 0.66, 1.07, hz + 0.46), Vector3(0.18, 0.8, 0.18), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "PilarDir", Vector3(hx + 0.66, 1.07, hz + 0.46), Vector3(0.18, 0.8, 0.18), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "Coifa", Vector3(hx, 1.87, hz), Vector3(1.6, 0.22, 1.2), Color(0.34, 0.33, 0.34)))
+	partes.append(_caixa(casa, "Chamine", Vector3(hx, 2.09, hz - 0.25), Vector3(0.7, 1.0, 0.6), Color(0.34, 0.33, 0.34)))
 	if pedra:
-		fornalha.material_override = pedra   # pedra do próprio kit, em vez de cinza liso
-	_caixa(casa, "Brasa", Vector3(-ix + 0.75, 1.1, -iz + 0.6), Vector3(1.1, 0.12, 0.8), Color(1.0, 0.3, 0.05), 1.4)
+		for parte in partes:
+			parte.material_override = pedra
+	_caixa(casa, "LeitoDeCarvao", Vector3(hx, 0.95, hz), Vector3(1.14, 0.05, 0.74), Color(0.05, 0.04, 0.04))
+	var sorte := RandomNumberGenerator.new()
+	sorte.seed = 3
+	for i in 8:   # brasas acesas espalhadas no leito
+		_caixa(casa, "Brasa%d" % i, Vector3(hx + sorte.randf_range(-0.45, 0.45), 0.99, hz + sorte.randf_range(-0.27, 0.27)),
+			Vector3(0.13, 0.05, 0.1), Color(1.0, 0.3, 0.06), 2.0, sorte.randf() * 90.0)
 	var cs := CollisionShape3D.new()
 	var bx := BoxShape3D.new()
-	bx.size = Vector3(1.5, 1.1, 1.1)
+	bx.size = Vector3(1.5, 0.95, 1.1)
 	cs.shape = bx
-	cs.position = Vector3(-ix + 0.75, 0.55, -iz + 0.6)
+	cs.position = Vector3(hx, 0.475, hz)
 	corpo.add_child(cs)
-	var fogo := Fogo.new()   # labaredas sobre a brasa da fornalha (só visual: o topo fica a 1,1 m)
+	var fogo := Fogo.new()   # chama baixa sobre as brasas, sob a coifa (só visual: o leito fica a 1 m)
 	fogo.name = "FogoDaForja"
-	fogo.escala = 0.55
+	fogo.escala = 0.5
+	fogo.com_fumaca = false   # a coifa e a chaminé escondem a fumaça; sem ela some a bola cinza na frente da chama
 	fogo.energia_luz = 2.2
 	fogo.alcance_luz = 7.0
-	fogo.position = Vector3(-ix + 0.75, 1.15, -iz + 0.6)
+	fogo.position = Vector3(hx, 1.0, hz)
 	casa.add_child(fogo)
 	_movel(casa, corpo, "Anvil", -ix + 1.4, -iz + 2.0, 90.0)
 	_movel(casa, corpo, "Workbench", ix - 0.52, -0.3, -90.0)

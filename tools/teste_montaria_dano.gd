@@ -88,10 +88,11 @@ func _rodar() -> void:
 	marcar("Ovelha morreu (22 de dano, 20 de vida)", ovelha.morto, "vida %d" % ovelha.vida)
 	marcar("Ovelha tocou Death", ovelha._anim.current_animation == "Death", ovelha._anim.current_animation)
 	await foto("ovelha_morta")
-	await esperar(0.3)
-	var total := 0
-	for k in jog.inventario:
-		total += int(jog.inventario[k])
+	for pk in jogo.area.find_children("*", "Pickup", false, false):   # recolhe o que caiu fora do alcance
+		if not is_instance_valid(pk):
+			continue   # já foi recolhido junto com outro
+		jog.global_position = pk.global_position + Vector3(0, 0.3, 0)
+		await esperar(0.3)
 	marcar("Itens da ovelha foram largados e recolhidos (carne e lã)", jog.inventario.has("carne") and jog.inventario.has("la"), str(jog.inventario))
 	# foto dos 4 itens no chão, longe do jogador
 	var ponto := jog.global_position + Vector3(8, 0, 0)
@@ -177,6 +178,9 @@ func _rodar() -> void:
 	# ---------------- Fagulha
 	print("== FAGULHA ==")
 	var fag := jogo.fagulha
+	fag.modo_voo = false
+	fag.global_position = Vector3(10.0, jogo.area.altura_em(10.0, 12.0), 12.0)   # ponto aberto: longe de NPCs e cavalos
+	await esperar(0.5)
 	perto_de(fag, 3.5, Vector3(1, 0, 1))
 	await esperar(1.0)
 	jogo.interagir()
@@ -210,7 +214,7 @@ func _rodar() -> void:
 		t += 0.2
 	await esperar(0.5)
 	apertar(KEY_C, false)
-	marcar("Fagulha pousou", jog.is_on_floor(), "y=%.1f" % jog.global_position.y)
+	marcar("Fagulha pousou (perto do chão)", jog.perto_do_chao(), "y=%.1f" % jog.global_position.y)
 	await foto("fagulha_pousada")
 	jogo.interagir()
 	await esperar(0.5)

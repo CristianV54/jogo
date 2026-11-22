@@ -96,7 +96,7 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 
 - **Origem e licença:** *Fantasy Props MegaKit* (versão gratuita) do Quaternius, **CC0** (`License_Standard.txt` do pacote). Copiados do SSD (`pacotes_livres/comida_objetos_3d/quaternius_fantasy_props_megakit`), só os usados, em glTF com as texturas `T_Trim_*` (22 MB).
 - **Peças usadas:** cama (Bed_Twin1/2), armário alto (Bookcase_2), cômoda (Cabinet), criado-mudo, baú, mesa grande, cadeira, banco, banquinho, barril, balde, saco, vela e candelabro, caneca, prato, panela, bigorna, bancada, arsenal (WeaponStand).
-- **Uso:** `scripts/mundo/construtor_casa.gd` (`_moradia` e `_forja`). Cada móvel de porte tem uma caixa de colisão na camada 4 (o jogador colide, a câmera atravessa). A **fornalha** da forja é geometria simples com a pedra do próprio kit (sem modelo de fornalha), e a brasa é uma caixa emissiva: aceitável, mas pode ganhar modelo próprio.
+- **Uso:** `scripts/mundo/construtor_casa.gd` (`_moradia` e `_forja`). Cada móvel de porte tem uma caixa de colisão na camada 4 (o jogador colide, a câmera atravessa). A **forja** é geometria simples com a pedra do próprio kit (sem modelo de forja): base, borda, leito de carvão com brasas acesas, painel de fundo, pilares, coifa e chaminé até o teto, com chama baixa por dentro. Pode ganhar modelo próprio.
 - **Validação:** `tools/teste_moveis.gd` (entrar pela porta, baú e mesa barram) e capturas do interior (casa de teste, forja e casa do Vane).
 
 ## Dano em animais e pessoas, e montaria (21/11/2026)
@@ -117,3 +117,6 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Chão vivo:** `scripts/mundo/vegetacao_rasteira.gd` (34 manchas de cor, moitas de capim, 14 anéis de flores e flores soltas) no Refúgio.
 - **Montaria:** animação de subir (Sitting_Enter com salto até o assento) e de descer (Sitting_Exit), e o cavalo pula (Espaço, 1,7 m). Cavaleiro usa Sitting_Enter/Idle/Exit do pacote de animações.
 - **Aviso de teste:** nos testes sem janela (`--headless`) o Godot mostra `Parameter "material" is null` do renderizador "dummy" ao carregar o Refúgio e o Bosque; nos testes com janela esse erro não aparece. Não foi suprimido; vale investigar se o aviso persistir.
+
+- **Animais e obstáculos (21/11/2026):** os animais de vila olham à frente com três raios de física (camada 1: paredes, cercas, troncos, portas fechadas, terreno) e param ou desviam antes de bater; ao fugir de um golpe, desviam de lado. Teste: `tools/teste_animais_obstaculos.gd` (960 amostras, zero atravessamentos; o código antigo, sem raios, teve 112 nas mesmas amostras). Eles ainda não evitam uns aos outros nem o chão muito inclinado.
+- **Desmontar do Fagulha:** vale perto do chão (raio de 1,5 m), não só com `is_on_floor`, para não ficar preso ao pousar numa ladeira.
