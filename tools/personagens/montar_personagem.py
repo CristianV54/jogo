@@ -85,7 +85,7 @@ limpar_icosferas()
 
 # 3b) texturas: o pacote vem em 4K (um personagem passava de 50 MB); reduz para no máximo 1024.
 #     Exporta em PNG: o Godot 4.7 recusou os JPEG de cor deste pacote ("Couldn't load image ... image/jpeg").
-LIMITE_TEXTURA = 1024
+LIMITE_TEXTURA = int(os.environ.get("TEXLIM", "1024"))   # NPCs menores usam 512
 for img in bpy.data.images:
     if img.size[0] > 0 and max(img.size) > LIMITE_TEXTURA:
         fator = LIMITE_TEXTURA / max(img.size)

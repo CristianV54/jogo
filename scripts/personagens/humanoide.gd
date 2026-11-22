@@ -10,6 +10,8 @@ const BIBLIOTECA: AnimationLibrary = preload("res://assets/animations/ual/ual1_b
 @export var cor_cabelo := Color(1, 1, 1)
 ## Escala do corpo todo (1,0 = 1,82 m, a altura da base). Usada para diferenciar personagens.
 @export var escala_corpo := 1.0
+## Animação em loop que toca ao entrar na cena.
+@export var animacao_inicial := "Idle"
 
 @onready var modelo: Node3D = $Modelo
 var animacoes: AnimationPlayer
@@ -23,7 +25,7 @@ func _ready() -> void:
 	add_child(animacoes)
 	animacoes.root_node = animacoes.get_path_to(modelo)
 	animacoes.add_animation_library("", BIBLIOTECA)
-	tocar("Idle")
+	tocar(animacao_inicial)
 
 
 func tocar(nome: String, mistura := 0.2) -> void:
