@@ -71,7 +71,7 @@ func pegar_pickups(area: Node, item := "") -> void:
 
 func fechar_dialogo() -> void:
 	var g := 0
-	while (jogo.hud.dialogo_aberto or not jogo._cena.is_empty()) and g < 20:
+	while (jogo.hud.dialogo_aberto or not jogo._cena.is_empty()) and g < 80:
 		jogo.interagir()
 		g += 1
 
