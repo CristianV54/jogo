@@ -43,6 +43,7 @@ func _ready() -> void:
 	add_child(visual)
 	name = nome if nome != "" else name
 	add_to_group("atingiveis")
+	add_to_group("npcs")
 	corpo = Solidos.corpo_movel(self, AABB(Vector3(-0.35, 0.0, -0.35), Vector3(0.7, 1.8, 0.7)))   # o jogador não atravessa as pessoas
 	if not rotina.is_empty():
 		_proximo_passo()
@@ -118,8 +119,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _andar(p: Dictionary, delta: float) -> void:
-	var destino: Vector3 = p["ir"]
-	var ate := destino - global_position
+	var destino: Vector3 = p["ir"]   # as rotinas são escritas nas coordenadas do pai (a área ou o mundo)
+	var ate := destino - position
 	ate.y = 0.0
 	if ate.length() < 0.25:
 		_proximo_passo()
@@ -127,11 +128,11 @@ func _andar(p: Dictionary, delta: float) -> void:
 	var dir := ate.normalized()
 	if _caminho_livre(dir):
 		_preso = 0.0
-		global_position += dir * float(p.get("vel", 1.5)) * delta
+		position += dir * float(p.get("vel", 1.5)) * delta
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
 		visual.tocar(String(p.get("anim", "Walk")), 0.2)
 		if altura_em.is_valid():
-			global_position.y = altura_em.call(global_position.x, global_position.z)
+			position.y = altura_em.call(position.x, position.z)
 	else:   # alguém no caminho (o jogador, um animal): espera um pouco e, se não sair, pula este passo
 		_preso += delta
 		visual.tocar("Idle", 0.2)
@@ -157,7 +158,7 @@ func _seguir(delta: float) -> void:
 		else:
 			visual.tocar("Idle", 0.2)
 		if altura_em.is_valid():
-			global_position.y = altura_em.call(global_position.x, global_position.z)
+			position.y = altura_em.call(position.x, position.z)
 	else:
 		visual.tocar("Idle", 0.2)
 		rotation.y = lerp_angle(rotation.y, atan2(-ate.x, -ate.z), 4.0 * delta)
@@ -206,7 +207,9 @@ func _entrar_no_passo() -> void:
 		return   # a animação Walk entra no primeiro quadro de _andar
 	_restante = float(p.get("seg", p.get("esperar", 3.0)))
 	if p.has("olhar"):
-		olhar_para(p["olhar"])
+		var alvo_olhar: Vector3 = p["olhar"]
+		var pai := get_parent() as Node3D
+		olhar_para(pai.to_global(alvo_olhar) if pai else alvo_olhar)
 	var anim: String = p.get("fazer", p.get("anim", "Idle"))
 	visual.animacoes.play(anim, 0.2)
 

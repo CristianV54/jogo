@@ -80,6 +80,7 @@ func _terreno() -> void:
 	for i in range(0, eixo.size(), 5):   # corredor plano em volta do rio, para as margens ficarem calmas
 		terreno.planos.append(Vector3(eixo[i].x, eixo[i].y, 11.0))
 	add_child(terreno)
+	Mundo.preparar_terreno(terreno, self)
 	terreno.gerar()
 
 
@@ -111,6 +112,7 @@ func _floresta() -> void:
 	var troncos := StaticBody3D.new()
 	troncos.name = "TroncosColisao"
 	add_child(troncos)
+	Mundo.paredes_de_borda(self, TAM, troncos)
 	var pinheiros: Array[Transform3D] = []
 	for k in 3600:
 		var x := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)

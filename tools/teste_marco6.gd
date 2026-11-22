@@ -52,7 +52,7 @@ func falar_com(nome: String) -> void:
 
 
 func interagiveis(tipo: Variant) -> Array:
-	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo))
+	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo) and jogo.area.is_ancestor_of(x))
 
 
 func matar(lista: Array) -> void:
@@ -101,11 +101,11 @@ func _rodar() -> void:
 
 	print("== C4-M1 ==")
 	jog.vida = jog.vida_max
-	jog.global_position = Vector3(30.0, 0.5, 98.0)
+	jog.global_position = a.to_global(Vector3(30.0, 0.5, 98.0))
 	await esperar(1.3)
 	var na_lava := jog.vida < jog.vida_max
 	jog.vida = jog.vida_max
-	jog.global_position = Vector3(0.0, 0.6, 98.0)
+	jog.global_position = a.to_global(Vector3(0.0, 0.6, 98.0))
 	await esperar(1.3)
 	marcar("Lava queima, a ponte de basalto é segura", na_lava and jog.vida == jog.vida_max, "lava=%s ponte=%d/%d" % [na_lava, jog.vida, jog.vida_max])
 	for p in a.minerios:
@@ -113,7 +113,7 @@ func _rodar() -> void:
 		jogo.interagir()
 		await esperar(0.1)
 	marcar("4 minérios vulcânicos coletados", m.feito("C4-M1", "minerios") == 4 and int(jog.inventario.get("minerio_vulcanico", 0)) == 4, str(jog.inventario))
-	jog.global_position = Vector3(-38.0, 1.0, 12.0)
+	jog.global_position = a.to_global(Vector3(-38.0, 1.0, 12.0))
 	await esperar(0.7)
 	marcar("Chegou ao alojamento: C4-M1 concluída", m.concluidas.has("C4-M1"), str(m.concluidas.slice(-2)))
 	await esperar(6.6)
@@ -162,7 +162,7 @@ func _rodar() -> void:
 	ig.set_physics_process(false)
 	a._t_onda = 999.0
 	a._t_brasas = 999.0
-	jog.global_position = Vector3(a.ARENA.x + 12.0, 0.8, a.ARENA.y)
+	jog.global_position = a.to_global(Vector3(a.ARENA.x + 12.0, 0.8, a.ARENA.y))
 	await esperar(0.6)
 	var vida_antes := jog.vida
 	a._onda_de_calor()

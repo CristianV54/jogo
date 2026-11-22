@@ -52,7 +52,7 @@ func falar_com(nome: String) -> void:
 
 
 func interagiveis(tipo: Variant) -> Array:
-	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo))
+	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo) and jogo.area.is_ancestor_of(x))
 
 
 func matar(lista: Array) -> void:
@@ -105,7 +105,7 @@ func _rodar() -> void:
 	marcar("Sem a C5-M1 o castelo fica fechado", jogo.area_nome == "valdoria")
 
 	print("== C5-M1 ==")
-	jog.global_position = Vector3(48.0, 1.0, 19.0)
+	jog.global_position = a.to_global(Vector3(48.0, 1.0, 19.0))
 	await esperar(0.7)
 	marcar("Atravessou o Distrito do Comerciante", m.feito("C5-M1", "mercado") == 1)
 	jog.global_position = a.trocas[5].global_position + Vector3(0.3, 0.6, 0)
@@ -127,7 +127,7 @@ func _rodar() -> void:
 	a = jogo.area
 	marcar("Castelo aberto: 4 focos, Vane dormindo e salão fechado", a.nome_area == "Castelo Imperial" and a.focos.size() == 4 and a.vane != null and a.portao_salao._folhas[0].collision_layer != 0)
 	marcar("Escadaria sobe 3 m e a plataforma é 3 m", is_equal_approx(a.altura_em(0.0, 100.0), 3.0) and a.altura_em(0.0, 115.0) > 0.5 and a.altura_em(0.0, 115.0) < 2.5)
-	jog.global_position = Vector3(0.0, 4.0, 12.0)
+	jog.global_position = a.to_global(Vector3(0.0, 4.0, 12.0))
 	await esperar(0.7)
 	marcar("Conversa antes do duelo roda sozinha", a.duelo_iniciado and (not jogo._cena.is_empty() or jogo.hud.dialogo_aberto))
 	await fechar_dialogo()

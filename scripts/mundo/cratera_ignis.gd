@@ -32,7 +32,7 @@ func _ready() -> void:
 	tam = 300.0
 	_rng.seed = 73
 	_ambiente()
-	_montar_terreno(41, 0.0, [], PackedVector2Array([Vector2(0, 140), Vector2(0, -100)]), Color(0.3, 0.2, 0.17), Color(0.22, 0.15, 0.14), 260.0)
+	_montar_terreno(41, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 140), Vector2(0, -100), Vector2(0, -155)]), Color(0.3, 0.2, 0.17), Color(0.22, 0.15, 0.14), 260.0)
 	_horizonte(Color(0.3, 0.14, 0.12), 170.0)
 	_paredoes()
 	for f in FENDAS:
@@ -330,17 +330,18 @@ func _libertar() -> void:
 		escama.item = "escama_ancestral"
 		escama.quantidade = 1
 		add_child(escama)
-		escama.global_position = Vector3(ARENA.x, _y(ARENA) + 0.5, ARENA.y)
+		escama.position = Vector3(ARENA.x, _y(ARENA) + 0.5, ARENA.y)
 		chefe_morreu.emit("ignis_maw"))
 
 
 func _process(delta: float) -> void:
 	if ignis == null or solto or not is_instance_valid(ignis):
 		return
-	var rel := Vector2(ignis.global_position.x - ARENA.x, ignis.global_position.z - ARENA.y)
+	var loc := to_local(ignis.global_position)   # ARENA está nas coordenadas da área
+	var rel := Vector2(loc.x - ARENA.x, loc.z - ARENA.y)
 	if rel.length() > RAIO_MAX - 4.0:   # preso às correntes: não sai da arena
 		rel = rel.normalized() * (RAIO_MAX - 4.0)
-		ignis.global_position = Vector3(ARENA.x + rel.x, ignis.global_position.y, ARENA.y + rel.y)
+		ignis.global_position = to_global(Vector3(ARENA.x + rel.x, loc.y, ARENA.y + rel.y))
 	var jog := get_tree().get_first_node_in_group("jogador") as Jogador
 	if jog == null:
 		return
@@ -374,7 +375,8 @@ func _onda_de_calor() -> void:
 	t.material = mat
 	anel.mesh = t
 	add_child(anel)
-	anel.global_position = Vector3(centro.x, _y(Vector2(centro.x, centro.z)) + 0.3, centro.z)
+	var c_loc := to_local(centro)
+	anel.position = Vector3(c_loc.x, _y(Vector2(c_loc.x, c_loc.z)) + 0.3, c_loc.z)
 	GerenciadorMissoes.instancia.aviso.emit("Onda de calor! Pule!", 1.5)
 	var tw := create_tween()
 	tw.tween_method(func(r: float) -> void:
@@ -396,7 +398,8 @@ func _chuva_de_brasas(jog: Jogador) -> void:
 		f.dano = 6
 		f.raio_dano = 1.6
 		var a := _rng.randf() * TAU
-		var p := Vector2(jog.global_position.x, jog.global_position.z) + Vector2(cos(a), sin(a)) * _rng.randf_range(2.0, 6.0)
+		var lj := to_local(jog.global_position)
+		var p := Vector2(lj.x, lj.z) + Vector2(cos(a), sin(a)) * _rng.randf_range(2.0, 6.0)
 		f.position = Vector3(p.x, _y(p), p.y)
 		add_child(f)
 		_brasas.append(f)

@@ -45,7 +45,7 @@ func _terreno() -> void:
 	terreno.amplitude = 9.0
 	terreno.inclinacao = Vector2(0.0, -0.04)   # sobe para o norte: a encosta do pomar
 	terreno.caminhos = [
-		PackedVector2Array([Vector2(0, 110), Vector2(0, 40), Vector2(0, 6), Vector2(0, -10)]),
+		PackedVector2Array([Vector2(0, 125), Vector2(0, 110), Vector2(0, 40), Vector2(0, 6), Vector2(0, -10)]),
 		PackedVector2Array([Vector2(0, 18), Vector2(30, -18), Vector2(40, -34)]),   # até o moinho
 	]
 	# Riacho do moinho: desce do norte, passa pela roda d'água e segue para o sul
@@ -56,6 +56,7 @@ func _terreno() -> void:
 		corredor.append(Vector3(eixo[i].x, eixo[i].y, 10.0))
 	terreno.planos = corredor
 	add_child(terreno)
+	Mundo.preparar_terreno(terreno, self)
 	terreno.gerar()
 
 
@@ -94,13 +95,7 @@ func _floresta() -> void:
 	inst.multimesh = mm
 	inst.material_override = FabricaNatureza.material()
 	add_child(inst)
-	for lado in [[Vector3(0, 6, -119), Vector3(TAM, 12, 2)], [Vector3(0, 6, 119), Vector3(TAM, 12, 2)], [Vector3(-119, 6, 0), Vector3(2, 12, TAM)], [Vector3(119, 6, 0), Vector3(2, 12, TAM)]]:
-		var cs := CollisionShape3D.new()   # paredes invisíveis na borda do mapa
-		var caixa := BoxShape3D.new()
-		caixa.size = lado[1]
-		cs.shape = caixa
-		cs.position = lado[0]
-		_solidos.add_child(cs)
+	Mundo.paredes_de_borda(self, TAM, _solidos)
 
 
 func _pomar() -> void:

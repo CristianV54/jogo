@@ -29,7 +29,7 @@ func _ready() -> void:
 	we.environment.fog_density = 0.006
 	(get_node("Sol") as DirectionalLight3D).light_energy = 0.9
 	var planos: Array[Vector3] = [Vector3(0, 110, 30), Vector3(0, 70, 40), Vector3(0, 25, 42), Vector3(0, -20, 42), Vector3(0, -62, 36), Vector3(0, -105, 20)]
-	_montar_terreno(29, 6.0, planos, PackedVector2Array([Vector2(0, 140), Vector2(0, 95), Vector2(0, 40), Vector2(0, -40), Vector2(0, -100), Vector2(0, -125)]), Color(0.27, 0.3, 0.22), Color(0.17, 0.22, 0.15))
+	_montar_terreno(29, 6.0, planos, PackedVector2Array([Vector2(0, 155), Vector2(0, 140), Vector2(0, 95), Vector2(0, 40), Vector2(0, -40), Vector2(0, -100), Vector2(0, -125), Vector2(0, -155)]), Color(0.27, 0.3, 0.22), Color(0.17, 0.22, 0.15))
 	_floresta(1800, func(x: float, z: float) -> bool:
 		return absf(x) < LADO + 8.0 and z > NORTE_Z - 12.0 and z < SUL_Z + 40.0)
 	_horizonte(Color(0.4, 0.4, 0.45), 130.0, true, -6.0)

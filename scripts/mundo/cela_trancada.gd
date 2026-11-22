@@ -93,7 +93,7 @@ func _ao_acionar() -> void:
 			continue
 		if o is Npc:   # civis e soldados saem pela frente e seguem para o portão
 			var npc := o as Npc
-			npc.rotina = [{"ir": global_position + global_transform.basis.z * 10.0, "vel": 2.4}, {"esperar": 99.0, "anim": "Idle"}]
+			npc.rotina = [{"ir": position + transform.basis.z * 10.0, "vel": 2.4}, {"esperar": 99.0, "anim": "Idle"}]
 			npc._passo = -1
 			npc._proximo_passo()
 		else:   # o dragão jovem sobe e se afasta

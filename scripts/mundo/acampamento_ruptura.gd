@@ -18,7 +18,7 @@ func _ready() -> void:
 	_rng.seed = 53
 	_ambiente_padrao()
 	var planos: Array[Vector3] = [Vector3(ACAMP.x, ACAMP.y, 24.0), Vector3(SUL.x, SUL.y, 16.0), Vector3(VAU.x, VAU.y, 14.0), Vector3(VAU.x, -70.0, 14.0)]
-	_montar_terreno(17, 7.0, planos, PackedVector2Array([Vector2(0, 125), Vector2(0, 55), Vector2(16, 20), Vector2(24, -8), Vector2(24, -70), Vector2(24, -118)]), Color(0.3, 0.38, 0.2), Color(0.18, 0.28, 0.15), 1.0, [{"pontos": Terreno.curva([Vector2(-156, -6.5), Vector2(-100, -9.5), Vector2(-50, -6.5), Vector2(0, -9.5), Vector2(24, -8), Vector2(60, -6.5), Vector2(100, -9.5), Vector2(156, -7)], 3.0), "largura": 9.0, "margem": 7.0, "fundo": 1.4, "agua": true, "vaus": [VAU]}])
+	_montar_terreno(17, 7.0, planos, PackedVector2Array([Vector2(0, 135), Vector2(0, 125), Vector2(0, 55), Vector2(16, 20), Vector2(24, -8), Vector2(24, -70), Vector2(24, -118), Vector2(24, -135)]), Color(0.3, 0.38, 0.2), Color(0.18, 0.28, 0.15), 1.0, [{"pontos": Terreno.curva([Vector2(-156, -6.5), Vector2(-100, -9.5), Vector2(-50, -6.5), Vector2(0, -9.5), Vector2(24, -8), Vector2(60, -6.5), Vector2(100, -9.5), Vector2(156, -7)], 3.0), "largura": 9.0, "margem": 7.0, "fundo": 1.4, "agua": true, "vaus": [VAU]}])
 	_floresta(2200, func(x: float, z: float) -> bool:
 		return Vector2(x, z).distance_to(ACAMP) < 30.0 or Vector2(x, z).distance_to(SUL) < 18.0 or (absf(z - RIO_Z) < 8.0 and absf(x) < 40.0) or Vector2(x, z).distance_to(Vector2(24, -70)) < 14.0)
 	_horizonte(Color(0.34, 0.4, 0.36), 120.0, true, -8.0)

@@ -24,6 +24,13 @@ extends Node3D
 ## O leito acompanha a altura do chão em volta (a água fica 0,55 m abaixo do chão no eixo), então o rio segue as colinas.
 @export var rios: Array = []
 
+## Mundo contínuo: nas bordas do terreno a altura e a cor se misturam com as do chão do mundo, para não haver emenda.
+## `origem` é a posição desta área no mundo; `externa(x, z)` e `cor_externa(x, z)` recebem coordenadas do MUNDO.
+@export var borda := 40.0
+var externa: Callable
+var cor_externa: Callable
+var origem := Vector2.ZERO
+
 ## Cada caminho é um PackedVector2Array de pontos (x, z).
 var caminhos: Array = []
 var _rio_caixa: Array[Rect2] = []
@@ -73,10 +80,22 @@ func altura_em(x: float, z: float) -> float:
 func _altura_base(x: float, z: float) -> float:
 	var h := _altura_crua(x, z)
 	for p in planos:
-		var dp := Vector2(x - p.x, z - p.y).length()
-		if dp < p.z + 10.0:
-			h = lerpf(h, _altura_crua(p.x, p.y), 1.0 - smoothstep(p.z, p.z + 10.0, dp))
+		var dx := x - p.x
+		var dz := z - p.y
+		var lim := p.z + 10.0
+		if dx * dx + dz * dz < lim * lim:
+			h = lerpf(h, _altura_crua(p.x, p.y), 1.0 - smoothstep(p.z, lim, sqrt(dx * dx + dz * dz)))
+	if externa.is_valid():
+		var w := _peso_da_borda(x, z)
+		if w > 0.0:
+			h = lerpf(h, externa.call(origem.x + x, origem.y + z), w)
 	return h
+
+
+## 1 na beirada do terreno, 0 a `borda` metros para dentro.
+func _peso_da_borda(x: float, z: float) -> float:
+	var d := minf(tamanho / 2.0 - absf(x), tamanho / 2.0 - absf(z))
+	return 1.0 - smoothstep(0.0, borda, d)
 
 
 func _preparar_rios() -> void:
@@ -238,8 +257,12 @@ func distancia_caminho(x: float, z: float) -> float:
 
 
 func cor_em(x: float, z: float) -> Color:
+	return _cor_vertice(x, z, normal_em(x, z))
+
+
+## Cor do chão num ponto, dado o vetor normal já calculado (grama, mata, pedra nas encostas, terra no caminho, lama no rio).
+func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 	var d := Vector2(x, z).length()
-	var n := normal_em(x, z)
 	var c := cor_grama.lerp(cor_mata, smoothstep(clareira_raio * 1.05, clareira_raio * 2.2, d))
 	c = c * (0.92 + 0.16 * (_ruido_fino.get_noise_2d(x * 3.1, z * 3.1) * 0.5 + 0.5))
 	var inclinacao := 1.0 - n.y
@@ -249,27 +272,63 @@ func cor_em(x: float, z: float) -> Color:
 	var dr := distancia_rio(x, z)
 	if dr < 3.5:   # lama e areia na margem do rio
 		c = c.lerp(Color(0.34, 0.29, 0.2), 1.0 - smoothstep(0.0, 3.5, dr))
+	if cor_externa.is_valid():
+		var w := _peso_da_borda(x, z)
+		if w > 0.0:
+			c = c.lerp(cor_externa.call(origem.x + x, origem.y + z), w)
 	return c
 
 
+## Malha em grade com vértices compartilhados: a altura de cada vértice é calculada uma vez só e a normal sai dos vizinhos.
 func _malha() -> ArrayMesh:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := int(tamanho / passo)
 	var meia := tamanho / 2.0
+	var lado := n + 1
+	var alturas := PackedFloat32Array()
+	alturas.resize(lado * lado)
+	for i in lado:
+		for j in lado:
+			alturas[i * lado + j] = altura_em(-meia + i * passo, -meia + j * passo)
+	var vertices := PackedVector3Array()
+	var normais := PackedVector3Array()
+	var cores := PackedColorArray()
+	vertices.resize(lado * lado)
+	normais.resize(lado * lado)
+	cores.resize(lado * lado)
+	for i in lado:
+		for j in lado:
+			var x := -meia + i * passo
+			var z := -meia + j * passo
+			var h := alturas[i * lado + j]
+			var hx0 := alturas[maxi(i - 1, 0) * lado + j]
+			var hx1 := alturas[mini(i + 1, n) * lado + j]
+			var hz0 := alturas[i * lado + maxi(j - 1, 0)]
+			var hz1 := alturas[i * lado + mini(j + 1, n)]
+			var dx := (hx1 - hx0) / ((mini(i + 1, n) - maxi(i - 1, 0)) * passo)
+			var dz := (hz1 - hz0) / ((mini(j + 1, n) - maxi(j - 1, 0)) * passo)
+			var normal := Vector3(-dx, 1.0, -dz).normalized()
+			var k := i * lado + j
+			vertices[k] = Vector3(x, h, z)
+			normais[k] = normal
+			cores[k] = _cor_vertice(x, z, normal).srgb_to_linear()   # cor de vértice é linear no Godot
+	var indices := PackedInt32Array()
+	indices.resize(n * n * 6)
+	var q := 0
 	for i in n:
 		for j in n:
-			var x0 := -meia + i * passo
-			var z0 := -meia + j * passo
-			var x1 := x0 + passo
-			var z1 := z0 + passo
-			var p00 := Vector3(x0, altura_em(x0, z0), z0)
-			var p10 := Vector3(x1, altura_em(x1, z0), z0)
-			var p01 := Vector3(x0, altura_em(x0, z1), z1)
-			var p11 := Vector3(x1, altura_em(x1, z1), z1)
-			for tri in [[p00, p10, p01], [p10, p11, p01]]:   # sentido horário visto de cima (a face que o Godot desenha)
-				for v in tri:
-					st.set_color(cor_em(v.x, v.z).srgb_to_linear())   # cor de vértice é linear no Godot
-					st.set_normal(normal_em(v.x, v.z))
-					st.add_vertex(v)
-	return st.commit()
+			var p00 := i * lado + j
+			var p10 := (i + 1) * lado + j
+			var p01 := i * lado + j + 1
+			var p11 := (i + 1) * lado + j + 1
+			for v in [p00, p10, p01, p10, p11, p01]:   # sentido horário visto de cima (a face que o Godot desenha)
+				indices[q] = v
+				q += 1
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normais
+	arrays[Mesh.ARRAY_COLOR] = cores
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var malha := ArrayMesh.new()
+	malha.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return malha

@@ -46,6 +46,9 @@ var _dialogo_npc: Npc
 var _dialogo_indice := 0
 var _trocando := false
 var clima: Clima
+var mundo: Mundo
+var _lugar := ""
+var _t_lugar := 0.0
 
 @onready var jogador: Jogador = $Jogador
 @onready var fagulha: Fagulha = $Fagulha
@@ -85,8 +88,46 @@ func _ready() -> void:
 			_forjar_lamina_final())
 	fagulha.alvo = null   # a Fagulha começa ferida na clareira do pinhal
 	fagulha.montaria.ativa = false
+	_trocando = true   # o mundo está sendo construído
+	jogador.set_physics_process(false)
+	_iniciar_mundo.call_deferred()
+
+
+## Constrói o mundo contínuo (todas as regiões, estradas, rios, florestas) e põe o Torin no Refúgio.
+func _iniciar_mundo() -> void:
+	mundo = Mundo.new()
+	mundo.name = "Mundo"
+	mundo.condicoes = _condicoes_das_barreiras()
+	mundo.progresso.connect(func(texto: String) -> void: hud.mensagem(texto, 0.0))
+	container.add_child(mundo)
+	await mundo.construir()
+	hud.mensagem("", 0.01)
+	for id in mundo.regioes:
+		var a: AreaBase = mundo.regioes[id]
+		if a.has_signal("chefe_vida"):
+			a.chefe_vida.connect(_ao_vida_do_chefe)
+		if a.has_signal("chefe_morreu"):
+			a.chefe_morreu.connect(_ao_derrotar_chefe)
+	jogador.set_physics_process(true)
+	_trocando = false
+	var refugio: AreaBase = mundo.regioes["refugio_do_pinhal"]
+	fagulha.visible = true
+	fagulha.set_physics_process(false)
+	fagulha.corpo.collision_layer = Solidos.CAMADA_SERES
+	fagulha.global_position = refugio.to_global(refugio.pos_fagulha_ferida())
 	ir_para("refugio_do_pinhal", "Principal")
 	missoes.iniciar("C1-M1")
+
+
+## O que abre cada barreira de história do mundo.
+func _condicoes_das_barreiras() -> Dictionary:
+	return {
+		"bosque": func() -> bool: return missoes.concluidas.has("C1-M4"),
+		"ruptura": func() -> bool: return derrotados.has("gorath"),
+		"ferrogris": func() -> bool: return missoes.concluidas.has("C3-M1"),
+		"valdoria": func() -> bool: return missoes.concluidas.has("C4-M4"),
+		"castelo": func() -> bool: return missoes.concluidas.has("C5-M1"),
+	}
 
 
 func ir_para(destino: String, spawn: String) -> void:
@@ -102,72 +143,25 @@ func ir_para(destino: String, spawn: String) -> void:
 		return
 	_trocando = true
 	if jogador.montaria and not jogador.montaria.persistente:
-		jogador.desmontar()   # a montaria some com a área antiga
-	if area:
-		container.remove_child(area)
-		area.queue_free()
-		area = null
+		jogador.desmontar()   # a montaria some quando se teleporta (morte, atalho)
 	hud.esconder_chefe()
-	var cena: PackedScene = load(AREAS[destino])
-	var nova: AreaBase = cena.instantiate()
-	container.add_child(nova)
-	area = nova
+	area = mundo.regioes[destino]
 	area_nome = destino
-	_adotar_ambiente(nova)
-	area.pediu_troca.connect(ir_para)
-	if area.has_signal("chefe_vida"):
-		area.chefe_vida.connect(_ao_vida_do_chefe)
-	if area.has_signal("chefe_morreu"):
-		area.chefe_morreu.connect(_ao_derrotar_chefe)
-	var t := area.ponto_de_spawn(spawn)
+	var t := mundo.spawn_global(destino, spawn)
 	var pos := t.origin
-	pos.y = area.altura_em(pos.x, pos.z) + 0.3
+	pos.y = area.altura_em(pos.x - area.position.x, pos.z - area.position.z) + area.position.y + 0.3
 	jogador.global_position = pos
 	jogador.rotation.y = t.basis.get_euler().y
 	jogador.velocity = Vector3.ZERO
 	camera.yaw = jogador.rotation.y
-	if not fagulha_livre:
-		var aqui := destino == "refugio_do_pinhal"   # ferida na clareira; fora do Refúgio ela some
-		fagulha.visible = aqui
-		fagulha.set_physics_process(false)
-		fagulha.corpo.collision_layer = Solidos.CAMADA_SERES if aqui else 0
-		if aqui:
-			fagulha.global_position = area.pos_fagulha_ferida()
-	elif not fagulha.montaria.montada:
+	if fagulha_livre and not fagulha.montaria.montada:
 		fagulha.modo_voo = false
 		fagulha.global_position = pos + Vector3(9.0, 0.0, 9.0).rotated(Vector3.UP, jogador.rotation.y)
 	hud.mostrar_area(area.nome_area)
+	_lugar = area.nome_area
 	await get_tree().process_frame
 	_trocando = false
 	area_carregada.emit(destino)
-
-
-## O ar da região (névoa, cor do sol, cores do céu) vem do ambiente que a área criou; o clima é quem manda no céu,
-## então o ambiente e o sol da área saem de cena e só o estilo fica.
-func _adotar_ambiente(a: AreaBase) -> void:
-	var amb := a.get_node_or_null("Ambiente") as WorldEnvironment
-	var sol := a.get_node_or_null("Sol") as DirectionalLight3D
-	var estilo := {}
-	if amb and amb.environment:
-		var e := amb.environment
-		estilo["neblina"] = e.fog_light_color
-		estilo["densidade"] = e.fog_density
-		estilo["ambiente"] = e.ambient_light_energy
-		var ceu := e.sky.sky_material as ProceduralSkyMaterial if e.sky else null
-		if ceu:
-			estilo["topo"] = ceu.sky_top_color
-			estilo["horizonte"] = ceu.sky_horizon_color
-	if sol:
-		estilo["sol"] = sol.light_color
-		estilo["energia"] = sol.light_energy
-	if not estilo.is_empty():
-		clima.definir_estilo(estilo)
-	if amb:
-		a.remove_child(amb)
-		amb.queue_free()
-	if sol:
-		a.remove_child(sol)
-		sol.queue_free()
 
 
 func _empurrar_para_tras() -> void:
@@ -216,7 +210,9 @@ func _ao_morrer() -> void:
 	ir_para("refugio_do_pinhal", "Principal")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if mundo and not _trocando:
+		_acompanhar_lugar(delta)
 	hud.definir_relogio("%s   %s" % [clima.hora_texto(), Clima.NOMES[clima.tempo]])
 	if area == null or _trocando:
 		return
@@ -239,10 +235,30 @@ func _process(_delta: float) -> void:
 	hud.dica("E   Montar %s" % montar.nome if montar else "")
 
 
+## Em que região, povoado ou estrada o Torin está; muda o nome na tela, a região atual e o ar (névoa e cor do céu).
+func _acompanhar_lugar(delta: float) -> void:
+	var id := mundo.regiao_em(jogador.global_position)
+	if id != "" and id != area_nome:
+		area = mundo.regioes[id]
+		area_nome = id
+		hud.esconder_chefe()
+	_t_lugar -= delta
+	if _t_lugar > 0.0:
+		return
+	_t_lugar = 0.5
+	var lugar := mundo.nome_do_lugar(jogador.global_position)
+	if lugar != _lugar:
+		_lugar = lugar
+		hud.mostrar_area(lugar)
+	var estilo := mundo.estilo_em(jogador.global_position)
+	if not estilo.is_empty():
+		clima.definir_estilo(estilo)
+
+
 func _npc_mais_perto() -> Npc:
 	var melhor: Npc = null
 	var dmin := 3.2
-	for n in area.npcs:
+	for n: Npc in get_tree().get_nodes_in_group("npcs"):   # todos os NPCs do mundo, não só os da região atual
 		var d := n.global_position.distance_to(jogador.global_position)
 		if d < dmin:
 			dmin = d

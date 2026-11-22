@@ -44,7 +44,7 @@ func _ready() -> void:
 	tam = 300.0
 	_rng.seed = 97
 	_ambiente()
-	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.28, 0.28), Color(0.25, 0.23, 0.23), 260.0)
+	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.28, 0.28), Color(0.25, 0.23, 0.23), 260.0)
 	_horizonte(Color(0.38, 0.36, 0.4), 140.0, true)
 	_plataforma()
 	_muralhas()
@@ -314,10 +314,11 @@ func _process(delta: float) -> void:
 			_t_brasas = 10.0
 			_brasas_corrompidas(jog)
 	if solon and is_instance_valid(solon) and solon.estado != Inimigo.Estado.MORTO:
-		var rel := Vector2(solon.global_position.x - TRONO.x, solon.global_position.z - (TRONO.y + 30.0))
+		var loc := to_local(solon.global_position)   # TRONO está nas coordenadas da área
+		var rel := Vector2(loc.x - TRONO.x, loc.z - (TRONO.y + 30.0))
 		if rel.length() > 36.0:   # o salão é a arena
 			rel = rel.normalized() * 36.0
-			solon.global_position = Vector3(TRONO.x + rel.x, solon.global_position.y, TRONO.y + 30.0 + rel.y)
+			solon.global_position = to_global(Vector3(TRONO.x + rel.x, loc.y, TRONO.y + 30.0 + rel.y))
 
 
 func _comecar_duelo() -> void:
@@ -351,7 +352,8 @@ func _brasas_corrompidas(jog: Jogador) -> void:
 		f.dano = 6
 		f.raio_dano = 1.5
 		var a := _rng.randf() * TAU
-		var p := Vector2(jog.global_position.x, jog.global_position.z) + Vector2(cos(a), sin(a)) * _rng.randf_range(2.0, 5.0)
+		var lj := to_local(jog.global_position)
+		var p := Vector2(lj.x, lj.z) + Vector2(cos(a), sin(a)) * _rng.randf_range(2.0, 5.0)
 		f.position = Vector3(p.x, _y(p), p.y)
 		add_child(f)
 		get_tree().create_timer(5.0).timeout.connect(func() -> void:

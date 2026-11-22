@@ -25,7 +25,7 @@ func _ready() -> void:
 	tam = 300.0
 	_rng.seed = 89
 	_ambiente()
-	_montar_terreno(53, 0.0, [], PackedVector2Array([Vector2(0, 150), Vector2(0, -85)]), Color(0.42, 0.38, 0.32), Color(0.34, 0.3, 0.26), 260.0)
+	_montar_terreno(53, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -85)]), Color(0.42, 0.38, 0.32), Color(0.34, 0.3, 0.26), 260.0)
 	_horizonte(Color(0.42, 0.34, 0.26), 110.0)
 	_muralhas()
 	_fila_de_carrocas()

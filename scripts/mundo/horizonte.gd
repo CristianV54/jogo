@@ -5,6 +5,8 @@ extends RefCounted
 
 
 static func montar(pai: Node3D, tam: float, cor_chao: Color, cor_monte: Color, altura: float, neve := false, semente := 1, y_chao := -0.2) -> void:
+	if Mundo.ativo:
+		return   # no mundo contínuo as montanhas são do mundo inteiro (ver Mundo._horizonte)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = semente
 	var chao := MeshInstance3D.new()

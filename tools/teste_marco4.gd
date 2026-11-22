@@ -52,7 +52,7 @@ func falar_com(nome: String) -> void:
 
 
 func interagiveis(tipo: Variant) -> Array:
-	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo))
+	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo) and jogo.area.is_ancestor_of(x))
 
 
 func _rodar() -> void:
@@ -72,16 +72,16 @@ func _rodar() -> void:
 	var jaulas := interagiveis(JaulaDeFilhote)
 	var raizes := interagiveis(RaizMedicinal)
 	var guardas := a.find_children("*", "Inimigo", false, false).filter(func(x): return x.especie == "guarda_mina")
-	marcar("3 jaulas, 8 raízes, 7 guardas, 3 âncoras, 3 vagonetes, 4 corvos", jaulas.size() == 3 and raizes.size() == 8 and guardas.size() == 7 and a.obelisco.ancoras.size() == 3 and interagiveis(CarrinhoDeMinerio).size() == 3 and get_nodes_in_group("corvos").size() == 4,
-		"%d/%d/%d/%d/%d/%d" % [jaulas.size(), raizes.size(), guardas.size(), a.obelisco.ancoras.size(), interagiveis(CarrinhoDeMinerio).size(), get_nodes_in_group("corvos").size()])
+	marcar("3 jaulas, 8 raízes, 7 guardas, 3 âncoras, 3 vagonetes, 4 corvos", jaulas.size() == 3 and raizes.size() == 8 and guardas.size() == 7 and a.obelisco.ancoras.size() == 3 and interagiveis(CarrinhoDeMinerio).size() == 3 and get_nodes_in_group("corvos").filter(func(c): return a.is_ancestor_of(c)).size() == 4,
+		"%d/%d/%d/%d/%d/%d" % [jaulas.size(), raizes.size(), guardas.size(), a.obelisco.ancoras.size(), interagiveis(CarrinhoDeMinerio).size(), get_nodes_in_group("corvos").filter(func(c): return a.is_ancestor_of(c)).size()])
 	marcar("Fauna: lobos, javalis, urso, cervos e coelhos", a.find_children("*", "Inimigo", false, false).filter(func(x): return x.especie in ["lobo", "javali", "urso"]).size() == 6 and a._fauna.size() == 10, str(a._fauna.size()))
 
 	print("== C2-M1 ==")
 	await falar_com("Elda")
 	marcar("Elda passa a C2-M1 (Caçada e Rastreamento)", m.ativas == ["C2-M1"])
-	jog.global_position = Vector3(a.TOCA.x, a.altura_em(a.TOCA.x, a.TOCA.y) + 1.0, a.TOCA.y + 12.0)
+	jog.global_position = a.to_global(Vector3(a.TOCA.x, a.altura_em(a.TOCA.x, a.TOCA.y) + 1.0, a.TOCA.y + 12.0))
 	await esperar(0.5)
-	jog.global_position = Vector3(a.TOCA.x, a.altura_em(a.TOCA.x, a.TOCA.y) + 1.0, a.TOCA.y)
+	jog.global_position = a.to_global(Vector3(a.TOCA.x, a.altura_em(a.TOCA.x, a.TOCA.y) + 1.0, a.TOCA.y))
 	await esperar(0.7)
 	marcar("Seguiu as pegadas de lobo até a toca", m.feito("C2-M1", "pegadas") == 1)
 	for i in 4:

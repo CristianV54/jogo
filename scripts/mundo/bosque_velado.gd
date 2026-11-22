@@ -94,13 +94,14 @@ func _terreno() -> void:
 		Vector3(ACAMPAMENTO.x, ACAMPAMENTO.y, 18.0), Vector3(VALE.x, VALE.y, 46.0), Vector3(ENCOSTA.x, ENCOSTA.y, 26.0),
 		Vector3(0.0, -62.0, 14.0), Vector3(0.0, -80.0, 14.0), Vector3(PRACA.x, PRACA.y, 34.0), Vector3(TOCA.x, TOCA.y, 9.0),
 	]
-	terreno.caminhos = [PackedVector2Array([Vector2(0, 150), Vector2(0, 105), Vector2(2, 60), Vector2(0, 20), Vector2(0, -20), Vector2(0, -60), Vector2(0, -100)])]
+	terreno.caminhos = [PackedVector2Array([Vector2(0, 165), Vector2(0, 150), Vector2(0, 105), Vector2(2, 60), Vector2(0, 20), Vector2(0, -20), Vector2(0, -60), Vector2(0, -100)])]
 	# Riacho da Névoa: meandro de ponta a ponta do bosque, cruzando a trilha em (1, 40)
 	var ctrl: Array = []
 	for x in range(-156, 157, 12):
 		ctrl.append(Vector2(float(x), VALE.y + 5.0 * sin(x * 0.12)))
 	terreno.rios = [{"pontos": Terreno.curva(ctrl, 3.0), "largura": 3.8, "margem": 6.0, "fundo": 0.7, "agua": true}]
 	add_child(terreno)
+	Mundo.preparar_terreno(terreno, self)
 	terreno.gerar()
 
 
@@ -144,13 +145,7 @@ func _floresta() -> void:
 	inst.multimesh = mm
 	inst.material_override = FabricaNatureza.material()
 	add_child(inst)
-	for lado in [[Vector3(0, 8, -158), Vector3(TAM, 16, 2)], [Vector3(0, 8, 158), Vector3(TAM, 16, 2)], [Vector3(-158, 8, 0), Vector3(2, 16, TAM)], [Vector3(158, 8, 0), Vector3(2, 16, TAM)]]:
-		var cs := CollisionShape3D.new()   # paredes invisíveis na borda do mapa
-		var caixa := BoxShape3D.new()
-		caixa.size = lado[1]
-		cs.shape = caixa
-		cs.position = lado[0]
-		_solidos.add_child(cs)
+	Mundo.paredes_de_borda(self, TAM, _solidos)
 
 
 # ---------------------------------------------------------------- ajudantes

@@ -52,7 +52,7 @@ func falar_com(nome: String) -> void:
 
 
 func interagiveis(tipo: Variant) -> Array:
-	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo))
+	return get_nodes_in_group("interagiveis").filter(func(x): return is_instance_of(x, tipo) and jogo.area.is_ancestor_of(x))
 
 
 func matar(lista: Array) -> void:
@@ -130,7 +130,7 @@ func _rodar() -> void:
 	var guardas_chave := guardas.filter(func(x): return x.drops.has("chave"))
 	var guardas_comuns := guardas.filter(func(x): return not x.drops.has("chave"))
 	marcar("3 guardas carregam chave", guardas_chave.size() == 3)
-	jog.global_position = Vector3(0, a.altura_em(0, 100) + 0.6, 100)
+	jog.global_position = a.to_global(Vector3(0, a.altura_em(0, 100) + 0.6, 100))
 	var vida_antes := jog.vida
 	await esperar(3.5)
 	marcar("Arqueiro atirou no jogador", jog.vida < vida_antes, "%d -> %d" % [vida_antes, jog.vida])

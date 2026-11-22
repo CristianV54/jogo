@@ -144,7 +144,7 @@ func _physics_process(delta: float) -> void:
 ## cercas, troncos, portas fechadas, terreno). `distancia` 0 = só a folga do corpo.
 func _caminho_livre(direcao: Vector3, distancia := 0.0) -> bool:
 	var alcance := maxf(distancia, 0.0) + maxf(raio_colisao, 0.5) + 0.6
-	var chao: float = altura_em.call(global_position.x, global_position.z) if altura_em.is_valid() else global_position.y
+	var chao: float = altura_em.call(position.x, position.z) if altura_em.is_valid() else global_position.y   # altura_em usa as coordenadas do pai (a área)
 	var lateral := direcao.cross(Vector3.UP).normalized() * 0.4
 	var espaco := get_world_3d().direct_space_state
 	for desvio in [-1.0, 0.0, 1.0]:

@@ -24,6 +24,8 @@ func _ready() -> void:
 
 
 func _ao_entrar(corpo: Node3D) -> void:
+	if Mundo.ativo:
+		return   # no mundo contínuo não há portais: as regiões se ligam por estradas
 	if corpo is Jogador and not _usado:
 		_usado = true   # uma vez só por vez que a área é carregada
 		usado.emit(destino, spawn)

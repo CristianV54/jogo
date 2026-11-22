@@ -34,19 +34,13 @@ func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], cam
 	terreno.caminhos = [caminho]
 	terreno.rios = rios
 	add_child(terreno)
+	Mundo.preparar_terreno(terreno, self)
 	terreno.gerar()
 	_solidos = StaticBody3D.new()
 	_solidos.name = "SolidosDaArea"
 	add_child(_solidos)
 	VilaRefugio.preparar(self, altura_em, _solidos)
-	var meio := tam / 2.0
-	for lado in [[Vector3(0, 8, -meio), Vector3(tam, 16, 2)], [Vector3(0, 8, meio), Vector3(tam, 16, 2)], [Vector3(-meio, 8, 0), Vector3(2, 16, tam)], [Vector3(meio, 8, 0), Vector3(2, 16, tam)]]:
-		var cs := CollisionShape3D.new()   # paredes invisíveis na borda do mapa
-		var caixa := BoxShape3D.new()
-		caixa.size = lado[1]
-		cs.shape = caixa
-		cs.position = lado[0]
-		_solidos.add_child(cs)
+	Mundo.paredes_de_borda(self, tam, _solidos)   # paredes invisíveis na borda (com vãos onde as estradas entram)
 
 
 ## Chão distante e montanhas em volta (ver Horizonte).
