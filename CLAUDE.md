@@ -95,4 +95,5 @@ ReinoDeCinzas/
 - Lobo e javali têm silhueta própria (versão 1, ver `assets/ASSETS.md`).
 - Interiores com móveis reais (Fantasy Props MegaKit, CC0), dano em animais e NPCs, montaria no cavalo e no Fagulha (E para montar; no dragão, Espaço sobe e C desce). Testes: `tools/teste_montaria_dano.gd` e `tools/teste_moveis.gd`.
 - Drops (carne, couro, lã, presa) com inventário, pelagens variadas, fogo que queima, portas que abrem e fecham, chão com capim e flores, cavalo que pula e animação de montar (ver `assets/ASSETS.md`). Teste: `tools/teste_montaria_dano.gd`.
-- Próximo: usar o inventário (cozinhar, forjar, vender), corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.
+- Inventário do jogador (tecla I): grade com ícones, descrição e uso (carne cura 20). Teste: `tools/teste_inventario.gd`.
+- Próximo: dar uso a couro/lã/presa (forja da Brenn, vender), salvar o inventário, corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.

@@ -8,6 +8,7 @@ extends CharacterBody3D
 signal vida_mudou(atual: int, maximo: int)
 signal morreu
 signal item_coletado(item: String, quantidade: int, inventario: Dictionary)
+signal inventario_mudou(inventario: Dictionary)
 
 @export var camera: CameraTerceiraPessoa
 @export var velocidade_andando := 4.0
@@ -230,6 +231,21 @@ func receber_dano(quantidade: int, _de: Node3D = null) -> void:
 func coletar(item: String, quantidade: int) -> void:
 	inventario[item] = int(inventario.get(item, 0)) + quantidade
 	item_coletado.emit(item, quantidade, inventario)
+	inventario_mudou.emit(inventario)
+
+
+## Usa um item comestível: recupera vida e gasta uma unidade. Devolve false se não deu (sem o item, vida cheia, não comestível).
+func usar_item(item: String) -> bool:
+	var cura := int(Itens.DADOS.get(item, {}).get("cura", 0))
+	if morto or cura <= 0 or int(inventario.get(item, 0)) <= 0 or vida >= vida_max:
+		return false
+	vida = mini(vida_max, vida + cura)
+	vida_mudou.emit(vida, vida_max)
+	inventario[item] = int(inventario[item]) - 1
+	if int(inventario[item]) <= 0:
+		inventario.erase(item)
+	inventario_mudou.emit(inventario)
+	return true
 
 
 func reviver() -> void:

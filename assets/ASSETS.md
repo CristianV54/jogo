@@ -120,3 +120,10 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 
 - **Animais e obstáculos (21/11/2026):** os animais de vila olham à frente com três raios de física (camada 1: paredes, cercas, troncos, portas fechadas, terreno) e param ou desviam antes de bater; ao fugir de um golpe, desviam de lado. Teste: `tools/teste_animais_obstaculos.gd` (960 amostras, zero atravessamentos; o código antigo, sem raios, teve 112 nas mesmas amostras). Eles ainda não evitam uns aos outros nem o chão muito inclinado.
 - **Desmontar do Fagulha:** vale perto do chão (raio de 1,5 m), não só com `is_on_floor`, para não ficar preso ao pousar numa ladeira.
+
+## Inventário do jogador (21/11/2026)
+
+- **Como usar:** tecla **I** abre e fecha (Esc também fecha). Com ele aberto o jogador fica parado, o mouse aparece, e não há mensagem por cima da grade (os avisos vão para o rodapé do painel). Clique num espaço para ver nome, quantidade e descrição; **Usar** (botão ou Enter) come a carne: +20 de vida, gasta uma unidade, não passa de 100 e não gasta com a vida cheia.
+- **Código:** `scripts/jogo/itens.gd` (catálogo: nome, descrição, modelo, cura; ordem de exibição), `scripts/interface/painel_inventario.gd` (grade 6x4, ícones renderizados do modelo 3D em SubViewport), `jogador.coletar/usar_item` e os sinais `item_coletado` e `inventario_mudou`, `hud.gd` (lista rápida no canto direito e painel), `jogo.gd` (tecla I, travar o jogador).
+- **Limites:** o inventário só guarda contagem (sem peso, capacidade, equipar, largar ou vender) e **não é salvo** ao fechar o jogo; couro, lã e presa ainda não têm uso. Para adicionar um item novo: uma entrada em `Itens.DADOS`/`ORDEM` e o modelo.
+- **Teste:** `tools/teste_inventario.gd` (21 verificações com teclas de verdade e cliques) e capturas `inv_*.png`.

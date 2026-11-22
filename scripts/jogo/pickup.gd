@@ -2,13 +2,6 @@ class_name Pickup
 extends Node3D
 ## Item largado no chão (carne, couro, lã, presa): gira e flutua, e o jogador o recolhe ao chegar perto.
 
-const MODELOS := {
-	"carne": "res://assets/models/itens/carne/carne.glb",
-	"couro": "res://assets/models/itens/couro/couro.glb",
-	"la": "res://assets/models/itens/la/la.glb",
-	"presa": "res://assets/models/itens/presa/presa.glb",
-}
-const NOMES := {"carne": "Carne", "couro": "Couro", "la": "Lã", "presa": "Presa"}
 const RAIO_COLETA := 1.8
 
 @export var item := "carne"
@@ -34,7 +27,7 @@ static func largar(pai: Node3D, pos: Vector3, tabela: Dictionary) -> void:
 
 
 func _ready() -> void:
-	_visual = (load(MODELOS[item]) as PackedScene).instantiate()
+	_visual = (load(Itens.DADOS[item]["modelo"]) as PackedScene).instantiate()
 	_visual.scale = Vector3.ONE * 1.8
 	add_child(_visual)
 	_t = randf() * TAU

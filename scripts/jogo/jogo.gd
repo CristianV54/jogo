@@ -41,6 +41,9 @@ func _ready() -> void:
 	jogador.vida_mudou.connect(hud.definir_vida)
 	jogador.morreu.connect(_ao_morrer)
 	jogador.item_coletado.connect(hud.item_coletado)
+	jogador.inventario_mudou.connect(hud.inventario_mudou)
+	hud.usar_item.connect(_ao_usar_item)
+	hud.fechar_inventario_pedido.connect(_alternar_inventario)
 	hud.definir_vida(jogador.vida, jogador.vida_max)
 	ir_para("refugio_do_pinhal", "Principal")
 
@@ -165,8 +168,33 @@ func _montaria_mais_perto() -> Montaria:
 
 
 func _unhandled_key_input(evento: InputEvent) -> void:
-	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_E:
-		interagir()
+	if evento is InputEventKey and evento.pressed and not evento.echo:
+		if evento.physical_keycode == KEY_I:
+			_alternar_inventario()
+		elif evento.physical_keycode == KEY_E and not hud.inventario_aberto:
+			interagir()
+
+
+## I abre/fecha o inventário: o jogador fica travado e o mouse volta a aparecer enquanto ele está aberto.
+func _alternar_inventario() -> void:
+	if hud.dialogo_aberto or jogador.morto:
+		return
+	if hud.inventario_aberto:
+		hud.fechar_inventario()
+		jogador.travado = false
+		if camera.capturar_mouse:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		hud.abrir_inventario()
+		jogador.travado = true
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _ao_usar_item(item: String) -> void:
+	if jogador.usar_item(item):
+		hud.mensagem("%s: +%d de vida" % [Itens.nome(item), int(Itens.DADOS[item]["cura"])], 1.5)
+	elif int(Itens.DADOS[item]["cura"]) > 0:
+		hud.mensagem("Vida cheia: não precisa comer agora.", 1.5)
 
 
 func interagir() -> void:

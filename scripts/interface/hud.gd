@@ -21,9 +21,14 @@ var _dialogo_nome: Label
 var _dialogo_texto: Label
 var _mensagem: Label
 var _inventario_label: Label
+var _painel: PainelInventario
+
+signal usar_item(item: String)
+signal fechar_inventario_pedido
 var _tween_area: Tween
 
 var dialogo_aberto := false
+var inventario_aberto := false
 
 
 func _ready() -> void:
@@ -81,8 +86,13 @@ func _ready() -> void:
 	_dialogo_texto.add_theme_font_size_override("font_size", 22)
 	_dialogo_caixa.add_child(_dialogo_texto)
 
-	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    E falar/montar    F Fagulha voar    Esc solta o mouse", Vector2(24, 690), 15)
+	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    I inventário    E falar/montar    F Fagulha voar    Esc solta o mouse", Vector2(24, 690), 15)
 	legenda.modulate.a = 0.85
+
+	_painel = PainelInventario.new()
+	_painel.usar_pedido.connect(func(item: String) -> void: usar_item.emit(item))
+	_painel.fechar_pedido.connect(func() -> void: fechar_inventario_pedido.emit())
+	_raiz.add_child(_painel)
 
 	_mensagem = _rotulo("", Vector2(80, 260), 40)
 	_mensagem.size = Vector2(1120, 160)
@@ -136,13 +146,33 @@ func mostrar_area(nome: String) -> void:
 	_tween_area.tween_property(_area_label, "modulate:a", 0.0, 1.2)
 
 
-## Atualiza a lista de itens do canto direito e avisa do que acabou de ser coletado.
-func item_coletado(item: String, quantidade: int, inventario: Dictionary) -> void:
+## Avisa do que acabou de ser coletado.
+func item_coletado(item: String, quantidade: int, _inventario: Dictionary) -> void:
+	mensagem("+%d %s" % [quantidade, Itens.nome(item)], 1.5)
+
+
+## Atualiza a lista do canto direito e o painel do inventário.
+func inventario_mudou(inventario: Dictionary) -> void:
 	var linhas: Array[String] = []
-	for id in inventario:
-		linhas.append("%s  x%d" % [Pickup.NOMES.get(id, id), inventario[id]])
+	for id in Itens.ORDEM:
+		if int(inventario.get(id, 0)) > 0:
+			linhas.append("%s  x%d" % [Itens.nome(id), inventario[id]])
 	_inventario_label.text = "\n".join(linhas)
-	mensagem("+%d %s" % [quantidade, Pickup.NOMES.get(item, item)], 1.5)
+	_painel.definir(inventario)
+
+
+func abrir_inventario() -> void:
+	inventario_aberto = true
+	_painel.visible = true
+	_mensagem.visible = false   # nada por cima da grade
+	_area_label.modulate.a = 0.0
+	_dica_label.visible = false
+
+
+func fechar_inventario() -> void:
+	inventario_aberto = false
+	_painel.visible = false
+	_dica_label.visible = true
 
 
 func dica(texto: String) -> void:
@@ -162,6 +192,9 @@ func fechar_dialogo() -> void:
 
 
 func mensagem(texto: String, segundos := 3.0) -> void:
+	if inventario_aberto:   # com o painel aberto, o aviso vai para o rodapé dele
+		_painel.aviso(texto, segundos)
+		return
 	_mensagem.text = texto
 	_mensagem.visible = true
 	if segundos > 0.0:
