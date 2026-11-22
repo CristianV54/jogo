@@ -1,0 +1,6 @@
+CASA CasaDoVane 4x6 | porta: fim local (1.0, -1.4) entrou=true | parede lateral: fim local x=4.5 barrou=true
+CASA Forja 3x3 | porta: fim local (0.0, -2.3) entrou=true | parede lateral: fim local x=3.5 barrou=true
+CASA Cabana1 3x3 | porta: fim local (0.0, -2.3) entrou=true | parede lateral: fim local x=3.5 barrou=true
+CASA Cabana2 2x3 | porta: fim local (1.0, -2.3) entrou=true | parede lateral: fim local x=2.5 barrou=true
+CASA Cabana3 3x3 | porta: fim local (0.0, -2.3) entrou=true | parede lateral: fim local x=3.5 barrou=true
+RESULTADO_CASAS OK

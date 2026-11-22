@@ -16,6 +16,27 @@ func _init() -> void:
 		var l := partes[2].split(",")
 		vistas.append([partes[0], Vector3(float(p[0]), float(p[1]), float(p[2])), Vector3(float(l[0]), float(l[1]), float(l[2]))])
 	DirAccess.make_dir_recursive_absolute(PASTA)
+	if args.size() > 3 and args[3] == "comluz":   # cenas de teste sem céu nem sol próprios
+		var env := WorldEnvironment.new()
+		var e := Environment.new()
+		e.background_mode = Environment.BG_COLOR
+		e.background_color = Color(0.7, 0.75, 0.8)
+		e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		e.ambient_light_color = Color(0.55, 0.55, 0.58)
+		env.environment = e
+		root.add_child(env)
+		var luz := DirectionalLight3D.new()
+		luz.rotation_degrees = Vector3(-45, -30, 0)
+		luz.shadow_enabled = true
+		root.add_child(luz)
+		var chao := MeshInstance3D.new()
+		var plano := PlaneMesh.new()
+		plano.size = Vector2(60, 60)
+		chao.mesh = plano
+		var mt := StandardMaterial3D.new()
+		mt.albedo_color = Color(0.4, 0.5, 0.35)
+		chao.material_override = mt
+		root.add_child(chao)
 	var area: Node = load(args[0]).instantiate()
 	root.add_child(area)
 	cam = Camera3D.new()

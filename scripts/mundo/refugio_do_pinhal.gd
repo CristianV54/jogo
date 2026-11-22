@@ -150,8 +150,8 @@ func _floresta() -> void:
 	_multimesh(FabricaNatureza.arbusto(), arbustos, "Arbustos")
 
 
-func _casa(nome_casa: String, posicao: Vector3, colunas: int, linhas: int, estilo: Dictionary) -> Node3D:
-	var casa := ConstrutorCasa.montar(colunas, linhas, estilo)
+func _casa(nome_casa: String, posicao: Vector3, colunas: int, linhas: int, estilo: Dictionary, interior := "moradia") -> Node3D:
+	var casa := ConstrutorCasa.montar(colunas, linhas, estilo, true, interior)
 	casa.name = nome_casa
 	casa.position = posicao
 	casa.rotation.y = atan2(-posicao.x, -posicao.z)   # a porta (+Z da casa) olha para o centro da clareira
@@ -161,7 +161,7 @@ func _casa(nome_casa: String, posicao: Vector3, colunas: int, linhas: int, estil
 
 func _casas() -> void:
 	_casa("CasaDoVane", Vector3(0, 0, -27), 4, 6, ESTILO_MADEIRA)
-	_casa("Forja", Vector3(-27, 0, -4), 3, 3, ESTILO_PEDRA)
+	_casa("Forja", Vector3(-27, 0, -4), 3, 3, ESTILO_PEDRA, "forja")
 	_casa("Cabana1", Vector3(27, 0, -12), 3, 3, ESTILO_MADEIRA)
 	_casa("Cabana2", Vector3(21, 0, 24), 2, 3, ESTILO_MADEIRA)
 	_casa("Cabana3", Vector3(-19, 0, 25), 3, 3, ESTILO_MADEIRA)

@@ -48,7 +48,8 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Origem e licença:** *Medieval Village MegaKit (Standard)*, Quaternius, **CC0** (`assets/models/cenario/vila_mv/LICENSE_CC0_Quaternius.txt`). 176 peças modulares em glTF: paredes, cantos, pisos, portas, janelas, telhados, escadas, cercas, caixas, carroça, chaminé.
 - **Ajuste feito:** texturas reduzidas de 4K para 1024 (de 153 MB para 22 MB). Medidas conferidas: parede de 2 m x 3,12 m, piso de 2 x 2 m, telhado `Roof_RoundTiles_LxP` em metros.
 - **Uso:** `scripts/mundo/construtor_casa.gd` monta casas por módulos (porta no meio da fachada +Z, janelas intercaladas, cantos, telhado automático, colisão em bloco).
-- **Pendência:** interiores não são visitáveis (a casa é um bloco sólido); só os estilos madeira e pedra foram usados.
+- **Casas (revisão 21/11/2026):** frontões fechados (`Roof_Front_BrickN`), janelas com esquadria e venezianas abertas, porta com batente e folha aberta, colisão só nas paredes com vão de 1,7 m na porta (dá para entrar), luz e móveis por dentro (moradia: cama, mesa, banco, caixas; forja: fornalha com brasa, bigorna, bancada). Teste de física: `tools/teste_casas.gd`.
+- **Pendência:** os móveis são caixas simples (sem modelo); só os estilos madeira e pedra foram usados; as janelas não abrem; sem escadas nem segundo andar.
 
 ## Natureza procedural (Fase B)
 

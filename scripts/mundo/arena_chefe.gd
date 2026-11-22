@@ -268,7 +268,7 @@ func _forte() -> void:
 	_muralha(24.0, 1, 3)
 	for sx in [-1, 1]:
 		for sz in [-1, 1]:
-			var torre := ConstrutorCasa.montar(2, 2, PEDRA)
+			var torre := ConstrutorCasa.montar(2, 2, PEDRA, true, "vazio")
 			torre.position = Vector3(sx * 24.0, 0, sz * 24.0)
 			torre.rotation.y = atan2(-torre.position.x, -torre.position.z)
 			add_child(torre)
@@ -287,7 +287,7 @@ func _castelo() -> void:
 	piso.position.y = 0.04
 	add_child(piso)
 	_muralha(32.0, 2, 4)
-	var salao := ConstrutorCasa.montar(8, 4, PEDRA)
+	var salao := ConstrutorCasa.montar(4, 6, PEDRA, true, "vazio")   # 8 x 12 m (o kit não tem telhado de 16 m)
 	salao.position = Vector3(0, 0, -50)
 	salao.name = "SalaoDoTrono"
 	add_child(salao)
