@@ -75,7 +75,7 @@ func ir_para(destino: String, spawn: String) -> void:
 	jogador.velocity = Vector3.ZERO
 	camera.yaw = jogador.rotation.y
 	fagulha.modo_voo = false
-	fagulha.global_position = pos + Vector3(3.0, 0.0, 3.0).rotated(Vector3.UP, jogador.rotation.y)
+	fagulha.global_position = pos + Vector3(9.0, 0.0, 9.0).rotated(Vector3.UP, jogador.rotation.y)
 	hud.mostrar_area(area.nome_area)
 	await get_tree().process_frame
 	_trocando = false

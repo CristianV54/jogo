@@ -4,11 +4,11 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 
 ## criaturas/fagulha/fagulha.glb
 
-- **O que é:** Fagulha, dragão jovem aliado do Torin. Hoje é um corpo de dragão adulto, reduzido (envergadura 3,05 m).
+- **O que é:** Fagulha, dragão jovem aliado do Torin. Corpo de dragão adulto em escala grande (21/11/2026, a pedido: dragão é grande): envergadura 10,7 m, altura 2,1 m, comprimento 7,6 m (Torin tem 1,8 m).
 - **Origem:** arquivo `Dragon_Baked_Actions.blend`, vindo de `~/Downloads` (usuário). Autor e página de origem **não conhecidos**. O arquivo original não está no repositório (só o `.glb` derivado).
 - **Licença:** "gratuita", segundo o usuário (informado em 21/11/2026). **Termos exatos não confirmados** (uso comercial, crédito ao autor, redistribuição). Pendência: confirmar antes de publicar o jogo.
 - **Como foi gerado:** `tools/fagulha/preparar_fagulha.py` abre o `.blend` (só leitura), pinta a cor por região em cor de vértice (o original não tinha nenhuma textura ligada), renomeia as ações com sufixo `-loop` e exporta o `.glb` sem aplicar escala.
-- **Importação (Godot 4.7):** `fagulha.glb.import` com `nodes/root_scale=0.02`; `scripts/importacao/post_importar_fagulha.gd` liga a cor do vértice nos materiais e recorta/fecha os ciclos das animações.
+- **Importação (Godot 4.7):** `fagulha.glb.import` com `nodes/root_scale=0.07`; `scripts/importacao/post_importar_fagulha.gd` liga a cor do vértice nos materiais e recorta/fecha os ciclos das animações.
 - **Malha:** 1 malha, 37.985 triângulos, 3 materiais (corpo, membrana, olhos).
 - **Esqueleto:** 136 ossos (5 raízes: `pelvic_2` e 4 de pés/mãos).
 - **Animações (todas em loop):** `Walk` 3,29 s, `Run` 1,63 s, `Idle` 22,75 s, `Fly` 2,5 s (recorte dos quadros 52 a 112 do clipe original, que é decolar/voar/pousar).
@@ -72,7 +72,7 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 
 ## criaturas/ (Filhote de Asa, Ignis-Maw, Javali, Lobo)
 
-- **Filhote de Asa e Ignis-Maw:** o mesmo dragão rigado do Fagulha (origem e licença ainda por confirmar, ver Fagulha) com outras paletas de cor de vértice (`PALETA=verde` e `PALETA=corrompido` em `tools/fagulha/preparar_fagulha.py`). Têm Idle, Walk, Run e Fly de verdade; não têm animação de ataque nem de morte (o ataque é uma investida, a morte é tombar e afundar).
+- **Filhote de Asa e Ignis-Maw:** o mesmo dragão rigado do Fagulha (origem e licença ainda por confirmar, ver Fagulha) com outras paletas de cor de vértice (`PALETA=verde` e `PALETA=corrompido` em `tools/fagulha/preparar_fagulha.py`). Escalas medidas: Filhote de Asa 1,8 m de envergadura; Ignis-Maw 24,4 m de envergadura, 4,9 m de altura (escala_visual 8). Têm Idle, Walk, Run e Fly de verdade; não têm animação de ataque nem de morte (o ataque é uma investida, a morte é tombar e afundar).
 - **PLACEHOLDER_ Javali Couraçado e PLACEHOLDER_ Lobo-cinza:** são o porco e o cachorro do pacote *Farm Animals* (Quaternius, CC0) tingidos de marrom e cinza. **Só têm Idle e Jump**: andam deslizando e atacam "pulando". Substituir por animais rigados de verdade (lobo e javali com andar, correr, atacar e morrer).
 
 ## Jogo (Fases B a D): o que existe e o que é provisório

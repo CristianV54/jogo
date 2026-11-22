@@ -4,13 +4,13 @@ extends Node3D
 ## Tecla F alterna o voo (sobe e paira em cima do alvo). O modelo olha para +Z (medido com a cabeça e a pélvis).
 
 @export var alvo: Node3D
-@export var distancia_parar := 3.0
-@export var distancia_correr := 9.0
-@export var velocidade_andando := 3.5
-@export var velocidade_correndo := 7.5
-@export var velocidade_voo := 6.0
-@export var altura_voo := 2.5
-@export var velocidade_subida := 3.0
+@export var distancia_parar := 8.0
+@export var distancia_correr := 18.0
+@export var velocidade_andando := 5.0
+@export var velocidade_correndo := 10.0
+@export var velocidade_voo := 9.0
+@export var altura_voo := 8.0
+@export var velocidade_subida := 5.0
 @export var giro := 6.0
 
 var modo_voo := false
