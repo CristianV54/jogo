@@ -531,10 +531,10 @@ func _floresta() -> void:
 			(tiles[k] as Array).append(t)
 			arvores.adicionar(x, z, 0.45 * s)
 			mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
-	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)
+	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa em pergaminho: a mata esverdeia o papel
 	for gz in gh:
 		for gx in gw:
-			img.set_pixel(gx, gz, Color(0.2, 0.27, 0.14).lerp(Color(0.06, 0.2, 0.1), clampf(mata[gz * gw + gx] / 7.0, 0.0, 1.0)))
+			img.set_pixel(gx, gz, Color(0.85, 0.77, 0.58).lerp(Color(0.5, 0.58, 0.36), clampf(mata[gz * gw + gx] / 6.0, 0.0, 1.0)))
 	mapa_floresta = ImageTexture.create_from_image(img)
 	var malha := FabricaNatureza.pinheiro()
 	var mat := FabricaNatureza.material()
