@@ -5,9 +5,10 @@ extends RefCounted
 ## "visitar" (alvo = id de uma ZonaDeEvento) e "entregar" (alvo = NPC; "item" = o que gastar do inventário).
 ## Nenhuma missão conclui por proximidade: só por contagem real de eventos.
 
-const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal"}
+const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes"}
 ## Ordem em que o quadro de avisos oferece as missões do capítulo.
 const ORDEM_CAP1 := ["C1-M1", "C1-M2", "C1-M3", "C1-M4"]
+## No capítulo II as missões são oferecidas pelos NPCs (Elda e Sava) ou começam em cadeia.
 
 const MISSOES := {
 	"C1-M1": {
@@ -69,5 +70,61 @@ const MISSOES := {
 		"dialogos": {
 			"tessa": ["Vi rastros de botas imperiais na trilha escondida do pinhal, ao norte. Eles prendem algo lá. Vá ver, mas leve carne, pelo que ouvi é um dragão.", "Batedores do Império costumam andar em três. Cuidado."],
 		},
+	},
+	"C2-M1": {
+		"capitulo": 2,
+		"titulo": "Caçada e Rastreamento",
+		"requer": "C1-M4",
+		"objetivos": [
+			{"id": "pegadas", "texto": "Seguir as pegadas de lobo até a toca (não as botas)", "tipo": "visitar", "alvo": "toca_do_lobo", "qtd": 1},
+			{"id": "couros", "texto": "Coletar couros ou presas da caça", "tipo": "coletar", "alvo": ["couro", "presa"], "qtd": 4},
+			{"id": "raizes", "texto": "Colher raízes medicinais no Riacho da Névoa", "tipo": "coletar", "alvo": "raiz", "qtd": 4},
+		],
+		"recompensa": {"itens": {"carne": 2}, "texto": "Elda confia em você"},
+		"encerramento": "Elda: \"Você lê rastro melhor que muito veterano. Fale com a Sava, na mina: ela cuida dos filhotes de dragão que o Império prendeu.\"",
+		"dialogos": {
+			"elda": ["Rastro bom a gente segue com calma. Há dois conjuntos de pegadas saindo do acampamento: as de lobo levam à toca, as de bota levam a um beco sem saída.", "Traga quatro couros ou presas da caça e quatro raízes do riacho. Evite o urso da margem norte."],
+		},
+	},
+	"C2-M2": {
+		"capitulo": 2,
+		"titulo": "Asas nas Gaiolas",
+		"requer": "C2-M1",
+		"objetivos": [
+			{"id": "chaves", "texto": "Tirar as chaves dos guardas da mina", "tipo": "coletar", "alvo": "chave", "qtd": 3},
+			{"id": "jaulas", "texto": "Libertar os Filhotes de Asa nas jaulas", "tipo": "interagir", "alvo": "jaula", "qtd": 3},
+		],
+		"recompensa": {"itens": {"maca": 2}, "texto": "Os filhotes voltam ao céu"},
+		"encerramento": "Sava: \"Olha eles voando! Procure o Borin, o mineiro fugido, perto do riacho. Ele sabe o que prende os dragões.\"",
+		"dialogos": {
+			"sava": ["Eles não comem, não dormem: o Ferro Negro os deixa tontos. Há três jaulas na encosta, na triagem e no depósito.", "Cada jaula tem um guarda com a chave. Tire a chave dele e abra."],
+		},
+	},
+	"C2-M3": {
+		"capitulo": 2,
+		"titulo": "Queda do Primeiro Obelisco",
+		"requer": "C2-M2",
+		"auto_apos": "C2-M2",
+		"objetivos": [
+			{"id": "borin", "texto": "Ouvir o mineiro Borin, perto do riacho", "tipo": "falar", "alvo": "borin", "qtd": 1},
+			{"id": "ancoras", "texto": "Destruir as âncoras do obelisco", "tipo": "destruir", "alvo": "ancora", "qtd": 3},
+			{"id": "minerio", "texto": "Coletar o Ferro Negro bruto que sobra", "tipo": "coletar", "alvo": "minerio_bruto", "qtd": 3},
+		],
+		"recompensa": {"itens": {"maca": 2}, "texto": "A névoa do bosque recua"},
+		"encerramento": "O obelisco desaba. A névoa recua, os animais correm para longe e os filhotes que restavam se vão. Mas o capataz da mina ouviu o estrondo.",
+		"dialogos": {
+			"borin": ["Eu cavei sete meses naquele buraco. O obelisco no meio da mina é o que deixa os dragões loucos: ele os prende por correntes invisíveis.", "Não adianta bater no corpo dele. Quebre as três âncoras ao redor, e a pedra cai sozinha. Os guardas vão tentar impedir."],
+		},
+	},
+	"C2-M4": {
+		"capitulo": 2,
+		"titulo": "O Capataz da Mina",
+		"requer": "C2-M3",
+		"auto_apos": "C2-M3",
+		"objetivos": [
+			{"id": "gorath", "texto": "Derrotar o capataz Gorath na praça da mina", "tipo": "derrotar", "alvo": "gorath", "qtd": 1},
+		],
+		"recompensa": {"itens": {"couro": 2}, "texto": "A estrada para Ferrogris se abre"},
+		"encerramento": "Gorath tomba. A estrada leste para a Fortaleza de Ferrogris está livre.",
 	},
 }

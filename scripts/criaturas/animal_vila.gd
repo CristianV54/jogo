@@ -14,6 +14,10 @@ extends Node3D
 @export var vida_max := 20
 @export var raio_colisao := 0.6       # alcance do golpe do jogador contra este animal
 @export var montavel := false
+@export var escala := 1.0          # tamanho do visual (cervo = cavalo menor, coelho = cão pequeno)
+@export var fugitivo := false      # foge quando o jogador chega perto (cervo, coelho)
+@export var raio_fuga := 9.0
+@export var acessorio := ""        # chifres, orelhas (ver Acessorios)
 @export var especie := ""           # chave de VariacaoDeCores
 @export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer
 
@@ -37,11 +41,14 @@ var _bicar := 1.5
 
 func _ready() -> void:
 	_visual = modelo.instantiate()
+	_visual.scale = Vector3.ONE * escala
 	add_child(_visual)
 	_anim = _visual.find_child("AnimationPlayer", true, false)
 	_cabeca = _visual.find_child("Cabeca", true, false) as Node3D
 	VariacaoDeCores.aplicar(_visual, especie)
-	corpo = Solidos.corpo_movel(self, Solidos.caixa_de(_visual, 0.8))
+	Acessorios.aplicar(_visual, acessorio)
+	var caixa := Solidos.caixa_de(_visual, 0.8)
+	corpo = Solidos.corpo_movel(self, AABB(caixa.position * escala, caixa.size * escala))
 	_casa = position
 	_espera = randf_range(0.5, 4.0)
 	vida = vida_max
@@ -65,6 +72,14 @@ func _physics_process(delta: float) -> void:
 	corpo.collision_layer = 0 if livre_de_corpo else Solidos.CAMADA_SERES
 	if livre_de_corpo:
 		return
+	if fugitivo and _fuga <= 0.0:
+		var j := get_tree().get_first_node_in_group("jogador") as Node3D
+		if j:
+			var d := global_position - j.global_position
+			d.y = 0.0
+			if d.length() < raio_fuga:
+				_dir_fuga = d.normalized()
+				_fuga = 2.5
 	if _fuga > 0.0:
 		_fuga -= delta
 		if not _caminho_livre(_dir_fuga):   # bateu numa parede/cerca: tenta desviar para um lado, senão para de fugir

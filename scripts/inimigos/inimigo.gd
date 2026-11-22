@@ -21,6 +21,7 @@ enum Estado { PARADO, PERSEGUINDO, ATACANDO, DANO, MORTO }
 @export var enfurece_em := 0.0          # fração da vida; 0 = nunca
 @export var cena_visual: PackedScene
 @export var escala_visual := 1.0
+@export var acessorio := ""        # ver Acessorios
 @export var especie := ""           # chave de VariacaoDeCores
 @export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer (só inimigos comuns)
 @export var raio_colisao := 0.5
@@ -50,6 +51,7 @@ func _ready() -> void:
 	visual.scale = Vector3.ONE * escala_visual
 	add_child(visual)
 	VariacaoDeCores.aplicar(visual, especie)
+	Acessorios.aplicar(visual, acessorio)
 	var cs := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
 	cap.radius = raio_colisao

@@ -162,7 +162,8 @@ func _process(_delta: float) -> void:
 		hud.dica("")
 		return
 	var perto := _npc_mais_perto()
-	if perto:
+	var objeto := _interagivel_mais_perto()
+	if perto and not _objeto_mais_perto_que(objeto, perto):
 		hud.dica("E   Falar com %s" % perto.nome)
 		return
 	if jogador.montaria:
@@ -195,6 +196,13 @@ func liberar_fagulha() -> void:
 	fagulha.set_physics_process(true)
 	fagulha.montaria.ativa = true
 	hud.mensagem("Fagulha agora acompanha você.", 4.0)
+
+
+## O objeto interativo está mais perto do jogador que o NPC? (decide o que o E faz quando os dois estão ao alcance)
+func _objeto_mais_perto_que(coisa: Interagivel, npc: Npc) -> bool:
+	if coisa == null:
+		return false
+	return coisa.global_position.distance_to(jogador.global_position) < npc.global_position.distance_to(jogador.global_position)
 
 
 func _interagivel_mais_perto() -> Interagivel:
@@ -272,6 +280,8 @@ func interagir() -> void:
 		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _falas_atuais[_dialogo_indice])
 		return
 	var n := _npc_mais_perto()
+	if n != null and _objeto_mais_perto_que(_interagivel_mais_perto(), n):
+		n = null   # um objeto interativo (jaula, raiz) está mais perto que o NPC: ele tem prioridade
 	if n == null:
 		var coisa := _interagivel_mais_perto()
 		if coisa:
@@ -282,6 +292,8 @@ func interagir() -> void:
 			jogador.montar(m)
 		return
 	missoes.tentar_entrega(n.nome.to_lower())   # maçãs para a Mara etc.
+	if n.oferece_missao != "" and missoes.pode_iniciar(n.oferece_missao):
+		missoes.iniciar(n.oferece_missao)   # Elda passa a C2-M1, Sava a C2-M2
 	_falas_atuais = missoes.dialogo_de(n.nome.to_lower())
 	if _falas_atuais.is_empty():
 		_falas_atuais = n.falas

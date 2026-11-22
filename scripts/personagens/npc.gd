@@ -15,6 +15,7 @@ extends Node3D
 @export var animacao := "Idle"
 @export var cena: PackedScene
 @export var rotina: Array = []
+@export var oferece_missao := ""      # id da missão que este NPC passa na primeira conversa
 @export var segue_jogador := false   # criança curiosa: acompanha o jogador à distância
 
 const PROTESTOS := ["Ei! Calma!", "Está louco?! Guarde essa espada!", "Pare com isso, Torin!", "Isso dói!", "Eu sou do seu bando!"]

@@ -98,5 +98,5 @@ ReinoDeCinzas/
 - Inventário do jogador (tecla I): grade com ícones, descrição e uso (carne cura 20). Teste: `tools/teste_inventario.gd`.
 - Colisão de seres vivos (animais, pessoas, Fagulha) e peças do cenário: ver `assets/ASSETS.md`. Testes só quando a mudança pedir e uma vez (o usuário reclamou de demora).
 - NPCs com rotinas de trabalho (ferreiro, lenhador, cozinheira, vigia, caçadora, líder): ver `assets/ASSETS.md`.
-- Campanha por marcos segundo a Bíblia expandida (ver `assets/ASSETS.md`, seção Campanha). Marcos 1 (missões), 2 (Refúgio como vila) e 3 (Pomar Alto, C1-M2 a M4, Fagulha ferida) feitos; próximo: Marco 4, o Bosque Velado e a Mina das Correntes.
+- Campanha por marcos segundo a Bíblia expandida (ver `assets/ASSETS.md`, seção Campanha). Marcos 1 (missões), 2 (Refúgio como vila), 3 (Pomar Alto, C1-M2 a M4, Fagulha ferida) e 4 (Bosque Velado e Mina, C2-M1 a M4) feitos; próximo: Marco 5, o Acampamento da Ruptura e a Fortaleza de Ferrogris.
 - Próximo: dar uso a couro/lã/presa (forja da Brenn, vender), salvar o inventário, corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.

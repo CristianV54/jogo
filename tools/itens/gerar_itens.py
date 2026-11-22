@@ -95,3 +95,36 @@ objeto(C, cabo, vertices=5, radius=0.008, depth=0.05, location=(0, 0, 0.18))
 o = objeto(S, verde, segments=5, ring_count=3, radius=0.035, location=(0.04, 0, 0.19))
 o.scale = (1.4, 0.7, 0.3)
 juntar_e_exportar("maca")
+
+# raiz medicinal: raiz retorcida clara com folhas verdes
+novo()
+terra = material("Raiz", (0.45, 0.32, 0.18))
+folha2 = material("FolhaRaiz", (0.15, 0.4, 0.1))
+o = objeto(S, terra, segments=6, ring_count=4, radius=0.06, location=(0, 0, 0.06))
+o.scale = (0.8, 0.8, 1.6)
+for dx, ang in ((-0.05, 25), (0.05, -25)):
+    objeto(K, terra, vertices=5, radius1=0.025, radius2=0.004, depth=0.14, location=(dx, 0, 0.02), rotation=(0, math.radians(180 + ang), 0))
+for dx in (-0.03, 0.03, 0):
+    o = objeto(S, folha2, segments=5, ring_count=3, radius=0.04, location=(dx, 0, 0.2))
+    o.scale = (0.5, 0.25, 1.2)
+juntar_e_exportar("raiz")
+
+# minério bruto de Ferro Negro: pedra escura com veios azuis
+novo()
+pedra = material("PedraNegra", (0.04, 0.04, 0.05))
+veio = material("VeioAzul", (0.1, 0.25, 0.8))
+o = objeto(I, pedra, subdivisions=1, radius=0.13, location=(0, 0, 0.12))
+o.scale = (1.0, 0.8, 0.85)
+for dx, dy in ((0.08, 0.02), (-0.06, 0.07)):
+    o = objeto(I, veio, subdivisions=1, radius=0.03, location=(dx, dy, 0.17))
+    o.scale = (0.6, 0.6, 1.3)
+juntar_e_exportar("minerio_bruto")
+
+# chave de jaula: argola, haste e dentes
+novo()
+ferro2 = material("FerroChave", (0.35, 0.3, 0.2))
+objeto(C, ferro2, vertices=8, radius=0.05, depth=0.015, location=(0, 0, 0.2), rotation=(math.pi / 2, 0, 0))
+objeto(C, ferro2, vertices=5, radius=0.012, depth=0.2, location=(0, 0, 0.09))
+objeto(C, ferro2, vertices=4, radius=0.02, depth=0.03, location=(0.03, 0, 0.02), rotation=(0, math.pi / 2, 0))
+objeto(C, ferro2, vertices=4, radius=0.02, depth=0.03, location=(0.03, 0, 0.06), rotation=(0, math.pi / 2, 0))
+juntar_e_exportar("chave")

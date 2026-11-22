@@ -231,6 +231,7 @@ func receber_dano(quantidade: int, _de: Node3D = null) -> void:
 func coletar(item: String, quantidade: int) -> void:
 	inventario[item] = int(inventario.get(item, 0)) + quantidade
 	item_coletado.emit(item, quantidade, inventario)
+	GerenciadorMissoes.evento("coletar", item, quantidade)
 	inventario_mudou.emit(inventario)
 
 

@@ -38,7 +38,7 @@ func iniciar(id: String) -> void:
 func _registrar(tipo: String, alvo: String, quantidade: int) -> void:
 	for id in ativas.duplicate():
 		for obj in DadosMissoes.MISSOES[id]["objetivos"]:
-			if obj["tipo"] != tipo or obj["alvo"] != alvo:
+			if obj["tipo"] != tipo or not _combina(obj["alvo"], alvo):
 				continue
 			var chave := "%s|%s" % [id, obj["id"]]
 			var antes := int(progresso.get(chave, 0))
@@ -47,6 +47,19 @@ func _registrar(tipo: String, alvo: String, quantidade: int) -> void:
 				objetivo_atualizado.emit(id)
 		if _completa(id):
 			_concluir(id)
+
+
+## O alvo do objetivo pode ser um texto ou uma lista de textos ("couro" ou "presa").
+func _combina(esperado: Variant, alvo: String) -> bool:
+	return alvo in esperado if esperado is Array else esperado == alvo
+
+
+## A missão pode começar agora? (sem outra ativa e com a anterior concluída)
+func pode_iniciar(id: String) -> bool:
+	if not DadosMissoes.MISSOES.has(id) or ativas.has(id) or concluidas.has(id) or not ativas.is_empty():
+		return false
+	var requer: String = DadosMissoes.MISSOES[id].get("requer", "")
+	return requer == "" or concluidas.has(requer)
 
 
 func feito(id: String, objetivo: String) -> int:
@@ -72,6 +85,9 @@ func _concluir(id: String) -> void:
 		quadro_liberado = true
 	missao_concluida.emit(id)
 	aviso.emit("Missão concluída: %s\n%s" % [dados["titulo"], dados["encerramento"]], 7.0)
+	for outra in DadosMissoes.MISSOES:   # missões que começam sozinhas depois desta
+		if DadosMissoes.MISSOES[outra].get("auto_apos", "") == id:
+			get_tree().create_timer(6.0).timeout.connect(iniciar.bind(outra))   # deixa ler o encerramento antes
 
 
 ## Texto do rastreador na tela: a primeira missão ativa, com contadores.

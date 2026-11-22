@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/criaturas/urso_visual.tscn" id="2"]
+
+[node name="Urso" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Urso-pardo"
+vida_max = 150
+dano = 14
+velocidade = 3.8
+alcance_visao = 11.0
+alcance_ataque = 2.2
+intervalo_ataque = 1.8
+escala_visual = 2.3
+raio_colisao = 0.8
+altura_colisao = 1.5
+anim_andar = "Walk"
+anim_correr = "Run"
+anim_atacar = "Jump"
+anim_dano = ""
+anim_morte = "Death"
+especie = "urso"
+acessorio = "orelhas_redondas"
+drops = {
+"carne": [2, 3],
+"couro": [2, 2]
+}

@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/personagens/humanoide.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/personagens/dorn/dorn.glb" id="2"]
+
+[node name="Borin" type="Node3D"]
+script = ExtResource("1")
+cor_cabelo = Color(0.2, 0.18, 0.16, 1)
+tom_traje = Color(0.68, 0.62, 0.55, 1)
+escala_corpo = 1.03
+
+[node name="Modelo" parent="." instance=ExtResource("2")]
