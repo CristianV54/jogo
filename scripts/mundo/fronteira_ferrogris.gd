@@ -32,6 +32,7 @@ func _ready() -> void:
 	_montar_terreno(29, 6.0, planos, PackedVector2Array([Vector2(0, 140), Vector2(0, 95), Vector2(0, 40), Vector2(0, -40), Vector2(0, -100), Vector2(0, -125)]), Color(0.27, 0.3, 0.22), Color(0.17, 0.22, 0.15))
 	_floresta(1800, func(x: float, z: float) -> bool:
 		return absf(x) < LADO + 8.0 and z > NORTE_Z - 12.0 and z < SUL_Z + 40.0)
+	_horizonte(Color(0.4, 0.4, 0.45), 130.0, true)
 	_muralhas()
 	_patio_externo()
 	_prisao_e_jaulas()

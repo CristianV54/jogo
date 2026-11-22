@@ -233,31 +233,13 @@ static func _poco(c: Vector3) -> Array:
 
 
 static func _horta(centro: Vector3) -> Array:
-	_cerca_retangular(centro, 8.0, 5.0, "s", 2.6)
-	var terra := _mat(Color(0.3, 0.2, 0.12))
-	var transf: Array[Transform3D] = []
-	var cores: Array[Color] = []
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 21
-	for bx in [-2.6, 2.6]:
-		for bz in [-0.9, 1.0]:
-			var p := centro + Vector3(bx, 0.0, bz)
-			var y := _y(p.x, p.z)
-			_caixa(Vector3(p.x, y + 0.14, p.z), Vector3(3.0, 0.28, 1.0), terra, true)
-			for k in 7:
-				var q := Vector3(p.x - 1.2 + k * 0.4, y + 0.42, p.z + rng.randf_range(-0.2, 0.2))
-				transf.append(Transform3D(Basis().scaled(Vector3.ONE * rng.randf_range(0.85, 1.2)), q))
-				cores.append([Color(0.3, 0.55, 0.2), Color(0.45, 0.65, 0.25), Color(0.82, 0.45, 0.12), Color(0.5, 0.7, 0.3)][rng.randi() % 4])
-	var bola := SphereMesh.new()
-	bola.radius = 0.18
-	bola.height = 0.34
-	bola.radial_segments = 6
-	bola.rings = 3
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 1.0
-	VegetacaoRasteira._multimesh(_area, bola, mat, transf, "Plantacao", cores)
-	return [Vector2(centro.x, centro.z), 7.0]
+	_cerca_retangular(centro, 17.0, 12.0, "s", 3.2)
+	var plantacao := Plantacao.new()
+	plantacao.largura = 11.0
+	plantacao.profundidade = 8.0
+	plantacao.position = Vector3(centro.x, _y(centro.x, centro.z), centro.z)
+	_area.add_child(plantacao)
+	return [Vector2(centro.x, centro.z), 11.5]
 
 
 static func _canil(c: Vector3) -> Array:

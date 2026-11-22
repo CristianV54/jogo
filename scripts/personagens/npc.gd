@@ -31,6 +31,8 @@ var _passo := -1
 var _restante := 0.0
 var _preso := 0.0
 var _comentario := 6.0
+var _marca: Label3D       # "!" (oferece missão) ou "?" (a missão ativa pede para falar ou entregar a ele)
+var _t_marca := 0.0
 var _pausas := 0          # > 0: conversando ou levando um golpe; a rotina espera
 
 
@@ -44,6 +46,40 @@ func _ready() -> void:
 	corpo = Solidos.corpo_movel(self, AABB(Vector3(-0.35, 0.0, -0.35), Vector3(0.7, 1.8, 0.7)))   # o jogador não atravessa as pessoas
 	if not rotina.is_empty():
 		_proximo_passo()
+	_marca = Label3D.new()
+	_marca.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_marca.font_size = 120
+	_marca.pixel_size = 0.006
+	_marca.outline_size = 16
+	_marca.modulate = Color(1.0, 0.82, 0.2)
+	_marca.position = Vector3(0.0, 2.55, 0.0)
+	_marca.visible = false
+	add_child(_marca)
+
+
+## Marcador de missão sobre a cabeça: "?" se a missão ativa pede para falar com ele ou entregar algo; "!" se ele passa uma missão.
+func _process(delta: float) -> void:
+	_t_marca -= delta
+	if _t_marca <= 0.0:
+		_t_marca = 0.4
+		_marca.text = _qual_marca()
+		_marca.visible = _marca.text != ""
+	if _marca.visible:
+		_marca.position.y = 2.55 + sin(Time.get_ticks_msec() / 250.0) * 0.07
+
+
+func _qual_marca() -> String:
+	var m := GerenciadorMissoes.instancia
+	if m == null or morto:
+		return ""
+	var meu := nome.to_lower()
+	for id in m.ativas:
+		for obj in DadosMissoes.MISSOES[id]["objetivos"]:
+			if obj["tipo"] in ["falar", "entregar"] and obj["alvo"] == meu and m.feito(id, obj["id"]) < int(obj["qtd"]):
+				return "?"
+	if oferece_missao != "" and m.pode_iniciar(oferece_missao):
+		return "!"
+	return ""
 
 
 func olhar_para(alvo: Vector3) -> void:

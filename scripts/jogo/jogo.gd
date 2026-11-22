@@ -190,7 +190,7 @@ func _process(_delta: float) -> void:
 	var perto := _npc_mais_perto()
 	var objeto := _interagivel_mais_perto()
 	if perto and not _objeto_mais_perto_que(objeto, perto):
-		hud.dica("E   Falar com %s" % perto.nome)
+		hud.dica("E   Falar com %s, %s" % [perto.nome, perto.papel.to_lower()])
 		return
 	if jogador.montaria:
 		hud.dica("E   Desmontar" if (not jogador.montaria.voa or jogador.perto_do_chao()) else "Espaço sobe    C desce    Pouse para desmontar")
@@ -252,7 +252,7 @@ func cena_dialogo(linhas: Array, ao_fim := Callable()) -> void:
 	_cena_i = 0
 	_cena_fim = ao_fim
 	jogador.travado = true
-	hud.dialogo(linhas[0][0], linhas[0][1])
+	hud.dialogo(linhas[0][0], linhas[0][1], 1, linhas.size())
 
 
 func _avancar_cena() -> void:
@@ -264,7 +264,7 @@ func _avancar_cena() -> void:
 		if _cena_fim.is_valid():
 			_cena_fim.call()
 		return
-	hud.dialogo(_cena[_cena_i][0], _cena[_cena_i][1])
+	hud.dialogo(_cena[_cena_i][0], _cena[_cena_i][1], _cena_i + 1, _cena.size())
 
 
 func _interagivel_mais_perto() -> Interagivel:
@@ -299,8 +299,40 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 	if evento is InputEventKey and evento.pressed and not evento.echo:
 		if evento.physical_keycode == KEY_I:
 			_alternar_inventario()
-		elif evento.physical_keycode == KEY_E and not hud.inventario_aberto:
+		elif evento.physical_keycode == KEY_M:
+			_alternar_mapa()
+		elif evento.physical_keycode == KEY_E and not hud.inventario_aberto and not hud.mapa_aberto:
 			interagir()
+
+
+## M abre/fecha o mapa do mundo (as regiões, o que está liberado e a região da missão ativa).
+func _alternar_mapa() -> void:
+	if hud.dialogo_aberto or jogador.morto or hud.inventario_aberto:
+		return
+	if hud.mapa_aberto:
+		hud.mapa.esconder()
+		hud.mapa_aberto = false
+		jogador.travado = false
+		return
+	var liberadas := {}
+	var motivos := {}
+	for id in AREAS:
+		var motivo := ""
+		if REQUISITOS.has(id) and not derrotados.has(REQUISITOS[id]):
+			motivo = "falta derrotar %s" % NOMES_DOS_CHEFES[REQUISITOS[id]]
+		elif REQUISITOS_MISSAO.has(id) and not missoes.concluidas.has(REQUISITOS_MISSAO[id]):
+			motivo = "falta a missão %s" % DadosMissoes.MISSOES[REQUISITOS_MISSAO[id]]["titulo"]
+		liberadas[id] = motivo == ""
+		if motivo != "":
+			motivos[id] = motivo
+	var missao := ""
+	var alvo := ""
+	if not missoes.ativas.is_empty():
+		missao = DadosMissoes.MISSOES[missoes.ativas[0]]["titulo"]
+		alvo = MapaDoMundo.REGIAO_DA_MISSAO.get(missoes.ativas[0], "")
+	hud.mapa.mostrar({"atual": area_nome, "alvo": alvo, "liberadas": liberadas, "motivos": motivos, "missao": missao})
+	hud.mapa_aberto = true
+	jogador.travado = true
 
 
 ## I abre/fecha o inventário: o jogador fica travado e o mouse volta a aparecer enquanto ele está aberto.
@@ -326,6 +358,9 @@ func _ao_usar_item(item: String) -> void:
 
 
 func interagir() -> void:
+	if hud.dialogo_aberto and hud.revelando:   # primeiro E: completa o texto que ainda está aparecendo
+		hud.completar_dialogo()
+		return
 	if not _cena.is_empty():
 		_avancar_cena()
 		return
@@ -342,7 +377,7 @@ func interagir() -> void:
 			jogador.travado = false
 			_dialogo_npc.retomar()
 			return
-		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _falas_atuais[_dialogo_indice])
+		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _falas_atuais[_dialogo_indice], _dialogo_indice + 1, _falas_atuais.size())
 		return
 	var n := _npc_mais_perto()
 	if n != null and _objeto_mais_perto_que(_interagivel_mais_perto(), n):
@@ -370,4 +405,4 @@ func interagir() -> void:
 	jogador.travado = true
 	n.olhar_para(jogador.global_position)
 	n.pausar()
-	hud.dialogo(n.nome + " (" + n.papel + ")", _falas_atuais[0])
+	hud.dialogo(n.nome + " (" + n.papel + ")", _falas_atuais[0], 1, _falas_atuais.size())

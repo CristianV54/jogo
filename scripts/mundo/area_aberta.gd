@@ -7,6 +7,7 @@ var terreno: Terreno
 var tam := 300.0
 var _rng := RandomNumberGenerator.new()
 var _solidos: StaticBody3D
+var _cor_do_chao := Color.WHITE
 
 
 func altura_em(x: float, z: float) -> float:
@@ -18,6 +19,7 @@ func _y(p: Vector2) -> float:
 
 
 func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], caminho: PackedVector2Array, cor_grama: Color, cor_mata: Color, clareira := 1.0) -> void:
+	_cor_do_chao = cor_grama
 	terreno = Terreno.new()
 	terreno.name = "Terreno"
 	terreno.tamanho = tam
@@ -46,10 +48,14 @@ func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], cam
 		_solidos.add_child(cs)
 
 
+## Chão distante e montanhas em volta (ver Horizonte).
+func _horizonte(cor_monte: Color, altura: float, neve := false) -> void:
+	Horizonte.montar(self, tam, _cor_do_chao * 0.9, cor_monte, altura, neve, int(_rng.seed % 1000))
+
+
 ## Pinheiros em MultiMesh com colisão nos primeiros troncos; `livre(x, z)` diz onde NÃO nasce árvore.
 func _floresta(tentativas: int, livre: Callable) -> void:
 	var pinheiros: Array[Transform3D] = []
-	var colisoes := 0
 	for k in tentativas:
 		var x := _rng.randf_range(-tam / 2.0 * 0.97, tam / 2.0 * 0.97)
 		var z := _rng.randf_range(-tam / 2.0 * 0.97, tam / 2.0 * 0.97)
@@ -58,15 +64,14 @@ func _floresta(tentativas: int, livre: Callable) -> void:
 		var s := _rng.randf_range(0.8, 1.6)
 		var h := altura_em(x, z)
 		pinheiros.append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, h - 0.15, z)))
-		if colisoes < 350:
-			colisoes += 1
-			var cs := CollisionShape3D.new()
-			var cil := CylinderShape3D.new()
-			cil.radius = 0.45 * s
-			cil.height = 4.0
-			cs.shape = cil
-			cs.position = Vector3(x, h + 2.0, z)
-			_solidos.add_child(cs)
+		# toda árvore tem tronco sólido
+		var cs := CollisionShape3D.new()
+		var cil := CylinderShape3D.new()
+		cil.radius = 0.45 * s
+		cil.height = 4.0
+		cs.shape = cil
+		cs.position = Vector3(x, h + 2.0, z)
+		_solidos.add_child(cs)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = FabricaNatureza.pinheiro()

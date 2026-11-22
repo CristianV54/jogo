@@ -23,6 +23,7 @@ func _ready() -> void:
 	_rng.seed = 2026
 	_ambiente()
 	_terreno()
+	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.46, 0.4), 120.0, true, 3)
 	_floresta()
 	_casas()
 	_cerca()
@@ -95,7 +96,6 @@ func _floresta() -> void:
 	troncos.name = "TroncosColisao"
 	add_child(troncos)
 	var pinheiros: Array[Transform3D] = []
-	var colisoes := 0
 	for k in 3600:
 		var x := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
 		var z := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
@@ -108,15 +108,14 @@ func _floresta() -> void:
 		var base := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s))
 		var h := terreno.altura_em(x, z)
 		pinheiros.append(Transform3D(base, Vector3(x, h - 0.15, z)))
-		if d < 130.0 and colisoes < 500:
-			colisoes += 1
-			var cs := CollisionShape3D.new()
-			var cil := CylinderShape3D.new()
-			cil.radius = 0.45 * s
-			cil.height = 4.0
-			cs.shape = cil
-			cs.position = Vector3(x, h + 2.0, z)
-			troncos.add_child(cs)
+		# toda árvore tem tronco sólido
+		var cs := CollisionShape3D.new()
+		var cil := CylinderShape3D.new()
+		cil.radius = 0.45 * s
+		cil.height = 4.0
+		cs.shape = cil
+		cs.position = Vector3(x, h + 2.0, z)
+		troncos.add_child(cs)
 	_multimesh(FabricaNatureza.pinheiro(), pinheiros, "Pinheiros")
 
 	for v in 3:

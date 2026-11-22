@@ -26,6 +26,7 @@ func _ready() -> void:
 	_rng.seed = 89
 	_ambiente()
 	_montar_terreno(53, 0.0, [], PackedVector2Array([Vector2(0, 150), Vector2(0, -85)]), Color(0.42, 0.38, 0.32), Color(0.34, 0.3, 0.26), 260.0)
+	_horizonte(Color(0.42, 0.34, 0.26), 110.0)
 	_muralhas()
 	_fila_de_carrocas()
 	_rua_dos_artesaos()
@@ -321,7 +322,7 @@ func _escadaria() -> void:
 	for i in 14:
 		var t := (i + 0.5) / 14.0
 		VilaRefugio._caixa(Vector3(0.0, TOPO_Y * t - 0.18, NORTE_Z - 4.0 - comp * t), Vector3(20.0, 0.5, comp / 14.0 + 0.1), pedra)
-	VilaRefugio._caixa(Vector3(0.0, TOPO_Y / 2.0 - 0.3, -126.0 + 3.0), Vector3(30.0, TOPO_Y, 16.0), pedra, true)   # plataforma do alto
+	VilaRefugio._caixa(Vector3(0.0, TOPO_Y / 2.0 - 0.3, -121.0), Vector3(30.0, TOPO_Y, 22.0), pedra, true)   # plataforma do alto
 	for lado in [-1.0, 1.0]:
 		var mur := VilaRefugio._caixa(Vector3(lado * 11.0, TOPO_Y / 2.0 + 1.0, -100.0), Vector3(1.4, TOPO_Y + 3.0, 26.0), pedra, true)
 		mur.rotation = Vector3.ZERO

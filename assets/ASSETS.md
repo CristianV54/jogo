@@ -224,3 +224,29 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Missões:** C5-M1 Portões e Ruas de Valdoria (atravessar o mercado, uma troca, 4 guardas de elite), C5-M2 O Duelo de Vane, C5-M3 Quebrar o Grande Obelisco (4 focos) e C5-M4 A Queda do Imperador Solon. Encadeadas sozinhas; o castelo só abre depois da C5-M1.
 - **Limites:** a Capela, a Prisão e as casas têm só o interior padrão do kit (sem móveis próprios); a Prisão Subterrânea não é subterrânea (prédio térreo); o Vane e o Solon usam o modelo e as animações de antes (sem golpes únicos); sem som, sem checkpoint antes do duelo, do obelisco e do Solon, e sem dinheiro (só troca). O epílogo é texto em caixas de diálogo, sem cena animada.
 - **Teste:** `tools/teste_marco7.gd` (ponta a ponta, sem janela) e capturas `m7v_*.png`/`m7c_*.png`.
+
+## Auditoria do mundo (22/11/2026)
+
+Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não parecia plantação, atravessar objetos, áreas sem ligação, missões sem encadeamento, mapa, estradas, montanhas, texturas do chão e conversa com NPC.
+
+**O que a auditoria mediu (scripts novos, sem janela):**
+- `tools/auditoria_mundo.gd`: para cada uma das 8 áreas confere (1) se toda casa tem telhado, (2) se há furo nas paredes (raios a cada 0,5 m a 1 m de altura) e (3) se dá para ANDAR, com a cápsula do jogador numa grade de 1 m, de cada spawn até cada portal, NPC, objeto interativo e a entrada de cada casa (portões e portas abertos; lava conta como bloqueio).
+- `tools/auditoria_portais.gd`: todo portal leva a uma área e a um spawn que existem, e a área de destino tem portal de volta.
+- `tools/teste_cadeia.gd`: começa do zero, cumpre os objetivos de cada missão pelos eventos reais e confere que a próxima começa sozinha, da C1-M1 à C5-M4.
+
+**Defeitos achados e consertados:**
+- **Atravessava árvores:** só 300 a 500 troncos por área tinham colisão (de 840 a 3100 árvores). Hoje todas têm.
+- **Escadaria do Castelo ao contrário:** a rampa subia para o sul, então a entrada do castelo ficava com um degrau de 3 m e quem chegava não passava. Corrigida (o jogo só funcionava porque o teste teleporta).
+- **Buraco de 1 m na escadaria de Valdoria** entre a rampa e a plataforma do alto: quem descia ou subia caía na vala. A plataforma agora cobre a emenda.
+- **Missões não encadeavam:** C1-M2, C1-M3, C1-M4, C2-M1 e C2-M2 dependiam do quadro de avisos ou de falar com um NPC. Agora cada missão começa 6 s depois da anterior, até o fim.
+- **Pomar Alto sem o spawn "Entrada"** que o Refúgio pede (caía no spawn padrão): criado.
+- **Casas sem telhado:** os prédios 4x3 da Fortaleza e da Cratera não tinham telhado (peça 8x6 não existe); passaram a 4x4 no Marco 6. A auditoria mede telhado em todas as casas das 8 áreas.
+
+**O que melhorou:**
+- **Plantação** (`plantacao.gd`, no Refúgio): terra lavrada em sulcos, 8 fileiras de trigo (espigas), milho (folhas e espigas), repolho, verduras e abóboras; trigo, milho e verduras balançam ao vento (shader); espantalho, 3 fardos de feno, bebedouro, 2 corvos na cerca.
+- **Chão com capim, flores e manchas** (`VegetacaoRasteira.decorar_zonas`) também no Pomar Alto, Bosque Velado e Acampamento da Ruptura (antes só o Refúgio).
+- **Horizonte e montanhas** (`horizonte.gd`) em todas as 8 áreas: chão até o fim da vista e duas fileiras de montanhas (neve em algumas, vulcão vermelho na Cratera, colinas ocres em Valdoria).
+- **Mapa do mundo** (`mapa_do_mundo.gd`, tecla M): 8 regiões, estradas (tracejadas quando trancadas), "você está aqui", anel dourado na região da missão ativa e o motivo de cada região trancada.
+- **Conversa com NPC:** texto aparece letra a letra (E completa), número da fala ("2/3"), aviso "E continuar / E fechar", prompt "E Falar com Nome, papel" e marcador sobre a cabeça: "?" quando a missão ativa pede para falar ou entregar a ele, "!" quando ele passa uma missão.
+
+**Ainda não feito:** vales e rios entre as regiões (as áreas continuam separadas por portais, não por um mundo contínuo; as estradas existem dentro de cada área e no mapa), textura de chão com arte (o chão ainda é cor com manchas), sons, checkpoints.

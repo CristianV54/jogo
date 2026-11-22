@@ -23,6 +23,10 @@ var _mensagem: Label
 var _inventario_label: Label
 var _painel: PainelInventario
 var _rastreador: Label
+var _dialogo_pag: Label
+var _dialogo_prompt: Label
+var _tween_texto: Tween
+var mapa: MapaDoMundo
 
 signal usar_item(item: String)
 signal fechar_inventario_pedido
@@ -30,6 +34,8 @@ var _tween_area: Tween
 
 var dialogo_aberto := false
 var inventario_aberto := false
+var mapa_aberto := false
+var revelando := false   # o texto do diálogo ainda está aparecendo letra a letra
 
 
 func _ready() -> void:
@@ -88,14 +94,31 @@ func _ready() -> void:
 	_dialogo_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_dialogo_texto.add_theme_font_size_override("font_size", 22)
 	_dialogo_caixa.add_child(_dialogo_texto)
+	_dialogo_pag = Label.new()
+	_dialogo_pag.position = Vector2(600, 14)
+	_dialogo_pag.size = Vector2(182, 24)
+	_dialogo_pag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_dialogo_pag.add_theme_font_size_override("font_size", 18)
+	_dialogo_pag.modulate = Color(0.8, 0.8, 0.8)
+	_dialogo_caixa.add_child(_dialogo_pag)
+	_dialogo_prompt = Label.new()
+	_dialogo_prompt.position = Vector2(600, 118)
+	_dialogo_prompt.size = Vector2(182, 24)
+	_dialogo_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_dialogo_prompt.add_theme_font_size_override("font_size", 18)
+	_dialogo_prompt.add_theme_color_override("font_color", COR_CHEFE)
+	_dialogo_caixa.add_child(_dialogo_prompt)
 
-	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    I inventário    E falar/montar    F Fagulha voar    Esc solta o mouse", Vector2(24, 690), 15)
+	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    I inventário    E falar/montar    F Fagulha voar    M mapa    Esc solta o mouse", Vector2(24, 690), 15)
 	legenda.modulate.a = 0.85
 
 	_painel = PainelInventario.new()
 	_painel.usar_pedido.connect(func(item: String) -> void: usar_item.emit(item))
 	_painel.fechar_pedido.connect(func() -> void: fechar_inventario_pedido.emit())
 	_raiz.add_child(_painel)
+
+	mapa = MapaDoMundo.new()
+	_raiz.add_child(mapa)
 
 	_mensagem = _rotulo("", Vector2(80, 260), 40)
 	_mensagem.size = Vector2(1120, 160)
@@ -187,14 +210,35 @@ func dica(texto: String) -> void:
 	_dica_label.text = texto
 
 
-func dialogo(nome: String, texto: String) -> void:
+## Mostra uma fala. `pagina` e `total` (opcionais) mostram "2/3" e trocam o aviso para "E fechar" na última.
+## O texto aparece letra a letra; apertar E uma vez completa o texto (ver `completar_dialogo`).
+func dialogo(nome: String, texto: String, pagina := 0, total := 0) -> void:
 	dialogo_aberto = true
 	_dialogo_caixa.visible = true
 	_dialogo_nome.text = nome
 	_dialogo_texto.text = texto
+	_dialogo_pag.text = "%d/%d" % [pagina, total] if total > 1 else ""
+	_dialogo_prompt.text = "E  fechar" if (total <= 1 or pagina >= total) else "E  continuar"
+	if _tween_texto:
+		_tween_texto.kill()
+	_dialogo_texto.visible_ratio = 0.0
+	revelando = true
+	_tween_texto = create_tween()
+	_tween_texto.tween_property(_dialogo_texto, "visible_ratio", 1.0, maxf(0.25, texto.length() / 55.0))
+	_tween_texto.tween_callback(func() -> void: revelando = false)
+
+
+func completar_dialogo() -> void:
+	if _tween_texto:
+		_tween_texto.kill()
+	_dialogo_texto.visible_ratio = 1.0
+	revelando = false
 
 
 func fechar_dialogo() -> void:
+	if _tween_texto:
+		_tween_texto.kill()
+	revelando = false
 	dialogo_aberto = false
 	_dialogo_caixa.visible = false
 

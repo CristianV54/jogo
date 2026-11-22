@@ -36,6 +36,7 @@ func _ready() -> void:
 	_solidos.name = "SolidosDoBosque"
 	add_child(_solidos)
 	VilaRefugio.preparar(self, altura_em, _solidos)
+	Horizonte.montar(self, TAM, Color(0.14, 0.26, 0.15), Color(0.3, 0.38, 0.42), 130.0, true, 11)
 	_floresta()
 	_acampamento()
 	_riacho()
@@ -45,6 +46,7 @@ func _ready() -> void:
 	_jaulas_e_guardas()
 	_animais()
 	_npcs()
+	VegetacaoRasteira.decorar_zonas(self, terreno, _rng, [[ACAMPAMENTO, 22.0, 1.0], [VALE, 48.0, 1.6], [ENCOSTA, 28.0, 0.8], [Vector2(0.0, 125.0), 24.0, 1.0]], [[ACAMPAMENTO, 3.0], [Vector2(0.0, VALE.y), 7.0]])
 	_novo_spawn("Entrada", Vector3(0, altura_em(0, 135), 135), Vector3(0, 0, 100))
 	_novo_spawn("Principal", Vector3(0, altura_em(0, 135), 135), Vector3(0, 0, 100))
 	_portal(Vector3(0, altura_em(0, 152), 152), "refugio_do_pinhal", "DoBosque", 16.0)
@@ -105,7 +107,6 @@ func _zonas_livres() -> Array:
 func _floresta() -> void:
 	var livres := _zonas_livres()
 	var pinheiros: Array[Transform3D] = []
-	var colisoes := 0
 	for k in 3200:
 		var x := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
 		var z := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
@@ -119,15 +120,14 @@ func _floresta() -> void:
 		var s := _rng.randf_range(0.8, 1.7)
 		var h := altura_em(x, z)
 		pinheiros.append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, h - 0.15, z)))
-		if colisoes < 450:
-			colisoes += 1
-			var cs := CollisionShape3D.new()
-			var cil := CylinderShape3D.new()
-			cil.radius = 0.45 * s
-			cil.height = 4.0
-			cs.shape = cil
-			cs.position = Vector3(x, h + 2.0, z)
-			_solidos.add_child(cs)
+		# toda árvore tem tronco sólido
+		var cs := CollisionShape3D.new()
+		var cil := CylinderShape3D.new()
+		cil.radius = 0.45 * s
+		cil.height = 4.0
+		cs.shape = cil
+		cs.position = Vector3(x, h + 2.0, z)
+		_solidos.add_child(cs)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = FabricaNatureza.pinheiro()

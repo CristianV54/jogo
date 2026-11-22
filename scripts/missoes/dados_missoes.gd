@@ -30,6 +30,8 @@ const MISSOES := {
 	"C1-M2": {
 		"capitulo": 1,
 		"titulo": "Colheita no Pomar Alto",
+		"requer": "C1-M1",
+		"auto_apos": "C1-M1",
 		"objetivos": [
 			{"id": "macas", "texto": "Colher maçãs nas macieiras do pomar", "tipo": "interagir", "alvo": "macieira", "qtd": 6},
 			{"id": "cesto", "texto": "Endireitar o cesto virado", "tipo": "interagir", "alvo": "cesto_virado", "qtd": 1},
@@ -45,6 +47,8 @@ const MISSOES := {
 	"C1-M3": {
 		"capitulo": 1,
 		"titulo": "Guardião do Cercado e da Estrada",
+		"requer": "C1-M2",
+		"auto_apos": "C1-M2",
 		"objetivos": [
 			{"id": "lobos", "texto": "Afastar os lobos que rondam o cercado", "tipo": "derrotar", "alvo": "lobo", "qtd": 3},
 			{"id": "cavalo", "texto": "Encontrar o cavalo fugido, na estrada leste", "tipo": "interagir", "alvo": "cavalo_perdido", "qtd": 1},
@@ -59,6 +63,8 @@ const MISSOES := {
 	"C1-M4": {
 		"capitulo": 1,
 		"titulo": "Resgate nas Sombras do Pinhal",
+		"requer": "C1-M3",
+		"auto_apos": "C1-M3",
 		"objetivos": [
 			{"id": "clareira", "texto": "Encontrar a clareira no pinhal (trilha norte)", "tipo": "visitar", "alvo": "clareira_pinhal", "qtd": 1},
 			{"id": "batedores", "texto": "Derrotar os batedores imperiais", "tipo": "derrotar", "alvo": "batedor", "qtd": 3},
@@ -75,6 +81,7 @@ const MISSOES := {
 		"capitulo": 2,
 		"titulo": "Caçada e Rastreamento",
 		"requer": "C1-M4",
+		"auto_apos": "C1-M4",
 		"objetivos": [
 			{"id": "pegadas", "texto": "Seguir as pegadas de lobo até a toca (não as botas)", "tipo": "visitar", "alvo": "toca_do_lobo", "qtd": 1},
 			{"id": "couros", "texto": "Coletar couros ou presas da caça", "tipo": "coletar", "alvo": ["couro", "presa"], "qtd": 4},
@@ -90,6 +97,7 @@ const MISSOES := {
 		"capitulo": 2,
 		"titulo": "Asas nas Gaiolas",
 		"requer": "C2-M1",
+		"auto_apos": "C2-M1",
 		"objetivos": [
 			{"id": "chaves", "texto": "Tirar as chaves dos guardas da mina", "tipo": "coletar", "alvo": "chave", "qtd": 3},
 			{"id": "jaulas", "texto": "Libertar os Filhotes de Asa nas jaulas", "tipo": "interagir", "alvo": "jaula", "qtd": 3},

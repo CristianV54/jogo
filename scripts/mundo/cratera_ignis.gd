@@ -33,6 +33,7 @@ func _ready() -> void:
 	_rng.seed = 73
 	_ambiente()
 	_montar_terreno(41, 0.0, [], PackedVector2Array([Vector2(0, 140), Vector2(0, -100)]), Color(0.3, 0.2, 0.17), Color(0.22, 0.15, 0.14), 260.0)
+	_horizonte(Color(0.3, 0.14, 0.12), 170.0)
 	_paredoes()
 	for f in FENDAS:
 		_fenda(f[0], f[1], f[2])

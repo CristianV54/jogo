@@ -45,6 +45,7 @@ func _ready() -> void:
 	_rng.seed = 97
 	_ambiente()
 	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.28, 0.28), Color(0.25, 0.23, 0.23), 260.0)
+	_horizonte(Color(0.38, 0.36, 0.4), 140.0, true)
 	_plataforma()
 	_muralhas()
 	_patio_externo()
@@ -91,7 +92,7 @@ func _plataforma() -> void:
 	cs.shape = forma
 	rampa.add_child(cs)
 	rampa.position = Vector3(0.0, PLAT / 2.0 - 0.3, SUL_Z + comp / 2.0)
-	rampa.rotation.x = -ang
+	rampa.rotation.x = ang   # sobe para o norte (-Z)
 	add_child(rampa)
 	var degraus := VilaRefugio._mat(Color(0.55, 0.52, 0.48))
 	for i in 12:   # degraus da escadaria monumental (desenho; a colisão é a rampa)

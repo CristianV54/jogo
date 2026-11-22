@@ -159,8 +159,8 @@ func _rodar() -> void:
 	await esperar(0.5)
 	marcar("Gorath derrotado: sinal de chefe chega ao jogo", jogo.derrotados.has("gorath"))
 	marcar("C2-M4 concluída", m.concluidas.has("C2-M4"))
-	await ir_para_area("fronteira_ferrogris", "Entrada")
-	marcar("A estrada para Ferrogris abriu", jogo.area_nome == "fronteira_ferrogris")
+	await ir_para_area("acampamento_ruptura", "Entrada")
+	marcar("A estrada leste (Acampamento da Ruptura) abriu depois do Gorath", jogo.area_nome == "acampamento_ruptura")
 
 	var falhas := 0
 	for k in checks:

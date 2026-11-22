@@ -7,10 +7,29 @@ const CORES_DE_FLOR := [Color(1.0, 0.85, 0.2), Color(0.95, 0.95, 0.9), Color(0.9
 const CORES_DE_MANCHA := [Color(0.5, 0.44, 0.2, 0.55), Color(0.08, 0.22, 0.09, 0.55), Color(0.33, 0.24, 0.15, 0.6), Color(0.24, 0.38, 0.14, 0.5)]
 
 
-static func espalhar(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: float, exclusoes: Array) -> void:
+static var _centro := Vector2.ZERO   # onde o círculo de `raio` está (padrão: a origem da área)
+static var _dens := 1.0              # multiplica a quantidade de moitas, manchas e flores
+
+
+## `centro` e `densidade` deixam decorar um trecho qualquer da área (não só o círculo em volta da origem).
+static func espalhar(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: float, exclusoes: Array, centro := Vector2.ZERO, densidade := 1.0) -> void:
+	_centro = centro
+	_dens = densidade
 	_manchas(pai, t, rng, raio, exclusoes)
 	_capim(pai, t, rng, raio, exclusoes)
 	_flores(pai, t, rng, raio, exclusoes)
+
+
+## Decora vários trechos de uma área: `zonas` é uma lista de [centro Vector2, raio, densidade]. Não nasce nada dentro das
+## casas (nós com meta "colunas" filhos de `pai`), nem em `exclusoes` ([centro, raio]), nem sobre os caminhos.
+static func decorar_zonas(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, zonas: Array, exclusoes: Array = []) -> void:
+	var ex: Array = exclusoes.duplicate()
+	for no in pai.get_children():
+		if no.has_meta("colunas"):
+			var meia := Vector2(no.get_meta("colunas"), no.get_meta("linhas"))   # meia largura = colunas (módulo de 2 m)
+			ex.append([Vector2(no.position.x, no.position.z), meia.length() + 1.5])
+	for z in zonas:
+		espalhar(pai, t, rng, z[1], ex, z[0], z[2])
 
 
 static func _livre(t: Terreno, x: float, z: float, exclusoes: Array) -> bool:
@@ -22,7 +41,7 @@ static func _livre(t: Terreno, x: float, z: float, exclusoes: Array) -> bool:
 
 static func _ponto(rng: RandomNumberGenerator, raio: float) -> Vector2:
 	var ang := rng.randf() * TAU
-	return Vector2(cos(ang), sin(ang)) * sqrt(rng.randf()) * raio
+	return _centro + Vector2(cos(ang), sin(ang)) * sqrt(rng.randf()) * raio
 
 
 static func _manchas(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: float, exclusoes: Array) -> void:
@@ -47,7 +66,7 @@ static func _manchas(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: 
 		materiais.append(m)
 	var plano := PlaneMesh.new()
 	plano.size = Vector2(1.0, 1.0)
-	for i in 34:
+	for i in int(34 * _dens):
 		var p := _ponto(rng, raio)
 		if not _livre(t, p.x, p.y, exclusoes):
 			continue
@@ -84,11 +103,11 @@ static func _malha_tufo() -> ArrayMesh:
 
 static func _capim(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: float, exclusoes: Array) -> void:
 	var lista: Array[Transform3D] = []
-	for i in 40:   # 40 moitas; cada uma com vários tufos juntos
+	for i in int(40 * _dens):   # 40 moitas; cada uma com vários tufos juntos
 		var c := _ponto(rng, raio)
 		for j in rng.randi_range(6, 16):
 			var p := c + Vector2(rng.randfn(0.0, 1.4), rng.randfn(0.0, 1.4))
-			if p.length() > raio or not _livre(t, p.x, p.y, exclusoes):
+			if (p - _centro).length() > raio or not _livre(t, p.x, p.y, exclusoes):
 				continue
 			var s := rng.randf_range(0.7, 1.5)
 			var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.4), s))
@@ -140,7 +159,7 @@ static func _flores(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: f
 		t_hastes.append(Transform3D(giro, Vector3(x, y + 0.12, z)))
 		t_cabecas.append(Transform3D(giro, Vector3(x, y + 0.27, z)))
 		cores.append(cor)
-	for i in 14:   # anéis de flores da mesma cor
+	for i in int(14 * _dens):   # anéis de flores da mesma cor
 		var c := _ponto(rng, raio)
 		var cor: Color = CORES_DE_FLOR[rng.randi() % CORES_DE_FLOR.size()]
 		var r := rng.randf_range(1.1, 2.4)
@@ -148,9 +167,9 @@ static func _flores(pai: Node3D, t: Terreno, rng: RandomNumberGenerator, raio: f
 		for k in n:
 			var a := TAU * k / n + rng.randf() * 0.15
 			var p := c + Vector2(cos(a), sin(a)) * (r + rng.randf_range(-0.15, 0.15))
-			if p.length() < raio and _livre(t, p.x, p.y, exclusoes):
+			if (p - _centro).length() < raio and _livre(t, p.x, p.y, exclusoes):
 				plantar.call(p.x, p.y, cor)
-	for i in 45:   # flores soltas
+	for i in int(45 * _dens):   # flores soltas
 		var p := _ponto(rng, raio)
 		if _livre(t, p.x, p.y, exclusoes):
 			plantar.call(p.x, p.y, CORES_DE_FLOR[rng.randi() % CORES_DE_FLOR.size()])

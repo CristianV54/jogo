@@ -21,11 +21,13 @@ func _ready() -> void:
 	_solidos.name = "SolidosDoPomar"
 	add_child(_solidos)
 	VilaRefugio.preparar(self, altura_em, _solidos)
+	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.44, 0.38), 110.0, true, 7)
 	_floresta()
 	_pomar()
 	_galpao()
 	_moinho()
 	_detalhes()
+	VegetacaoRasteira.decorar_zonas(self, terreno, _rng, [[Vector2(0, -10), 80.0, 1.8], [Vector2(0, 60), 40.0, 1.2]], [[Vector2(44.0, -34.0), 9.0]])
 	_saidas()
 	if GerenciadorMissoes.instancia:
 		GerenciadorMissoes.instancia.objetivo_atualizado.connect(_ao_progresso)
@@ -58,7 +60,6 @@ func _livre_de_arvore(x: float, z: float) -> bool:
 
 func _floresta() -> void:
 	var pinheiros: Array[Transform3D] = []
-	var colisoes := 0
 	for k in 1500:
 		var x := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
 		var z := _rng.randf_range(-TAM / 2.0 * 0.97, TAM / 2.0 * 0.97)
@@ -67,15 +68,14 @@ func _floresta() -> void:
 		var s := _rng.randf_range(0.8, 1.6)
 		var h := altura_em(x, z)
 		pinheiros.append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, h - 0.15, z)))
-		if colisoes < 300:
-			colisoes += 1
-			var cs := CollisionShape3D.new()
-			var cil := CylinderShape3D.new()
-			cil.radius = 0.45 * s
-			cil.height = 4.0
-			cs.shape = cil
-			cs.position = Vector3(x, h + 2.0, z)
-			_solidos.add_child(cs)
+		# toda árvore tem tronco sólido
+		var cs := CollisionShape3D.new()
+		var cil := CylinderShape3D.new()
+		cil.radius = 0.45 * s
+		cil.height = 4.0
+		cs.shape = cil
+		cs.position = Vector3(x, h + 2.0, z)
+		_solidos.add_child(cs)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = FabricaNatureza.pinheiro()
@@ -222,6 +222,7 @@ func _moinho() -> void:
 
 func _saidas() -> void:
 	_novo_spawn("Principal", Vector3(0, altura_em(0, 62), 62), Vector3(0, 0, 0))
+	_novo_spawn("Entrada", Vector3(0, altura_em(0, 98), 98), Vector3(0, 0, 0))
 	_portal(Vector3(0, altura_em(0, 105), 105), "refugio_do_pinhal", "DoPomar", 14.0)
 
 

@@ -21,8 +21,13 @@ func _ready() -> void:
 	_montar_terreno(17, 7.0, planos, PackedVector2Array([Vector2(0, 125), Vector2(0, 55), Vector2(16, 20), Vector2(24, -8), Vector2(24, -70), Vector2(24, -118)]), Color(0.3, 0.38, 0.2), Color(0.18, 0.28, 0.15))
 	_floresta(2200, func(x: float, z: float) -> bool:
 		return Vector2(x, z).distance_to(ACAMP) < 30.0 or Vector2(x, z).distance_to(SUL) < 18.0 or (absf(z - RIO_Z) < 8.0 and absf(x) < 40.0) or Vector2(x, z).distance_to(Vector2(24, -70)) < 14.0)
+	_horizonte(Color(0.34, 0.4, 0.36), 120.0, true)
 	_rio()
 	_acampamento()
+	var ex: Array = [[ACAMP, 3.0]]
+	for x in range(-120, 121, 8):   # o rio fica sem mato
+		ex.append([Vector2(float(x), RIO_Z), 6.0])
+	VegetacaoRasteira.decorar_zonas(self, terreno, _rng, [[ACAMP, 30.0, 1.2], [SUL, 20.0, 0.8], [VAU, 18.0, 1.0], [Vector2(24.0, -70.0), 18.0, 0.8]], ex)
 	_novo_spawn("Entrada", Vector3(0, altura_em(0, 122), 122), Vector3(0, 0, 90))
 	_novo_spawn("Principal", Vector3(0, altura_em(0, 122), 122), Vector3(0, 0, 90))
 	_novo_spawn("DaFortaleza", Vector3(24, altura_em(24, -104), -104), Vector3(24, 0, -60))
