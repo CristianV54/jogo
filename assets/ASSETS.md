@@ -250,3 +250,17 @@ Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não par
 - **Conversa com NPC:** texto aparece letra a letra (E completa), número da fala ("2/3"), aviso "E continuar / E fechar", prompt "E Falar com Nome, papel" e marcador sobre a cabeça: "?" quando a missão ativa pede para falar ou entregar a ele, "!" quando ele passa uma missão.
 
 **Ainda não feito:** vales e rios entre as regiões (as áreas continuam separadas por portais, não por um mundo contínuo; as estradas existem dentro de cada área e no mapa), textura de chão com arte (o chão ainda é cor com manchas), sons, checkpoints.
+
+## Vales e rios (22/11/2026)
+
+- **Terreno com rios e vales escavados** (`terreno.gd`, propriedade `rios`): cada rio tem eixo (suavizado por `Terreno.curva`), largura do leito, margem (barranca que sobe de volta ao chão), profundidade, vaus (trechos rasos) e água viva opcional. O leito acompanha a altura do chão em volta (a água fica 0,55 m abaixo do chão do eixo), então o rio segue as colinas. Margem pintada de lama. A água (`AguaDoRio`) é uma fita com shader de correnteza e espuma na borda. `na_agua(x, z, folga)` e `distancia_rio` servem para não plantar árvore na água.
+- **Pontes** (`ponte_de_madeira.gd`): tabuleiro inclinado que liga dois pontos do chão sem degrau, com tábuas, vigas, corrimão e colisão (o corrimão também barra).
+- **Onde ficou:**
+  - **Refúgio do Pinhal**: Riacho do Pinhal, em U em volta da vila (oeste, norte e leste), com uma ponte em cada estrada.
+  - **Pomar Alto**: riacho do moinho descendo do norte, passando pela roda d'água e seguindo para o sul (substitui a caixa de água que existia).
+  - **Bosque Velado**: Riacho da Névoa em meandro de ponta a ponta do bosque, com ponte de madeira na trilha.
+  - **Acampamento da Ruptura**: Rio Cinzento de 9 m de largura, fundo, com o vau raso em x=24 (o resto continua barrado pela parede invisível, como antes).
+  - Valdoria, Castelo, Fortaleza e Cratera não têm rio (cidade murada, fortaleza e vulcão).
+- **Horizonte:** o chão distante agora fica abaixo do terreno e da água (antes, no Pomar, ele cobria o sul do terreno que desce).
+- **Testes:** `tools/teste_rio.gd` (de pé na ponte, pisa no leito, nenhuma árvore na água); a auditoria de caminhabilidade e os testes dos marcos seguem passando.
+- **Limites:** o rio raso não atrasa nem espirra água; não dá para nadar; as regiões continuam áreas separadas por portais (o mundo contínuo seria outra reconstrução); o vale do Refúgio é uma barranca suave, não um desfiladeiro.

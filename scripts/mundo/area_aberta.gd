@@ -18,7 +18,7 @@ func _y(p: Vector2) -> float:
 	return altura_em(p.x, p.y)
 
 
-func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], caminho: PackedVector2Array, cor_grama: Color, cor_mata: Color, clareira := 1.0) -> void:
+func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], caminho: PackedVector2Array, cor_grama: Color, cor_mata: Color, clareira := 1.0, rios: Array = []) -> void:
 	_cor_do_chao = cor_grama
 	terreno = Terreno.new()
 	terreno.name = "Terreno"
@@ -32,6 +32,7 @@ func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], cam
 	terreno.cor_pedra = Color(0.4, 0.4, 0.4)
 	terreno.planos = planos
 	terreno.caminhos = [caminho]
+	terreno.rios = rios
 	add_child(terreno)
 	terreno.gerar()
 	_solidos = StaticBody3D.new()
@@ -49,8 +50,8 @@ func _montar_terreno(semente: int, amplitude: float, planos: Array[Vector3], cam
 
 
 ## Chão distante e montanhas em volta (ver Horizonte).
-func _horizonte(cor_monte: Color, altura: float, neve := false) -> void:
-	Horizonte.montar(self, tam, _cor_do_chao * 0.9, cor_monte, altura, neve, int(_rng.seed % 1000))
+func _horizonte(cor_monte: Color, altura: float, neve := false, y_chao := -0.2) -> void:
+	Horizonte.montar(self, tam, _cor_do_chao * 0.9, cor_monte, altura, neve, int(_rng.seed % 1000), y_chao)
 
 
 ## Pinheiros em MultiMesh com colisão nos primeiros troncos; `livre(x, z)` diz onde NÃO nasce árvore.
@@ -59,7 +60,7 @@ func _floresta(tentativas: int, livre: Callable) -> void:
 	for k in tentativas:
 		var x := _rng.randf_range(-tam / 2.0 * 0.97, tam / 2.0 * 0.97)
 		var z := _rng.randf_range(-tam / 2.0 * 0.97, tam / 2.0 * 0.97)
-		if livre.call(x, z) or terreno.distancia_caminho(x, z) < 4.0 or terreno.normal_em(x, z).y < 0.72:
+		if livre.call(x, z) or terreno.distancia_caminho(x, z) < 4.0 or terreno.na_agua(x, z, 3.0) or terreno.normal_em(x, z).y < 0.72:
 			continue
 		var s := _rng.randf_range(0.8, 1.6)
 		var h := altura_em(x, z)

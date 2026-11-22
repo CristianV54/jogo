@@ -4,7 +4,7 @@ extends RefCounted
 ## (cones de poucas faces, com neve nos picos se pedir). Não tem colisão: fica fora das paredes invisíveis do mapa.
 
 
-static func montar(pai: Node3D, tam: float, cor_chao: Color, cor_monte: Color, altura: float, neve := false, semente := 1) -> void:
+static func montar(pai: Node3D, tam: float, cor_chao: Color, cor_monte: Color, altura: float, neve := false, semente := 1, y_chao := -0.2) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = semente
 	var chao := MeshInstance3D.new()
@@ -13,7 +13,7 @@ static func montar(pai: Node3D, tam: float, cor_chao: Color, cor_monte: Color, a
 	plano.size = Vector3(3000.0, 0.2, 3000.0)
 	plano.material = _mat(cor_chao)
 	chao.mesh = plano
-	chao.position.y = -0.2
+	chao.position.y = y_chao   # tem que ficar ABAIXO do terreno e da água (rios descem até -2 m)
 	chao.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pai.add_child(chao)
 	var serra := Node3D.new()

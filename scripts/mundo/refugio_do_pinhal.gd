@@ -23,10 +23,11 @@ func _ready() -> void:
 	_rng.seed = 2026
 	_ambiente()
 	_terreno()
-	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.46, 0.4), 120.0, true, 3)
+	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.46, 0.4), 120.0, true, 3, -12.0)
 	_floresta()
 	_casas()
 	_cerca()
+	_pontes()
 	_fogueira()
 	_adereços()
 	_postos_de_trabalho()
@@ -52,6 +53,16 @@ func _ambiente() -> void:
 	_ambiente_padrao()
 
 
+## Uma ponte em cada estrada que cruza o Riacho do Pinhal (oeste, norte e leste).
+func _pontes() -> void:
+	for it in [[Vector2(-74.0, 3.9), Vector2(-58.0, 3.9)], [Vector2(3.3, -70.0), Vector2(3.3, -54.0)], [Vector2(56.0, 4.2), Vector2(72.0, 4.2)]]:
+		var a: Vector2 = it[0]
+		var b: Vector2 = it[1]
+		var ponte := PonteDeMadeira.new()
+		add_child(ponte)
+		ponte.ligar(Vector3(a.x, terreno.altura_em(a.x, a.y), a.y), Vector3(b.x, terreno.altura_em(b.x, b.y), b.y))
+
+
 func _terreno() -> void:
 	terreno = Terreno.new()
 	terreno.name = "Terreno"
@@ -63,6 +74,11 @@ func _terreno() -> void:
 		PackedVector2Array([Vector2(6, -80), Vector2(-15, -93), Vector2(-45, -100), Vector2(-62, -105)]),   # trilha escondida do pinhal
 	]
 	terreno.planos = [Vector3(CLAREIRA.x, CLAREIRA.z, 12.0)]   # a clareira do pinhal é plana
+	# Riacho do Pinhal: contorna a vila por oeste, norte e leste e cruza as três estradas (uma ponte em cada)
+	var eixo := Terreno.curva([Vector2(-76, 150), Vector2(-70, 90), Vector2(-67, 40), Vector2(-66, 3.9), Vector2(-62, -28), Vector2(-40, -52), Vector2(3.3, -62), Vector2(42, -52), Vector2(60, -28), Vector2(64, 4.2), Vector2(67, 40), Vector2(72, 90), Vector2(78, 150)], 3.0)
+	terreno.rios = [{"pontos": eixo, "largura": 4.4, "margem": 8.0, "fundo": 0.8, "agua": true}]
+	for i in range(0, eixo.size(), 5):   # corredor plano em volta do rio, para as margens ficarem calmas
+		terreno.planos.append(Vector3(eixo[i].x, eixo[i].y, 11.0))
 	add_child(terreno)
 	terreno.gerar()
 
@@ -86,7 +102,7 @@ func _livre(x: float, z: float, folga_caminho: float, inclinacao_min: float) -> 
 		return false   # a clareira do pinhal fica limpa de árvores
 	if Vector2(x, z).length() < terreno.clareira_raio * 1.02:
 		return false
-	if terreno.distancia_caminho(x, z) < folga_caminho:
+	if terreno.distancia_caminho(x, z) < folga_caminho or terreno.na_agua(x, z, 3.0):
 		return false
 	return terreno.normal_em(x, z).y >= inclinacao_min
 

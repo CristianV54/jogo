@@ -17,14 +17,23 @@ extends Node3D
 @export var cor_terra := Color(0.47, 0.36, 0.23)
 @export var cor_pedra := Color(0.5, 0.48, 0.45)
 
+## Rios e vales escavados no terreno. Cada rio é um Dictionary:
+##   "pontos": PackedVector2Array (x, z) do eixo (use Terreno.curva para suavizar)
+##   "largura": largura do leito, "margem": largura da barranca que sobe de volta ao chão, "fundo": profundidade do leito
+##   "agua": se tem água viva (false = só um vale), "vaus": lista de Vector2 onde o leito é raso (dá para atravessar)
+## O leito acompanha a altura do chão em volta (a água fica 0,55 m abaixo do chão no eixo), então o rio segue as colinas.
+@export var rios: Array = []
+
 ## Cada caminho é um PackedVector2Array de pontos (x, z).
 var caminhos: Array = []
+var _rio_caixa: Array[Rect2] = []
 var corpo: StaticBody3D
 var _ruido := FastNoiseLite.new()
 var _ruido_fino := FastNoiseLite.new()
 
 
 func gerar() -> void:
+	_preparar_rios()
 	_ruido.seed = semente
 	_ruido.frequency = frequencia
 	_ruido.fractal_octaves = 4
@@ -47,15 +56,158 @@ func gerar() -> void:
 	cs.shape = malha.create_trimesh_shape()
 	corpo.add_child(cs)
 	add_child(corpo)
+	for r in rios:
+		if r.get("agua", true):
+			add_child(_agua(r))
 
 
 func altura_em(x: float, z: float) -> float:
+	var h := _altura_base(x, z)
+	for i in rios.size():
+		if _rio_caixa[i].has_point(Vector2(x, z)):
+			h = _aplicar_rio(rios[i], Vector2(x, z), h)
+	return h
+
+
+## Altura sem os rios (colinas, clareira e áreas aplanadas).
+func _altura_base(x: float, z: float) -> float:
 	var h := _altura_crua(x, z)
 	for p in planos:
 		var dp := Vector2(x - p.x, z - p.y).length()
 		if dp < p.z + 10.0:
 			h = lerpf(h, _altura_crua(p.x, p.y), 1.0 - smoothstep(p.z, p.z + 10.0, dp))
 	return h
+
+
+func _preparar_rios() -> void:
+	_rio_caixa.clear()
+	for r in rios:
+		var pts: PackedVector2Array = r["pontos"]
+		var ext := float(r["largura"]) / 2.0 + float(r["margem"]) + 1.5
+		var menor := pts[0]
+		var maior := pts[0]
+		for p in pts:
+			menor = menor.min(p)
+			maior = maior.max(p)
+		_rio_caixa.append(Rect2(menor - Vector2(ext, ext), maior - menor + Vector2(ext, ext) * 2.0))
+
+
+## Ponto do eixo mais perto de `p`: devolve [distância, ponto].
+func _eixo_mais_perto(p: Vector2, pts: PackedVector2Array) -> Array:
+	var melhor := 1e9
+	var q := pts[0]
+	for i in range(pts.size() - 1):
+		var a := pts[i]
+		var ab := pts[i + 1] - a
+		var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var c := a + ab * t
+		var d := p.distance_to(c)
+		if d < melhor:
+			melhor = d
+			q = c
+	return [melhor, q]
+
+
+func _aplicar_rio(r: Dictionary, p: Vector2, h: float) -> float:
+	var meia := float(r["largura"]) / 2.0
+	var margem := float(r["margem"])
+	var par := _eixo_mais_perto(p, r["pontos"])
+	var d: float = par[0]
+	if d > meia + margem:
+		return h
+	var q: Vector2 = par[1]
+	var nivel := _altura_base(q.x, q.y) - 0.55
+	var fundo := float(r["fundo"])
+	for v in r.get("vaus", []):
+		fundo *= 1.0 - 0.85 * (1.0 - smoothstep(0.0, 7.0, q.distance_to(v)))   # o vau é raso
+	if d <= meia:
+		return nivel - fundo * (1.0 - smoothstep(0.0, 1.0, d / meia))
+	return lerpf(nivel, h, smoothstep(0.0, 1.0, (d - meia) / margem))
+
+
+## Distância ao eixo do rio com água mais perto (para pintar a lama da margem e não plantar árvore na água).
+func distancia_rio(x: float, z: float) -> float:
+	var melhor := 1e9
+	for i in rios.size():
+		if rios[i].get("agua", true) and _rio_caixa[i].has_point(Vector2(x, z)):
+			var par := _eixo_mais_perto(Vector2(x, z), rios[i]["pontos"])
+			melhor = minf(melhor, float(par[0]) - float(rios[i]["largura"]) / 2.0)
+	return melhor
+
+
+## Está na água ou a menos de `folga` metros dela?
+func na_agua(x: float, z: float, folga := 2.0) -> bool:
+	return distancia_rio(x, z) < folga
+
+
+## Suaviza pontos de controle (Catmull-Rom) em pontos a cada ~`passo` metros. O resultado passa pelos pontos de controle.
+static func curva(ctrl: Array, passo := 3.0) -> PackedVector2Array:
+	var saida := PackedVector2Array()
+	for i in range(ctrl.size() - 1):
+		var p0: Vector2 = ctrl[maxi(i - 1, 0)]
+		var p1: Vector2 = ctrl[i]
+		var p2: Vector2 = ctrl[i + 1]
+		var p3: Vector2 = ctrl[mini(i + 2, ctrl.size() - 1)]
+		var n := maxi(1, int(p1.distance_to(p2) / passo))
+		for k in n:
+			var t := float(k) / n
+			saida.append(0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t))
+	saida.append(ctrl[ctrl.size() - 1])
+	return saida
+
+
+## Fita de água ao longo do eixo, 0,55 m abaixo do chão do eixo, com shader de correnteza e espuma na margem.
+func _agua(r: Dictionary) -> MeshInstance3D:
+	var pts: PackedVector2Array = r["pontos"]
+	var meia := float(r["largura"]) / 2.0 + 1.2
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var acumulado := 0.0
+	var anteriores: Array = []
+	for i in pts.size():
+		var dir := (pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]).normalized()
+		var lado := Vector2(-dir.y, dir.x) * meia
+		var y := _altura_base(pts[i].x, pts[i].y) - 0.55
+		if i > 0:
+			acumulado += pts[i].distance_to(pts[i - 1])
+		var a := Vector3(pts[i].x + lado.x, y, pts[i].y + lado.y)
+		var b := Vector3(pts[i].x - lado.x, y, pts[i].y - lado.y)
+		anteriores.append([a, b, acumulado])
+	for i in range(anteriores.size() - 1):
+		var a0: Vector3 = anteriores[i][0]
+		var b0: Vector3 = anteriores[i][1]
+		var a1: Vector3 = anteriores[i + 1][0]
+		var b1: Vector3 = anteriores[i + 1][1]
+		var u0: float = anteriores[i][2]
+		var u1: float = anteriores[i + 1][2]
+		for tri in [[[a0, 0.0, u0], [b0, 1.0, u0], [a1, 0.0, u1]], [[b0, 1.0, u0], [b1, 1.0, u1], [a1, 0.0, u1]]]:
+			for v in tri:
+				st.set_normal(Vector3.UP)
+				st.set_uv(Vector2(v[1], v[2]))
+				st.add_vertex(v[0])
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode cull_disabled, specular_schlick_ggx;
+void fragment() {
+	float borda = abs(UV.x - 0.5) * 2.0;
+	float fluxo = sin(UV.y * 0.9 - TIME * 1.6 + sin(UV.x * 9.0 + TIME * 0.7) * 1.4);
+	float faixa = smoothstep(0.55, 0.95, fluxo);
+	vec3 c = mix(vec3(0.07, 0.22, 0.32), vec3(0.2, 0.46, 0.5), smoothstep(0.2, 1.0, borda));
+	c += faixa * 0.1;
+	float espuma = smoothstep(0.8, 0.98, borda);
+	ALBEDO = mix(c, vec3(0.85, 0.92, 0.95), espuma * 0.55);
+	ALPHA = 0.8 + espuma * 0.2;
+	ROUGHNESS = 0.15;
+}
+"""
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	var mi := MeshInstance3D.new()
+	mi.name = "AguaDoRio"
+	mi.mesh = st.commit()
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
 
 
 func _altura_crua(x: float, z: float) -> float:
@@ -94,6 +246,9 @@ func cor_em(x: float, z: float) -> Color:
 	c = c.lerp(cor_pedra, smoothstep(0.22, 0.45, inclinacao))
 	c = c.lerp(cor_terra, 1.0 - smoothstep(1.4, 3.2, distancia_caminho(x, z)))
 	c = c.lerp(cor_terra, 0.55 * (1.0 - smoothstep(5.0, 15.0, d)))   # chão pisado em volta da fogueira
+	var dr := distancia_rio(x, z)
+	if dr < 3.5:   # lama e areia na margem do rio
+		c = c.lerp(Color(0.34, 0.29, 0.2), 1.0 - smoothstep(0.0, 3.5, dr))
 	return c
 
 

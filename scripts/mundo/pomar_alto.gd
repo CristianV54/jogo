@@ -21,7 +21,7 @@ func _ready() -> void:
 	_solidos.name = "SolidosDoPomar"
 	add_child(_solidos)
 	VilaRefugio.preparar(self, altura_em, _solidos)
-	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.44, 0.38), 110.0, true, 7)
+	Horizonte.montar(self, TAM, Color(0.2, 0.34, 0.16), Color(0.36, 0.44, 0.38), 110.0, true, 7, -16.0)
 	_floresta()
 	_pomar()
 	_galpao()
@@ -48,12 +48,19 @@ func _terreno() -> void:
 		PackedVector2Array([Vector2(0, 110), Vector2(0, 40), Vector2(0, 6), Vector2(0, -10)]),
 		PackedVector2Array([Vector2(0, 18), Vector2(30, -18), Vector2(40, -34)]),   # até o moinho
 	]
+	# Riacho do moinho: desce do norte, passa pela roda d'água e segue para o sul
+	var eixo := Terreno.curva([Vector2(49, -112), Vector2(49, -75), Vector2(49, -40), Vector2(50, -10), Vector2(54, 30), Vector2(62, 75), Vector2(70, 118)], 3.0)
+	terreno.rios = [{"pontos": eixo, "largura": 3.0, "margem": 6.0, "fundo": 0.7, "agua": true}]
+	var corredor: Array[Vector3] = []
+	for i in range(0, eixo.size(), 5):
+		corredor.append(Vector3(eixo[i].x, eixo[i].y, 10.0))
+	terreno.planos = corredor
 	add_child(terreno)
 	terreno.gerar()
 
 
 func _livre_de_arvore(x: float, z: float) -> bool:
-	if Vector2(x, z).length() < 88.0:
+	if Vector2(x, z).length() < 88.0 or terreno.na_agua(x, z, 3.0):
 		return false
 	return terreno.normal_em(x, z).y >= 0.74
 
@@ -207,17 +214,6 @@ func _moinho() -> void:
 	var roda := RodaDagua.new()   # roda d'água na lateral direita, sobre o riacho
 	roda.position = Vector3(3.6, 1.7, 0.0)
 	casa.add_child(roda)
-	var agua := MeshInstance3D.new()
-	var rio := BoxMesh.new()
-	rio.size = Vector3(2.6, 0.06, 26.0)
-	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.08, 0.24, 0.4, 0.8)
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.roughness = 0.7
-	rio.material = m
-	agua.mesh = rio
-	agua.position = Vector3(3.6, 0.12, 6.0)
-	casa.add_child(agua)
 
 
 func _saidas() -> void:

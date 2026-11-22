@@ -36,7 +36,7 @@ func _ready() -> void:
 	_solidos.name = "SolidosDoBosque"
 	add_child(_solidos)
 	VilaRefugio.preparar(self, altura_em, _solidos)
-	Horizonte.montar(self, TAM, Color(0.14, 0.26, 0.15), Color(0.3, 0.38, 0.42), 130.0, true, 11)
+	Horizonte.montar(self, TAM, Color(0.14, 0.26, 0.15), Color(0.3, 0.38, 0.42), 130.0, true, 11, -12.0)
 	_floresta()
 	_acampamento()
 	_riacho()
@@ -95,6 +95,11 @@ func _terreno() -> void:
 		Vector3(0.0, -62.0, 14.0), Vector3(0.0, -80.0, 14.0), Vector3(PRACA.x, PRACA.y, 34.0), Vector3(TOCA.x, TOCA.y, 9.0),
 	]
 	terreno.caminhos = [PackedVector2Array([Vector2(0, 150), Vector2(0, 105), Vector2(2, 60), Vector2(0, 20), Vector2(0, -20), Vector2(0, -60), Vector2(0, -100)])]
+	# Riacho da Névoa: meandro de ponta a ponta do bosque, cruzando a trilha em (1, 40)
+	var ctrl: Array = []
+	for x in range(-156, 157, 12):
+		ctrl.append(Vector2(float(x), VALE.y + 5.0 * sin(x * 0.12)))
+	terreno.rios = [{"pontos": Terreno.curva(ctrl, 3.0), "largura": 3.8, "margem": 6.0, "fundo": 0.7, "agua": true}]
 	add_child(terreno)
 	terreno.gerar()
 
@@ -115,7 +120,7 @@ func _floresta() -> void:
 			if Vector2(x, z).distance_to(l[0]) < l[1]:
 				ok = false
 				break
-		if not ok or terreno.distancia_caminho(x, z) < 4.0 or terreno.normal_em(x, z).y < 0.72:
+		if not ok or terreno.distancia_caminho(x, z) < 4.0 or terreno.na_agua(x, z, 3.0) or terreno.normal_em(x, z).y < 0.72:
 			continue
 		var s := _rng.randf_range(0.8, 1.7)
 		var h := altura_em(x, z)
@@ -316,25 +321,10 @@ func _pegadas(pontos: Array, bota: bool) -> void:
 # ---------------------------------------------------------------- zona 2: Riacho da Névoa
 
 func _riacho() -> void:
-	var agua := StandardMaterial3D.new()
-	agua.albedo_color = Color(0.08, 0.24, 0.4, 0.8)
-	agua.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	agua.roughness = 0.6
-	var pontos: Array[Vector2] = []
-	for x in range(-54, 56, 6):
-		pontos.append(Vector2(x, VALE.y + 5.0 * sin(x * 0.12)))
-	for i in pontos.size() - 1:
-		var de := pontos[i]
-		var para := pontos[i + 1]
-		var mi := MeshInstance3D.new()
-		var b := BoxMesh.new()
-		b.size = Vector3(3.8, 0.06, de.distance_to(para) + 0.8)
-		b.material = agua
-		mi.mesh = b
-		var meio := (de + para) / 2.0
-		mi.position = Vector3(meio.x, _y(meio) + 0.03, meio.y)
-		mi.rotation.y = atan2((para - de).x, (para - de).y)
-		add_child(mi)
+	# o leito e a água vêm do terreno (ver _terreno); a trilha cruza por uma ponte de madeira
+	var ponte := PonteDeMadeira.new()
+	add_child(ponte)
+	ponte.ligar(Vector3(1.0, altura_em(1.0, 32.0), 32.0), Vector3(1.0, altura_em(1.0, 49.0), 49.0))
 	for k in 5:   # pedras de travessia, no cruzamento da trilha
 		var p := Vector2(0.6, VALE.y - 1.8 + k * 0.9)
 		_rocha(p, 0.5, false, 11.0 + k)
