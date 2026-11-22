@@ -12,6 +12,13 @@ static var _area: Node3D
 static var _corpo: StaticBody3D
 
 
+## Prepara o estado estático para outras áreas usarem as ajudantes (cercas, caixas) sem construir a vila.
+static func preparar(area: Node3D, altura_em: Callable, corpo: StaticBody3D) -> void:
+	_area = area
+	_h = altura_em
+	_corpo = corpo
+
+
 static func construir(area: Node3D, altura_em: Callable) -> Array:
 	_area = area
 	_h = altura_em
@@ -21,6 +28,7 @@ static func construir(area: Node3D, altura_em: Callable) -> Array:
 	var ocupado: Array = []
 	_portao(Vector3(0.0, 0.0, -1.0), "Trilha do Bosque Velado")
 	_portao(Vector3(1.0, 0.0, 0.0), "Refúgio do Pinhal - Estrada de Ferrogris")
+	_portao(Vector3(-1.0, 0.0, 0.0), "Trilha do Pomar Alto")
 	ocupado.append(_curral(Vector3(0.0, 0.0, 31.0), 16.0, 11.0, "n", ["Cocho", "Feno"]))
 	ocupado.append(_curral(Vector3(-15.0, 0.0, -28.0), 8.0, 6.0, "l", ["Cocho"]))
 	ocupado.append(_curral(Vector3(-30.0, 0.0, 13.0), 9.0, 8.0, "l", ["Cocho", "Feno"]))
@@ -155,7 +163,7 @@ static func _portao(sentido: Vector3, placa: String) -> void:
 	rotulo.outline_size = 14
 	rotulo.modulate = Color(0.95, 0.88, 0.7)
 	rotulo.position = raiz + Vector3(0.0, 4.2, 0.0) - sentido * 0.28
-	rotulo.rotation.y = -PI / 2.0 if absf(sentido.x) > 0.5 else 0.0
+	rotulo.rotation.y = -PI / 2.0 * sentido.x
 	_area.add_child(rotulo)
 
 

@@ -64,6 +64,7 @@ func _rodar() -> void:
 	while jogo.area_nome != "refugio_do_pinhal" or jogo._trocando:
 		await esperar(0.2)
 	await esperar(2.0)
+	jogo.liberar_fagulha()   # desde o Marco 3 a Fagulha só segue o jogador depois do resgate
 
 	# ---------------- dano
 	print("== DANO ==")

@@ -98,9 +98,39 @@ func dialogo_de(npc: String) -> PackedStringArray:
 	return PackedStringArray()
 
 
-## Ler o quadro de avisos da praça.
+## Ler o quadro de avisos da praça: oferece o próximo serviço do capítulo, na ordem.
 func ler_quadro() -> void:
 	if not quadro_liberado:
 		aviso.emit("O quadro está cheio de avisos que você ainda não pode atender. Termine a Rotina do Exílio.", 4.0)
-	else:
-		aviso.emit("Nenhum aviso novo por enquanto.", 3.0)
+		return
+	if not ativas.is_empty():
+		aviso.emit("Você já tem um serviço em andamento: %s." % DadosMissoes.MISSOES[ativas[0]]["titulo"], 3.0)
+		return
+	for id in DadosMissoes.ORDEM_CAP1:
+		if not concluidas.has(id):
+			iniciar(id)
+			return
+	aviso.emit("Nenhum aviso novo por enquanto.", 3.0)
+
+
+## O jogador tenta entregar ao NPC `alvo` o que alguma missão ativa pede (maçãs à Mara, carne à Fagulha).
+## Gasta o item do inventário e conta para o objetivo. Devolve true se algo foi entregue.
+func tentar_entrega(alvo: String) -> bool:
+	for id in ativas.duplicate():
+		for obj in DadosMissoes.MISSOES[id]["objetivos"]:
+			if obj["tipo"] != "entregar" or obj["alvo"] != alvo:
+				continue
+			var faltam := int(obj["qtd"]) - feito(id, obj["id"])
+			if faltam <= 0 or jogador == null:
+				continue
+			var item: String = obj["item"]
+			var tenho := int(jogador.inventario.get(item, 0))
+			if tenho <= 0:
+				aviso.emit("Você precisa de %s para isso." % Itens.nome(item), 2.5)
+				return false
+			var dar := mini(tenho, faltam)
+			jogador.gastar_item(item, dar)
+			aviso.emit("Entregou %d %s." % [dar, Itens.nome(item)], 2.0)
+			_registrar("entregar", alvo, dar)
+			return true
+	return false

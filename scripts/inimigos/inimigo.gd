@@ -157,6 +157,8 @@ func _morrer() -> void:
 		tw.tween_property(visual, "rotation_degrees:z", 80.0, 0.9)
 		tw.parallel().tween_property(visual, "position:y", -0.6 * escala_visual, 1.6)
 	morreu.emit(self)
+	if especie != "":
+		GerenciadorMissoes.evento("derrotar", especie)
 	if not chefe:
 		Pickup.largar(get_parent(), global_position, drops)
 		get_tree().create_timer(4.0).timeout.connect(func() -> void: Efeitos.desintegrar(self, visual))

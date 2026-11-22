@@ -5,6 +5,7 @@ extends Node3D
 
 const AREAS := {
 	"refugio_do_pinhal": "res://scenes/areas/refugio_do_pinhal.tscn",
+	"pomar_alto": "res://scenes/areas/pomar_alto.tscn",
 	"bosque_velado": "res://scenes/areas/bosque_velado.tscn",
 	"fronteira_ferrogris": "res://scenes/areas/fronteira_ferrogris.tscn",
 	"cratera_ignis": "res://scenes/areas/cratera_ignis.tscn",
@@ -16,6 +17,8 @@ const REQUISITOS := {
 	"cratera_ignis": "kaelor",
 	"valdoria": "ignis_maw",
 }
+## Missão que precisa estar concluída para o Halk abrir a passagem.
+const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4"}
 const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "solon": "Imperador Solon"}
 
 signal area_carregada(nome: String)
@@ -26,6 +29,7 @@ var area: AreaBase
 var area_nome := ""
 var derrotados: Dictionary = {}
 var missoes: GerenciadorMissoes
+var fagulha_livre := false      # só acompanha o Torin depois do resgate (C1-M4)
 var _falas_atuais := PackedStringArray()
 var _dialogo_npc: Npc
 var _dialogo_indice := 0
@@ -53,7 +57,12 @@ func _ready() -> void:
 	missoes.aviso.connect(hud.mensagem)
 	missoes.missao_iniciada.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
 	missoes.objetivo_atualizado.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
-	missoes.missao_concluida.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
+	missoes.missao_concluida.connect(func(id: String) -> void:
+		hud.definir_rastreador(missoes.rastreador())
+		if id == "C1-M4":
+			liberar_fagulha())
+	fagulha.alvo = null   # a Fagulha começa ferida na clareira do pinhal
+	fagulha.montaria.ativa = false
 	ir_para("refugio_do_pinhal", "Principal")
 	missoes.iniciar("C1-M1")
 
@@ -63,6 +72,10 @@ func ir_para(destino: String, spawn: String) -> void:
 		return
 	if REQUISITOS.has(destino) and not derrotados.has(REQUISITOS[destino]):
 		hud.mensagem("Caminho bloqueado: derrote %s antes." % NOMES_DOS_CHEFES[REQUISITOS[destino]], 2.5)
+		_empurrar_para_tras()
+		return
+	if REQUISITOS_MISSAO.has(destino) and not missoes.concluidas.has(REQUISITOS_MISSAO[destino]):
+		hud.mensagem("Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).", 3.5)
 		_empurrar_para_tras()
 		return
 	_trocando = true
@@ -90,7 +103,14 @@ func ir_para(destino: String, spawn: String) -> void:
 	jogador.rotation.y = t.basis.get_euler().y
 	jogador.velocity = Vector3.ZERO
 	camera.yaw = jogador.rotation.y
-	if not fagulha.montaria.montada:
+	if not fagulha_livre:
+		var aqui := destino == "refugio_do_pinhal"   # ferida na clareira; fora do Refúgio ela some
+		fagulha.visible = aqui
+		fagulha.set_physics_process(false)
+		fagulha.corpo.collision_layer = Solidos.CAMADA_SERES if aqui else 0
+		if aqui:
+			fagulha.global_position = area.pos_fagulha_ferida()
+	elif not fagulha.montaria.montada:
 		fagulha.modo_voo = false
 		fagulha.global_position = pos + Vector3(9.0, 0.0, 9.0).rotated(Vector3.UP, jogador.rotation.y)
 	hud.mostrar_area(area.nome_area)
@@ -165,6 +185,16 @@ func _npc_mais_perto() -> Npc:
 			dmin = d
 			melhor = n
 	return melhor
+
+
+## Depois do resgate a Fagulha acompanha o Torin, pode ser montada e o portão norte abre.
+func liberar_fagulha() -> void:
+	fagulha_livre = true
+	fagulha.visible = true
+	fagulha.alvo = jogador
+	fagulha.set_physics_process(true)
+	fagulha.montaria.ativa = true
+	hud.mensagem("Fagulha agora acompanha você.", 4.0)
 
 
 func _interagivel_mais_perto() -> Interagivel:
@@ -251,6 +281,7 @@ func interagir() -> void:
 		if m:
 			jogador.montar(m)
 		return
+	missoes.tentar_entrega(n.nome.to_lower())   # maçãs para a Mara etc.
 	_falas_atuais = missoes.dialogo_de(n.nome.to_lower())
 	if _falas_atuais.is_empty():
 		_falas_atuais = n.falas

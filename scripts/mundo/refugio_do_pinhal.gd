@@ -12,6 +12,8 @@ const ESTILO_PEDRA := {
 	"parede": "Wall_UnevenBrick_Straight", "porta": "Wall_UnevenBrick_Door_Round", "janela": "Wall_UnevenBrick_Window_Wide_Round",
 	"piso": "Floor_UnevenBrick", "canto": "Corner_Exterior_Brick"}
 
+const CLAREIRA := Vector3(-65.0, 0.0, -105.0)   # clareira do pinhal (missão C1-M4)
+
 var terreno: Terreno
 var _rng := RandomNumberGenerator.new()
 
@@ -33,6 +35,12 @@ func _ready() -> void:
 	_npcs()
 	_animais()
 	_saidas()
+	_clareira_do_pinhal()
+	var m := GerenciadorMissoes.instancia
+	if m:
+		m.missao_iniciada.connect(_ao_missao_iniciada)
+		if m.ativas.has("C1-M3"):
+			_ao_missao_iniciada("C1-M3")
 
 
 func altura_em(x: float, z: float) -> float:
@@ -40,33 +48,7 @@ func altura_em(x: float, z: float) -> float:
 
 
 func _ambiente() -> void:
-	var ceu := ProceduralSkyMaterial.new()
-	ceu.sky_top_color = Color(0.32, 0.5, 0.78)
-	ceu.sky_horizon_color = Color(0.74, 0.8, 0.86)
-	ceu.ground_horizon_color = Color(0.62, 0.68, 0.66)
-	ceu.ground_bottom_color = Color(0.3, 0.38, 0.32)
-	var sky := Sky.new()
-	sky.sky_material = ceu
-	var e := Environment.new()
-	e.background_mode = Environment.BG_SKY
-	e.sky = sky
-	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	e.ambient_light_energy = 0.9
-	e.fog_enabled = true
-	e.fog_light_color = Color(0.72, 0.79, 0.84)
-	e.fog_density = 0.0035
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	var we := WorldEnvironment.new()
-	we.name = "Ambiente"
-	we.environment = e
-	add_child(we)
-	var sol := DirectionalLight3D.new()
-	sol.name = "Sol"
-	sol.rotation_degrees = Vector3(-50.0, -35.0, 0.0)
-	sol.light_energy = 1.15
-	sol.shadow_enabled = true
-	sol.directional_shadow_max_distance = 130.0
-	add_child(sol)
+	_ambiente_padrao()
 
 
 func _terreno() -> void:
@@ -76,7 +58,10 @@ func _terreno() -> void:
 	terreno.caminhos = [
 		PackedVector2Array([Vector2(0, 0), Vector2(0, -40), Vector2(6, -80), Vector2(-5, -120), Vector2(0, -160)]),
 		PackedVector2Array([Vector2(0, 0), Vector2(40, 0), Vector2(80, 7), Vector2(120, -4), Vector2(160, 0)]),
+		PackedVector2Array([Vector2(0, 0), Vector2(-40, 0), Vector2(-80, 6), Vector2(-120, -4), Vector2(-160, 0)]),   # trilha do Pomar Alto
+		PackedVector2Array([Vector2(6, -80), Vector2(-15, -93), Vector2(-45, -100), Vector2(-62, -105)]),   # trilha escondida do pinhal
 	]
+	terreno.planos = [Vector3(CLAREIRA.x, CLAREIRA.z, 12.0)]   # a clareira do pinhal é plana
 	add_child(terreno)
 	terreno.gerar()
 
@@ -96,6 +81,8 @@ func _multimesh(malha: Mesh, transformacoes: Array[Transform3D], nome_no: String
 
 
 func _livre(x: float, z: float, folga_caminho: float, inclinacao_min: float) -> bool:
+	if Vector2(x, z).distance_to(Vector2(CLAREIRA.x, CLAREIRA.z)) < 17.0:
+		return false   # a clareira do pinhal fica limpa de árvores
 	if Vector2(x, z).length() < terreno.clareira_raio * 1.02:
 		return false
 	if terreno.distancia_caminho(x, z) < folga_caminho:
@@ -211,8 +198,8 @@ func _cerca() -> void:
 	for i in n:
 		var ang := TAU * i / n
 		var pos := Vector3(cos(ang) * RAIO_CERCA, 0.0, sin(ang) * RAIO_CERCA)
-		if (pos.z < 0.0 and absf(pos.x) < 8.0) or (pos.x > 0.0 and absf(pos.z) < 8.0):
-			continue   # saídas norte e leste
+		if (pos.z < 0.0 and absf(pos.x) < 8.0) or (absf(pos.z) < 8.0):
+			continue   # saídas norte, leste e oeste
 		var tangente := Vector3(-sin(ang), 0.0, cos(ang))
 		var p := ConstrutorCasa.peca("Prop_WoodenFence_Single")
 		p.position = pos
@@ -339,6 +326,12 @@ const CALDEIRAO := Vector3(2.6, 0.0, 2.2)
 
 
 func _postos_de_trabalho() -> void:
+	var zona_curral := ZonaDeEvento.new()   # o cavalo fugido, ao chegar ao curral dos cavalos, conta para C1-M3
+	zona_curral.id = "curral_cavalo"
+	zona_curral.raio = 5.5
+	zona_curral.grupo_alvo = "cavalo_perdido"
+	zona_curral.position = Vector3(-30.0, 0.0, 13.0)
+	add_child(zona_curral)
 	var solidos := StaticBody3D.new()
 	solidos.name = "SolidosDosPostos"
 	add_child(solidos)
@@ -443,7 +436,7 @@ const DROPS_DE_ANIMAIS := {
 const RAIO_DE_ANIMAIS := {"vaca": 1.0, "cavalo": 1.1, "ovelha": 0.6, "porco": 0.6, "cao": 0.4, "galinha": 0.3}
 
 
-func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> void:
+func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> AnimalVila:
 	var a := AnimalVila.new()
 	a.name = arquivo.capitalize()
 	a.nome = NOMES_DE_ANIMAIS[arquivo]
@@ -459,6 +452,7 @@ func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> v
 	a.position = Vector3(pos.x, altura_em(pos.x, pos.z), pos.z)
 	a.rotation.y = _rng.randf() * TAU
 	add_child(a)
+	return a
 
 
 func _animais() -> void:
@@ -483,5 +477,101 @@ func _saidas() -> void:
 	_novo_spawn("Principal", Vector3(0, 0, 14), Vector3(0, 0, -30))
 	_novo_spawn("DoBosque", Vector3(0, 0, -43), Vector3(0, 0, 0))
 	_novo_spawn("DaFronteira", Vector3(43, 0, 0), Vector3(0, 0, 0))
+	_novo_spawn("DoPomar", Vector3(-43, 0, 0), Vector3(0, 0, 0))
+	_portal(Vector3(-150, terreno.altura_em(-150, 0), 0), "pomar_alto", "Entrada").rotation.y = deg_to_rad(90.0)
 	_portal(Vector3(0, terreno.altura_em(0, -150), -150), "bosque_velado", "Entrada")
 	_portal(Vector3(150, terreno.altura_em(150, -1), -1), "fronteira_ferrogris", "Entrada").rotation.y = deg_to_rad(90.0)
+
+
+## Onde a Fagulha ferida fica deitada até o resgate (C1-M4).
+func pos_fagulha_ferida() -> Vector3:
+	var p := CLAREIRA + Vector3(5.0, 0.0, 3.0)
+	return Vector3(p.x, altura_em(p.x, p.z), p.z)
+
+
+## Clareira escondida no pinhal: chão escuro, círculo de pedras, a estaca de Ferro Negro com correntes até a Fagulha,
+## três batedores imperiais de guarda e a zona que conta como "encontrar a clareira".
+func _clareira_do_pinhal() -> void:
+	var h := altura_em(CLAREIRA.x, CLAREIRA.z)
+	var disco := MeshInstance3D.new()
+	var cil := CylinderMesh.new()
+	cil.top_radius = 10.0
+	cil.bottom_radius = 10.0
+	cil.height = 0.08
+	cil.radial_segments = 20
+	var solo := StandardMaterial3D.new()
+	solo.albedo_color = Color(0.17, 0.14, 0.11)
+	solo.roughness = 1.0
+	cil.material = solo
+	disco.mesh = cil
+	disco.position = Vector3(CLAREIRA.x, h + 0.05, CLAREIRA.z)
+	add_child(disco)
+	for i in 9:   # círculo de pedras
+		var a := TAU * i / 9.0
+		var pedra := MeshInstance3D.new()
+		pedra.mesh = FabricaNatureza.pedra(5.0 + i)
+		pedra.material_override = FabricaNatureza.material()
+		pedra.scale = Vector3.ONE * 1.1
+		var px := CLAREIRA.x + cos(a) * 10.5
+		var pz := CLAREIRA.z + sin(a) * 10.5
+		pedra.position = Vector3(px, altura_em(px, pz) - 0.1, pz)
+		add_child(pedra)
+	var estaca := EstacaDeFerroNegro.new()
+	estaca.name = "EstacaDeFerroNegro"
+	estaca.position = Vector3(CLAREIRA.x, h, CLAREIRA.z)
+	add_child(estaca)
+	var fag := pos_fagulha_ferida()
+	var ferro := StandardMaterial3D.new()
+	ferro.albedo_color = Color(0.1, 0.1, 0.12)
+	ferro.metallic = 0.6
+	for k in 2:   # correntes da estaca até a Fagulha
+		var de := Vector3(CLAREIRA.x, h + 1.2, CLAREIRA.z)
+		var para := Vector3(fag.x + (k - 0.5) * 1.2, fag.y + 0.9, fag.z)
+		var corr := MeshInstance3D.new()
+		var cc := CylinderMesh.new()
+		cc.top_radius = 0.04
+		cc.bottom_radius = 0.04
+		cc.height = de.distance_to(para)
+		cc.radial_segments = 4
+		cc.material = ferro
+		corr.mesh = cc
+		corr.position = (de + para) / 2.0
+		add_child(corr)
+		corr.look_at(para, Vector3.UP)
+		corr.rotate_object_local(Vector3.RIGHT, PI / 2.0)
+	var alimentar := FagulhaFerida.new()
+	alimentar.position = Vector3(fag.x - 2.5, fag.y, fag.z - 1.5)
+	add_child(alimentar)
+	var zona := ZonaDeEvento.new()
+	zona.id = "clareira_pinhal"
+	zona.raio = 15.0
+	zona.position = Vector3(CLAREIRA.x, h, CLAREIRA.z)
+	add_child(zona)
+	var m := GerenciadorMissoes.instancia
+	if m == null or not m.concluidas.has("C1-M4"):
+		for p in [Vector2(-8, 6), Vector2(8, 5), Vector2(0, 11)]:   # três batedores imperiais de guarda
+			var batedor: Inimigo = (load("res://scenes/inimigos/guarda_imperial.tscn") as PackedScene).instantiate()
+			batedor.especie = "batedor"
+			batedor.position = Vector3(CLAREIRA.x + p.x, altura_em(CLAREIRA.x + p.x, CLAREIRA.z + p.y) + 0.3, CLAREIRA.z + p.y)
+			add_child(batedor)
+
+
+## C1-M3 começa: lobos rondam o cercado das ovelhas e um cavalo some pela estrada leste.
+func _ao_missao_iniciada(id: String) -> void:
+	if id != "C1-M3":
+		return
+	var m := GerenciadorMissoes.instancia
+	var faltam := 3 - m.feito("C1-M3", "lobos")
+	var pontos := [Vector2(14, 30), Vector2(-14, 34), Vector2(-12, 24)]
+	for i in faltam:
+		var lobo: Inimigo = (load("res://scenes/inimigos/lobo.tscn") as PackedScene).instantiate()
+		lobo.position = Vector3(pontos[i].x, altura_em(pontos[i].x, pontos[i].y) + 0.3, pontos[i].y)
+		add_child(lobo)
+	if m.feito("C1-M3", "cavalo") == 0 and get_tree().get_nodes_in_group("cavalo_perdido").is_empty():
+		var cavalo := _animal("cavalo", Vector3(78.0, 0.0, 9.0), 0.5, 0.5)
+		cavalo.add_to_group("cavalo_perdido")
+		var acalmar := Interagivel.new()
+		acalmar.id = "cavalo_perdido"
+		acalmar.texto = "Acalmar o cavalo"
+		acalmar.raio = 3.5
+		cavalo.add_child(acalmar)

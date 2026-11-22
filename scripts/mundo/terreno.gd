@@ -9,6 +9,9 @@ extends Node3D
 @export var amplitude := 16.0
 @export var frequencia := 0.011
 @export var clareira_raio := 45.0
+## Áreas aplanadas: cada Vector3 é (x, z, raio). O terreno vira plano na altura do centro, com 10 m de transição.
+@export var planos: Array[Vector3] = []
+@export var inclinacao := Vector2.ZERO   # sobe/desce suave em x e z (a encosta do Pomar Alto)
 @export var cor_grama := Color(0.34, 0.5, 0.21)
 @export var cor_mata := Color(0.2, 0.34, 0.16)
 @export var cor_terra := Color(0.47, 0.36, 0.23)
@@ -47,10 +50,19 @@ func gerar() -> void:
 
 
 func altura_em(x: float, z: float) -> float:
+	var h := _altura_crua(x, z)
+	for p in planos:
+		var dp := Vector2(x - p.x, z - p.y).length()
+		if dp < p.z + 10.0:
+			h = lerpf(h, _altura_crua(p.x, p.y), 1.0 - smoothstep(p.z, p.z + 10.0, dp))
+	return h
+
+
+func _altura_crua(x: float, z: float) -> float:
 	var d := Vector2(x, z).length()
 	var m := smoothstep(clareira_raio, clareira_raio * 1.9, d)
 	var n := _ruido.get_noise_2d(x, z) * 0.5 + 0.5
-	return (n * amplitude + _ruido_fino.get_noise_2d(x, z) * 1.3) * m
+	return (n * amplitude + _ruido_fino.get_noise_2d(x, z) * 1.3) * m + x * inclinacao.x + z * inclinacao.y
 
 
 func normal_em(x: float, z: float) -> Vector3:

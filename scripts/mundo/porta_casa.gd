@@ -12,6 +12,7 @@ extends Node3D
 var folha: Node3D
 var corpo: StaticBody3D                 # colisão do vão, ativa só com a porta quase fechada
 var aberta := false
+var trancada := false                   # trancada nunca abre (moinho do Pomar Alto)
 var angulo := 0.0
 
 
@@ -24,6 +25,8 @@ func _process(delta: float) -> void:
 			aberta = true
 		elif aberta and d.length() > raio_fechar:
 			aberta = false
+	if trancada:
+		aberta = false
 	angulo = move_toward(angulo, abertura if aberta else 0.0, velocidade * delta)
 	if folha:
 		folha.rotation_degrees.y = giro_base + angulo

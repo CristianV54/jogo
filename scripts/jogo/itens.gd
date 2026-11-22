@@ -3,9 +3,15 @@ extends RefCounted
 ## Catálogo dos itens do jogo: nome, descrição, modelo 3D (usado no chão e no ícone do inventário) e efeito.
 ## `cura` > 0: o item é comestível e recupera essa vida ao ser usado.
 
-const ORDEM := ["carne", "couro", "la", "presa"]
+const ORDEM := ["maca", "carne", "couro", "la", "presa"]
 
 const DADOS := {
+	"maca": {
+		"nome": "Maçã",
+		"descricao": "Maçã do Pomar Alto, a despensa do Refúgio. Comer recupera 8 de vida.",
+		"modelo": "res://assets/models/itens/maca/maca.glb",
+		"cura": 8,
+	},
 	"carne": {
 		"nome": "Carne",
 		"descricao": "Carne fresca de caça ou de criação. Comer recupera 20 de vida.",

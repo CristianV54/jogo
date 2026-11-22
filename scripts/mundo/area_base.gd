@@ -34,3 +34,34 @@ func _portal(pos: Vector3, destino: String, spawn: String, largura := 8.0) -> Po
 	add_child(p)
 	p.usado.connect(func(d: String, s: String) -> void: pediu_troca.emit(d, s))
 	return p
+
+
+## Céu, névoa e sol do mundo aberto (pinhais e campos).
+func _ambiente_padrao() -> void:
+	var ceu := ProceduralSkyMaterial.new()
+	ceu.sky_top_color = Color(0.32, 0.5, 0.78)
+	ceu.sky_horizon_color = Color(0.74, 0.8, 0.86)
+	ceu.ground_horizon_color = Color(0.62, 0.68, 0.66)
+	ceu.ground_bottom_color = Color(0.3, 0.38, 0.32)
+	var sky := Sky.new()
+	sky.sky_material = ceu
+	var e := Environment.new()
+	e.background_mode = Environment.BG_SKY
+	e.sky = sky
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	e.ambient_light_energy = 0.9
+	e.fog_enabled = true
+	e.fog_light_color = Color(0.72, 0.79, 0.84)
+	e.fog_density = 0.0035
+	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	var we := WorldEnvironment.new()
+	we.name = "Ambiente"
+	we.environment = e
+	add_child(we)
+	var sol := DirectionalLight3D.new()
+	sol.name = "Sol"
+	sol.rotation_degrees = Vector3(-50.0, -35.0, 0.0)
+	sol.light_energy = 1.15
+	sol.shadow_enabled = true
+	sol.directional_shadow_max_distance = 130.0
+	add_child(sol)

@@ -365,11 +365,12 @@ static func _mapa_na_parede(casa: Node3D, x: float, z: float) -> void:
 
 static func _deposito(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> void:
 	# depósito de grãos: sacos empilhados no fundo, barris na lateral esquerda, caixotes na direita
-	for i in 5:
+	var sacos := maxi(2, int((2.0 * ix - 1.0) / 0.75))
+	for i in sacos:
 		_movel(casa, corpo, "Bag", -ix + 0.5 + i * 0.75, -iz + 0.4, 0.0)
-	for i in 3:
+	for i in maxi(1, sacos - 2):
 		_movel(casa, corpo, "Bag", -ix + 1.0 + i * 0.75, -iz + 0.4, 0.0, 0.8, false)
-	for i in 3:
+	for i in (3 if iz > 2.0 else 1):
 		_movel(casa, corpo, "Barrel", -ix + 0.4, -iz + 1.4 + i * 0.85, 0.0)
 	for i in 2:
 		var c := _colocar(casa, "Prop_Crate", Vector3(ix - 0.6, 0.0, -iz + 1.0 + i * 1.0), 10.0 * i)

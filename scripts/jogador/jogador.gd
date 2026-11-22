@@ -234,6 +234,17 @@ func coletar(item: String, quantidade: int) -> void:
 	inventario_mudou.emit(inventario)
 
 
+## Tira `quantidade` do item do inventário (para entregas). Devolve false se não houver o bastante.
+func gastar_item(item: String, quantidade: int) -> bool:
+	if int(inventario.get(item, 0)) < quantidade:
+		return false
+	inventario[item] = int(inventario[item]) - quantidade
+	if int(inventario[item]) <= 0:
+		inventario.erase(item)
+	inventario_mudou.emit(inventario)
+	return true
+
+
 ## Usa um item comestível: recupera vida e gasta uma unidade. Devolve false se não deu (sem o item, vida cheia, não comestível).
 func usar_item(item: String) -> bool:
 	var cura := int(Itens.DADOS.get(item, {}).get("cura", 0))
