@@ -479,10 +479,7 @@ func _falar_solto(texto: String) -> void:
 
 ## Raios à frente contra o mundo e outros seres (camadas 1 e 8), partindo da altura do peito.
 func _caminho_livre(dir: Vector3) -> bool:
-	var de := global_position + Vector3(0.0, 0.9, 0.0)
-	var q := PhysicsRayQueryParameters3D.create(de, de + dir * 0.9, 1 | Solidos.CAMADA_SERES)
-	q.exclude = [corpo.get_rid()]
-	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
+	return Solidos.caminho_livre(self, global_position + Vector3(0.0, 0.9, 0.0), dir, 0.7, 0.35, [corpo.get_rid()])
 
 
 func _proximo_passo() -> void:

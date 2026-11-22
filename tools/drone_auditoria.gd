@@ -40,7 +40,11 @@ func _rodar() -> void:
 	for pid in m.povoados:
 		if m.povoados[pid].has("no"):
 			m._ligar(m.povoados[pid]["no"], true)
-	for i in 6:
+	if m.fauna:
+		for c in m.fauna.get_children():
+			if c is Node3D:
+				m._ligar(c, true)   # os bichos só rodam perto do jogador: liga todos para conferir o nascimento de cada um
+	for i in 8:
 		await physics_frame
 	var espaco := jogo.get_world_3d().direct_space_state
 	_grade(m, espaco)
@@ -88,7 +92,7 @@ func _grade(m: Mundo, espaco: PhysicsDirectSpaceState3D) -> void:
 				if tipo[k2] != 1 or alturas[k] < -900.0 or alturas[k2] < -900.0:
 					continue
 				var dy := absf(alturas[k] - alturas[k2])
-				if dy > 4.5:
+				if dy > 6.0:   # mais de 45 graus: o Torin (ângulo máximo de piso 45) não sobe
 					_achado("CRITICO", "penhasco no terreno", lim.position.x + i * PASSO, lim.position.y + j * PASSO, "terreno", "desnível de %.1f m em %d m: o jogador não sobe nem desce" % [dy, int(PASSO)])
 	print("GRADE ", total, " células, ", nx, "x", nz)
 
@@ -201,7 +205,10 @@ func _seres(m: Mundo, espaco: PhysicsDirectSpaceState3D) -> void:
 			if n3 == null or not n3.is_inside_tree():
 				continue
 			var p := n3.global_position
-			var h := espaco.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 6.0, 0), p + Vector3(0, -12.0, 0), 1))
+			var rq := PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.2, 0), p + Vector3(0, -12.0, 0), 1)   # começa logo acima dos pés: telhado e galho em cima não contam como chão
+			if n3 is CollisionObject3D:
+				rq.exclude = [(n3 as CollisionObject3D).get_rid()]   # o raio não pode acertar o próprio corpo do ser
+			var h := espaco.intersect_ray(rq)
 			var chao: float = h.position.y if not h.is_empty() else -999.0
 			if absf(p.y - chao) > 0.8:
 				_achado("CRITICO", "ser flutuando ou enterrado", p.x, p.z, String(n3.name), "a %.1f m do chão" % (p.y - chao))
@@ -212,7 +219,12 @@ func _seres(m: Mundo, espaco: PhysicsDirectSpaceState3D) -> void:
 			for r in espaco.intersect_shape(q, 4):
 				var nome := String((r.collider as Node).name)
 				if r.collider is StaticBody3D and nome != "Colisao" and nome != "ColisaoPorta":
-					_achado("CRITICO", "ser dentro de parede", p.x, p.z, String(n3.name), "dentro de " + str((r.collider as Node).get_path()))
+					var co := r.collider as CollisionObject3D
+					var forma := co.shape_owner_get_owner(co.shape_find_owner(r.shape)) as CollisionShape3D
+					var det := ""
+					if forma:
+						det = " [forma %s em %s]" % [str(forma.shape.get_class()) + (" " + str((forma.shape as BoxShape3D).size) if forma.shape is BoxShape3D else (" r=%.1f h=%.1f" % [(forma.shape as CylinderShape3D).radius, (forma.shape as CylinderShape3D).height] if forma.shape is CylinderShape3D else "")), str(forma.global_position.snapped(Vector3(0.1, 0.1, 0.1)))]
+					_achado("CRITICO", "ser dentro de parede", p.x, p.z, String(n3.name) + " (" + String(n3.get_script().get_global_name() if n3.get_script() else n3.get_class()) + ")", "dentro de " + str((r.collider as Node).get_path()) + det)
 					break
 
 

@@ -1,0 +1,111 @@
+{
+  "contagem": {
+    "CRITICO|ser dentro de parede": 2,
+    "VISUAL|água no ar sobre chão mais baixo": 10
+  },
+  "etapa": "etapa2c",
+  "exemplos": [
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "624 de 942 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -381.5,
+      "z": 113.2
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "680 de 1032 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 342.8,
+      "z": 58.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "336 de 516 amostras; pior 1.0 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 776.4,
+      "z": -387.1
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "259 de 768 amostras; pior 0.8 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -336.2,
+      "z": -60.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "268 de 804 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -225.2,
+      "z": -480.8
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "150 de 450 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 271.4,
+      "z": -451.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "325 de 972 amostras; pior 0.7 m abaixo da faixa de água",
+      "objeto": "refugio_do_pinhal/rio",
+      "severidade": "VISUAL",
+      "x": 40.8,
+      "z": -50.2
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "150 de 450 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "pomar_alto/rio",
+      "severidade": "VISUAL",
+      "x": -353.6,
+      "z": -161.7
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "226 de 624 amostras; pior 0.8 m abaixo da faixa de água",
+      "objeto": "bosque_velado/rio",
+      "severidade": "VISUAL",
+      "x": 71.2,
+      "z": -508.4
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "397 de 606 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "acampamento_ruptura/rio",
+      "severidade": "VISUAL",
+      "x": 619.9,
+      "z": -339.3
+    },
+    {
+      "categoria": "ser dentro de parede",
+      "causa": "dentro de /root/Jogo/AreaAtual/Mundo/pomar_alto/SolidosDoPomar",
+      "objeto": "@Node3D@28809",
+      "severidade": "CRITICO",
+      "x": -504.1,
+      "z": -300.7
+    },
+    {
+      "categoria": "ser dentro de parede",
+      "causa": "dentro de /root/Jogo/AreaAtual/Mundo/acampamento_ruptura/SolidosDaArea",
+      "objeto": "@Node3D@28887",
+      "severidade": "CRITICO",
+      "x": 639.5,
+      "z": -387.7
+    }
+  ],
+  "por_severidade": {
+    "BLOQUEADOR": 0,
+    "CRITICO": 2,
+    "MENOR": 0,
+    "VISUAL": 10
+  }
+}

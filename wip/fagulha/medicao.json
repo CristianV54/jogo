@@ -1,0 +1,23 @@
+{
+ "cabeca_H_m": 0.382,
+ "tronco_em_H": 1.94,
+ "pescoco_em_H": 1.46,
+ "cauda_em_H": 4.99,
+ "envergadura_em_H": 6.95,
+ "perna_diant_em_H": 1.82,
+ "perna_tras_em_H": 2.28,
+ "comprimento_total_m": 3.2,
+ "altura_ate_chifre_m": 1.37,
+ "largura_asas_m": 2.66,
+ "pe_no_chao_z_min": 0.01,
+ "vertices_total": 31763,
+ "faces_total": 31793,
+ "pedacos_soltos": {
+  "Fagulha_corpo": 1,
+  "Fagulha_mandibula": 1,
+  "Fagulha_chifres": 2,
+  "Fagulha_asa_ossos": 2,
+  "Fagulha_asa_membrana": 2
+ },
+ "membrana_arestas_abertas_alem_da_borda": 0
+}

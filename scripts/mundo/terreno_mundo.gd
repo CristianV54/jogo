@@ -116,8 +116,9 @@ func _altura_crua(x: float, z: float) -> float:
 		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
 	var costa := Costa.distancia(x, z)
-	if costa < 30.0:   # o chão desce até o mar
-		h = lerpf(h, -5.0, smoothstep(26.0, 2.0, costa))
+	if costa < 70.0:   # a terra vai se achatando até a praia (0,6 m) e só nos últimos 14 m desce para o mar: encosta suave, sem penhasco
+		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))
+		h = lerpf(h, -3.0, smoothstep(14.0, 0.0, costa))
 	return h
 
 

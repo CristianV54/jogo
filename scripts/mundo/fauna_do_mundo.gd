@@ -100,11 +100,31 @@ func _perto_de_barreira(p: Vector2) -> bool:
 	return false
 
 
-func _criar(especie: String, p: Vector2) -> void:
-	if _perto_de_barreira(p):
+## Há uma pedra, parede ou tronco no ponto? (esfera de 0,8 m contra o mundo, sem contar o chão): ali nenhum bicho nasce.
+func _ocupado(p: Vector2) -> bool:
+	var q := PhysicsShapeQueryParameters3D.new()
+	var esfera := SphereShape3D.new()
+	esfera.radius = 1.3
+	q.shape = esfera
+	q.transform = Transform3D(Basis.IDENTITY, Vector3(p.x, mundo.chao_em(p.x, p.y) + 1.0, p.y))
+	q.collision_mask = 1
+	for r in mundo.get_world_3d().direct_space_state.intersect_shape(q, 4):
+		var nome := String((r.collider as Node).name)
+		if r.collider is StaticBody3D and nome != "Colisao":
+			return true
+	return false
+
+
+func _criar(especie: String, p_original: Vector2) -> void:
+	var p := p_original
+	for tentativa in 8:   # se caiu dentro de uma pedra, tenta um ponto vizinho
+		if not _ocupado(p):
+			break
+		p = p_original + Vector2(_rng.randf_range(-7.0, 7.0), _rng.randf_range(-7.0, 7.0))
+	if _ocupado(p) or _perto_de_barreira(p):
 		return
 	contagem[especie] = int(contagem.get(especie, 0)) + 1
-	var y := mundo.terreno.altura_em(p.x, p.y)
+	var y := mundo.chao_em(p.x, p.y)
 	match especie:
 		"cervo":
 			_caca("cavalo", p, 0.62, "Cervo", "cervo", "chifres", 30, 1.4, {"carne": [2, 3], "couro": [1, 1]})
@@ -147,8 +167,8 @@ func _caca(modelo: String, p: Vector2, esc: float, nome_a: String, especie: Stri
 	a.vida_max = vida
 	a.raio_colisao = 0.5
 	a.drops = drops
-	a.altura_em = mundo.terreno.altura_em
-	a.position = Vector3(p.x, mundo.terreno.altura_em(p.x, p.y), p.y)
+	a.altura_em = mundo.chao_em
+	a.position = Vector3(p.x, mundo.chao_em(p.x, p.y), p.y)
 	add_child(a)
 
 
@@ -161,8 +181,8 @@ func _domestico(modelo: String, p: Vector2, nome_a: String, especie: String, esc
 	a.raio_vagar = 4.0
 	a.vida_max = 30
 	a.drops = drops
-	a.altura_em = mundo.terreno.altura_em
-	a.position = Vector3(p.x, mundo.terreno.altura_em(p.x, p.y), p.y)
+	a.altura_em = mundo.chao_em
+	a.position = Vector3(p.x, mundo.chao_em(p.x, p.y), p.y)
 	add_child(a)
 
 

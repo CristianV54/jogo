@@ -68,7 +68,46 @@ func _ready() -> void:
 	_tocar(anim_parado)
 
 
+var _verificado := false
+
+
+## Na primeira vez que o bicho está ativo (a física da região só existe com a região ligada), se nasceu dentro de uma pedra,
+## tronco ou parede, procura o ponto livre mais perto em anéis crescentes e vai para lá.
+func _desencravar() -> void:
+	_verificado = true
+	var raio := maxf(raio_colisao, 0.5) * 0.9
+	var chao: float = altura_em.call(position.x, position.z) if altura_em.is_valid() else global_position.y
+	if _livre_em(Vector3(global_position.x, chao + 0.7, global_position.z), raio):
+		return
+	for anel in [1.5, 3.0, 4.5, 6.0, 9.0]:
+		for k in 12:
+			var ang := TAU * k / 12.0
+			var d: Vector3 = Vector3(cos(ang), 0.0, sin(ang)) * anel
+			var alvo_local: Vector3 = position + d
+			var chao2: float = altura_em.call(alvo_local.x, alvo_local.z) if altura_em.is_valid() else global_position.y
+			if _livre_em(global_position + d + Vector3(0.0, chao2 - global_position.y + 0.7, 0.0), raio):
+				position = alvo_local
+				_casa = position
+				return
+
+
+func _livre_em(centro: Vector3, raio: float) -> bool:
+	var esfera := SphereShape3D.new()
+	esfera.radius = raio
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = esfera
+	q.transform = Transform3D(Basis.IDENTITY, centro)
+	q.collision_mask = 1 | Solidos.CAMADA_SERES
+	q.exclude = [corpo.get_rid()]
+	for r in get_world_3d().direct_space_state.intersect_shape(q, 4):
+		if String((r.collider as Node).name) != "Colisao":
+			return false
+	return true
+
+
 func _physics_process(delta: float) -> void:
+	if not _verificado:
+		_desencravar()
 	var livre_de_corpo := morto or (montaria != null and montaria.montada)   # morto ou montado: sem corpo (o cavaleiro mora dentro dele)
 	corpo.collision_layer = 0 if livre_de_corpo else Solidos.CAMADA_SERES
 	if livre_de_corpo:
@@ -144,17 +183,9 @@ func _physics_process(delta: float) -> void:
 ## Há espaço para andar nessa direção? Três raios (centro e lados do corpo) contra o mundo (camada 1: paredes,
 ## cercas, troncos, portas fechadas, terreno). `distancia` 0 = só a folga do corpo.
 func _caminho_livre(direcao: Vector3, distancia := 0.0) -> bool:
-	var alcance := maxf(distancia, 0.0) + maxf(raio_colisao, 0.5) + 0.6
 	var chao: float = altura_em.call(position.x, position.z) if altura_em.is_valid() else global_position.y   # altura_em usa as coordenadas do pai (a área)
-	var lateral := direcao.cross(Vector3.UP).normalized() * 0.4
-	var espaco := get_world_3d().direct_space_state
-	for desvio in [-1.0, 0.0, 1.0]:
-		var de: Vector3 = Vector3(global_position.x, chao + 0.6, global_position.z) + lateral * desvio
-		var q := PhysicsRayQueryParameters3D.create(de, de + direcao * alcance, 1 | Solidos.CAMADA_SERES)   # mundo + outros seres
-		q.exclude = [corpo.get_rid()]
-		if not espaco.intersect_ray(q).is_empty():
-			return false
-	return true
+	var raio := maxf(raio_colisao, 0.5) * 0.9
+	return Solidos.caminho_livre(self, Vector3(global_position.x, chao + 0.7, global_position.z), direcao, maxf(distancia, 0.0) + raio + 0.4, raio, [corpo.get_rid()])
 
 
 func receber_dano(quantidade: int, de: Node3D = null) -> void:

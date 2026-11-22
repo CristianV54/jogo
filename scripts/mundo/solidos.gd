@@ -7,6 +7,22 @@ extends RefCounted
 const CAMADA_SERES := 8
 
 
+## Caminho livre para quem anda sem física (animais, gente): arrasta uma esfera do tamanho do corpo por `distancia` metros
+## na direção `dir`, na altura do peito, contra o mundo (camada 1) e os outros seres (camada 8). Uma esfera pega a quina de
+## um tronco ou de uma pedra, o que 3 raios finos deixavam passar (o bicho acabava dentro da árvore).
+static func caminho_livre(espaco_de: Node3D, de: Vector3, dir: Vector3, distancia: float, raio: float, excluir: Array = []) -> bool:
+	var esfera := SphereShape3D.new()
+	esfera.radius = raio
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = esfera
+	q.transform = Transform3D(Basis.IDENTITY, de)
+	q.motion = dir.normalized() * distancia
+	q.collision_mask = 1 | CAMADA_SERES
+	q.exclude = excluir
+	var r := espaco_de.get_world_3d().direct_space_state.cast_motion(q)
+	return r.size() < 2 or r[0] >= 0.999
+
+
 ## Caixa que envolve todas as malhas de `no`, em coordenadas do próprio `no`. `encolher` < 1 afina a caixa
 ## (a malha de animais inclui rabo e orelhas que não precisam bloquear).
 static func caixa_de(no: Node3D, encolher := 1.0) -> AABB:

@@ -107,6 +107,8 @@ func construir() -> void:
 	NavegacaoLocal.assar(regioes["valdoria"], Vector3(vcen.x, 0, vcen.y), Vector2(80, 105), false)
 	progresso.emit("Soltando os bichos...")
 	await get_tree().process_frame
+	await get_tree().physics_frame   # o motor só enxerga os corpos novos depois de um passo de física: sem isso a conferência de "há pedra aqui?" não vê nada
+	await get_tree().physics_frame
 	fauna = FaunaDoMundo.new()
 	fauna.mundo = self
 	add_child(fauna)
@@ -264,6 +266,18 @@ func _ligar(no: Node3D, ligado: bool) -> void:
 func spawn_global(id: String, nome: String) -> Transform3D:
 	var area: AreaBase = regioes[id]
 	return area.global_transform * area.ponto_de_spawn(nome)
+
+
+## Altura do chão onde se pisa de verdade em (x, z) do mundo: o chão da região, se o ponto está dentro de uma (cada região tem
+## o terreno próprio), ou o chão do mundo. Quem anda sem física (bichos, gente) precisa desta função, não de `terreno.altura_em`.
+func chao_em(x: float, z: float) -> float:
+	for id in MundoDados.REGIOES:
+		if MundoDados.retangulo(id, -1.0).has_point(Vector2(x, z)):
+			var area: Node3D = regioes.get(id)
+			if area != null:
+				var c := MundoDados.centro(id)
+				return (area as AreaBase).altura_em(x - c.x, z - c.y) + area.position.y
+	return terreno.altura_em(x, z)
 
 
 func regiao_em(p: Vector3) -> String:
