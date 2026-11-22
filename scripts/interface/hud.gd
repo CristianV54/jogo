@@ -22,6 +22,7 @@ var _dialogo_texto: Label
 var _mensagem: Label
 var _inventario_label: Label
 var _painel: PainelInventario
+var _rastreador: Label
 
 signal usar_item(item: String)
 signal fechar_inventario_pedido
@@ -59,6 +60,8 @@ func _ready() -> void:
 	_chefe_nome.add_theme_font_size_override("font_size", 20)
 	_chefe_caixa.add_child(_chefe_nome)
 
+	_rastreador = _rotulo("", Vector2(30, 84), 17)
+	_rastreador.size = Vector2(420, 130)
 	_inventario_label = _rotulo("", Vector2(1080, 24), 18)
 	_inventario_label.size = Vector2(176, 120)
 	_inventario_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -173,6 +176,11 @@ func fechar_inventario() -> void:
 	inventario_aberto = false
 	_painel.visible = false
 	_dica_label.visible = true
+
+
+## Rastreador da missão ativa (canto esquerdo, abaixo da vida).
+func definir_rastreador(texto: String) -> void:
+	_rastreador.text = texto
 
 
 func dica(texto: String) -> void:

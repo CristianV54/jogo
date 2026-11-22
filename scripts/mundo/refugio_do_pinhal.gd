@@ -27,6 +27,7 @@ func _ready() -> void:
 	_fogueira()
 	_adereços()
 	_postos_de_trabalho()
+	_patio_de_treino()
 	_chao_vivo()
 	_npcs()
 	_animais()
@@ -333,6 +334,24 @@ func _postos_de_trabalho() -> void:
 	cs.shape = cs_forma
 	cs.position = cepo.position
 	solidos.add_child(cs)
+
+
+## Pátio de treino do Vane (boneco e três tochas) e o quadro de avisos da praça.
+func _patio_de_treino() -> void:
+	var boneco := BonecoDeTreino.new()
+	boneco.name = "BonecoDeTreino"
+	boneco.position = Vector3(-10.0, altura_em(-10.0, -13.0), -13.0)
+	add_child(boneco)
+	for p in [Vector2(-14.0, -11.0), Vector2(-10.0, -8.5), Vector2(-6.0, -11.0)]:
+		var tocha := TochaDeTreino.new()
+		tocha.name = "TochaDeTreino"
+		tocha.position = Vector3(p.x, altura_em(p.x, p.y), p.y)
+		add_child(tocha)
+	var quadro := QuadroDeAvisos.new()
+	quadro.name = "QuadroDeAvisos"
+	quadro.position = Vector3(7.0, altura_em(7.0, -5.5), -5.5)
+	quadro.rotation.y = atan2(-7.0, 5.5)   # a frente do quadro olha para a fogueira
+	add_child(quadro)
 
 
 func _npcs() -> void:

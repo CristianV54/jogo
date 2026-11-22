@@ -1,0 +1,106 @@
+class_name GerenciadorMissoes
+extends Node
+## Rastreia as missões: quais estão ativas, o progresso de cada objetivo e as recompensas. Qualquer parte do jogo avisa
+## o que aconteceu com `GerenciadorMissoes.evento("golpear", "boneco_treino")`; quando todos os objetivos chegam à
+## quantidade pedida, a missão conclui, entrega a recompensa e avisa a interface por sinal.
+
+signal missao_iniciada(id: String)
+signal objetivo_atualizado(id: String)
+signal missao_concluida(id: String)
+signal aviso(texto: String, segundos: float)
+
+static var instancia: GerenciadorMissoes
+
+var ativas: Array[String] = []
+var concluidas: Array[String] = []
+var progresso := {}                 # "missao|objetivo" -> quantidade feita
+var jogador: Jogador                # recebe as recompensas
+var quadro_liberado := false
+
+
+func _ready() -> void:
+	instancia = self
+
+
+static func evento(tipo: String, alvo: String, quantidade := 1) -> void:
+	if instancia:
+		instancia._registrar(tipo, alvo, quantidade)
+
+
+func iniciar(id: String) -> void:
+	if ativas.has(id) or concluidas.has(id) or not DadosMissoes.MISSOES.has(id):
+		return
+	ativas.append(id)
+	missao_iniciada.emit(id)
+	aviso.emit("Missão: %s" % DadosMissoes.MISSOES[id]["titulo"], 3.0)
+
+
+func _registrar(tipo: String, alvo: String, quantidade: int) -> void:
+	for id in ativas.duplicate():
+		for obj in DadosMissoes.MISSOES[id]["objetivos"]:
+			if obj["tipo"] != tipo or obj["alvo"] != alvo:
+				continue
+			var chave := "%s|%s" % [id, obj["id"]]
+			var antes := int(progresso.get(chave, 0))
+			progresso[chave] = mini(int(obj["qtd"]), antes + quantidade)
+			if int(progresso[chave]) != antes:
+				objetivo_atualizado.emit(id)
+		if _completa(id):
+			_concluir(id)
+
+
+func feito(id: String, objetivo: String) -> int:
+	return int(progresso.get("%s|%s" % [id, objetivo], 0))
+
+
+func _completa(id: String) -> bool:
+	for obj in DadosMissoes.MISSOES[id]["objetivos"]:
+		if feito(id, obj["id"]) < int(obj["qtd"]):
+			return false
+	return true
+
+
+func _concluir(id: String) -> void:
+	var dados: Dictionary = DadosMissoes.MISSOES[id]
+	ativas.erase(id)
+	concluidas.append(id)
+	var recompensa: Dictionary = dados["recompensa"]
+	for item in recompensa.get("itens", {}):
+		if jogador:
+			jogador.coletar(item, int(recompensa["itens"][item]))
+	if id == "C1-M1":
+		quadro_liberado = true
+	missao_concluida.emit(id)
+	aviso.emit("Missão concluída: %s\n%s" % [dados["titulo"], dados["encerramento"]], 7.0)
+
+
+## Texto do rastreador na tela: a primeira missão ativa, com contadores.
+func rastreador() -> String:
+	if ativas.is_empty():
+		return ""
+	var id := ativas[0]
+	var dados: Dictionary = DadosMissoes.MISSOES[id]
+	var linhas: Array[String] = [String(dados["titulo"])]
+	for obj in dados["objetivos"]:
+		var f := feito(id, obj["id"])
+		var q := int(obj["qtd"])
+		var marca := "[x]" if f >= q else "[ ]"
+		linhas.append("%s %s%s" % [marca, obj["texto"], " (%d/%d)" % [f, q] if q > 1 else ""])
+	return "\n".join(linhas)
+
+
+## Falas do NPC que dependem da missão ativa (vazio = usa as falas normais).
+func dialogo_de(npc: String) -> PackedStringArray:
+	for id in ativas:
+		var d: Dictionary = DadosMissoes.MISSOES[id].get("dialogos", {})
+		if d.has(npc):
+			return PackedStringArray(d[npc])
+	return PackedStringArray()
+
+
+## Ler o quadro de avisos da praça.
+func ler_quadro() -> void:
+	if not quadro_liberado:
+		aviso.emit("O quadro está cheio de avisos que você ainda não pode atender. Termine a Rotina do Exílio.", 4.0)
+	else:
+		aviso.emit("Nenhum aviso novo por enquanto.", 3.0)

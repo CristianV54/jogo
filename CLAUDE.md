@@ -98,4 +98,5 @@ ReinoDeCinzas/
 - Inventário do jogador (tecla I): grade com ícones, descrição e uso (carne cura 20). Teste: `tools/teste_inventario.gd`.
 - Colisão de seres vivos (animais, pessoas, Fagulha) e peças do cenário: ver `assets/ASSETS.md`. Testes só quando a mudança pedir e uma vez (o usuário reclamou de demora).
 - NPCs com rotinas de trabalho (ferreiro, lenhador, cozinheira, vigia, caçadora, líder): ver `assets/ASSETS.md`.
+- Campanha por marcos segundo a Bíblia expandida (ver `assets/ASSETS.md`, seção Campanha). Marco 1 (sistema de missões + C1-M1) feito; próximo: Marco 2, o Refúgio como vila completa.
 - Próximo: dar uso a couro/lã/presa (forja da Brenn, vender), salvar o inventário, corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.

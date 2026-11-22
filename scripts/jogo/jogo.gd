@@ -25,6 +25,8 @@ signal fim_de_jogo
 var area: AreaBase
 var area_nome := ""
 var derrotados: Dictionary = {}
+var missoes: GerenciadorMissoes
+var _falas_atuais := PackedStringArray()
 var _dialogo_npc: Npc
 var _dialogo_indice := 0
 var _trocando := false
@@ -45,7 +47,15 @@ func _ready() -> void:
 	hud.usar_item.connect(_ao_usar_item)
 	hud.fechar_inventario_pedido.connect(_alternar_inventario)
 	hud.definir_vida(jogador.vida, jogador.vida_max)
+	missoes = GerenciadorMissoes.new()
+	missoes.jogador = jogador
+	add_child(missoes)
+	missoes.aviso.connect(hud.mensagem)
+	missoes.missao_iniciada.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
+	missoes.objetivo_atualizado.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
+	missoes.missao_concluida.connect(func(_id: String) -> void: hud.definir_rastreador(missoes.rastreador()))
 	ir_para("refugio_do_pinhal", "Principal")
+	missoes.iniciar("C1-M1")
 
 
 func ir_para(destino: String, spawn: String) -> void:
@@ -138,6 +148,10 @@ func _process(_delta: float) -> void:
 	if jogador.montaria:
 		hud.dica("E   Desmontar" if (not jogador.montaria.voa or jogador.perto_do_chao()) else "Espaço sobe    C desce    Pouse para desmontar")
 		return
+	var coisa := _interagivel_mais_perto()
+	if coisa:
+		hud.dica("E   " + coisa.texto)
+		return
 	var montar := _montaria_mais_perto()
 	hud.dica("E   Montar %s" % montar.nome if montar else "")
 
@@ -150,6 +164,20 @@ func _npc_mais_perto() -> Npc:
 		if d < dmin:
 			dmin = d
 			melhor = n
+	return melhor
+
+
+func _interagivel_mais_perto() -> Interagivel:
+	var melhor: Interagivel = null
+	var dmin := 99.0
+	for no in get_tree().get_nodes_in_group("interagiveis"):
+		var c := no as Interagivel
+		if c == null or not c.disponivel():
+			continue
+		var d := c.global_position.distance_to(jogador.global_position)
+		if d < c.raio and d < dmin:
+			dmin = d
+			melhor = c
 	return melhor
 
 
@@ -206,24 +234,32 @@ func interagir() -> void:
 		return
 	if hud.dialogo_aberto:
 		_dialogo_indice += 1
-		if _dialogo_indice >= _dialogo_npc.falas.size():
+		if _dialogo_indice >= _falas_atuais.size():
 			hud.fechar_dialogo()
 			jogador.travado = false
 			_dialogo_npc.retomar()
 			return
-		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _dialogo_npc.falas[_dialogo_indice])
+		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _falas_atuais[_dialogo_indice])
 		return
 	var n := _npc_mais_perto()
 	if n == null:
+		var coisa := _interagivel_mais_perto()
+		if coisa:
+			coisa.acionar()
+			return
 		var m := _montaria_mais_perto()
 		if m:
 			jogador.montar(m)
 		return
-	if n.falas.size() == 0:
+	_falas_atuais = missoes.dialogo_de(n.nome.to_lower())
+	if _falas_atuais.is_empty():
+		_falas_atuais = n.falas
+	if _falas_atuais.size() == 0:
 		return
 	_dialogo_npc = n
+	GerenciadorMissoes.evento("falar", n.nome.to_lower())
 	_dialogo_indice = 0
 	jogador.travado = true
 	n.olhar_para(jogador.global_position)
 	n.pausar()
-	hud.dialogo(n.nome + " (" + n.papel + ")", n.falas[0])
+	hud.dialogo(n.nome + " (" + n.papel + ")", _falas_atuais[0])

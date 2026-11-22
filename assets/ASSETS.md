@@ -144,3 +144,13 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Corpo sólido móvel:** os NPCs agora usam `AnimatableBody3D` (como os animais), pois andam.
 - **Limites:** os NPCs não entram nas casas (as portas só abrem para o jogador), não há ciclo de dia e noite, e não reagem uns aos outros. A animação de martelar/cortar é o golpe de espada repetido (não há animação própria de ofício).
 - **Teste:** `tools/teste_rotinas.gd` (sem janela, tempo 8x, 50 s de jogo): cada NPC anda, toca as animações certas e não fica preso.
+
+## Campanha: Bíblia expandida e sistema de missões (22/11/2026)
+
+- **Documento-fonte:** a "Bíblia expandida do mundo" que o Cristian colou em 22/11/2026 (5 capítulos, missões C1-M1 a C5-M4, locais, NPCs, regras de implementação). É a referência da campanha; o jogo a segue por **marcos**: M1 sistema de missões e C1-M1 (feito); M2 Refúgio como vila completa; M3 Pomar Alto e C1-M2 a M4; M4 Bosque Velado e Mina; M5 Ruptura e Ferrogris; M6 Cratera de Ignis; M7 Valdoria e Castelo.
+- **Conflito de nomes a resolver no Marco 2:** a Bíblia chama os moradores do Refúgio de Mara (curral), Oren (agricultor), Tessa (mensageira), Halk (guarda do portão) e Nilo (menino); o jogo já tem Orin (vigia), Dorn (lenhador), Tessa (cozinheira) e Mira (caçadora), criados antes. A Bíblia manda: no Marco 2 os papéis e nomes passam para os da Bíblia, reaproveitando os modelos. Brenn também muda (grisalha, prótese metálica no braço esquerdo) e Vane ganha a cicatriz no olho esquerdo.
+- **Sistema (Marco 1):** `scripts/missoes/dados_missoes.gd` (catálogo; só missões que já dá para cumprir) e `gerenciador_missoes.gd` (ativas, progresso por contador, recompensa, sinais). Qualquer parte do jogo avisa com `GerenciadorMissoes.evento("tipo", "alvo")`; tipos: falar, golpear, interagir. **Nada conclui por proximidade.** O rastreador fica abaixo da vida; falas dos NPCs mudam com a missão ativa.
+- **Interação (`Interagivel`):** objetos que o jogador aciona com E (grupo `interagiveis`, dica na tela): `TochaDeTreino`, `QuadroDeAvisos`. `BonecoDeTreino` leva golpe (grupo `atingiveis`) e conta para a missão. Servem de base para cestos de maçã, jaulas, âncoras e fornalhas dos próximos capítulos.
+- **C1-M1 Rotina do Exílio (jogável):** falar com Vane, visitar Brenn, 3 golpes no boneco, acender 3 tochas; recompensa 2 carnes e liberação do quadro de avisos (que ainda diz "nenhum aviso novo" até o Marco 3). O pátio de treino fica a oeste da fogueira; o quadro, a leste.
+- **Teste:** `tools/teste_missoes.gd` (fluxo real, sem janela, 11 verificações).
+- **Ainda não existe (Bíblia):** salvamento/checkpoints, sons ambientes, ciclo de manhã/tarde/noite, evolução do Fagulha em 3 fases, comércio, chapter gating por missão.
