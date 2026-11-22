@@ -28,7 +28,8 @@ func _ready() -> void:
 	_adereços()
 	_postos_de_trabalho()
 	_patio_de_treino()
-	_chao_vivo()
+	var ocupado := VilaRefugio.construir(self, altura_em)
+	_chao_vivo(ocupado)
 	_npcs()
 	_animais()
 	_saidas()
@@ -169,6 +170,34 @@ func _casas() -> void:
 	_casa("Cabana1", Vector3(27, 0, -12), 3, 3, ESTILO_MADEIRA)
 	_casa("Cabana2", Vector3(21, 0, 24), 2, 3, ESTILO_MADEIRA)
 	_casa("Cabana3", Vector3(-19, 0, 25), 3, 3, ESTILO_MADEIRA)
+	_casa("Deposito", Vector3(-30, 0, -20), 3, 2, ESTILO_MADEIRA, "deposito")
+	_placas()
+
+
+## Placa de madeira acima de cada porta com a função da casa.
+func _placas() -> void:
+	var nomes := {"CasaDoVane": "Casa do Vane", "Forja": "Forja", "Cabana1": "Casa do Oren", "Cabana2": "Casa da Tessa", "Cabana3": "Casa da Mara", "Deposito": "Depósito de Grãos"}
+	for id in nomes:
+		var casa: Node3D = get_node(id)
+		var x_porta: float = casa.get_meta("x_porta")
+		var meia_z := float(casa.get_meta("linhas"))
+		var tabua := MeshInstance3D.new()
+		var b := BoxMesh.new()
+		b.size = Vector3(2.0, 0.42, 0.06)
+		var m := StandardMaterial3D.new()
+		m.albedo_color = Color(0.3, 0.2, 0.11)
+		b.material = m
+		tabua.mesh = b
+		tabua.position = Vector3(x_porta, 2.62, meia_z + 0.3)
+		casa.add_child(tabua)
+		var rotulo := Label3D.new()
+		rotulo.text = nomes[id]
+		rotulo.font_size = 40
+		rotulo.pixel_size = 0.0045
+		rotulo.outline_size = 8
+		rotulo.modulate = Color(0.95, 0.85, 0.6)
+		rotulo.position = Vector3(x_porta, 2.62, meia_z + 0.35)
+		casa.add_child(rotulo)
 
 
 func _cerca() -> void:
@@ -198,8 +227,10 @@ func _cerca() -> void:
 
 
 ## Manchas de cor no solo, tufos de grama e anéis de flores, longe das casas, do fogo e dos caminhos.
-func _chao_vivo() -> void:
+func _chao_vivo(ocupado: Array = []) -> void:
 	var exclusoes: Array = [[Vector2.ZERO, 3.2]]   # a fogueira
+	for o in ocupado:
+		exclusoes.append(o)   # currais, galinheiro, horta, poço, canil
 	for no in get_children():
 		if no.has_meta("colunas"):
 			var meia := Vector2(no.get_meta("colunas"), no.get_meta("linhas"))   # meia largura = colunas (módulo de 2 m)
@@ -364,36 +395,52 @@ func _npcs() -> void:
 		[{"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"esperar": 3.0, "anim": "Idle_Talking"},
 		 {"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"ir": Vector3(-20.0, 0, -5.5)},
 		 {"esperar": 2.5, "anim": "Idle", "olhar": Vector3(-27, 0, -4)}, {"ir": Vector3(-21.3, 0, -1.5)}])
-	_npc("Orin", "Vigia", "res://scenes/personagens/orin.tscn", Vector3(35.0, 0, 7.0), "Idle",
-		PackedStringArray(["Fico de olho na estrada de Ferrogris. Patrulhas do Império passam por lá.", "Se ouvir asas, corra para a fogueira."]),
-		Vector3(60, 0, 0),
-		[{"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, 7)}, {"ir": Vector3(33.5, 0, 13.0), "vel": 1.3}, {"ir": Vector3(31.0, 0, 18.5), "vel": 1.3},
-		 {"esperar": 6.0, "anim": "Idle", "olhar": Vector3(50, 0, 24)}, {"ir": Vector3(33.5, 0, 13.0), "vel": 1.3}, {"ir": Vector3(35.0, 0, 7.0), "vel": 1.3}])
-	_npc("Tessa", "Cozinheira", "res://scenes/personagens/tessa.tscn", Vector3(3.9, 0, 2.2), "Idle_Talking",
-		PackedStringArray(["Sopa quente para quem volta da caçada.", "Você está magro, Torin. Coma."]), CALDEIRAO,
-		[{"fazer": "Interact", "seg": 7.0, "olhar": CALDEIRAO}, {"fazer": "PickUp_Table", "seg": 2.5, "olhar": CALDEIRAO},
-		 {"esperar": 3.0, "anim": "Idle_Talking", "olhar": CALDEIRAO}, {"ir": Vector3(6.0, 0, 6.5)},
-		 {"esperar": 2.5, "anim": "PickUp_Table", "olhar": Vector3(8, 0, 8)}, {"ir": Vector3(3.9, 0, 2.2)}])
+	_npc("Halk", "Guarda do portão", "res://scenes/personagens/orin.tscn", Vector3(37.0, 0, 5.5), "Idle",
+		PackedStringArray(["Portão do Refúgio. Ninguém sai sem a minha palavra.", "Batedores do Império rondam a estrada. Volte vivo, rapaz."]),
+		Vector3(60, 0, 5.5),
+		[{"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, 5.5)}, {"ir": Vector3(37.0, 0, -5.5), "vel": 1.3},
+		 {"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, -5.5)}, {"ir": Vector3(37.0, 0, 5.5), "vel": 1.3}])
+	_npc("Oren", "Agricultor", "res://scenes/personagens/oren.tscn", Vector3(12.8, 0, -12.3), "Idle",
+		PackedStringArray(["Sem o pomar, o Refúgio passa fome. Cada maçã conta.", "Se passar pelo pomar, traga cestos cheios."]), Vector3(12.4, 0, -13.4),
+		[{"fazer": "Fixing_Kneeling", "seg": 9.0, "olhar": Vector3(12.4, 0, -13.4)}, {"ir": Vector3(17.6, 0, -12.3)},
+		 {"fazer": "Fixing_Kneeling", "seg": 9.0, "olhar": Vector3(17.6, 0, -13.4)}, {"ir": Vector3(12.8, 0, -12.3)}])
+	_npc("Mara", "Cuidadora do curral", "res://scenes/personagens/mara.tscn", Vector3(3.0, 0, 27.5), "Idle",
+		PackedStringArray(["Os animais sentem o medo da gente. Calma, e o cavalo vem.", "Mantenha as ovelhas longe da cerca: os lobos rondam."]), Vector3(0, 0, 31),
+		[{"ir": Vector3(-4.5, 0, 33.0)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(-6.0, 0, 34.5)},
+		 {"ir": Vector3(4.5, 0, 33.5)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(6.0, 0, 34.5)},
+		 {"ir": Vector3(3.0, 0, 27.5)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(0, 0, 31)}])
+	_npc("Tessa", "Mensageira", "res://scenes/personagens/tessa.tscn", Vector3(1.5, 0, -21.0), "Idle_Talking",
+		PackedStringArray(["Vi rastros de botas imperiais perto da estrada. Avise o Vane.", "Corro mais do que qualquer um aqui."]), Vector3(0, 0, -27),
+		[{"esperar": 4.0, "anim": "Idle_Talking", "olhar": Vector3(0, 0, -27)}, {"ir": Vector3(0, 0, -10.0), "vel": 3.2, "anim": "Jog_Fwd"},
+		 {"ir": Vector3(10, 0, -8.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(20, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"},
+		 {"ir": Vector3(34, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(60, 0, -1)},
+		 {"ir": Vector3(20, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(10, 0, -8.0), "vel": 3.2, "anim": "Jog_Fwd"},
+		 {"ir": Vector3(0, 0, -10.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(1.5, 0, -21.0), "vel": 3.2, "anim": "Jog_Fwd"}])
+	var nilo := _npc("Nilo", "Menino curioso", "res://scenes/personagens/nilo.tscn", Vector3(-3.0, 0, -16.0), "Idle",
+		PackedStringArray(["Você tem um dragão! Posso ver de perto?", "Quando crescer, vou ser caçador como a Mira."]))
+	nilo.segue_jogador = true
 	_npc("Dorn", "Lenhador", "res://scenes/personagens/dorn.tscn", Vector3(22.4, 0, -24.2), "Idle",
 		PackedStringArray(["Esses pinheiros seguram o telhado do mundo.", "A trilha do norte leva à mina. Cuidado com o Gorath."]), CEPO,
 		[{"fazer": "Sword_Attack", "seg": 10.0, "olhar": CEPO}, {"ir": Vector3(20.4, 0, -24.6)},
 		 {"esperar": 3.0, "anim": "PickUp_Table", "olhar": Vector3(20.3, 0, -26.0)}, {"ir": Vector3(22.4, 0, -24.2)}])
-	_npc("Mira", "Caçadora", "res://scenes/personagens/mira.tscn", Vector3(-12.0, 0, 14.0), "Crouch_Idle",
+	_npc("Mira", "Caçadora", "res://scenes/personagens/mira.tscn", Vector3(-12.0, 0, 14.0), "Idle",
 		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]), Vector3.ZERO,
-		[{"ir": Vector3(-26.0, 0, 18.0), "vel": 1.3}, {"esperar": 7.0, "anim": "Crouch_Idle", "olhar": Vector3(-60, 0, 22)},
-		 {"ir": Vector3(-12.0, 0, 14.0), "vel": 1.3}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(-12, 0, 30)}])
+		[{"ir": Vector3(-23.0, 0, 19.0), "vel": 1.3}, {"esperar": 6.0, "anim": "Crouch_Idle", "olhar": Vector3(-60, 0, 22)},
+		 {"ir": Vector3(3.9, 0, 2.2), "vel": 1.4}, {"fazer": "Interact", "seg": 7.0, "olhar": CALDEIRAO},
+		 {"ir": Vector3(-12.0, 0, 14.0), "vel": 1.4}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(-12, 0, 30)}])
 
 
-const NOMES_DE_ANIMAIS := {"vaca": "Vaca", "cavalo": "Cavalo", "ovelha": "Ovelha", "porco": "Porco", "cao": "Cão"}
-const VIDA_DE_ANIMAIS := {"vaca": 40, "cavalo": 50, "ovelha": 20, "porco": 25, "cao": 20}
+const NOMES_DE_ANIMAIS := {"vaca": "Vaca", "cavalo": "Cavalo", "ovelha": "Ovelha", "porco": "Porco", "cao": "Cão", "galinha": "Galinha"}
+const VIDA_DE_ANIMAIS := {"vaca": 40, "cavalo": 50, "ovelha": 20, "porco": 25, "cao": 20, "galinha": 6}
 const DROPS_DE_ANIMAIS := {
 	"vaca": {"carne": [2, 3], "couro": [1, 1]},
 	"cavalo": {"carne": [2, 3], "couro": [1, 2]},
 	"ovelha": {"carne": [1, 2], "la": [1, 2]},
 	"porco": {"carne": [2, 3]},
 	"cao": {"couro": [1, 1]},
+	"galinha": {"carne": [1, 1]},
 }
-const RAIO_DE_ANIMAIS := {"vaca": 1.0, "cavalo": 1.1, "ovelha": 0.6, "porco": 0.6, "cao": 0.4}
+const RAIO_DE_ANIMAIS := {"vaca": 1.0, "cavalo": 1.1, "ovelha": 0.6, "porco": 0.6, "cao": 0.4, "galinha": 0.3}
 
 
 func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> void:
@@ -415,16 +462,20 @@ func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> v
 
 
 func _animais() -> void:
-	# pasto ao sul (entre as cabanas 2 e 3), chiqueiro a oeste da casa do Vane, cavalos a oeste, cão perto da forja
-	_animal("vaca", Vector3(-4, 0, 31), 5.0, 0.9)
-	_animal("vaca", Vector3(5, 0, 32), 5.0, 0.9)
-	_animal("ovelha", Vector3(0, 0, 28), 5.0, 0.8)
-	_animal("ovelha", Vector3(-6, 0, 33), 5.0, 0.8)
-	_animal("ovelha", Vector3(7, 0, 29), 5.0, 0.8)
-	_animal("porco", Vector3(-16, 0, -28), 3.0, 0.8)
-	_animal("porco", Vector3(-14, 0, -30), 3.0, 0.8)
-	_animal("cavalo", Vector3(-33, 0, 12), 4.0, 1.3)
-	_animal("cavalo", Vector3(-31, 0, 16), 4.0, 1.3)
+	# currais: vacas e ovelhas ao sul, porcos a oeste da casa do Vane, cavalos a oeste; galinheiro a sudeste; cães no canil do portão leste
+	_animal("vaca", Vector3(-3, 0, 31), 3.0, 0.9)
+	_animal("vaca", Vector3(4, 0, 32), 3.0, 0.9)
+	_animal("ovelha", Vector3(0, 0, 28.5), 3.0, 0.8)
+	_animal("ovelha", Vector3(-5, 0, 33), 2.5, 0.8)
+	_animal("ovelha", Vector3(6, 0, 29.5), 2.5, 0.8)
+	_animal("porco", Vector3(-16, 0, -28), 1.8, 0.8)
+	_animal("porco", Vector3(-14, 0, -29.5), 1.8, 0.8)
+	_animal("cavalo", Vector3(-31, 0, 12), 2.2, 1.3)
+	_animal("cavalo", Vector3(-28.5, 0, 15), 2.2, 1.3)
+	for k in 6:
+		_animal("galinha", Vector3(10.5 + k * 0.6, 0, 20.5 + (k % 2) * 1.5), 1.8, 0.7)
+	_animal("cao", Vector3(36.0, 0, -4.0), 2.0, 1.4)
+	_animal("cao", Vector3(34.0, 0, -7.0), 2.0, 1.4)
 	_animal("cao", Vector3(-17, 0, -6), 3.0, 1.4)
 
 

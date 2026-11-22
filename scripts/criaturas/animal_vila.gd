@@ -31,12 +31,15 @@ var _fuga := 0.0
 var _dir_fuga := Vector3.ZERO
 var _anim: AnimationPlayer
 var _visual: Node3D
+var _cabeca: Node3D                   # se o modelo tiver um nó "Cabeca" (galinha), ele bica o chão parado
+var _bicar := 1.5
 
 
 func _ready() -> void:
 	_visual = modelo.instantiate()
 	add_child(_visual)
 	_anim = _visual.find_child("AnimationPlayer", true, false)
+	_cabeca = _visual.find_child("Cabeca", true, false) as Node3D
 	VariacaoDeCores.aplicar(_visual, especie)
 	corpo = Solidos.corpo_movel(self, Solidos.caixa_de(_visual, 0.8))
 	_casa = position
@@ -111,6 +114,13 @@ func _physics_process(delta: float) -> void:
 					break
 			if not _andando:
 				_espera = randf_range(1.0, 2.5)
+	if _cabeca and not _andando and _fuga <= 0.0:
+		_bicar -= delta
+		if _bicar <= 0.0:
+			_bicar = randf_range(1.2, 3.5)
+			var tw := create_tween()
+			tw.tween_property(_cabeca, "rotation:x", 1.0, 0.18)
+			tw.tween_property(_cabeca, "rotation:x", 0.0, 0.22)
 	if altura_em.is_valid():
 		position.y = altura_em.call(position.x, position.z)
 
@@ -142,6 +152,8 @@ func receber_dano(quantidade: int, de: Node3D = null) -> void:
 			montaria.ativa = false
 		if _tem("Death"):
 			_anim.play("Death", 0.1)
+		else:   # sem animação de morte (galinha): tomba de lado
+			create_tween().tween_property(_visual, "rotation_degrees:z", 90.0, 0.35)
 		Pickup.largar(get_parent(), global_position, drops)
 		await get_tree().create_timer(5.0).timeout
 		Efeitos.desintegrar(self, _visual)

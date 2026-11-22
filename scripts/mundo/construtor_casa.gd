@@ -266,6 +266,8 @@ static func _interior(casa: Node3D, colunas: int, linhas: int, tipo: String) -> 
 		_moradia(casa, corpo, colunas, ix, iz)
 	elif tipo == "forja":
 		_forja(casa, corpo, ix, iz)
+	elif tipo == "deposito":
+		_deposito(casa, corpo, ix, iz)
 
 
 static func _moradia(casa: Node3D, corpo: StaticBody3D, colunas: int, ix: float, iz: float) -> void:
@@ -291,6 +293,7 @@ static func _moradia(casa: Node3D, corpo: StaticBody3D, colunas: int, ix: float,
 		_movel(casa, corpo, "Table_Plate", tx, tz + 0.55, 0.0, 0.81, false)
 		_movel(casa, corpo, "Mug", tx + 0.1, tz, 0.0, 0.81, false)
 		if colunas >= 4:
+			_mapa_na_parede(casa, -0.6, -iz + 0.03)
 			# casa grande: segunda cama, arsenal e mais um armário
 			_movel(casa, corpo, "Bed_Twin2", -ix + 0.94, -iz + 5.0, 0.0)
 			_movel(casa, corpo, "WeaponStand", ix - 0.8, iz - 2.6, -90.0)
@@ -318,6 +321,66 @@ static func _material_do_kit(nome_peca: String) -> StandardMaterial3D:
 			m.uv1_scale = Vector3(2.0, 2.0, 2.0)
 	p.free()
 	return m
+
+
+## Mapa de Arvendal pregado na parede: relevo em ruído, a trilha dos capítulos em linha tracejada e um marcador por região.
+static func _mapa_na_parede(casa: Node3D, x: float, z: float) -> void:
+	var larg := 256
+	var alt := 176
+	var img := Image.create(larg, alt, false, Image.FORMAT_RGB8)
+	var ruido := FastNoiseLite.new()
+	ruido.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	ruido.frequency = 0.012
+	ruido.seed = 4
+	for py in alt:
+		for px in larg:
+			var n := ruido.get_noise_2d(px, py)
+			var cor := Color(0.82, 0.72, 0.5)   # pergaminho
+			if n > 0.0:
+				cor = Color(0.55, 0.6, 0.38).lerp(Color(0.5, 0.42, 0.3), clampf(n * 2.0, 0.0, 1.0))   # terra firme
+			if px < 5 or py < 5 or px > larg - 6 or py > alt - 6:
+				cor = Color(0.3, 0.2, 0.1)
+			img.set_pixel(px, py, cor)
+	var marcos := [Vector2(40, 140), Vector2(80, 95), Vector2(130, 70), Vector2(185, 45), Vector2(220, 20)]   # Refúgio, Bosque, Ferrogris, Cratera, Valdoria
+	for i in marcos.size() - 1:
+		for t in range(0, 100, 7):
+			var p: Vector2 = marcos[i].lerp(marcos[i + 1], t / 100.0)
+			img.set_pixel(int(p.x), int(p.y), Color(0.3, 0.1, 0.05))
+	for m in marcos:
+		for dx in range(-3, 4):
+			for dy in range(-3, 4):
+				img.set_pixel(int(m.x) + dx, int(m.y) + dy, Color(0.7, 0.1, 0.08))
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = ImageTexture.create_from_image(img)
+	mat.roughness = 1.0
+	var mi := MeshInstance3D.new()
+	mi.name = "MapaDeArvendal"
+	var q := QuadMesh.new()
+	q.size = Vector2(1.9, 1.3)
+	q.material = mat
+	mi.mesh = q
+	mi.position = Vector3(x, 1.7, z)
+	casa.add_child(mi)
+
+
+static func _deposito(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> void:
+	# depósito de grãos: sacos empilhados no fundo, barris na lateral esquerda, caixotes na direita
+	for i in 5:
+		_movel(casa, corpo, "Bag", -ix + 0.5 + i * 0.75, -iz + 0.4, 0.0)
+	for i in 3:
+		_movel(casa, corpo, "Bag", -ix + 1.0 + i * 0.75, -iz + 0.4, 0.0, 0.8, false)
+	for i in 3:
+		_movel(casa, corpo, "Barrel", -ix + 0.4, -iz + 1.4 + i * 0.85, 0.0)
+	for i in 2:
+		var c := _colocar(casa, "Prop_Crate", Vector3(ix - 0.6, 0.0, -iz + 1.0 + i * 1.0), 10.0 * i)
+		c.scale = Vector3.ONE * 0.75
+		var cs := CollisionShape3D.new()
+		var bx := BoxShape3D.new()
+		bx.size = Vector3(0.8, 0.8, 0.8)
+		cs.shape = bx
+		cs.position = Vector3(ix - 0.6, 0.4, -iz + 1.0 + i * 1.0)
+		corpo.add_child(cs)
+	_movel(casa, corpo, "Bucket_Wooden_1", ix - 0.6, iz - 0.5, 0.0, 0.0, false)
 
 
 static func _forja(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> void:

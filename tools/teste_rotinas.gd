@@ -14,6 +14,8 @@ func _init() -> void:
 func _rodar() -> void:
 	await create_timer(0.5).timeout
 	for n in area.npcs:
+		if n.segue_jogador:
+			continue   # o Nilo só anda quando o jogador se afasta
 		dados[n.nome] = {"inicio": n.global_position, "ultimo": n.global_position, "andou": 0.0, "anims": {}, "max_longe": 0.0, "parado": 0.0, "pior_parado": 0.0}
 	Engine.time_scale = 8.0
 	var t := 0.0
@@ -21,6 +23,8 @@ func _rodar() -> void:
 		await physics_frame
 		t += 1.0 / 60.0
 		for n in area.npcs:
+			if not dados.has(n.nome):
+				continue
 			var d: Dictionary = dados[n.nome]
 			var mov: float = (n.global_position - d["ultimo"]).length()
 			d["andou"] += mov

@@ -15,6 +15,7 @@ extends Node3D
 @export var animacao := "Idle"
 @export var cena: PackedScene
 @export var rotina: Array = []
+@export var segue_jogador := false   # criança curiosa: acompanha o jogador à distância
 
 const PROTESTOS := ["Ei! Calma!", "Está louco?! Guarde essa espada!", "Pare com isso, Torin!", "Isso dói!", "Eu sou do seu bando!"]
 
@@ -28,6 +29,7 @@ var _protesto: Label3D
 var _passo := -1
 var _restante := 0.0
 var _preso := 0.0
+var _comentario := 6.0
 var _pausas := 0          # > 0: conversando ou levando um golpe; a rotina espera
 
 
@@ -61,6 +63,9 @@ func retomar() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if segue_jogador and _pausas == 0:
+		_seguir(delta)
+		return
 	if rotina.is_empty() or _pausas > 0 or _passo < 0:
 		return
 	var p: Dictionary = rotina[_passo]
@@ -87,7 +92,7 @@ func _andar(p: Dictionary, delta: float) -> void:
 		_preso = 0.0
 		global_position += dir * float(p.get("vel", 1.5)) * delta
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
-		visual.tocar("Walk", 0.2)
+		visual.tocar(String(p.get("anim", "Walk")), 0.2)
 		if altura_em.is_valid():
 			global_position.y = altura_em.call(global_position.x, global_position.z)
 	else:   # alguém no caminho (o jogador, um animal): espera um pouco e, se não sair, pula este passo
@@ -96,6 +101,52 @@ func _andar(p: Dictionary, delta: float) -> void:
 		if _preso > 3.0:
 			_preso = 0.0
 			_proximo_passo()
+
+
+## Segue o jogador: anda até ficar a ~4 m (correndo se estiver longe), olha para ele quando parado e comenta o Fagulha.
+func _seguir(delta: float) -> void:
+	var jog := get_tree().get_first_node_in_group("jogador") as Node3D
+	if jog == null:
+		return
+	var ate := jog.global_position - global_position
+	ate.y = 0.0
+	if ate.length() > 4.5:
+		var dir := ate.normalized()
+		if _caminho_livre(dir):
+			var rapido := ate.length() > 10.0
+			global_position += dir * (3.6 if rapido else 1.9) * delta
+			rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
+			visual.tocar("Jog_Fwd" if rapido else "Walk", 0.2)
+		else:
+			visual.tocar("Idle", 0.2)
+		if altura_em.is_valid():
+			global_position.y = altura_em.call(global_position.x, global_position.z)
+	else:
+		visual.tocar("Idle", 0.2)
+		rotation.y = lerp_angle(rotation.y, atan2(-ate.x, -ate.z), 4.0 * delta)
+		_comentario -= delta
+		if _comentario <= 0.0:
+			_comentario = 14.0
+			for no in get_tree().get_nodes_in_group("montarias"):
+				var m := no as Montaria
+				if m and m.nome == "Fagulha" and m.dono.global_position.distance_to(global_position) < 14.0:
+					_falar_solto(["Ele cospe fogo de verdade?", "Posso fazer carinho no dragão?", "Ele é enorme!"][randi() % 3])
+					break
+
+
+func _falar_solto(texto: String) -> void:
+	if _protesto == null:
+		_protesto = Label3D.new()
+		_protesto.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_protesto.position = Vector3(0.0, 2.3, 0.0)
+		_protesto.font_size = 48
+		_protesto.pixel_size = 0.006
+		_protesto.outline_size = 12
+		_protesto.no_depth_test = true
+		add_child(_protesto)
+	_protesto.text = texto
+	_protesto.visible = true
+	get_tree().create_timer(3.0).timeout.connect(func() -> void: _protesto.visible = false)
 
 
 ## Raios à frente contra o mundo e outros seres (camadas 1 e 8), partindo da altura do peito.
