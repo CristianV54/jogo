@@ -1,6 +1,6 @@
-# Sangue e Escamas: história, missões, cidades e povoados
+# Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados
 
-Documento para você ajustar. Tudo aqui foi tirado do jogo como está hoje (catálogo de missões lido do código, NPCs e falas lidos das cenas). Onde algo ainda **não existe**, está marcado como LACUNA. Título do jogo e nomes menores são provisórios.
+Documento para você ajustar. Tudo aqui foi tirado do jogo como está hoje (catálogo de missões lido do código, NPCs e falas lidos das cenas). Onde algo ainda **não existe**, está marcado como LACUNA. O título oficial é Reino de Cinzas (Sangue e Escamas é o subtítulo). Nomes menores são provisórios.
 
 ## 1. A história
 

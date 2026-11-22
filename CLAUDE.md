@@ -1,4 +1,6 @@
-# Sangue e Escamas (título provisório; pasta: ReinoDeCinzas)
+# Reino de Cinzas (subtítulo: Sangue e Escamas; pasta: ReinoDeCinzas)
+
+Título oficial: **Reino de Cinzas**. "Sangue e Escamas" é só o subtítulo e não deve aparecer sozinho em código, diálogos ou documentos.
 
 Jogo de ação/RPG em 3ª pessoa, medieval, com dragões. Combate no centro, com evolução de armas e armaduras.
 Idioma de trabalho: português do Brasil. Explicar arquitetura em linguagem direta.

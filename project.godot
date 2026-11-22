@@ -1,9 +1,9 @@
-; Sangue e Escamas (pasta ReinoDeCinzas). Godot 4.7.
+; Reino de Cinzas, subtítulo Sangue e Escamas (pasta ReinoDeCinzas). Godot 4.7.
 config_version=5
 
 [application]
 run/main_scene="res://scenes/jogo.tscn"
-config/name="Sangue e Escamas"
+config/name="Reino de Cinzas"
 
 [rendering]
 renderer/rendering_method="mobile"
