@@ -23,6 +23,7 @@ var _mensagem: Label
 var _inventario_label: Label
 var _painel: PainelInventario
 var _rastreador: Label
+var _relogio: Label
 var _dialogo_pag: Label
 var _dialogo_prompt: Label
 var _tween_texto: Tween
@@ -71,6 +72,10 @@ func _ready() -> void:
 	_inventario_label = _rotulo("", Vector2(1080, 24), 18)
 	_inventario_label.size = Vector2(176, 120)
 	_inventario_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+
+	_relogio = _rotulo("", Vector2(1000, 660), 20)
+	_relogio.size = Vector2(256, 28)
+	_relogio.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 	_area_label = _rotulo("", Vector2(0, 90), 34)
 	_area_label.size = Vector2(1280, 50)
@@ -145,6 +150,10 @@ func _rotulo(texto: String, pos: Vector2, tamanho_fonte: int) -> Label:
 	l.add_theme_constant_override("outline_size", 6)
 	_raiz.add_child(l)
 	return l
+
+
+func definir_relogio(texto: String) -> void:
+	_relogio.text = texto
 
 
 func definir_vida(atual: int, maximo: int) -> void:

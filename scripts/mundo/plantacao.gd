@@ -12,6 +12,7 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	Clima.registrar_globais()
 	_rng.seed = 5
 	_terra()
 	_fileiras()
@@ -120,12 +121,13 @@ func _material_vento(forca: float) -> ShaderMaterial:
 	sh.code = """shader_type spatial;
 render_mode cull_disabled;
 uniform float forca = 0.08;
+global uniform float vento_forca;
 void vertex() {
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float h = max(VERTEX.y, 0.0);
 	float t = TIME * 1.7 + w.x * 0.55 + w.z * 0.35;
-	VERTEX.x += sin(t) * forca * h;
-	VERTEX.z += cos(t * 0.8) * forca * 0.6 * h;
+	VERTEX.x += sin(t) * forca * vento_forca * h;
+	VERTEX.z += cos(t * 0.8) * forca * 0.6 * vento_forca * h;
 }
 void fragment() {
 	ALBEDO = COLOR.rgb;

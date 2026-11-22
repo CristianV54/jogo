@@ -45,6 +45,7 @@ var _cena_fim: Callable
 var _dialogo_npc: Npc
 var _dialogo_indice := 0
 var _trocando := false
+var clima: Clima
 
 @onready var jogador: Jogador = $Jogador
 @onready var fagulha: Fagulha = $Fagulha
@@ -55,6 +56,11 @@ var _trocando := false
 
 func _ready() -> void:
 	add_to_group("jogo")
+	Clima.registrar_globais()
+	clima = Clima.new()
+	clima.name = "Clima"
+	add_child(clima)
+	clima.camera = camera
 	jogador.camera = camera
 	jogador.vida_mudou.connect(hud.definir_vida)
 	jogador.morreu.connect(_ao_morrer)
@@ -107,6 +113,7 @@ func ir_para(destino: String, spawn: String) -> void:
 	container.add_child(nova)
 	area = nova
 	area_nome = destino
+	_adotar_ambiente(nova)
 	area.pediu_troca.connect(ir_para)
 	if area.has_signal("chefe_vida"):
 		area.chefe_vida.connect(_ao_vida_do_chefe)
@@ -133,6 +140,34 @@ func ir_para(destino: String, spawn: String) -> void:
 	await get_tree().process_frame
 	_trocando = false
 	area_carregada.emit(destino)
+
+
+## O ar da região (névoa, cor do sol, cores do céu) vem do ambiente que a área criou; o clima é quem manda no céu,
+## então o ambiente e o sol da área saem de cena e só o estilo fica.
+func _adotar_ambiente(a: AreaBase) -> void:
+	var amb := a.get_node_or_null("Ambiente") as WorldEnvironment
+	var sol := a.get_node_or_null("Sol") as DirectionalLight3D
+	var estilo := {}
+	if amb and amb.environment:
+		var e := amb.environment
+		estilo["neblina"] = e.fog_light_color
+		estilo["densidade"] = e.fog_density
+		estilo["ambiente"] = e.ambient_light_energy
+		var ceu := e.sky.sky_material as ProceduralSkyMaterial if e.sky else null
+		if ceu:
+			estilo["topo"] = ceu.sky_top_color
+			estilo["horizonte"] = ceu.sky_horizon_color
+	if sol:
+		estilo["sol"] = sol.light_color
+		estilo["energia"] = sol.light_energy
+	if not estilo.is_empty():
+		clima.definir_estilo(estilo)
+	if amb:
+		a.remove_child(amb)
+		amb.queue_free()
+	if sol:
+		a.remove_child(sol)
+		sol.queue_free()
 
 
 func _empurrar_para_tras() -> void:
@@ -182,6 +217,7 @@ func _ao_morrer() -> void:
 
 
 func _process(_delta: float) -> void:
+	hud.definir_relogio("%s   %s" % [clima.hora_texto(), Clima.NOMES[clima.tempo]])
 	if area == null or _trocando:
 		return
 	if hud.dialogo_aberto:
