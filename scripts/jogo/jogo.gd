@@ -49,6 +49,8 @@ var clima: Clima
 var mundo: Mundo
 var _lugar := ""
 var _t_lugar := 0.0
+var _ultimo_chao_seguro := Vector3.INF   # último ponto firme em que o Torin pisou (rede de segurança contra queda)
+var _t_chao := 0.0
 
 @onready var jogador: Jogador = $Jogador
 @onready var fagulha: Fagulha = $Fagulha
@@ -212,9 +214,24 @@ func _ao_morrer() -> void:
 	ir_para("refugio_do_pinhal", "Principal")
 
 
+## Cair do mundo não mata: se o Torin passar de uma queda de 25 m abaixo do último chão firme, volta para ele.
+func _rede_de_seguranca(delta: float) -> void:
+	if jogador.morto or jogador.montaria != null:
+		return
+	_t_chao -= delta
+	if jogador.is_on_floor() and _t_chao <= 0.0:
+		_t_chao = 0.5
+		_ultimo_chao_seguro = jogador.global_position
+	elif _ultimo_chao_seguro != Vector3.INF and jogador.global_position.y < _ultimo_chao_seguro.y - 25.0:
+		jogador.global_position = _ultimo_chao_seguro + Vector3(0.0, 1.0, 0.0)
+		jogador.velocity = Vector3.ZERO
+		hud.mensagem("Você escorregou para fora do mapa e voltou ao último chão firme.", 3.0)
+
+
 func _process(delta: float) -> void:
 	if mundo and not _trocando:
 		_acompanhar_lugar(delta)
+		_rede_de_seguranca(delta)
 	hud.definir_relogio("%s   %s" % [clima.hora_texto(), Clima.NOMES[clima.tempo]])
 	if area == null or _trocando:
 		return

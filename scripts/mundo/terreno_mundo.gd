@@ -56,6 +56,13 @@ func gerar() -> void:
 			add_child(_agua(copia))
 
 
+func _celula_dentro_de_area(c: Rect2) -> bool:
+	for r in retangulos:
+		if r.encloses(c):
+			return true
+	return false
+
+
 func _dentro_de_area(p: Vector2, folga := 0.0) -> bool:
 	for r in retangulos:
 		if r.grow(folga).has_point(p):
@@ -173,15 +180,15 @@ func _malha() -> ArrayMesh:
 			var dz := (alturas[i * lz + j1] - alturas[i * lz + j0]) / ((j1 - j0) * passo)
 			var normal := Vector3(-dx, 1.0, -dz).normalized()
 			var k := i * lz + j
-			vertices[k] = Vector3(x, alturas[k], z)
+			vertices[k] = Vector3(x, alturas[k] - (0.2 if _dentro_de_area(Vector2(x, z)) else 0.0), z)   # a parte da célula que cai dentro da área fica logo abaixo do chão dela
 			normais[k] = normal
 			cores[k] = _cor_vertice(x, z, normal).srgb_to_linear()
 	var indices := PackedInt32Array()
 	for i in nx:
 		for j in nz:
-			var centro := Vector2(limites.position.x + (i + 0.5) * passo, limites.position.y + (j + 0.5) * passo)
-			if _dentro_de_area(centro, -1.0):
-				continue   # o chão desta célula é o da área
+			var celula := Rect2(limites.position.x + i * passo, limites.position.y + j * passo, passo, passo)
+			if _celula_dentro_de_area(celula):
+				continue   # o chão desta célula é o da área (só some a célula inteira: célula cortada ao meio abria uma fresta no chão)
 			var p00 := i * lz + j
 			var p10 := (i + 1) * lz + j
 			var p01 := i * lz + j + 1

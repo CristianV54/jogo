@@ -55,7 +55,7 @@ func _rodar() -> void:
 	clima.congelado = true
 	clima.forcar_tempo(Clima.Tempo.LIMPO)
 	var campos: Povoado = m.povoados["campos_altos"]["no"]
-	jogo.jogador.global_position = Vector3(campos.centro.x, 5.0, campos.centro.y + 40.0)   # perto, para o povoado ficar ativo
+	jogo.jogador.global_position = Vector3(campos.centro.x, m.terreno.altura_em(campos.centro.x, campos.centro.y + 40.0) + 1.5, campos.centro.y + 40.0)   # perto, para o povoado ficar ativo
 	clima.definir_hora(10.0)
 	await create_timer(1.0).timeout
 	Engine.time_scale = 6.0
