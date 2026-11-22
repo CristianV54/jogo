@@ -37,9 +37,9 @@ const ESTRADAS := [
 
 ## Rios do mundo (largura do leito, margem, fundo). Ligam-se aos rios que já existem dentro das áreas.
 const RIOS := [
-	{"id": "cinzento", "nome": "Rio Cinzento", "largura": 5.0, "margem": 8.0, "fundo": 0.8,
+	{"id": "cinzento", "nome": "Rio Cinzento", "largura": 7.0, "margem": 8.0, "fundo": 1.5,
 		"pontos": [Vector2(-700, 150), Vector2(-560, 140), Vector2(-400, 120), Vector2(-300, 95), Vector2(-180, 130), Vector2(-76, 150)]},
-	{"id": "cinzento_leste", "nome": "Rio Cinzento", "largura": 5.0, "margem": 8.0, "fundo": 0.8,
+	{"id": "cinzento_leste", "nome": "Rio Cinzento", "largura": 7.0, "margem": 8.0, "fundo": 1.5,
 		"pontos": [Vector2(78, 150), Vector2(180, 150), Vector2(280, 110), Vector2(360, 40), Vector2(400, -80), Vector2(404, -200), Vector2(404, -336.5)]},
 	{"id": "cinzento_fim", "nome": "Rio Cinzento", "largura": 6.0, "margem": 8.0, "fundo": 1.2,
 		"pontos": [Vector2(716, -337), Vector2(790, -400), Vector2(840, -520), Vector2(860, -640)]},

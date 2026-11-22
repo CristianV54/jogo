@@ -132,16 +132,17 @@ func _aplicar_rio(r: Dictionary, p: Vector2, h: float) -> float:
 	var margem := float(r["margem"])
 	var par := _eixo_mais_perto(p, r["pontos"])
 	var d: float = par[0]
-	if d > meia + margem:
+	if d > meia + 3.5 + margem:
 		return h
 	var q: Vector2 = par[1]
 	var nivel := _altura_base(q.x, q.y) - 0.55
 	var fundo := float(r["fundo"])
 	for v in r.get("vaus", []):
 		fundo *= 1.0 - 0.85 * (1.0 - smoothstep(0.0, 7.0, q.distance_to(v)))   # o vau é raso
-	if d <= meia:
-		return nivel - fundo * (1.0 - smoothstep(0.0, 1.0, d / meia))
-	return lerpf(nivel, h, smoothstep(0.0, 1.0, (d - meia) / margem))
+	var leito := meia + 3.5   # o leito é mais largo que a água: com o chão em grade de 8 m um leito estreito sumia entre os vértices
+	if d <= leito:
+		return nivel - fundo * (1.0 - smoothstep(0.0, 1.0, d / leito)) - 0.15
+	return lerpf(nivel - 0.15, h, smoothstep(0.0, 1.0, (d - leito) / margem))
 
 
 ## Distância ao eixo do rio com água mais perto (para pintar a lama da margem e não plantar árvore na água).
@@ -178,7 +179,7 @@ static func curva(ctrl: Array, passo := 3.0) -> PackedVector2Array:
 ## Fita de água ao longo do eixo, 0,55 m abaixo do chão do eixo, com shader de correnteza e espuma na margem.
 func _agua(r: Dictionary) -> MeshInstance3D:
 	var pts: PackedVector2Array = r["pontos"]
-	var meia := float(r["largura"]) / 2.0 + 1.2
+	var meia := float(r["largura"]) / 2.0 + 5.0   # larga de propósito: o chão esconde o excesso e a margem da água fica onde o chão cruza
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var acumulado := 0.0
@@ -206,17 +207,25 @@ func _agua(r: Dictionary) -> MeshInstance3D:
 				st.add_vertex(v[0])
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
-render_mode cull_disabled, specular_schlick_ggx;
+render_mode cull_disabled, depth_draw_opaque, specular_schlick_ggx;
+uniform sampler2D prof : hint_depth_texture, repeat_disable, filter_nearest;
 void fragment() {
-	float borda = abs(UV.x - 0.5) * 2.0;
-	float fluxo = sin(UV.y * 0.9 - TIME * 1.6 + sin(UV.x * 9.0 + TIME * 0.7) * 1.4);
-	float faixa = smoothstep(0.55, 0.95, fluxo);
-	vec3 c = mix(vec3(0.07, 0.22, 0.32), vec3(0.2, 0.46, 0.5), smoothstep(0.2, 1.0, borda));
-	c += faixa * 0.1;
-	float espuma = smoothstep(0.8, 0.98, borda);
-	ALBEDO = mix(c, vec3(0.85, 0.92, 0.95), espuma * 0.55);
-	ALPHA = 0.8 + espuma * 0.2;
-	ROUGHNESS = 0.15;
+	float d = textureLod(prof, SCREEN_UV, 0.0).r;
+	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, d);
+	vec4 v = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+	v.xyz /= v.w;
+	float fundo = clamp(-v.z + VERTEX.z, 0.0, 6.0);          // quanto de água há por baixo deste ponto
+	float fluxo = sin(UV.y * 0.7 - TIME * 1.5 + sin(UV.x * 7.0 + TIME * 0.6) * 1.2);
+	float faixa = smoothstep(0.6, 0.98, fluxo);
+	vec3 raso = vec3(0.2, 0.6, 0.64);
+	vec3 fundo_c = vec3(0.04, 0.28, 0.42);
+	vec3 c = mix(raso, fundo_c, smoothstep(0.1, 1.3, fundo));
+	c += faixa * 0.07 * (1.0 - smoothstep(0.0, 1.2, fundo));
+	float espuma = 1.0 - smoothstep(0.0, 0.16, fundo);         // espuma onde o chão encosta na água
+	ALBEDO = mix(c, vec3(0.9, 0.96, 0.97), espuma * 0.7);
+	ALPHA = clamp(0.35 + fundo * 0.9 + espuma * 0.4, 0.0, 0.92);
+	ROUGHNESS = 0.1;
+	SPECULAR = 0.7;
 }
 """
 	var mat := ShaderMaterial.new()
@@ -226,7 +235,53 @@ void fragment() {
 	mi.mesh = st.commit()
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_pedras_da_margem(mi, r)
 	return mi
+
+
+## Pedras e seixos nas duas margens, como num rio de verdade (só visual, sem colisão; o vau fica limpo).
+func _pedras_da_margem(pai: MeshInstance3D, r: Dictionary) -> void:
+	var pts: PackedVector2Array = r["pontos"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(pts[0].x * 7.0 + pts[0].y * 13.0)
+	var lista: Array[Transform3D] = []
+	for i in range(pts.size() - 1):
+		var a := pts[i]
+		var b := pts[i + 1]
+		var comp := a.distance_to(b)
+		if comp < 0.01:
+			continue
+		var dir := (b - a) / comp
+		var lado := Vector2(-dir.y, dir.x)
+		var t := 0.0
+		while t < comp:
+			var c0 := a + dir * t
+			var no_vau := false
+			for v in r.get("vaus", []):
+				if c0.distance_to(v) < 9.0:
+					no_vau = true
+			if not no_vau:
+				for sg in [-1.0, 1.0]:
+					if rng.randf() < 0.7:
+						var c: Vector2 = c0 + lado * sg * (float(r["largura"]) / 2.0 + rng.randf_range(-0.2, 1.6))
+						var e := rng.randf_range(0.3, 1.0)
+						var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(e * 1.2, e * rng.randf_range(0.5, 0.9), e))
+						lista.append(Transform3D(base, Vector3(c.x, altura_em(c.x, c.y) - 0.1, c.y)))
+			t += rng.randf_range(1.5, 3.0)
+	if lista.is_empty():
+		return
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = FabricaNatureza.pedra(11.0)
+	mm.instance_count = lista.size()
+	for i in lista.size():
+		mm.set_instance_transform(i, lista[i])
+	var inst := MultiMeshInstance3D.new()
+	inst.name = "PedrasDaMargem"
+	inst.multimesh = mm
+	inst.material_override = FabricaNatureza.material()
+	inst.visibility_range_end = 220.0
+	pai.add_child(inst)
 
 
 func _altura_crua(x: float, z: float) -> float:
