@@ -3,10 +3,10 @@
   4.2s  PASSOU Refúgio: jogador pisa no chão  [y=0.0]
   4.4s FOTO 01_refugio
   5.3s  PASSOU Diálogo abriu perto do Vane
-  5.4s FOTO 02_dialogo
+  5.5s FOTO 02_dialogo
   5.5s  PASSOU Diálogo fechou e liberou o jogador  [2 falas]
   5.9s  PASSOU Passagem para Ferrogris bloqueada sem derrotar o Gorath
-  8.8s  PASSOU Portal norte levou ao Bosque Velado  [2.0s]
+  8.9s  PASSOU Portal norte levou ao Bosque Velado  [2.0s]
  10.1s  PASSOU Bosque: jogador pisa no chão
  10.2s FOTO 03_bosque
  10.2s  PASSOU Bosque: há Lobo-cinza
@@ -15,39 +15,39 @@
  13.0s  PASSOU Lobo-cinza foi derrotado
  13.0s  PASSOU Gorath existe na área
  13.9s  PASSOU barra de vida de Gorath apareceu ao chegar perto
- 16.2s FOTO 05_gorath
- 30.5s  luta: Brutamontes Gorath golpes=15 vida_do_alvo=0 vida_do_torin=94 morto=true
- 30.5s  PASSOU Gorath foi derrotado
- 31.3s  PASSOU progresso registrou gorath
- 31.4s FOTO 06_gorath_derrotado
- 37.8s  PASSOU Portal leste (já liberado) levou à Fortaleza de Ferrogris  [2.8s]
- 39.1s FOTO 07_ferrogris
- 39.1s  PASSOU Kaelor existe na área
- 40.0s  PASSOU barra de vida de Kaelor apareceu ao chegar perto
- 42.3s FOTO 08_kaelor
- 62.1s  luta: General Kaelor golpes=20 vida_do_alvo=0 vida_do_torin=79 morto=true
- 62.1s  PASSOU Kaelor foi derrotado
- 62.9s  PASSOU progresso registrou kaelor
- 62.9s  PASSOU portal da próxima área abriu depois de Kaelor
- 64.8s  PASSOU Cratera liberada depois de Kaelor
- 64.8s FOTO 09_cratera
- 64.8s  PASSOU Ignis-Maw existe na área
- 65.8s  PASSOU barra de vida de Ignis-Maw apareceu ao chegar perto
- 68.1s FOTO 10_ignis_maw
-101.2s  luta: Ignis-Maw golpes=32 vida_do_alvo=0 vida_do_torin=37 morto=true
-101.2s  PASSOU Ignis-Maw foi derrotado
-102.0s  PASSOU progresso registrou ignis_maw
-102.0s  PASSOU portal da próxima área abriu depois de Ignis-Maw
-104.3s  PASSOU Valdoria liberada depois de Ignis-Maw
-104.4s FOTO 11_valdoria
-104.4s  PASSOU Solon existe na área
-105.3s  PASSOU barra de vida de Solon apareceu ao chegar perto
-107.7s FOTO 12_solon
-150.7s  luta: Imperador Solon golpes=41 vida_do_alvo=0 vida_do_torin=46 morto=true
-150.7s  PASSOU Solon foi derrotado
-151.5s  PASSOU progresso registrou solon
-152.5s  PASSOU Fim de jogo disparou depois de Solon
-152.6s FOTO 13_fim
+ 16.3s FOTO 05_gorath
+ 30.6s  luta: Brutamontes Gorath golpes=15 vida_do_alvo=0 vida_do_torin=94 morto=true
+ 30.6s  PASSOU Gorath foi derrotado
+ 31.4s  PASSOU progresso registrou gorath
+ 31.5s FOTO 06_gorath_derrotado
+ 37.9s  PASSOU Portal leste (já liberado) levou à Fortaleza de Ferrogris  [2.8s]
+ 39.3s FOTO 07_ferrogris
+ 39.3s  PASSOU Kaelor existe na área
+ 40.2s  PASSOU barra de vida de Kaelor apareceu ao chegar perto
+ 42.5s FOTO 08_kaelor
+ 62.3s  luta: General Kaelor golpes=20 vida_do_alvo=0 vida_do_torin=79 morto=true
+ 62.3s  PASSOU Kaelor foi derrotado
+ 63.1s  PASSOU progresso registrou kaelor
+ 63.1s  PASSOU portal da próxima área abriu depois de Kaelor
+ 64.9s  PASSOU Cratera liberada depois de Kaelor
+ 65.0s FOTO 09_cratera
+ 65.0s  PASSOU Ignis-Maw existe na área
+ 65.9s  PASSOU barra de vida de Ignis-Maw apareceu ao chegar perto
+ 68.2s FOTO 10_ignis_maw
+101.3s  luta: Ignis-Maw golpes=32 vida_do_alvo=0 vida_do_torin=37 morto=true
+101.3s  PASSOU Ignis-Maw foi derrotado
+102.1s  PASSOU progresso registrou ignis_maw
+102.1s  PASSOU portal da próxima área abriu depois de Ignis-Maw
+104.4s  PASSOU Valdoria liberada depois de Ignis-Maw
+104.6s FOTO 11_valdoria
+104.6s  PASSOU Solon existe na área
+105.4s  PASSOU barra de vida de Solon apareceu ao chegar perto
+107.8s FOTO 12_solon
+150.9s  luta: Imperador Solon golpes=41 vida_do_alvo=0 vida_do_torin=46 morto=true
+150.9s  PASSOU Solon foi derrotado
+151.7s  PASSOU progresso registrou solon
+152.7s  PASSOU Fim de jogo disparou depois de Solon
+152.8s FOTO 13_fim
 CURAS_FORCADAS_PELO_BOT 23
-TEMPO_TOTAL 152.6s
+TEMPO_TOTAL 152.8s
 RESULTADO TUDO PASSOU

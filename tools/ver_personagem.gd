@@ -70,7 +70,7 @@ func _init() -> void:
 	await process_frame
 	if raiz.has_method("tocar"):
 		raiz.tocar(anim, 0.0)
-		raiz.animacoes.seek(0.0, true)
+		raiz.animacoes.seek(float(OS.get_cmdline_user_args()[3]) if OS.get_cmdline_user_args().size() > 3 else 0.0, true)
 	_medir()
 
 

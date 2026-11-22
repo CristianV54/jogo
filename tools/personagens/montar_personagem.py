@@ -79,8 +79,22 @@ def anexar(caminho):
 
 for p in [x for x in PARTES.split(",") if x]:
     anexar(f"{MCO}/{p}.gltf")
+def prender_cabelo_na_cabeca(nome_antes: set) -> None:
+    """O cabelo do pacote é uma malha solta (sem pesos nem modificador), feita para ser pendurada no osso da cabeça
+    pelo motor. Exportado assim, ele ficava parado no espaço quando a cabeça mexia. Aqui ele ganha 100% de peso no osso Head."""
+    for m in [o for o in bpy.data.objects if o.type == 'MESH' and o.name not in nome_antes and not o.name.startswith("Icosphere")]:
+        if len(m.vertex_groups) == 0:
+            g = m.vertex_groups.new(name="Head")
+            g.add(list(range(len(m.data.vertices))), 1.0, 'REPLACE')
+            mod = m.modifiers.new("Armature", 'ARMATURE')
+            mod.object = armadura
+            print("CABELO preso ao osso Head:", m.name, len(m.data.vertices), "vertices")
+
+
 for c in [x for x in CABELOS.split(",") if x]:
+    antes = {o.name for o in bpy.data.objects}
     anexar(f"{CAB}/{c}.gltf")
+    prender_cabelo_na_cabeca(antes)
 limpar_icosferas()
 
 # 3b) texturas: o pacote vem em 4K (um personagem passava de 50 MB); reduz para no máximo 1024.
