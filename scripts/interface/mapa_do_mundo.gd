@@ -67,7 +67,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var tela := get_viewport_rect().size
-	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.02, 0.02, 0.02, 0.97))   # cobre a tela toda (some vida, rastreador e dicas)
+	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.02, 0.02, 0.02, 1.0))   # cobre a tela toda (some vida, rastreador e dicas)
 	var fonte := ThemeDB.fallback_font
 	draw_string(fonte, Vector2(40, 52), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, COR_ACENTO)
 	draw_string(fonte, Vector2(tela.x - 160, 52), "M fecha", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.8, 0.8, 0.8))
@@ -78,9 +78,25 @@ func _draw() -> void:
 	var area := Rect2(40, 70, tela.x * 0.42, tela.y - 100)
 	var esc := minf(area.size.x / lim.size.x, area.size.y / lim.size.y)
 	var origem := area.position + (area.size - lim.size * esc) / 2.0
-	draw_rect(Rect2(origem, lim.size * esc), Color(0.1, 0.13, 0.09))
+	if mundo.mapa_floresta:   # a mata em verde escuro, as clareiras em verde claro
+		draw_texture_rect(mundo.mapa_floresta, Rect2(origem, lim.size * esc), false)
+	else:
+		draw_rect(Rect2(origem, lim.size * esc), Color(0.1, 0.13, 0.09))
 	draw_rect(Rect2(origem, lim.size * esc), COR_ESTRADA, false, 2.0)
 	var mundo_para_mapa := func(p: Vector2) -> Vector2: return origem + (p - lim.position) * esc
+	for c in MundoDados.CRISTAS:   # serras de rocha, abertas só no vão das barreiras
+		var de: Vector2 = c["de"]
+		var para: Vector2 = c["para"]
+		var dir := (para - de).normalized()
+		var pos: Array = []
+		for v in c["vaos"]:
+			pos.append((v - de).dot(dir))
+		pos.sort()
+		var ini := 0.0
+		for pv in pos + [de.distance_to(para) + 10.0]:
+			if pv - 10.0 > ini:
+				draw_line(mundo_para_mapa.call(de + dir * ini), mundo_para_mapa.call(de + dir * (pv - 10.0)), Color(0.55, 0.5, 0.46), 3.0)
+			ini = pv + 10.0
 	for r in mundo.terreno.rios:   # rios
 		var pts := PackedVector2Array()
 		for p in r["pontos"]:
@@ -98,6 +114,7 @@ func _draw() -> void:
 		var livre: bool = liberadas.get(id, false)
 		draw_rect(Rect2(a, b - a), Color(0.22, 0.42, 0.24, 0.85) if livre else Color(0.28, 0.26, 0.25, 0.85))
 		draw_rect(Rect2(a, b - a), Color(0.6, 0.55, 0.45), false, 1.5)
+		draw_multiline_string(fonte, a + Vector2(4.0, 13.0), String(REGIOES[id]["nome"]).replace("\n", " "), HORIZONTAL_ALIGNMENT_LEFT, b.x - a.x - 6.0, 11, 2, Color(1, 1, 1, 0.9))
 		if id == alvo:   # a missão ativa fica nesta região
 			draw_rect(Rect2(a - Vector2(4, 4), b - a + Vector2(8, 8)), COR_ACENTO, false, 2.0 + sin(_t * 4.0))
 		if id == atual:
@@ -105,6 +122,7 @@ func _draw() -> void:
 	for pid in mundo.povoados:     # povoados e fazendas
 		var q: Vector2 = mundo_para_mapa.call(mundo.povoados[pid]["centro"])
 		draw_rect(Rect2(q - Vector2(3, 3), Vector2(6, 6)), Color(0.9, 0.75, 0.35))
+		draw_string(fonte, q + Vector2(6.0, 4.0), String(mundo.povoados[pid].get("nome", "")), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.88, 0.65))
 	for bid in mundo.barreiras:    # barreiras: vermelhas fechadas, verdes abertas
 		var bar: Barreira = mundo.barreiras[bid]
 		var q: Vector2 = mundo_para_mapa.call(Vector2(bar.global_position.x, bar.global_position.z))
@@ -132,8 +150,8 @@ func _draw() -> void:
 			y += 20.0
 			draw_string(fonte, Vector2(x + 22, y), motivos[id], HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 14, Color(0.7, 0.62, 0.5))
 	y += 40.0
-	draw_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, quadrado dourado = povoado, barra vermelha = barreira fechada", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, Color(0.75, 0.75, 0.75))
-	y += 34.0
+	draw_multiline_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, cinza claro = serra de rocha, verde escuro = mata, quadrado dourado = povoado, barra vermelha = barreira fechada", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, 3, Color(0.75, 0.75, 0.75))
+	y += 70.0
 	if missao_texto != "":
 		draw_rect(Rect2(x, y - 14.0, 12, 12), COR_ACENTO, false, 2.0)
 		draw_string(fonte, Vector2(x + 22, y), "Missão: " + missao_texto, HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.44, 18, COR_ACENTO)

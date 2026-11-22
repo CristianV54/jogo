@@ -28,6 +28,35 @@ func povoar() -> void:
 	_na_estrada("ruptura", [["lobo", 3], ["javali", 2], ["corvo", 4]])
 	_na_estrada("ferrogris", [["corvo", 8], ["cao_guerra", 2], ["guarda", 3]])
 	_na_estrada("imperial", [["cavalo", 3], ["vaca", 3], ["cao", 2], ["guarda", 3]])
+	# o mundo aberto: cada zona tem a sua fauna (lobos, javalis e ursos só longe das casas)
+	_na_zona(Rect2(-760, -380, 1090, 740), [["cervo", 22], ["coelho", 30], ["lobo", 6], ["javali", 3]])          # bacia do Refúgio
+	_na_zona(Rect2(-760, -2650, 1090, 2265), [["cervo", 28], ["coelho", 25], ["lobo", 20], ["javali", 10], ["urso", 6]])   # terras do Bosque
+	_na_zona(Rect2(330, -940, 550, 1300), [["cervo", 10], ["coelho", 10], ["lobo", 8]])                          # leste, rumo à Ruptura
+	_na_zona(Rect2(330, -1700, 550, 760), [["corvo", 24], ["cao_guerra", 6], ["guarda", 10]])                    # terras queimadas
+	_na_zona(Rect2(330, -2650, 550, 950), [["cavalo", 4], ["vaca", 4], ["cao", 4], ["guarda", 6]])               # terras do Império
+
+
+## Espalha bichos num retângulo do mundo, fora das regiões, da água e (os hostis) das casas.
+func _na_zona(zona: Rect2, lista: Array) -> void:
+	var hostis := ["lobo", "javali", "urso", "cao_guerra", "guarda"]
+	for item in lista:
+		var feitos := 0
+		var tentativas := 0
+		while feitos < int(item[1]) and tentativas < 60:
+			tentativas += 1
+			var p := Vector2(_rng.randf_range(zona.position.x, zona.end.x), _rng.randf_range(zona.position.y, zona.end.y))
+			if mundo._em_alguma_area(p) or mundo.terreno.na_agua(p.x, p.y, 3.0):
+				continue
+			var longe := true
+			for pid in mundo.povoados:
+				if p.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]) * 1.3:
+					longe = false
+			if item[0] in hostis and not longe:
+				continue
+			if item[0] in ["lobo", "javali", "urso"] and MundoDados.retangulo("refugio_do_pinhal", 90.0).has_point(p):
+				continue   # perto do Refúgio é seguro
+			_criar(item[0], p)
+			feitos += 1
 
 
 func _em_regiao(id: String, lista: Array, raio: float) -> void:
@@ -47,7 +76,7 @@ func _na_estrada(id: String, lista: Array) -> void:
 			var par := mundo.ponto_na_estrada(id, s)
 			var dir: Vector2 = par[1]
 			var esq := Vector2(-dir.y, dir.x)
-			var meia := mundo._largura_do_corredor(id, s, 1.0)
+			var meia := 40.0
 			var p: Vector2 = par[0] + esq * _rng.randf_range(-meia * 0.75, meia * 0.75)
 			if mundo.terreno.na_agua(p.x, p.y, 3.0):
 				continue
@@ -78,6 +107,8 @@ func _criar(especie: String, p: Vector2) -> void:
 			_inimigo("res://scenes/inimigos/lobo.tscn", p, y)
 		"javali":
 			_inimigo("res://scenes/inimigos/javali.tscn", p, y)
+		"urso":
+			_inimigo("res://scenes/inimigos/urso.tscn", p, y)
 		"cao_guerra":
 			_inimigo("res://scenes/inimigos/cao_de_guerra.tscn", p, y, "cao_guerra")
 		"guarda":

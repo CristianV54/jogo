@@ -61,13 +61,44 @@ const POVOADOS := [
 	{"id": "fazenda_imperial", "nome": "Fazenda Imperial", "tipo": "fazenda", "estrada": "imperial", "t": 0.8, "lado": -1.0, "raio": 60.0},
 ]
 
-## Barreiras de história: onde, o que bloqueia e a condição (chave tratada pelo Jogo). `estrada` + `t` posicionam no corredor.
+## Cristas de rocha: muralhas naturais que fecham o mundo por trás de cada passagem de história. Só passa quem usa o vão,
+## e em cada vão há uma barreira (ver BARREIRAS). Fora delas o mundo é aberto. `altura` limita a colisão (o viaduto passa por cima).
+const CRISTAS := [
+	{"id": "oeste_leste", "de": Vector2(330, 360), "para": Vector2(330, -2650), "altura": 40.0, "vaos": [Vector2(330, -1.0)]},
+	{"id": "bosque", "de": Vector2(-760, -385), "para": Vector2(330, -385), "altura": 40.0, "vaos": [Vector2(0.5, -385)]},
+	{"id": "ruptura", "de": Vector2(330, -640), "para": Vector2(880, -640), "altura": 40.0, "vaos": [Vector2(581, -640)]},
+	{"id": "fortaleza_norte_oeste", "de": Vector2(330, -940), "para": Vector2(514, -940), "altura": 40.0, "vaos": []},
+	{"id": "fortaleza_norte_leste", "de": Vector2(654, -940), "para": Vector2(880, -940), "altura": 40.0, "vaos": []},
+	{"id": "imperial", "de": Vector2(330, -1700), "para": Vector2(880, -1700), "altura": 40.0, "vaos": [Vector2(578, -1700)]},
+	{"id": "castelo", "de": Vector2(330, -2035), "para": Vector2(880, -2035), "altura": 5.5, "vaos": []},
+]
+
+## Barreiras de história: uma em cada vão. `dir` é o sentido da estrada ali.
 const BARREIRAS := [
-	{"id": "bosque", "estrada": "bosque", "t": 0.12, "tipo": "portao", "texto": "O portão da trilha está fechado: Halk só deixa passar quem terminou os serviços do Refúgio (Resgate nas Sombras do Pinhal)."},
-	{"id": "ruptura", "estrada": "campos", "t": 0.1, "tipo": "entulho", "texto": "A estrada para o leste está bloqueada por uma barricada do capataz. Derrote o Brutamontes Gorath na mina."},
-	{"id": "ferrogris", "estrada": "ruptura", "t": 0.9, "tipo": "portao", "texto": "O vau é vigiado e a passagem está fechada. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento)."},
-	{"id": "castelo", "pos": Vector2(584, -2008), "largura": 34.0, "tipo": "portao", "texto": "O portão do castelo está fechado: a elite imperial guarda a escadaria. Cumpra Portões e Ruas de Valdoria."},
-	{"id": "valdoria", "estrada": "imperial", "t": 0.92, "tipo": "carroca", "texto": "Uma barricada de carroças imperiais fecha a estrada. Só passa quem tiver a lâmina final (A Lâmina Forjada no Fogo)."},
+	{"id": "bosque", "pos": Vector2(0.5, -385), "dir": Vector2(0, -1), "largura": 20.0, "tipo": "portao", "texto": "O portão da trilha está fechado: Halk só deixa passar quem terminou os serviços do Refúgio (Resgate nas Sombras do Pinhal)."},
+	{"id": "ruptura", "pos": Vector2(330, -1), "dir": Vector2(1, 0), "largura": 20.0, "tipo": "entulho", "texto": "A estrada para o leste está bloqueada por uma barricada do capataz. Derrote o Brutamontes Gorath na mina."},
+	{"id": "ferrogris", "pos": Vector2(581, -640), "dir": Vector2(0, -1), "largura": 20.0, "tipo": "portao", "texto": "O vau é vigiado e a passagem está fechada. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento)."},
+	{"id": "valdoria", "pos": Vector2(578, -1700), "dir": Vector2(0, -1), "largura": 20.0, "tipo": "carroca", "texto": "Uma barricada de carroças imperiais fecha a estrada. Só passa quem tiver a lâmina final (A Lâmina Forjada no Fogo)."},
+	{"id": "castelo", "pos": Vector2(584, -2008), "dir": Vector2(0, -1), "largura": 34.0, "tipo": "portao", "altura_y": 6.7, "texto": "O portão do castelo está fechado: a elite imperial guarda a escadaria. Cumpra Portões e Ruas de Valdoria."},
+]
+
+## Mais povoados, espalhados pelo mundo (centro explícito; `dir` é para onde a porta da frente das casas olha ao contrário).
+const POVOADOS_LIVRES := [
+	{"id": "beira_rio", "nome": "Aldeia Beira-Rio", "tipo": "vila", "centro": Vector2(-200, 270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
+	{"id": "rio_claro", "nome": "Fazenda Rio Claro", "tipo": "fazenda", "centro": Vector2(210, 240), "dir": Vector2(1, 0), "lado": -1.0, "raio": 55.0, "liga": "campos"},
+	{"id": "pescador", "nome": "Cabana do Pescador", "tipo": "cabana", "centro": Vector2(-490, 200), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "pomar"},
+	{"id": "pedras_altas", "nome": "Vila Pedras Altas", "tipo": "vila", "centro": Vector2(-610, -40), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
+	{"id": "posto_de_caca", "nome": "Posto de Caça", "tipo": "posto", "centro": Vector2(160, -270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "bosque"},
+	{"id": "nevoa_azul", "nome": "Aldeia Névoa Azul", "tipo": "vila", "centro": Vector2(-430, -820), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": ""},
+	{"id": "brumosa", "nome": "Fazenda Brumosa", "tipo": "fazenda", "centro": Vector2(-190, -1010), "dir": Vector2(1, 0), "lado": 1.0, "raio": 55.0, "liga": ""},
+	{"id": "mineiros", "nome": "Acampamento dos Mineiros", "tipo": "posto", "centro": Vector2(-560, -1300), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": ""},
+	{"id": "pinhal_escuro", "nome": "Vila Pinhal Escuro", "tipo": "vila", "centro": Vector2(-300, -1700), "dir": Vector2(1, 0), "lado": -1.0, "raio": 70.0, "liga": ""},
+	{"id": "vale_oculto", "nome": "Fazenda do Vale Oculto", "tipo": "fazenda", "centro": Vector2(150, -1500), "dir": Vector2(1, 0), "lado": 1.0, "raio": 55.0, "liga": ""},
+	{"id": "cabana_bruxa", "nome": "Cabana da Velha do Pinhal", "tipo": "cabana", "centro": Vector2(-90, -2200), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": ""},
+	{"id": "ruptura_velha", "nome": "Aldeia Ruptura Velha", "tipo": "vila", "centro": Vector2(800, -250), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": ""},
+	{"id": "vigia", "nome": "Posto de Vigia Imperial", "tipo": "posto_imperial", "centro": Vector2(385, -790), "dir": Vector2(0, -1), "lado": 1.0, "raio": 40.0, "liga": ""},
+	{"id": "ocre", "nome": "Vila Ocre", "tipo": "vila", "centro": Vector2(805, -1900), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": ""},
+	{"id": "cinzas", "nome": "Fazenda das Cinzas", "tipo": "fazenda", "centro": Vector2(385, -1620), "dir": Vector2(0, -1), "lado": 1.0, "raio": 55.0, "liga": ""},
 ]
 
 

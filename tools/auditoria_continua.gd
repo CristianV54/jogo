@@ -42,6 +42,14 @@ func _rodar() -> void:
 		await physics_frame
 	var m: Mundo = jogo.mundo
 	jogo.jogador.global_position = Vector3(9000.0, 500.0, 9000.0)   # tira o Torin do caminho: o corpo dele também é uma parede para os raios
+	m.set_process(false)   # tudo ligado: o mundo só liga a colisão do que está perto do jogador
+	for id in m.regioes:
+		m._ligar(m.regioes[id], true)
+	for pid in m.povoados:
+		if m.povoados[pid].has("no"):
+			m._ligar(m.povoados[pid]["no"], true)
+	for i in 4:
+		await physics_frame
 	jogo.jogador.set_physics_process(false)
 	await physics_frame
 	# abre todos os portões das áreas e as portas das casas (as portas abrem sozinhas)

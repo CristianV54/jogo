@@ -37,6 +37,9 @@ var pernoita := true      # vai para casa à noite e quando chove (guardas e vig
 var casa := Vector3.INF   # ponto diante da porta da casa mais perto (coordenadas do pai)
 var _recolhido := false
 var _t_horario := 0.0
+var _medo := false          # um monstro caça por perto: corre para dentro da casa mais perto
+var _t_sem_ameaca := 0.0
+var _dentro_de_casa := false
 var _anim_descanso := ""
 var _melhor_dist := 1e9   # progresso rumo à casa (para detectar quem empacou)
 var _t_sem_progresso := 0.0
@@ -100,11 +103,21 @@ func _qual_marca() -> String:
 func _horario(delta: float) -> bool:
 	_t_horario -= delta
 	if _t_horario <= 0.0:
-		_t_horario = 1.5 + float(hash(nome) % 100) / 100.0
+		_t_horario = 0.5 + float(hash(nome) % 100) / 200.0
+		if papel.findn("guarda") >= 0 or papel.findn("vigia") >= 0 or papel.findn("sentinela") >= 0 or papel.findn("preso") >= 0:
+			pernoita = false
+			return false
+		if _ameacado():
+			_medo = true
+			_t_sem_ameaca = 0.0
+		else:
+			_t_sem_ameaca += 0.7
+			if _t_sem_ameaca > 8.0:
+				_medo = false
 		var jogo := get_tree().get_first_node_in_group("jogo")
 		var clima: Clima = jogo.get("clima") if jogo else null
-		if clima:
-			var quer := clima.hora_de_dormir() or clima.chuva > 0.4
+		if clima or _medo:
+			var quer := _medo or clima.hora_de_dormir() or clima.chuva > 0.4
 			if quer and not _recolhido:
 				if papel.findn("guarda") >= 0 or papel.findn("vigia") >= 0 or papel.findn("sentinela") >= 0 or papel.findn("preso") >= 0:
 					pernoita = false
@@ -117,6 +130,7 @@ func _horario(delta: float) -> bool:
 					casa = _achar_casa()
 			elif not quer and _recolhido:
 				_recolhido = false
+				_sair_de_casa()
 				_melhor_dist = 1e9
 				if not rotina.is_empty():
 					_proximo_passo()
@@ -160,6 +174,8 @@ func _horario(delta: float) -> bool:
 				position.y = altura_em.call(position.x, position.z)
 		else:
 			visual.tocar("Idle", 0.2)
+	elif _medo:
+		_entrar_em_casa()   # chegou à porta com o monstro por perto: entra e se esconde
 	else:
 		if _anim_descanso == "":
 			_anim_descanso = "Idle"
@@ -192,9 +208,9 @@ func _seguir_trilha(delta: float) -> bool:
 		_i_trilha += 1
 		return true
 	var dir := d.normalized()
-	position += dir * 2.4 * delta
+	position += dir * (4.4 if _medo else 2.4) * delta
 	rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
-	visual.tocar("Jog_Fwd" if (destino - global_position).length() > 30.0 else "Walk", 0.2)
+	visual.tocar("Sprint" if _medo and visual.tem("Sprint") else ("Jog_Fwd" if (destino - global_position).length() > 30.0 else "Walk"), 0.2)
 	if altura_em.is_valid():
 		position.y = altura_em.call(position.x, position.z)
 	return true
@@ -217,6 +233,37 @@ func _achar_casa() -> Vector3:
 	var folga := float(hash(nome) % 100) / 100.0 * 2.4 - 1.2   # cada um fica num lugar da soleira
 	local += Vector3(folga, 0.0, 0.0).rotated(Vector3.UP, melhor.global_rotation.y)
 	return local
+
+
+## Algum monstro (ou guarda) em perseguição a menos de 28 m? Quem está parado não assusta.
+func _ameacado() -> bool:
+	for e in get_tree().get_nodes_in_group("inimigos"):
+		var ini := e as Inimigo
+		if ini == null or ini.estado == Inimigo.Estado.MORTO or ini.estado == Inimigo.Estado.PARADO:
+			continue
+		if ini.global_position.distance_to(global_position) < 28.0:
+			return true
+	return false
+
+
+func _entrar_em_casa() -> void:
+	if _dentro_de_casa:
+		return
+	_dentro_de_casa = true
+	visible = false
+	corpo.collision_layer = 0
+	remove_from_group("npcs")
+	remove_from_group("atingiveis")
+
+
+func _sair_de_casa() -> void:
+	if not _dentro_de_casa:
+		return
+	_dentro_de_casa = false
+	visible = true
+	corpo.collision_layer = Solidos.CAMADA_SERES
+	add_to_group("npcs")
+	add_to_group("atingiveis")
 
 
 func olhar_para(alvo: Vector3) -> void:

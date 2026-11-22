@@ -18,6 +18,9 @@ var condicoes: Dictionary = {}     # id -> Callable (o Jogo diz quando cada barr
 var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio, tipo, no)
 var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
+var trilhas: Array[PackedVector2Array] = []
+var arvores: ColisoresDeArvores
+var mapa_floresta: ImageTexture   # onde há mata, para o mapa (tecla M)
 var _rng := RandomNumberGenerator.new()
 var _t_atividade := 0.0
 const RAIO_ATIVO := 230.0    # regiões e povoados mais longe que isto ficam parados e invisíveis (fogueiras, gente e bichos custam CPU)
@@ -36,71 +39,19 @@ static func preparar_terreno(t: Terreno, area: Node3D) -> void:
 	t.cor_externa = instancia.terreno.cor_do_mundo
 
 
-## Paredes invisíveis na borda do mapa de uma área. No mundo contínuo elas têm vãos onde as estradas entram.
+## Paredes invisíveis na borda do mapa de uma área. No mundo contínuo não há: as bordas das áreas são abertas
+## (quem fecha o caminho são as cristas de rocha e a borda do mundo).
 static func paredes_de_borda(area: Node3D, tam: float, corpo: StaticBody3D) -> void:
-	var meio := tam / 2.0
-	var vaos := {"N": [], "S": [], "L": [], "O": []}   # lado -> [[centro, largura]]
 	if ativo:
-		vaos = instancia._vaos_da_area(String(area.name), meio)
-	for lado in ["N", "S", "L", "O"]:
-		var lista: Array = vaos[lado]
-		lista.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-		var ini := -meio
-		var trechos: Array = []
-		for v in lista:
-			trechos.append([ini, float(v[0]) - float(v[1]) / 2.0])
-			ini = float(v[0]) + float(v[1]) / 2.0
-		trechos.append([ini, meio])
-		for t in trechos:
-			var comp: float = t[1] - t[0]
-			if comp < 1.0:
-				continue
-			var meio_t: float = (t[0] + t[1]) / 2.0
-			var cs := CollisionShape3D.new()
-			var caixa := BoxShape3D.new()
-			var pos := Vector3.ZERO
-			match lado:
-				"N":
-					caixa.size = Vector3(comp, 16.0, 2.0)
-					pos = Vector3(meio_t, 8.0, -meio)
-				"S":
-					caixa.size = Vector3(comp, 16.0, 2.0)
-					pos = Vector3(meio_t, 8.0, meio)
-				"L":
-					caixa.size = Vector3(2.0, 16.0, comp)
-					pos = Vector3(meio, 8.0, meio_t)
-				_:
-					caixa.size = Vector3(2.0, 16.0, comp)
-					pos = Vector3(-meio, 8.0, meio_t)
-			cs.shape = caixa
-			cs.position = pos
-			corpo.add_child(cs)
-
-
-func _vaos_da_area(id: String, meio: float) -> Dictionary:
-	var vaos := {"N": [], "S": [], "L": [], "O": []}
-	var pontas: Array = []   # pontos do mundo onde uma estrada toca esta área
-	for e in MundoDados.ESTRADAS:
-		var curva: PackedVector2Array = estradas.get(e["id"], PackedVector2Array())
-		if curva.is_empty():
-			continue
-		if e["a"] == id:
-			pontas.append([curva[0], float(e["meia"])])
-		if e["b"] == id:
-			pontas.append([curva[curva.size() - 1], float(e["meia"])])
-	if id == "valdoria":
-		pontas.append([MundoDados.centro(id) + Vector2(0, -meio), 20.0])   # a escadaria leva ao viaduto do castelo
-	if id == "castelo_imperial":
-		pontas.append([MundoDados.centro(id) + Vector2(0, meio), 20.0])
-	var c := MundoDados.centro(id)
-	for p in pontas:
-		var l: Vector2 = p[0] - c
-		var largura: float = maxf(26.0, float(p[1]) * 2.0 + 6.0)
-		if absf(absf(l.y) - meio) < absf(absf(l.x) - meio):
-			vaos["N" if l.y < 0.0 else "S"].append([l.x, largura])
-		else:
-			vaos["O" if l.x < 0.0 else "L"].append([l.y, largura])
-	return vaos
+		return
+	var meio := tam / 2.0
+	for lado in [[Vector3(0, 8, -meio), Vector3(tam, 16, 2)], [Vector3(0, 8, meio), Vector3(tam, 16, 2)], [Vector3(-meio, 8, 0), Vector3(2, 16, tam)], [Vector3(meio, 8, 0), Vector3(2, 16, tam)]]:
+		var cs := CollisionShape3D.new()
+		var caixa := BoxShape3D.new()
+		caixa.size = lado[1]
+		cs.shape = caixa
+		cs.position = lado[0]
+		corpo.add_child(cs)
 
 
 # ---------------------------------------------------------------- construção
@@ -125,12 +76,12 @@ func construir() -> void:
 	terreno.gerar()
 	add_child(terreno)
 	_paredes = StaticBody3D.new()
-	_paredes.name = "ParedesDosCorredores"
+	_paredes.name = "CristasEBordas"
 	add_child(_paredes)
-	progresso.emit("Abrindo estradas, pontes e corredores...")
+	progresso.emit("Erguendo as serras e abrindo as estradas...")
 	await get_tree().process_frame
 	_pontes()
-	_corredores()
+	_cristas()
 	_viaduto()
 	_barreiras()
 	progresso.emit("Plantando florestas...")
@@ -178,15 +129,31 @@ func _planejar() -> void:
 	for r in MundoDados.RIOS:
 		rios.append({"pontos": Terreno.curva(r["pontos"], 4.0), "largura": r["largura"], "margem": r["margem"], "fundo": r["fundo"], "agua": true})
 	terreno.rios = rios
-	terreno.preparar()
-	for p in MundoDados.POVOADOS:   # onde fica cada povoado: ao lado da estrada, do lado indicado
+	for p in MundoDados.POVOADOS:   # povoados na beira de uma estrada: ao lado dela, do lado indicado
 		var s := float(p["t"]) * comprimento_da_estrada(p["estrada"])
 		var par := ponto_na_estrada(p["estrada"], s)
 		var dir: Vector2 = par[1]
 		var esq := Vector2(-dir.y, dir.x)
 		var centro: Vector2 = par[0] + esq * float(p["lado"]) * float(p["raio"]) * 0.55
-		terreno.planos.append(Vector3(centro.x, centro.y, float(p["raio"]) * 0.7))   # o chão do povoado fica nivelado
-		povoados[p["id"]] = {"id": p["id"], "lado": p["lado"], "centro": centro, "nome": p["nome"], "raio": p["raio"], "tipo": p["tipo"], "estrada": p["estrada"], "dir": dir, "ponto_da_estrada": par[0]}
+		_registrar_povoado(p, centro, dir, par[0])
+	for p in MundoDados.POVOADOS_LIVRES:   # povoados espalhados pelo mundo, com uma trilha até a estrada mais perto
+		_registrar_povoado(p, p["centro"], p["dir"], p["centro"])
+		if String(p["liga"]) != "":
+			var pts: PackedVector2Array = estradas[p["liga"]]
+			var melhor := pts[0]
+			for q in pts:
+				if q.distance_to(p["centro"]) < melhor.distance_to(p["centro"]):
+					melhor = q
+			var meio: Vector2 = (melhor + p["centro"]) / 2.0 + Vector2(-(melhor - p["centro"]).y, (melhor - p["centro"]).x).normalized() * 12.0
+			var trilha := Terreno.curva([p["centro"], meio, melhor], 4.0)
+			trilhas.append(trilha)
+			terreno.estradas_mundo.append(trilha)
+	terreno.preparar()   # depois de todas as estradas, trilhas e áreas aplanadas
+
+
+func _registrar_povoado(p: Dictionary, centro: Vector2, dir: Vector2, ponto_estrada: Vector2) -> void:
+	terreno.planos.append(Vector3(centro.x, centro.y, float(p["raio"]) * 0.7))   # o chão do povoado fica nivelado
+	povoados[p["id"]] = {"id": p["id"], "lado": p["lado"], "centro": centro, "nome": p["nome"], "raio": p["raio"], "tipo": p["tipo"], "dir": dir, "ponto_da_estrada": ponto_estrada}
 
 
 ## Lê o ar da região (névoa, sol, céu) do ambiente que a área criou e tira o ambiente dela: quem manda no céu é o Clima.
@@ -373,64 +340,11 @@ func ponto_na_estrada(id: String, s: float) -> Array:
 
 # ---------------------------------------------------------------- estradas, pontes, corredores
 
-func _largura_do_corredor(id: String, s: float, lado: float) -> float:
-	var e := MundoDados.estrada(id)
-	var comp := comprimento_da_estrada(id)
-	var w: float = e["meia"]
-	for p in MundoDados.POVOADOS:   # o corredor se alarga do lado do povoado
-		if p["estrada"] == id and float(p["lado"]) == lado:
-			var s0 := float(p["t"]) * comp
-			var meio := float(p["raio"]) * 1.4
-			var x := absf(s - s0) / meio
-			if x < 1.0:
-				w = maxf(w, lerpf(w, float(p["raio"]) * 1.3, 0.5 + 0.5 * cos(PI * x)))
-	for b in MundoDados.BARREIRAS:   # e se estreita no pescoço da barreira
-		if b.get("estrada", "") == id:
-			var s0 := float(b["t"]) * comp
-			var x := absf(s - s0) / 40.0
-			if x < 1.0:
-				w = lerpf(w, 9.0, 0.5 + 0.5 * cos(PI * x))
-	return w
-
-
-func _corredores() -> void:
-	for e in MundoDados.ESTRADAS:
-		var pts: PackedVector2Array = estradas[e["id"]]
-		var acum := 0.0
-		var anterior := {}   # lado -> ponto
-		for i in pts.size():
-			var dir := (pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]).normalized()
-			var esq := Vector2(-dir.y, dir.x)
-			if i > 0:
-				acum += pts[i].distance_to(pts[i - 1])
-			for lado in [1.0, -1.0]:
-				var w := _largura_do_corredor(e["id"], acum, lado)
-				var p: Vector2 = pts[i] + esq * lado * w
-				if anterior.has(lado):
-					var a: Vector2 = anterior[lado]
-					if not (_em_alguma_area(a) or _em_alguma_area(p)):
-						_parede(a, p)
-				anterior[lado] = p
-
-
 func _em_alguma_area(p: Vector2) -> bool:
 	for id in MundoDados.REGIOES:
 		if MundoDados.retangulo(id, -2.0).has_point(p):
 			return true
 	return false
-
-
-func _parede(a: Vector2, b: Vector2) -> void:
-	var d := b - a
-	if d.length() < 0.5:
-		return
-	var cs := CollisionShape3D.new()
-	var caixa := BoxShape3D.new()
-	caixa.size = Vector3(1.2, 24.0, d.length() + 1.0)
-	cs.shape = caixa
-	var m := (a + b) / 2.0
-	cs.transform = Transform3D(Basis(Vector3.UP, atan2(d.x, d.y)), Vector3(m.x, terreno.altura_em(m.x, m.y) + 8.0, m.y))
-	_paredes.add_child(cs)
 
 
 ## Pontes onde uma estrada cruza um rio do mundo (fora das áreas).
@@ -490,80 +404,152 @@ func _viaduto() -> void:
 
 func _barreiras() -> void:
 	for b in MundoDados.BARREIRAS:
-		var p: Vector2
-		var dir := Vector2(0, -1)
-		if b.has("pos"):
-			p = b["pos"]
-		else:
-			var s := float(b["t"]) * comprimento_da_estrada(b["estrada"])
-			var par := ponto_na_estrada(b["estrada"], s)
-			p = par[0]
-			dir = par[1]
+		var p: Vector2 = b["pos"]
+		var dir: Vector2 = b["dir"]
 		var bar := Barreira.new()
 		bar.tipo = b["tipo"]
 		bar.texto = b["texto"]
-		bar.largura = float(b.get("largura", 18.0))
+		bar.largura = float(b["largura"])
 		bar.condicao = condicoes.get(b["id"], Callable())
-		bar.position = Vector3(p.x, 6.7 if b.has("pos") else terreno.altura_em(p.x, p.y), p.y)
+		bar.position = Vector3(p.x, float(b["altura_y"]) if b.has("altura_y") else terreno.altura_em(p.x, p.y), p.y)
 		bar.rotation.y = atan2(dir.x, dir.y)   # a barreira atravessa a estrada: o lado largo (X local) é perpendicular a ela
 		add_child(bar)
 		barreiras[b["id"]] = bar
 
 
-# ---------------------------------------------------------------- floresta e horizonte
-
-func _floresta() -> void:
-	var visuais: Array[Transform3D] = []
-	var solidos: Array[Transform3D] = []
-	var corpo := StaticBody3D.new()
-	corpo.name = "TroncosDoCorredor"
-	add_child(corpo)
-	for k in 42000:
-		var x := _rng.randf_range(MundoDados.LIMITES.position.x, MundoDados.LIMITES.end.x)
-		var z := _rng.randf_range(MundoDados.LIMITES.position.y, MundoDados.LIMITES.end.y)
-		var p := Vector2(x, z)
-		if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0):
-			continue
-		var info := info_estrada(p)
-		var perto_estrada: float = info["distancia"] if not info.is_empty() else 1e9
-		var dist_area := terreno._distancia_a_area(p)
-		if perto_estrada > 170.0 and dist_area > 150.0:
-			continue
-		var povoado := false
-		for pid in povoados:
-			if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.1:
-				povoado = true
-		if povoado or perto_estrada < 6.5:
-			continue
-		var meia := 20.0
-		if not info.is_empty():
-			meia = _largura_do_corredor(info["id"], info["s"], info["lado"])
-		var dentro := perto_estrada < meia
-		if dentro and _rng.randf() > 0.12:
-			continue   # dentro do corredor a mata é rala
-		var y := terreno.altura_em(x, z)
-		var s := _rng.randf_range(0.8, 1.7)
-		var t := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, y - 0.15, z))
-		visuais.append(t)
-		if dentro:
+## Cristas de rocha (muralhas naturais com vão só onde há barreira) e a borda do mundo.
+func _cristas() -> void:
+	var rocha := FabricaNatureza.pedra(3.0)
+	var transf: Array[Transform3D] = []
+	for c in MundoDados.CRISTAS:
+		var de: Vector2 = c["de"]
+		var para: Vector2 = c["para"]
+		var comp := de.distance_to(para)
+		var dir := (para - de) / comp
+		var vaos: Array = c["vaos"]
+		var cortes: Array = [0.0]   # intervalos [ini, fim] ao longo da crista, sem os vãos
+		var intervalos: Array = []
+		var posicoes: Array = []
+		for v in vaos:
+			posicoes.append((v - de).dot(dir))
+		posicoes.sort()
+		var ini := 0.0
+		for pv in posicoes:
+			intervalos.append([ini, pv - 10.0])
+			ini = pv + 10.0
+		intervalos.append([ini, comp])
+		var altura := float(c["altura"])
+		for it in intervalos:
+			var a: float = it[0]
+			var b: float = it[1]
+			if b - a < 1.0:
+				continue
+			var meio := de + dir * ((a + b) / 2.0)
 			var cs := CollisionShape3D.new()
-			var cil := CylinderShape3D.new()
-			cil.radius = 0.45 * s
-			cil.height = 4.0
-			cs.shape = cil
-			cs.position = Vector3(x, y + 2.0, z)
-			corpo.add_child(cs)
+			var caixa := BoxShape3D.new()
+			caixa.size = Vector3(9.0, altura + 12.0, b - a)
+			cs.shape = caixa
+			cs.transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)), Vector3(meio.x, terreno.altura_em(meio.x, meio.y) + altura / 2.0 - 6.0, meio.y))
+			_paredes.add_child(cs)
+			var t := a
+			while t < b:   # rochas gigantes ao longo da crista
+				var q := de + dir * t + Vector2(-dir.y, dir.x) * _rng.randf_range(-3.0, 3.0)
+				var e := _rng.randf_range(9.0, 15.0)
+				var h := e * _rng.randf_range(0.9, 1.5) * (1.0 if altura > 10.0 else 0.35)
+				var base := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, h, e))
+				transf.append(Transform3D(base, Vector3(q.x, terreno.altura_em(q.x, q.y) - 1.0, q.y)))
+				t += 13.0
+	var lim := MundoDados.LIMITES
+	for lado in [[Vector2(lim.position.x, lim.get_center().y), Vector2(4, lim.size.y)], [Vector2(lim.end.x, lim.get_center().y), Vector2(4, lim.size.y)], [Vector2(lim.get_center().x, lim.position.y), Vector2(lim.size.x, 4)], [Vector2(lim.get_center().x, lim.end.y), Vector2(lim.size.x, 4)]]:
+		var cs := CollisionShape3D.new()
+		var caixa := BoxShape3D.new()
+		caixa.size = Vector3(lado[1].x, 80.0, lado[1].y)
+		cs.shape = caixa
+		cs.position = Vector3(lado[0].x, 30.0, lado[0].y)
+		_paredes.add_child(cs)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = FabricaNatureza.pinheiro()
-	mm.instance_count = visuais.size()
-	for i in visuais.size():
-		mm.set_instance_transform(i, visuais[i])
+	mm.mesh = rocha
+	mm.instance_count = transf.size()
+	for i in transf.size():
+		mm.set_instance_transform(i, transf[i])
 	var inst := MultiMeshInstance3D.new()
-	inst.name = "FlorestaDoMundo"
+	inst.name = "RochasDasCristas"
 	inst.multimesh = mm
 	inst.material_override = FabricaNatureza.material()
 	add_child(inst)
+
+
+# ---------------------------------------------------------------- floresta e horizonte
+
+func _floresta() -> void:
+	var rng_f := FastNoiseLite.new()
+	rng_f.seed = 77
+	rng_f.frequency = 0.0032
+	rng_f.fractal_octaves = 2
+	arvores = ColisoresDeArvores.new()
+	arvores.altura_em = terreno.altura_em
+	add_child(arvores)
+	arvores.iniciar(220)
+	var tiles: Dictionary = {}   # Vector2i -> Array[Transform3D]
+	var passo := 7.5
+	var lim := MundoDados.LIMITES
+	var gw := int(lim.size.x / 20.0) + 1
+	var gh := int(lim.size.y / 20.0) + 1
+	var mata := PackedFloat32Array()
+	mata.resize(gw * gh)
+	var nx := int(lim.size.x / passo)
+	var nz := int(lim.size.y / passo)
+	for i in nx:
+		for j in nz:
+			var x := lim.position.x + (i + _rng.randf()) * passo
+			var z := lim.position.y + (j + _rng.randf()) * passo
+			var p := Vector2(x, z)
+			var dens := smoothstep(0.38, 0.78, rng_f.get_noise_2d(x, z) * 0.5 + 0.5)   # bosques e clareiras
+			if _rng.randf() > dens * 0.85 + 0.06:
+				continue
+			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0:
+				continue
+			var no_povoado := false
+			for pid in povoados:
+				if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.05:
+					no_povoado = true
+					break
+			if no_povoado:
+				continue
+			var y := terreno.altura_em(x, z)
+			var s := _rng.randf_range(0.8, 1.7)
+			var t := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, y - 0.15, z))
+			var k := Vector2i(int(floor(x / 160.0)), int(floor(z / 160.0)))
+			if not tiles.has(k):
+				tiles[k] = []
+			(tiles[k] as Array).append(t)
+			arvores.adicionar(x, z, 0.45 * s)
+			mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
+	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)
+	for gz in gh:
+		for gx in gw:
+			img.set_pixel(gx, gz, Color(0.2, 0.27, 0.14).lerp(Color(0.06, 0.2, 0.1), clampf(mata[gz * gw + gx] / 7.0, 0.0, 1.0)))
+	mapa_floresta = ImageTexture.create_from_image(img)
+	var malha := FabricaNatureza.pinheiro()
+	var mat := FabricaNatureza.material()
+	var total := 0
+	for k in tiles:   # um MultiMesh por bloco de 160 m: o motor esconde os distantes e os fora da tela
+		var lista: Array = tiles[k]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = malha
+		mm.instance_count = lista.size()
+		for i in lista.size():
+			mm.set_instance_transform(i, lista[i])
+		var inst := MultiMeshInstance3D.new()
+		inst.name = "Floresta_%d_%d" % [k.x, k.y]
+		inst.multimesh = mm
+		inst.material_override = mat
+		inst.visibility_range_end = 420.0
+		add_child(inst)
+		total += lista.size()
+	print("Mundo: ", total, " árvores em ", tiles.size(), " blocos")
 
 
 ## Montanhas em volta do mundo inteiro e chão até onde a vista alcança.

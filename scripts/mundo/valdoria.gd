@@ -309,14 +309,16 @@ func _predios_publicos() -> void:
 func _escadaria() -> void:
 	var pedra := VilaRefugio._mat(Color(0.55, 0.5, 0.42))
 	var comp := 24.0
-	var ang := atan2(TOPO_Y, comp)
+	var topo := TOPO_Y - 0.3   # a plataforma do alto fica em 6.7: a rampa chega ali sem degrau (o jogador não sobe quina)
+	var corrida := 22.0
+	var ang := atan2(topo, corrida)
 	var rampa := StaticBody3D.new()   # colisão lisa (o jogador sobe como numa rampa); os degraus abaixo são só o desenho
 	var cs := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
-	forma.size = Vector3(20.0, 0.6, sqrt(comp * comp + TOPO_Y * TOPO_Y) + 1.0)
+	forma.size = Vector3(20.0, 0.6, sqrt(corrida * corrida + topo * topo) + 1.0)
 	cs.shape = forma
 	rampa.add_child(cs)
-	rampa.position = Vector3(0.0, TOPO_Y / 2.0 - 0.3, -100.0)
+	rampa.position = Vector3(0.0, topo / 2.0 - 0.3 * cos(ang), -99.0 - 0.3 * sin(ang))
 	rampa.rotation.x = ang
 	add_child(rampa)
 	for i in 14:

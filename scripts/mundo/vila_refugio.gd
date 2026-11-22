@@ -218,11 +218,30 @@ static func _galinheiro(centro: Vector3) -> Array:
 
 static func _poco(c: Vector3) -> Array:
 	var pedra := ConstrutorCasa._material_do_kit("Floor_UnevenBrick")
+	var mat_pedra: Material = pedra if pedra else _mat(Color(0.5, 0.5, 0.52))
 	var madeira := _mat(Color(0.34, 0.22, 0.12))
 	var y := _y(c.x, c.z)
-	var anel := _cilindro(Vector3(c.x, y + 0.45, c.z), 0.85, 0.9, pedra if pedra else _mat(Color(0.5, 0.5, 0.52)), true, 12)
-	anel.name = "Poco"
-	_cilindro(Vector3(c.x, y + 0.88, c.z), 0.66, 0.04, _mat(Color(0.12, 0.28, 0.42)), false, 12)
+	for k in 12:   # anel de pedra OCO: 12 blocos em círculo
+		var a := TAU * k / 12.0
+		var b := _caixa(Vector3(c.x + cos(a) * 0.76, y + 0.45, c.z + sin(a) * 0.76), Vector3(0.5, 0.9, 0.32), mat_pedra, true, -a + PI / 2.0)
+		if k == 0:
+			b.name = "Poco"
+	var parede := MeshInstance3D.new()   # parede de dentro do poço (vista de cima, dá a sensação de fundo)
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.6
+	cil.bottom_radius = 0.6
+	cil.height = 0.9
+	cil.radial_segments = 14
+	var m_in := StandardMaterial3D.new()
+	m_in.albedo_color = Color(0.16, 0.16, 0.17)
+	m_in.cull_mode = BaseMaterial3D.CULL_FRONT
+	cil.material = m_in
+	parede.mesh = cil
+	parede.position = Vector3(c.x, y + 0.45, c.z)
+	_area.add_child(parede)
+	_cilindro(Vector3(c.x, y + 0.03, c.z), 0.6, 0.02, _mat(Color(0.02, 0.02, 0.03)), false, 14)   # escuridão do fundo
+	var agua := _mat(Color(0.05, 0.16, 0.26))
+	_cilindro(Vector3(c.x, y + 0.05, c.z), 0.38, 0.02, agua, false, 14)                           # reflexo da água lá embaixo
 	for dx in [-0.78, 0.78]:
 		_caixa(Vector3(c.x + dx, y + 1.5, c.z), Vector3(0.14, 3.0, 0.14), madeira, true)
 	_caixa(Vector3(c.x, y + 2.6, c.z), Vector3(1.8, 0.14, 0.14), madeira)

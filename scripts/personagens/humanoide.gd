@@ -10,6 +10,8 @@ const BIBLIOTECA: AnimationLibrary = preload("res://assets/animations/ual/ual1_b
 @export var cor_cabelo := Color(1, 1, 1)
 ## Escala do corpo todo (1,0 = 1,82 m, a altura da base). Usada para diferenciar personagens.
 @export var escala_corpo := 1.0
+## Cabeça maior em relação ao corpo (crianças: 1,3). Mexe só no osso da cabeça.
+@export var cabeca_grande := 1.0
 ## Cor que multiplica as peças de traje (não a pele): serve para diferenciar chefes e soldados.
 @export var tom_traje := Color(1, 1, 1)
 ## Arma na mão direita (opcional). O giro e o deslocamento foram calibrados por captura.
@@ -21,22 +23,62 @@ const BIBLIOTECA: AnimationLibrary = preload("res://assets/animations/ual/ual1_b
 ## Animação em loop que toca ao entrar na cena.
 @export var animacao_inicial := "Idle"
 
+## Ao correr a espada vai para as costas (na mão, o braço balançando a levava para a cabeça).
+@export var costas_giro := Vector3(90.0, 0.0, 40.0)
+@export var costas_deslocamento := Vector3(0.0, -0.08, -0.22)
+
 @onready var modelo: Node3D = $Modelo
 var animacoes: AnimationPlayer
+var _arma_mao: Node3D
+var _arma_costas: Node3D
+var _correndo_antes := false
 
 
 func _ready() -> void:
 	modelo.scale = Vector3.ONE * escala_corpo
 	_tingir_cabelo()
 	_tingir_traje()
+	if cabeca_grande != 1.0:
+		var esq0: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
+		var osso := esq0.find_bone("head") if esq0 else -1
+		if osso >= 0:
+			esq0.set_bone_pose_scale(osso, Vector3.ONE * cabeca_grande)
 	if arma_cena:
-		equipar_arma(arma_cena, arma_escala, arma_giro, arma_deslocamento, arma_empunhadura)
+		_arma_mao = equipar_arma(arma_cena, arma_escala, arma_giro, arma_deslocamento, arma_empunhadura)
+		_guardar_nas_costas()
 	animacoes = AnimationPlayer.new()
 	animacoes.name = "Animacoes"
 	add_child(animacoes)
 	animacoes.root_node = animacoes.get_path_to(modelo)
 	animacoes.add_animation_library("", BIBLIOTECA)
 	tocar(animacao_inicial)
+
+
+func _guardar_nas_costas() -> void:
+	var esq: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
+	if esq == null or esq.find_bone("spine_03") < 0:
+		return
+	var anexo := BoneAttachment3D.new()
+	anexo.name = "ArmaNasCostas"
+	anexo.bone_name = "spine_03"
+	esq.add_child(anexo)
+	_arma_costas = arma_cena.instantiate()
+	_arma_costas.scale = Vector3.ONE * arma_escala
+	_arma_costas.rotation_degrees = costas_giro
+	_arma_costas.position = costas_deslocamento
+	_arma_costas.visible = false
+	anexo.add_child(_arma_costas)
+
+
+func _process(_delta: float) -> void:
+	if _arma_mao == null or _arma_costas == null or animacoes == null:
+		return
+	var a := animacoes.current_animation
+	var correndo := a == "Sprint" or a == "Jog_Fwd" or a == "Jog_Bwd" or a == "Jog_Left" or a == "Jog_Right"
+	if correndo != _correndo_antes:
+		_correndo_antes = correndo
+		_arma_mao.visible = not correndo
+		_arma_costas.visible = correndo
 
 
 func tocar(nome: String, mistura := 0.2) -> void:
