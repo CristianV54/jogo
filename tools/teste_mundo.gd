@@ -63,7 +63,7 @@ func _rodar() -> void:
 	for n in campos.npcs:
 		antes[n] = n.position
 	clima.definir_hora(21.0)
-	await create_timer(9.0).timeout   # 54 s de jogo
+	await create_timer(16.0).timeout   # ~96 s de jogo
 	var em_casa := 0
 	var trabalhadores := 0
 	for n in campos.npcs:
@@ -74,7 +74,7 @@ func _rodar() -> void:
 	marcar("À noite os trabalhadores se recolhem", trabalhadores > 0 and em_casa == trabalhadores, "%d de %d" % [em_casa, trabalhadores])
 	var perto_de_casa := 0
 	for n in campos.npcs:
-		if n._recolhido and n.casa != Vector3.INF and Vector2(n.position.x - n.casa.x, n.position.z - n.casa.z).length() < 4.0:
+		if n._deitado or (n._recolhido and n.casa != Vector3.INF and Vector2(n.position.x - n.casa.x, n.position.z - n.casa.z).length() < 4.0):   # chegou: já deitado na cama ou na porta
 			perto_de_casa += 1
 	for n in campos.npcs:
 		if n._recolhido:

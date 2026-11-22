@@ -240,6 +240,7 @@ func _fazenda() -> void:
 	_casa("Celeiro", _p(-22.0, 10.0), 4, 4, REF.ESTILO_MADEIRA, "deposito")
 	var c1 := _p(0.0, 43.0)   # um campo grande atrás da casa, com o poço e o palheiro no quintal entre os dois
 	var c2 := c1
+	_casa("Anexo", _p(17.0, 4.0), 2, 2, REF.ESTILO_MADEIRA)   # quarto dos lavradores
 	_plantacao(c1, 32.0, 18.0)
 	_feno(_p(-12.0, 16.0))
 	VilaRefugio._poco(Vector3(_p(10.0, 8.0).x, 0.0, _p(10.0, 8.0).y))

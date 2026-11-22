@@ -254,6 +254,9 @@ func _ligar(no: Node3D, ligado: bool) -> void:
 	if no.process_mode != modo:
 		no.process_mode = modo
 		no.visible = ligado
+		if ligado:   # a gente da região já acorda no horário certo (deitada à noite, de pé de dia)
+			for e in no.find_children("*", "Npc", true, false):
+				(e as Npc).acomodar_ao_horario()
 
 
 # ---------------------------------------------------------------- consultas

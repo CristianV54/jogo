@@ -39,7 +39,7 @@ func _ready() -> void:
 	_tingir_traje()
 	if cabeca_grande != 1.0:
 		var esq0: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
-		var osso := esq0.find_bone("head") if esq0 else -1
+		var osso := esq0.find_bone("Head") if esq0 else -1
 		if osso >= 0:
 			esq0.set_bone_pose_scale(osso, Vector3.ONE * cabeca_grande)
 	if arma_cena:

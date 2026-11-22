@@ -175,7 +175,19 @@ static func _torre(centro: Vector3, madeira: Material, escura: Material) -> void
 	for dx in [-1.0, 1.0]:
 		_caixa(centro + Vector3(dx * 1.3, 5.2, 0.0), Vector3(0.1, 0.9, 2.7), madeira)
 		_caixa(centro + Vector3(0.0, 5.2, dx * 1.3), Vector3(2.7, 0.9, 0.1), madeira)
-	_telhado(centro + Vector3(0.0, 6.35, 0.0), Vector3(3.4, 1.3, 3.4), escura, PI / 4.0)
+	var piramide := MeshInstance3D.new()   # telhado de pirâmide de 4 águas com beiral (o prisma de duas águas parecia uma cunha solta)
+	var pm := CylinderMesh.new()
+	pm.top_radius = 0.0
+	pm.bottom_radius = 2.5
+	pm.height = 1.7
+	pm.radial_segments = 4
+	pm.rings = 1
+	pm.material = _mat(Color(0.5, 0.2, 0.14))
+	piramide.mesh = pm
+	piramide.position = centro + Vector3(0.0, 6.05 + 0.85, 0.0)
+	piramide.rotation.y = PI / 4.0
+	_area.add_child(piramide)
+	_caixa(centro + Vector3(0.0, 5.67, 0.0), Vector3(3.0, 0.16, 3.0), escura)   # forro sob o telhado
 	for degrau in 8:   # escada encostada
 		_caixa(centro + Vector3(1.4, 0.3 + degrau * 0.55, 0.0), Vector3(0.1, 0.07, 0.8), madeira)
 

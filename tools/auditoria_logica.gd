@@ -181,6 +181,25 @@ func _rodar() -> void:
 			pass
 		if m.terreno.distancia_caminho(ctr.x, ctr.y) < 2.0 and not m.regiao_em(Vector3(ctr.x, 0, ctr.y)) != "":
 			_ruim("sobre o caminho", "%s está em cima de estrada/trilha" % c["nome"])
+	# H) casa sem telhado / sem frontão / sem porta (o kit só tem alguns tamanhos de telhado)
+	for c in construcoes:
+		if c["campo"]:
+			continue
+		var casa: Node3D = c["no"]
+		var tem_telhado := false
+		var tem_porta := false
+		for f in casa.get_children():
+			if f.has_meta("peca"):
+				var nm: String = f.get_meta("peca")
+				if nm.begins_with("Roof_") and not nm.begins_with("Roof_Front"):
+					tem_telhado = true
+				if nm.contains("Door"):
+					tem_porta = true
+		if not tem_telhado:
+			_ruim("sem telhado", "%s (%dx%d) não tem telhado" % [c["nome"], int(casa.get_meta("colunas")), int(casa.get_meta("linhas"))])
+		if not tem_porta:
+			_ruim("sem porta", "%s não tem porta" % c["nome"])
+	# I) estrutura (torre, muro) em volta de nada / solta: só conta casas que se cruzam com plinto fora do chão
 	# G) povoado encostando em serra de rocha ou em outra região
 	for pid in m.povoados:
 		var cp: Vector2 = m.povoados[pid]["centro"]

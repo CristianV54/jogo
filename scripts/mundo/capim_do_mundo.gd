@@ -121,7 +121,7 @@ func _construir(k: Vector2i) -> MultiMeshInstance3D:
 		if ter.distancia_caminho(q.x, q.y) < 2.4 or ter.na_agua(q.x, q.y, 1.6) or Costa.distancia(p.x, p.y) < 7.0:
 			continue
 		var y := ter.altura_em(q.x, q.y)
-		var s := rng.randf_range(1.1, 2.3)
+		var s := rng.randf_range(0.5, 1.1)   # moita de 15 a 55 cm: bem abaixo do joelho do Torin
 		var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.5), s))
 		t.append(Transform3D(base, Vector3(p.x, y - 0.02, p.y)))
 		var c := ter.cor_em(q.x, q.y)

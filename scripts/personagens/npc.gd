@@ -40,6 +40,9 @@ var _t_horario := 0.0
 var _medo := false          # um monstro caça por perto: corre para dentro da casa mais perto
 var _t_sem_ameaca := 0.0
 var _dentro_de_casa := false
+var _cama: Cama = null     # a cama em que dorme
+var _casa_no: Node3D = null
+var _deitado := false
 var _anim_descanso := ""
 var _melhor_dist := 1e9   # progresso rumo à casa (para detectar quem empacou)
 var _t_sem_progresso := 0.0
@@ -98,6 +101,31 @@ func _qual_marca() -> String:
 	return ""
 
 
+## Chamado quando a região do NPC liga (o jogador chegou perto): se já é hora de dormir (ou chove forte), ele já está
+## deitado na cama, e se já é dia, já está de pé no trabalho. Sem isso a vila inteira estaria parada nos postos à noite
+## e só depois sairia andando para casa à vista do jogador.
+func acomodar_ao_horario() -> void:
+	if segue_jogador or not pernoita or papel.findn("guarda") >= 0 or papel.findn("vigia") >= 0 or papel.findn("sentinela") >= 0 or papel.findn("preso") >= 0:
+		return
+	var jogo := get_tree().get_first_node_in_group("jogo")
+	var clima: Clima = jogo.get("clima") if jogo else null
+	if clima == null:
+		return
+	var quer := clima.hora_de_dormir() or clima.chuva > 0.4
+	if quer and not _recolhido:
+		_recolhido = true
+		if casa == Vector3.INF:
+			casa = _achar_casa()
+		if _cama != null:
+			_deitar()
+	elif not quer and _recolhido:
+		_recolhido = false
+		_acordar()
+		_sair_de_casa()
+		if not rotina.is_empty():
+			_proximo_passo()
+
+
 ## O dia do NPC: trabalha de dia; das 19h30 às 5h30, ou com chuva forte, vai para a porta da casa mais perto e descansa.
 ## Devolve true quando o horário está no comando (a rotina de trabalho fica parada).
 func _horario(delta: float) -> bool:
@@ -130,12 +158,15 @@ func _horario(delta: float) -> bool:
 					casa = _achar_casa()
 			elif not quer and _recolhido:
 				_recolhido = false
+				_acordar()
 				_sair_de_casa()
 				_melhor_dist = 1e9
 				if not rotina.is_empty():
 					_proximo_passo()
 	if not _recolhido:
 		return false
+	if _deitado:
+		return true   # dormindo na cama até de manhã
 	if _pausas > 0:
 		return true   # conversando
 	var ate := casa - position
@@ -176,14 +207,10 @@ func _horario(delta: float) -> bool:
 			visual.tocar("Idle", 0.2)
 	elif _medo:
 		_entrar_em_casa()   # chegou à porta com o monstro por perto: entra e se esconde
+	elif _cama != null:
+		_deitar()           # hora de dormir: entra e deita na cama
 	else:
-		if _anim_descanso == "":
-			_anim_descanso = "Idle"
-			for a in visual.animacoes.get_animation_list():
-				if String(a).begins_with("Sitting_Idle") or String(a) == "Sitting_Idle_Loop":
-					_anim_descanso = a
-					break
-		visual.tocar(_anim_descanso, 0.4)
+		visual.tocar("Idle", 0.4)   # sem cama livre por perto: espera de pé na porta, nunca sentado ao relento
 	return true
 
 
@@ -216,23 +243,101 @@ func _seguir_trilha(delta: float) -> bool:
 	return true
 
 
-## Ponto diante da porta da casa mais perto (até 120 m); sem casa por perto, fica onde está.
+## Ponto diante da porta da casa mais perto que tem cama livre (até 200 m); sem casa por perto, fica onde está.
 func _achar_casa() -> Vector3:
 	var melhor: Node3D = null
-	var dmin := 120.0
+	var dmin := 200.0
 	for c: Node3D in get_tree().get_nodes_in_group("casas"):
 		var d := c.global_position.distance_to(global_position)
-		if d < dmin and c.has_meta("x_porta"):
+		if d < dmin and c.has_meta("x_porta") and _cama_livre(c) != null:
 			dmin = d
 			melhor = c
 	if melhor == null:
 		return position
+	_casa_no = melhor
+	_cama = _cama_livre(melhor)
+	_cama.dono = nome
 	var porta := melhor.to_global(Vector3(float(melhor.get_meta("x_porta")), 0.0, float(melhor.get_meta("linhas")) + 1.8))
 	var pai := get_parent() as Node3D
 	var local := pai.to_local(porta) if pai else porta
 	var folga := float(hash(nome) % 100) / 100.0 * 2.4 - 1.2   # cada um fica num lugar da soleira
 	local += Vector3(folga, 0.0, 0.0).rotated(Vector3.UP, melhor.global_rotation.y)
 	return local
+
+
+func _cama_livre(c: Node3D) -> Cama:
+	for d in c.get_meta("camas", []):
+		var cm := d["no"] as Cama
+		if cm != null and (cm.dono == "" or cm.dono == nome):
+			return cm
+	return null
+
+
+## Chegou à porta e é hora de dormir: entra, vai até a cama e deita (a casa esconde o NPC por fora).
+func _deitar() -> void:
+	if _deitado or _cama == null or _casa_no == null:
+		return
+	_deitado = true
+	var dados: Dictionary = {}
+	for d in _casa_no.get_meta("camas", []):
+		if d["no"] == _cama:
+			dados = d
+	var alvo: Vector3 = _casa_no.to_global(dados["pos"] as Vector3)
+	var pai := get_parent() as Node3D
+	position = pai.to_local(alvo) if pai else alvo
+	position.y += 0.05
+	visual.tocar("Death01", 0.1)
+	if visual.animacoes:
+		var a := visual.animacoes.get_animation("Death01")
+		visual.animacoes.seek(a.length, true)
+		visual.animacoes.pause()
+	_alinhar_na_cama(dados)
+
+
+## Gira o corpo deitado até a cabeça ficar do lado do travesseiro e o corpo na direção comprida da cama
+## (mede o osso da cabeça em relação ao quadril na pose final, em vez de supor para onde a animação aponta).
+func _alinhar_na_cama(dados: Dictionary) -> void:
+	await get_tree().process_frame
+	var esq: Skeleton3D = visual.find_child("Skeleton3D", true, false)
+	if esq == null:
+		return
+	var cab := esq.find_bone("neck_01")
+	var bac := esq.find_bone("pelvis")
+	if cab < 0 or bac < 0:
+		return
+	var corpo_dir: Vector3 = esq.global_transform * esq.get_bone_global_pose(cab).origin - esq.global_transform * esq.get_bone_global_pose(bac).origin
+	corpo_dir.y = 0.0
+	var alvo: Vector3 = _casa_no.global_transform.basis * (dados["cabeceira"] as Vector3)
+	alvo.y = 0.0
+	if corpo_dir.length() < 0.05 or alvo.length() < 0.05:
+		return
+	rotation.y += atan2(alvo.x, alvo.z) - atan2(corpo_dir.x, corpo_dir.z)
+	await get_tree().process_frame
+	var dep: Vector3 = esq.global_transform * esq.get_bone_global_pose(cab).origin - esq.global_transform * esq.get_bone_global_pose(bac).origin
+	dep.y = 0.0
+	if dep.length() > 0.01 and dep.normalized().dot(alvo.normalized()) < 0.5:   # ficou de cabeça para o pé da cama: vira meia-volta
+		rotation.y += PI
+		await get_tree().process_frame
+	# centraliza o tronco sobre o centro da cama
+	var meio: Vector3 = (esq.global_transform * esq.get_bone_global_pose(cab).origin + esq.global_transform * esq.get_bone_global_pose(bac).origin) / 2.0
+	var cama_centro: Vector3 = _casa_no.to_global(dados["pos"] as Vector3)
+	var d := cama_centro - meio
+	d.y = 0.0
+	global_position += d
+
+
+func _acordar() -> void:
+	if not _deitado:
+		return
+	_deitado = false
+	if visual.animacoes:
+		visual.animacoes.play("Idle")
+	if casa != Vector3.INF:
+		position = casa
+		if altura_em.is_valid():
+			position.y = altura_em.call(position.x, position.z)
+	if _cama:
+		_cama.dono = ""
 
 
 ## Algum monstro (ou guarda) em perseguição a menos de 28 m? Quem está parado não assusta.

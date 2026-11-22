@@ -315,9 +315,32 @@ static func _interior(casa: Node3D, colunas: int, linhas: int, tipo: String) -> 
 		_deposito(casa, corpo, ix, iz)
 
 
+## Cama de verdade: o móvel, a interação "Dormir" do Torin e o ponto onde o NPC se deita (meta "camas" da casa).
+static func _cama(casa: Node3D, corpo: StaticBody3D, x: float, z: float, giro: float) -> void:
+	var m := _movel(casa, corpo, "Bed_Twin1", x, z, giro)
+	var uniao := AABB()
+	var primeiro := true
+	for mi in m.find_children("*", "MeshInstance3D", true, false):
+		var t := Transform3D.IDENTITY
+		var no: Node = mi
+		while no != m:
+			t = (no as Node3D).transform * t
+			no = no.get_parent()
+		var a: AABB = t * (mi as MeshInstance3D).get_aabb()
+		uniao = a if primeiro else uniao.merge(a)
+		primeiro = false
+	var centro := m.transform * uniao.get_center()
+	var c := Cama.new()
+	c.position = Vector3(centro.x, 0.6, centro.z)
+	casa.add_child(c)
+	var camas: Array = casa.get_meta("camas", [])
+	camas.append({"pos": Vector3(centro.x, uniao.position.y + uniao.size.y, centro.z), "longo_x": uniao.size.x > uniao.size.z, "cabeceira": (m.transform.basis * Vector3(0, 0, -1)).normalized(), "no": c})
+	casa.set_meta("camas", camas)
+
+
 static func _moradia(casa: Node3D, corpo: StaticBody3D, colunas: int, ix: float, iz: float) -> void:
 	# canto do fundo à esquerda: cama, criado-mudo e baú no pé da cama
-	_movel(casa, corpo, "Bed_Twin1", -ix + 0.94, -iz + 1.21, 0.0)
+	_cama(casa, corpo, -ix + 0.94, -iz + 1.21, 0.0)
 	_movel(casa, corpo, "Nightstand_Shelf", -ix + 2.3, -iz + 0.2, 0.0)
 	_movel(casa, corpo, "Candle_1", -ix + 2.3, -iz + 0.2, 0.0, 0.62, false)
 	_movel(casa, corpo, "Chest_Wood", -ix + 0.94, -iz + 2.85, 0.0)
@@ -340,7 +363,7 @@ static func _moradia(casa: Node3D, corpo: StaticBody3D, colunas: int, ix: float,
 		if colunas >= 4:
 			_mapa_na_parede(casa, -0.6, -iz + 0.03)
 			# casa grande: segunda cama, arsenal e mais um armário
-			_movel(casa, corpo, "Bed_Twin2", -ix + 0.94, -iz + 5.0, 0.0)
+			_cama(casa, corpo, -ix + 0.94, -iz + 5.0, 0.0)
 			_movel(casa, corpo, "WeaponStand", ix - 0.8, iz - 2.6, -90.0)
 			_movel(casa, corpo, "Bookcase_2", ix - 2.6, -iz + 0.22, 0.0)
 			_movel(casa, corpo, "Bench", 0.0, -iz + 0.4, 0.0)
@@ -417,14 +440,19 @@ static func _deposito(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -
 		_movel(casa, corpo, "Bag", -ix + 1.0 + i * 0.75, -iz + 0.4, 0.0, 0.8, false)
 	for i in (3 if iz > 2.0 else 1):
 		_movel(casa, corpo, "Barrel", -ix + 0.4, -iz + 1.4 + i * 0.85, 0.0)
+	var com_cama := ix >= 2.0   # depósito de 3 módulos ou mais: cama de palha no canto do fundo para o trabalhador
+	if com_cama:
+		_cama(casa, corpo, ix - 0.94, -iz + 1.21, 180.0)
 	for i in 2:
-		var c := _colocar(casa, "Prop_Crate", Vector3(ix - 0.6, 0.0, -iz + 1.0 + i * 1.0), 10.0 * i)
+		var cx := ix - 1.9 if com_cama else ix - 0.6   # com cama, os caixotes vão para o lado da porta
+		var cz := iz - 0.7 - i * 0.9 if com_cama else -iz + 1.0 + i * 1.0
+		var c := _colocar(casa, "Prop_Crate", Vector3(cx, 0.0, cz), 10.0 * i)
 		c.scale = Vector3.ONE * 0.75
 		var cs := CollisionShape3D.new()
 		var bx := BoxShape3D.new()
 		bx.size = Vector3(0.8, 0.8, 0.8)
 		cs.shape = bx
-		cs.position = Vector3(ix - 0.6, 0.4, -iz + 1.0 + i * 1.0)
+		cs.position = Vector3(cx, 0.4, cz)
 		corpo.add_child(cs)
 	_movel(casa, corpo, "Bucket_Wooden_1", ix - 0.6, iz - 0.5, 0.0, 0.0, false)
 
@@ -475,4 +503,5 @@ static func _forja(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> v
 	_movel(casa, corpo, "WeaponStand", -ix + 0.5, 0.9, 90.0)
 	_movel(casa, corpo, "Barrel", ix - 0.4, iz - 0.4, 0.0)
 	_movel(casa, corpo, "Bucket_Wooden_1", -ix + 0.4, -iz + 1.9, 0.0, 0.0, false)
+	_cama(casa, corpo, ix - 0.94, -iz + 1.21, 180.0)   # o ferreiro dorme na própria forja
 	_movel(casa, corpo, "Bag", ix - 0.4, -iz + 0.4, 0.0)
