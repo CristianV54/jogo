@@ -93,4 +93,5 @@ ReinoDeCinzas/
 - NPCs menores propostos por mim (não aprovados antes): Orin (vigia), Tessa (cozinheira), Dorn (lenhador), Mira (caçadora). Criaturas comuns: Lobo-cinza e Javali Couraçado (ver `assets/ASSETS.md`) e Filhote de Asa.
 - Animais (21/11/2026): vaca, cavalo, ovelha, porco e cão povoam o Refúgio (`scripts/criaturas/animal_vila.gd`, gerados por `tools/criaturas/gerar_animais.py`). Faltam galinha, cervo, urso, coelho, aves, peixes, aranha, wyvern e cão de guerra.
 - Lobo e javali têm silhueta própria (versão 1, ver `assets/ASSETS.md`).
+- Interiores com móveis reais (Fantasy Props MegaKit, CC0), dano em animais e NPCs, montaria no cavalo e no Fagulha (E para montar; no dragão, Espaço sobe e C desce). Testes: `tools/teste_montaria_dano.gd` e `tools/teste_moveis.gd`.
 - Próximo: corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.

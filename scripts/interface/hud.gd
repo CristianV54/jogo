@@ -76,7 +76,7 @@ func _ready() -> void:
 	_dialogo_texto.add_theme_font_size_override("font_size", 22)
 	_dialogo_caixa.add_child(_dialogo_texto)
 
-	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    E falar    F Fagulha voar    Esc solta o mouse", Vector2(24, 690), 15)
+	var legenda := _rotulo("WASD andar    Shift correr    Espaço pular    J golpe    K rolar    E falar/montar    F Fagulha voar    Esc solta o mouse", Vector2(24, 690), 15)
 	legenda.modulate.a = 0.85
 
 	_mensagem = _rotulo("", Vector2(80, 260), 40)

@@ -52,6 +52,8 @@ func ir_para(destino: String, spawn: String) -> void:
 		_empurrar_para_tras()
 		return
 	_trocando = true
+	if jogador.montaria and not jogador.montaria.persistente:
+		jogador.desmontar()   # a montaria some com a área antiga
 	if area:
 		container.remove_child(area)
 		area.queue_free()
@@ -74,8 +76,9 @@ func ir_para(destino: String, spawn: String) -> void:
 	jogador.rotation.y = t.basis.get_euler().y
 	jogador.velocity = Vector3.ZERO
 	camera.yaw = jogador.rotation.y
-	fagulha.modo_voo = false
-	fagulha.global_position = pos + Vector3(9.0, 0.0, 9.0).rotated(Vector3.UP, jogador.rotation.y)
+	if not fagulha.montaria.montada:
+		fagulha.modo_voo = false
+		fagulha.global_position = pos + Vector3(9.0, 0.0, 9.0).rotated(Vector3.UP, jogador.rotation.y)
 	hud.mostrar_area(area.nome_area)
 	await get_tree().process_frame
 	_trocando = false
@@ -125,7 +128,14 @@ func _process(_delta: float) -> void:
 		hud.dica("")
 		return
 	var perto := _npc_mais_perto()
-	hud.dica("E   Falar com %s" % perto.nome if perto else "")
+	if perto:
+		hud.dica("E   Falar com %s" % perto.nome)
+		return
+	if jogador.montaria:
+		hud.dica("E   Desmontar" if (not jogador.montaria.voa or jogador.is_on_floor()) else "Espaço sobe    C desce    Pouse para desmontar")
+		return
+	var montar := _montaria_mais_perto()
+	hud.dica("E   Montar %s" % montar.nome if montar else "")
 
 
 func _npc_mais_perto() -> Npc:
@@ -139,12 +149,32 @@ func _npc_mais_perto() -> Npc:
 	return melhor
 
 
+func _montaria_mais_perto() -> Montaria:
+	var melhor: Montaria = null
+	var dmin := 6.0
+	for no in get_tree().get_nodes_in_group("montarias"):
+		var m := no as Montaria
+		if m == null or not m.ativa or m.montada:
+			continue
+		var d := m.dono.global_position.distance_to(jogador.global_position)
+		if d < dmin:
+			dmin = d
+			melhor = m
+	return melhor
+
+
 func _unhandled_key_input(evento: InputEvent) -> void:
 	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_E:
 		interagir()
 
 
 func interagir() -> void:
+	if jogador.montaria and not hud.dialogo_aberto:
+		if jogador.montaria.voa and not jogador.is_on_floor():
+			hud.mensagem("Pouse (tecla C) para desmontar.", 2.0)
+		else:
+			jogador.desmontar()
+		return
 	if hud.dialogo_aberto:
 		_dialogo_indice += 1
 		if _dialogo_indice >= _dialogo_npc.falas.size():
@@ -154,7 +184,12 @@ func interagir() -> void:
 		hud.dialogo(_dialogo_npc.nome + " (" + _dialogo_npc.papel + ")", _dialogo_npc.falas[_dialogo_indice])
 		return
 	var n := _npc_mais_perto()
-	if n == null or n.falas.size() == 0:
+	if n == null:
+		var m := _montaria_mais_perto()
+		if m:
+			jogador.montar(m)
+		return
+	if n.falas.size() == 0:
 		return
 	_dialogo_npc = n
 	_dialogo_indice = 0

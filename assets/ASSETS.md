@@ -80,7 +80,7 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Origem e licença:** *Farm Animals* do Quaternius (CC0, catálogo `pacotes_livres/CATALOGO.md` do SSD), FBX convertido por `tools/criaturas/gerar_animais.py` (Blender, só leitura do original). Estilo: low-poly de cores chapadas, o mesmo do kit de cenário.
 - **Animações:** vaca e cavalo vêm com Idle, Walk, WalkSlow, Run, Jump e Death. Ovelha, porco, cão, lobo e javali só vinham com Idle e Jump; como o esqueleto é o mesmo (muda só a cauda), a rotação de cada osso do Walk, WalkSlow, Run e Death da vaca é copiada quadro a quadro. Isso dá um andar de quadrúpede plausível, mas não é afinado para cada espécie (pé pode deslizar um pouco).
 - **Correção necessária:** os materiais do FBX vêm com alfa 0 (o animal fica invisível no Godot); o script força alfa 1 e opaco.
-- **Escala (`nodes/root_scale` no `.import`):** vaca 0,27 (1,4 m), cavalo 0,28 (1,9 m), ovelha 0,23 (1,0 m), porco 0,17 (0,8 m), cão 0,57 (0,6 m), lobo 0,7, javali 0,2.
+- **Escala (`nodes/root_scale` no `.import`):** vaca 0,27 (1,4 m), cavalo 0,28 (1,9 m), ovelha 0,23 (1,0 m), porco 0,17 (0,8 m), cão 0,38 (0,4 m; reduzido de 0,57 por parecer grande demais), lobo 0,7, javali 0,2.
 - **No jogo:** `scripts/criaturas/animal_vila.gd` (perambula e para, sem colisão), colocados em `refugio_do_pinhal.gd` (`_animais()`): 2 vacas e 3 ovelhas no pasto sul, 2 porcos a oeste da casa do Vane, 2 cavalos a oeste, 1 cão perto da forja. Velocidades de passo estimadas a olho, não calibradas contra o ciclo da animação.
 - **Ainda não existem:** galinha, cervo, urso, coelho, aves, peixes, aranha, wyvern menor, cão de guerra do Império. No Downloads há `Free+Pack+-+Lowpoly+Animal` (urso, gato, cabra, canguru etc., sem rig nem animação, licença não conferida) e `horse.glb` do Sketchfab (28 animações, licença não conferida), ainda não usados.
 
@@ -90,3 +90,17 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Progresso:** cada chefe derrotado libera o próximo caminho; sem o chefe a passagem fica bloqueada com aviso.
 - **Interface:** barras de vida, nome da área, diálogo e mensagens desenhados por código com a fonte padrão do Godot. Provisório: falta fonte, arte e identidade visual.
 - **Combate:** golpe de espada (J ou clique), rolamento com invulnerabilidade (Espaço), dano, reação, morte e recuperação lenta de vida. Um golpe só (`Sword_Attack`). Sem bloqueio, sem arco, sem magia, sem inventário nem forja.
+
+
+## cenario/moveis/ (interior das casas)
+
+- **Origem e licença:** *Fantasy Props MegaKit* (versão gratuita) do Quaternius, **CC0** (`License_Standard.txt` do pacote). Copiados do SSD (`pacotes_livres/comida_objetos_3d/quaternius_fantasy_props_megakit`), só os usados, em glTF com as texturas `T_Trim_*` (22 MB).
+- **Peças usadas:** cama (Bed_Twin1/2), armário alto (Bookcase_2), cômoda (Cabinet), criado-mudo, baú, mesa grande, cadeira, banco, banquinho, barril, balde, saco, vela e candelabro, caneca, prato, panela, bigorna, bancada, arsenal (WeaponStand).
+- **Uso:** `scripts/mundo/construtor_casa.gd` (`_moradia` e `_forja`). Cada móvel de porte tem uma caixa de colisão na camada 4 (o jogador colide, a câmera atravessa). A **fornalha** da forja é geometria simples com a pedra do próprio kit (sem modelo de fornalha), e a brasa é uma caixa emissiva: aceitável, mas pode ganhar modelo próprio.
+- **Validação:** `tools/teste_moveis.gd` (entrar pela porta, baú e mesa barram) e capturas do interior (casa de teste, forja e casa do Vane).
+
+## Dano em animais e pessoas, e montaria (21/11/2026)
+
+- **Dano:** o golpe do jogador (J ou clique) também acerta o grupo `atingiveis` (animais e NPCs). Animal: pisca em vermelho, perde vida, **foge** por 3 s e, a 0 de vida, toca Death e some depois de 12 s (vaca 40, cavalo 50, ovelha 20, porco 25, cão 20; golpe do Torin = 22). NPC: pisca, se encolhe (Hit_Chest) e protesta num balão de texto; **não perde vida nem morre** (são personagens da história). Código: `animal_vila.gd`, `npc.gd`, `efeitos.gd`.
+- **Montaria (tecla E perto de um cavalo ou do Fagulha):** `scripts/criaturas/montaria.gd` + `jogador.gd` (`montar`, `desmontar`, `_mover_montado`). O corpo do jogador move a criatura; o cavaleiro fica sentado (Sitting_Idle) no osso do assento (`Torso` no cavalo, `paunch` no Fagulha). Cavalo: 6 m/s, galope com Shift a 13 m/s. Fagulha: no chão 6/12 m/s; **Espaço decola e sobe, C desce**, 16 m/s (28 com Shift) no ar; só desmonta pousado. Ao trocar de área o jogador desmonta do cavalo (ele fica na área velha); o Fagulha acompanha.
+- **Limites conhecidos:** a colisão da montaria é a cápsula do jogador (o dragão atravessa copas de árvore e quinas de casa com as asas); sem sela nem rédeas; cavaleiro usa a pose de sentado genérica; sem pulo a cavalo.

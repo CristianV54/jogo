@@ -300,9 +300,18 @@ func _npcs() -> void:
 		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]))
 
 
+const NOMES_DE_ANIMAIS := {"vaca": "Vaca", "cavalo": "Cavalo", "ovelha": "Ovelha", "porco": "Porco", "cao": "Cão"}
+const VIDA_DE_ANIMAIS := {"vaca": 40, "cavalo": 50, "ovelha": 20, "porco": 25, "cao": 20}
+const RAIO_DE_ANIMAIS := {"vaca": 1.0, "cavalo": 1.1, "ovelha": 0.6, "porco": 0.6, "cao": 0.4}
+
+
 func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> void:
 	var a := AnimalVila.new()
 	a.name = arquivo.capitalize()
+	a.nome = NOMES_DE_ANIMAIS[arquivo]
+	a.vida_max = VIDA_DE_ANIMAIS[arquivo]
+	a.raio_colisao = RAIO_DE_ANIMAIS[arquivo]
+	a.montavel = arquivo == "cavalo"
 	a.modelo = load("res://assets/models/criaturas/%s/%s.glb" % [arquivo, arquivo])
 	a.raio_vagar = raio
 	a.velocidade = velocidade

@@ -193,11 +193,45 @@ static func _caixa(pai: Node3D, nome: String, pos: Vector3, tamanho: Vector3, co
 	return mi
 
 
+const PASTA_MOVEIS := "res://assets/models/cenario/moveis/"
+const CAMADA_MOVEIS := 4   # bit 3: o jogador colide com os móveis, a câmera (máscara 1+2) atravessa
+
+
+## Coloca um móvel (Fantasy Props MegaKit) e, se `colide`, cria uma caixa de colisão do tamanho dele no corpo `corpo`.
+static func _movel(casa: Node3D, corpo: StaticBody3D, nome: String, x: float, z: float, giro: float, y := 0.0, colide := true) -> Node3D:
+	var m: Node3D = (load(PASTA_MOVEIS + nome + ".gltf") as PackedScene).instantiate()
+	m.name = nome
+	m.position = Vector3(x, y, z)
+	m.rotation_degrees.y = giro
+	casa.add_child(m)
+	if colide:
+		var uniao := AABB()
+		var primeiro := true
+		for mi in m.find_children("*", "MeshInstance3D", true, false):
+			var t := Transform3D.IDENTITY
+			var no: Node = mi
+			while no != m:
+				t = (no as Node3D).transform * t
+				no = no.get_parent()
+			var a: AABB = t * (mi as MeshInstance3D).get_aabb()
+			uniao = a if primeiro else uniao.merge(a)
+			primeiro = false
+		var cs := CollisionShape3D.new()
+		var bx := BoxShape3D.new()
+		bx.size = uniao.size
+		cs.shape = bx
+		cs.transform = m.transform * Transform3D(Basis(), uniao.get_center())
+		corpo.add_child(cs)
+	return m
+
+
 static func _interior(casa: Node3D, colunas: int, linhas: int, tipo: String) -> void:
 	if tipo == "vazio":
 		return
 	var meia_x := colunas * MODULO / 2.0
 	var meia_z := linhas * MODULO / 2.0
+	var ix := meia_x - 0.45   # limite interno livre: a parede de colisão ocupa uns 0,4 m
+	var iz := meia_z - 0.45
 	var luz := OmniLight3D.new()
 	luz.name = "LuzInterna"
 	luz.light_color = Color(1.0, 0.78, 0.5)
@@ -205,31 +239,92 @@ static func _interior(casa: Node3D, colunas: int, linhas: int, tipo: String) -> 
 	luz.omni_range = maxf(meia_x, meia_z) * 2.2
 	luz.position = Vector3(0, 2.4, 0)
 	casa.add_child(luz)
-	var madeira := Color(0.36, 0.24, 0.14)
+	var corpo := StaticBody3D.new()
+	corpo.name = "ColisaoMoveis"
+	corpo.collision_layer = CAMADA_MOVEIS
+	corpo.collision_mask = 0
+	casa.add_child(corpo)
 	if tipo == "moradia":
-		# cama no canto do fundo, mesa no meio e duas caixas
-		_caixa(casa, "Cama", Vector3(-meia_x + 1.0, 0.0, -meia_z + 1.5), Vector3(1.0, 0.45, 2.0), madeira)
-		_caixa(casa, "Colchao", Vector3(-meia_x + 1.0, 0.45, -meia_z + 1.5), Vector3(0.9, 0.18, 1.85), Color(0.72, 0.68, 0.6))
-		_caixa(casa, "Mesa", Vector3(meia_x - 1.6, 0.0, -0.4), Vector3(1.3, 0.8, 0.8), madeira)
-		_caixa(casa, "Banco", Vector3(meia_x - 1.6, 0.0, 0.9), Vector3(1.1, 0.42, 0.34), madeira)
-		if _existe("Prop_Crate"):
-			var c1 := _colocar(casa, "Prop_Crate", Vector3(meia_x - 0.9, 0.0, -meia_z + 0.9), 15.0)
-			c1.scale = Vector3.ONE * 0.7
-			var c2 := _colocar(casa, "Prop_Crate", Vector3(meia_x - 0.9, 0.0, -meia_z + 2.0), -10.0)
-			c2.scale = Vector3.ONE * 0.55
+		_moradia(casa, corpo, colunas, ix, iz)
 	elif tipo == "forja":
-		# fornalha de pedra com brasa, bigorna e bancada
-		_caixa(casa, "Fornalha", Vector3(-meia_x + 1.0, 0.0, -meia_z + 1.0), Vector3(1.5, 1.1, 1.1), Color(0.34, 0.33, 0.34))
-		_caixa(casa, "Brasa", Vector3(-meia_x + 1.0, 1.1, -meia_z + 1.0), Vector3(1.1, 0.12, 0.8), Color(1.0, 0.4, 0.1), 3.0)
-		var brasa := OmniLight3D.new()
-		brasa.light_color = Color(1.0, 0.45, 0.15)
-		brasa.light_energy = 2.2
-		brasa.omni_range = 7.0
-		brasa.position = Vector3(-meia_x + 1.0, 1.6, -meia_z + 1.0)
-		casa.add_child(brasa)
-		_caixa(casa, "BigornaBase", Vector3(0.6, 0.0, 0.0), Vector3(0.4, 0.7, 0.4), Color(0.2, 0.18, 0.17))
-		_caixa(casa, "BigornaTopo", Vector3(0.6, 0.7, 0.0), Vector3(0.9, 0.22, 0.4), Color(0.12, 0.12, 0.13))
-		_caixa(casa, "Bancada", Vector3(meia_x - 0.8, 0.0, -0.5), Vector3(0.7, 0.9, 2.2), madeira)
-		if _existe("Prop_Crate"):
-			var c := _colocar(casa, "Prop_Crate", Vector3(meia_x - 1.0, 0.0, -meia_z + 0.9), 20.0)
-			c.scale = Vector3.ONE * 0.7
+		_forja(casa, corpo, ix, iz)
+
+
+static func _moradia(casa: Node3D, corpo: StaticBody3D, colunas: int, ix: float, iz: float) -> void:
+	# canto do fundo à esquerda: cama, criado-mudo e baú no pé da cama
+	_movel(casa, corpo, "Bed_Twin1", -ix + 0.94, -iz + 1.21, 0.0)
+	_movel(casa, corpo, "Nightstand_Shelf", -ix + 2.3, -iz + 0.2, 0.0)
+	_movel(casa, corpo, "Candle_1", -ix + 2.3, -iz + 0.2, 0.0, 0.62, false)
+	_movel(casa, corpo, "Chest_Wood", -ix + 0.94, -iz + 2.85, 0.0)
+	# barril no canto da frente oposto à porta
+	var lado_barril := 1.0 if colunas % 2 == 1 else -1.0
+	_movel(casa, corpo, "Barrel", lado_barril * (ix - 0.4), iz - 0.4, 0.0)
+	if colunas >= 3:
+		# armário alto no fundo, cômoda na parede esquerda, mesa com cadeiras à direita
+		_movel(casa, corpo, "Bookcase_2", ix - 0.95, -iz + 0.22, 0.0)
+		_movel(casa, corpo, "Cabinet", -ix + 0.2, iz - 1.2, 90.0)
+		_movel(casa, corpo, "CandleStick_Triple", -ix + 0.2, iz - 1.2, 90.0, 1.0, false)
+		var tx := ix - 0.9
+		var tz := 0.4
+		_movel(casa, corpo, "Table_Large", tx, tz, 90.0)
+		_movel(casa, corpo, "Chair_1", tx - 0.95, tz - 0.6, 90.0)
+		_movel(casa, corpo, "Chair_1", tx - 0.95, tz + 0.6, 90.0)
+		_movel(casa, corpo, "Table_Plate", tx, tz - 0.55, 0.0, 0.81, false)
+		_movel(casa, corpo, "Table_Plate", tx, tz + 0.55, 0.0, 0.81, false)
+		_movel(casa, corpo, "Mug", tx + 0.1, tz, 0.0, 0.81, false)
+		if colunas >= 4:
+			# casa grande: segunda cama, arsenal e mais um armário
+			_movel(casa, corpo, "Bed_Twin2", -ix + 0.94, -iz + 5.0, 0.0)
+			_movel(casa, corpo, "WeaponStand", ix - 0.8, iz - 2.6, -90.0)
+			_movel(casa, corpo, "Bookcase_2", ix - 2.6, -iz + 0.22, 0.0)
+			_movel(casa, corpo, "Bench", 0.0, -iz + 0.4, 0.0)
+	else:
+		# casa estreita: armário alto na parede direita e um banco
+		_movel(casa, corpo, "Bookcase_2", ix - 0.22, -0.4, -90.0)
+		_movel(casa, corpo, "Stool", -0.2, 0.9, 20.0)
+		_movel(casa, corpo, "Bucket_Wooden_1", -ix + 0.35, iz - 0.3, 0.0, 0.0, false)
+
+
+## Material (cópia, com a textura repetida) da primeira malha de uma peça do kit.
+static func _material_do_kit(nome_peca: String) -> StandardMaterial3D:
+	var p := peca(nome_peca)
+	var mi := p.find_child("*", true, false) as MeshInstance3D
+	for no in p.find_children("*", "MeshInstance3D", true, false):
+		mi = no as MeshInstance3D
+		break
+	var m: StandardMaterial3D = null
+	if mi and mi.mesh:
+		var base := mi.mesh.surface_get_material(0) as StandardMaterial3D
+		if base:
+			m = base.duplicate()
+			m.uv1_scale = Vector3(2.0, 2.0, 2.0)
+	p.free()
+	return m
+
+
+static func _forja(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> void:
+	# fornalha de pedra com brasa (geometria simples, sem modelo próprio), bigorna, bancada, arsenal
+	var fornalha := _caixa(casa, "Fornalha", Vector3(-ix + 0.75, 0.0, -iz + 0.6), Vector3(1.5, 1.1, 1.1), Color(0.34, 0.33, 0.34))
+	var pedra := _material_do_kit("Floor_UnevenBrick")
+	if pedra:
+		fornalha.material_override = pedra   # pedra do próprio kit, em vez de cinza liso
+	_caixa(casa, "Brasa", Vector3(-ix + 0.75, 1.1, -iz + 0.6), Vector3(1.1, 0.12, 0.8), Color(1.0, 0.3, 0.05), 1.4)
+	var cs := CollisionShape3D.new()
+	var bx := BoxShape3D.new()
+	bx.size = Vector3(1.5, 1.1, 1.1)
+	cs.shape = bx
+	cs.position = Vector3(-ix + 0.75, 0.55, -iz + 0.6)
+	corpo.add_child(cs)
+	var brasa := OmniLight3D.new()
+	brasa.light_color = Color(1.0, 0.45, 0.15)
+	brasa.light_energy = 2.2
+	brasa.omni_range = 7.0
+	brasa.position = Vector3(-ix + 0.75, 1.6, -iz + 0.6)
+	casa.add_child(brasa)
+	_movel(casa, corpo, "Anvil", -ix + 1.4, -iz + 2.0, 90.0)
+	_movel(casa, corpo, "Workbench", ix - 0.52, -0.3, -90.0)
+	_movel(casa, corpo, "Pot_1", ix - 0.5, 0.2, 0.0, 0.89, false)
+	_movel(casa, corpo, "WeaponStand", -ix + 0.5, 0.9, 90.0)
+	_movel(casa, corpo, "Barrel", ix - 0.4, iz - 0.4, 0.0)
+	_movel(casa, corpo, "Bucket_Wooden_1", -ix + 0.4, -iz + 1.9, 0.0, 0.0, false)
+	_movel(casa, corpo, "Bag", ix - 0.4, -iz + 0.4, 0.0)

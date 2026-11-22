@@ -14,6 +14,7 @@ extends Node3D
 @export var giro := 6.0
 
 var modo_voo := false
+var montaria: Montaria
 var animacao_atual := ""
 
 @onready var _modelo: Node3D = $Modelo
@@ -22,16 +23,31 @@ var _anim: AnimationPlayer
 
 func _ready() -> void:
 	_anim = _modelo.find_child("AnimationPlayer", true, false)
+	montaria = Montaria.new()
+	montaria.nome = "Fagulha"
+	montaria.osso_assento = "paunch"
+	montaria.elevacao = 0.3
+	montaria.voa = true
+	montaria.persistente = true
+	montaria.velocidade_andando = 6.0
+	montaria.velocidade_correndo = 12.0
+	montaria.velocidade_voo = 16.0
+	montaria.velocidade_voo_rapido = 28.0
+	montaria.camera_altura = 3.5
+	montaria.camera_distancia = 12.0
+	add_child(montaria)
 	_tocar("Idle")
 
 
 func _unhandled_key_input(evento: InputEvent) -> void:
+	if montaria.montada:
+		return
 	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_F:
 		modo_voo = not modo_voo
 
 
 func _physics_process(delta: float) -> void:
-	if alvo == null:
+	if montaria.montada or alvo == null:
 		return
 	var ate := alvo.global_position - global_position
 	var plano := Vector3(ate.x, 0.0, ate.z)
