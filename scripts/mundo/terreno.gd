@@ -177,7 +177,7 @@ static func curva(ctrl: Array, passo := 3.0) -> PackedVector2Array:
 
 
 ## Fita de água ao longo do eixo, 0,55 m abaixo do chão do eixo, com shader de correnteza e espuma na margem.
-func _agua(r: Dictionary) -> MeshInstance3D:
+func _agua(r: Dictionary) -> Node3D:
 	var pts: PackedVector2Array = r["pontos"]
 	var meia := float(r["largura"]) / 2.0 + 5.0   # larga de propósito: o chão esconde o excesso e a margem da água fica onde o chão cruza
 	var st := SurfaceTool.new()
@@ -193,31 +193,65 @@ func _agua(r: Dictionary) -> MeshInstance3D:
 		var a := Vector3(pts[i].x + lado.x, y, pts[i].y + lado.y)
 		var b := Vector3(pts[i].x - lado.x, y, pts[i].y - lado.y)
 		anteriores.append([a, b, acumulado])
-	for i in range(anteriores.size() - 1):
-		var a0: Vector3 = anteriores[i][0]
-		var b0: Vector3 = anteriores[i][1]
-		var a1: Vector3 = anteriores[i + 1][0]
-		var b1: Vector3 = anteriores[i + 1][1]
-		var u0: float = anteriores[i][2]
-		var u1: float = anteriores[i + 1][2]
-		for tri in [[[a0, 0.0, u0], [b0, 1.0, u0], [a1, 0.0, u1]], [[b0, 1.0, u0], [b1, 1.0, u1], [a1, 0.0, u1]]]:
-			for v in tri:
-				st.set_normal(Vector3.UP)
-				st.set_uv(Vector2(v[1], v[2]))
-				st.add_vertex(v[0])
 	var mat := material_agua()
-	var mi := MeshInstance3D.new()
-	mi.name = "AguaDoRio"
-	mi.mesh = st.commit()
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_pedras_da_margem(mi, r)
-	return mi
-
+	var mat_longe := material_agua(false)
+	var raiz := Node3D.new()
+	raiz.name = "AguaDoRio"
+	var por_pedaco := 24   # a fita é cortada em pedaços de ~100 m: cada um some sozinho quando está longe (a água lê o buffer de profundidade, que custa caro a cada quadro)
+	var inicio := 0
+	while inicio < anteriores.size() - 1:
+		var st2 := SurfaceTool.new()
+		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for i in range(inicio, mini(inicio + por_pedaco, anteriores.size() - 1)):
+			var a0: Vector3 = anteriores[i][0]
+			var b0: Vector3 = anteriores[i][1]
+			var a1: Vector3 = anteriores[i + 1][0]
+			var b1: Vector3 = anteriores[i + 1][1]
+			var u0: float = anteriores[i][2]
+			var u1: float = anteriores[i + 1][2]
+			for tri in [[[a0, 0.0, u0], [b0, 1.0, u0], [a1, 0.0, u1]], [[b0, 1.0, u0], [b1, 1.0, u1], [a1, 0.0, u1]]]:
+				for v in tri:
+					st2.set_normal(Vector3.UP)
+					st2.set_uv(Vector2(v[1], v[2]))
+					st2.add_vertex(v[0])
+		var mi := MeshInstance3D.new()
+		mi.name = "Pedaco%d" % (inicio / por_pedaco)
+		mi.mesh = st2.commit()
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.visibility_range_end = 120.0   # perto: com profundidade e espuma
+		mi.visibility_range_end_margin = 20.0
+		raiz.add_child(mi)
+		var longe := MeshInstance3D.new()   # longe: a mesma fita em cor lisa
+		longe.name = "Longe%d" % (inicio / por_pedaco)
+		longe.mesh = mi.mesh
+		longe.material_override = mat_longe
+		longe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		longe.visibility_range_begin = 100.0
+		longe.visibility_range_begin_margin = 20.0
+		longe.visibility_range_end = 420.0
+		longe.visibility_range_end_margin = 40.0
+		raiz.add_child(longe)
+		inicio += por_pedaco
+	_pedras_da_margem(raiz, r)
+	return raiz
 
 ## Material da água (rios e mar): cor por profundidade lida do buffer de profundidade, espuma onde o chão encosta.
-static func material_agua() -> ShaderMaterial:
+static func material_agua(com_profundidade := true) -> ShaderMaterial:
 	var sh := Shader.new()
+	if not com_profundidade:   # versão de longe: cor lisa, sem ler o buffer de profundidade (que custa caro a cada quadro)
+		sh.code = """shader_type spatial;
+render_mode cull_disabled, specular_schlick_ggx;
+void fragment() {
+	float faixa = smoothstep(0.6, 0.98, sin(UV.y * 0.7 - TIME * 1.5 + sin(UV.x * 7.0 + TIME * 0.6) * 1.2));
+	ALBEDO = vec3(0.1, 0.42, 0.55) + faixa * 0.04;
+	ALPHA = 0.88;
+	ROUGHNESS = 0.1;
+}
+"""
+		var longe := ShaderMaterial.new()
+		longe.shader = sh
+		return longe
 	sh.code = """shader_type spatial;
 render_mode cull_disabled, depth_draw_opaque, specular_schlick_ggx;
 uniform sampler2D prof : hint_depth_texture, repeat_disable, filter_nearest;
@@ -246,7 +280,7 @@ void fragment() {
 
 
 ## Pedras e seixos nas duas margens, como num rio de verdade (só visual, sem colisão; o vau fica limpo).
-func _pedras_da_margem(pai: MeshInstance3D, r: Dictionary) -> void:
+func _pedras_da_margem(pai: Node3D, r: Dictionary) -> void:
 	var pts: PackedVector2Array = r["pontos"]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(pts[0].x * 7.0 + pts[0].y * 13.0)
@@ -268,12 +302,12 @@ func _pedras_da_margem(pai: MeshInstance3D, r: Dictionary) -> void:
 					no_vau = true
 			if not no_vau:
 				for sg in [-1.0, 1.0]:
-					if rng.randf() < 0.7:
+					if rng.randf() < 0.45:
 						var c: Vector2 = c0 + lado * sg * (float(r["largura"]) / 2.0 + rng.randf_range(-0.2, 1.6))
 						var e := rng.randf_range(0.3, 1.0)
 						var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(e * 1.2, e * rng.randf_range(0.5, 0.9), e))
 						lista.append(Transform3D(base, Vector3(c.x, altura_em(c.x, c.y) - 0.1, c.y)))
-			t += rng.randf_range(1.5, 3.0)
+			t += rng.randf_range(3.0, 5.5)
 	if lista.is_empty():
 		return
 	var mm := MultiMesh.new()
@@ -286,7 +320,9 @@ func _pedras_da_margem(pai: MeshInstance3D, r: Dictionary) -> void:
 	inst.name = "PedrasDaMargem"
 	inst.multimesh = mm
 	inst.material_override = FabricaNatureza.material()
-	inst.visibility_range_end = 220.0
+	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF   # as sombras do sol (4 faixas) multiplicavam o custo
+	inst.visibility_range_end = 70.0   # pedrinha de margem só importa de perto
+	inst.visibility_range_end_margin = 10.0
 	pai.add_child(inst)
 
 

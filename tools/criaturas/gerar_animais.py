@@ -204,6 +204,5 @@ else:
     montar("ovelha", "Sheep", {})
     montar("porco", "Pig", {})
     montar("cao", "Pug", {})
-    # PLACEHOLDER_: lobo é o cachorro (Pug) em cinza e javali é o porco em marrom escuro, agora com andar, corrida e morte de verdade
-    montar("lobo", "Pug", {"Beige": (0.18, 0.18, 0.2), "Brown": (0.05, 0.05, 0.06)}, ajuste_lobo)
+    # o lobo agora vem de tools/criaturas/gerar_lobo.py (Wolf do Quaternius); aqui o javali ainda é o porco em marrom escuro
     montar("javali", "Pig", {"Material": (0.02, 0.015, 0.01), "Material.003": (0.06, 0.04, 0.03)}, ajuste_javali)

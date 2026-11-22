@@ -74,6 +74,11 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 			if base == null:
 				continue
 			var m := base.duplicate() as StandardMaterial3D
+			if malha.mesh.surface_get_format(i) & Mesh.ARRAY_FORMAT_COLOR != 0:   # pelagem pintada por vértice (o lobo): mantém
+				m.vertex_color_use_as_albedo = true
+				m.albedo_color = Color.WHITE
+				malha.set_surface_override_material(i, m)
+				continue
 			var opcoes: Array = paleta.get(base.resource_name, [])
 			if opcoes.is_empty():
 				malha.set_surface_override_material(i, m)

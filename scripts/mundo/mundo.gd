@@ -430,15 +430,43 @@ func _barreiras() -> void:
 ## Mar em volta da costa: plano de água e uma fileira de paredes invisíveis um pouco antes da água funda.
 func _mar() -> void:
 	var lim := MundoDados.LIMITES
-	var plano := MeshInstance3D.new()
-	plano.name = "Mar"
-	var pm := PlaneMesh.new()
-	pm.size = lim.size + Vector2(600.0, 600.0)
-	plano.mesh = pm
-	plano.material_override = Terreno.material_agua()
-	plano.position = Vector3(lim.get_center().x, Costa.NIVEL_MAR, lim.get_center().y)
-	plano.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(plano)
+	var mat_mar := Terreno.material_agua()
+	var mat_mar_longe := Terreno.material_agua(false)
+	var lado := 160.0   # o mar é feito de ladrilhos: um plano só, do tamanho do mundo, ficava sempre na tela e forçava a cópia do buffer de profundidade a cada quadro
+	var mx := lim.position.x - 240.0
+	while mx < lim.end.x + 240.0:
+		var mz := lim.position.y - 240.0
+		while mz < lim.end.y + 240.0:
+			var perto_do_mar := false
+			for ax in [0.0, 0.5, 1.0]:
+				for az in [0.0, 0.5, 1.0]:
+					if Costa.distancia(mx + lado * ax, mz + lado * az) < 24.0:
+						perto_do_mar = true
+			if perto_do_mar:
+				var plano := MeshInstance3D.new()
+				plano.name = "Mar"
+				var pm := PlaneMesh.new()
+				pm.size = Vector2(lado, lado)
+				plano.mesh = pm
+				plano.material_override = mat_mar
+				plano.position = Vector3(mx + lado / 2.0, Costa.NIVEL_MAR, mz + lado / 2.0)
+				plano.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				plano.visibility_range_end = 130.0
+				plano.visibility_range_end_margin = 20.0
+				add_child(plano)
+				var longe := MeshInstance3D.new()
+				longe.name = "MarLonge"
+				longe.mesh = pm
+				longe.material_override = mat_mar_longe
+				longe.position = plano.position
+				longe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				longe.visibility_range_begin = 110.0
+				longe.visibility_range_begin_margin = 20.0
+				longe.visibility_range_end = 700.0
+				longe.visibility_range_end_margin = 50.0
+				add_child(longe)
+			mz += lado
+		mx += lado
 	var n := 0
 	var x := lim.position.x
 	while x <= lim.end.x:

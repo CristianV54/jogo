@@ -12,7 +12,7 @@ func _init() -> void:
 
 
 func _amostra(rotulo: String) -> void:
-	await create_timer(3.0).timeout
+	await create_timer(7.0).timeout   # espera o capim e a floresta em volta terminarem de nascer
 	var soma := 0.0
 	var minimo := 999.0
 	for i in 20:
