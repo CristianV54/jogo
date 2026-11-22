@@ -5,7 +5,7 @@ extends RefCounted
 ## "visitar" (alvo = id de uma ZonaDeEvento) e "entregar" (alvo = NPC; "item" = o que gastar do inventário).
 ## Nenhuma missão conclui por proximidade: só por contagem real de eventos.
 
-const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes", 3: "Capítulo III: Ruptura e Fortaleza de Ferrogris", 4: "Capítulo IV: Cratera de Ignis"}
+const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes", 3: "Capítulo III: Ruptura e Fortaleza de Ferrogris", 4: "Capítulo IV: Cratera de Ignis", 5: "Capítulo V: Valdoria e o Castelo Imperial"}
 ## Ordem em que o quadro de avisos oferece as missões do capítulo.
 const ORDEM_CAP1 := ["C1-M1", "C1-M2", "C1-M3", "C1-M4"]
 ## No capítulo II as missões são oferecidas pelos NPCs (Elda e Sava) ou começam em cadeia.
@@ -232,5 +232,54 @@ const MISSOES := {
 		"dialogos": {
 			"brenn": ["Trouxe tudo? Quatro minérios vulcânicos e a escama. Dá cá, vou acender a forja de campo.", "Ferro Negro, brasa e escama de dragão livre: é a única liga que o obelisco não consegue dobrar."],
 		},
+	},
+	"C5-M1": {
+		"capitulo": 5,
+		"titulo": "Portões e Ruas de Valdoria",
+		"requer": "C4-M4",
+		"auto_apos": "C4-M4",
+		"objetivos": [
+			{"id": "mercado", "texto": "Atravessar o Distrito do Comerciante", "tipo": "visitar", "alvo": "mercado_valdoria", "qtd": 1},
+			{"id": "suprimento", "texto": "Obter suprimentos (fazer uma troca com um mercador)", "tipo": "interagir", "alvo": "suprimento", "qtd": 1},
+			{"id": "elite", "texto": "Derrotar 4 guardas de elite", "tipo": "derrotar", "alvo": "guarda_elite", "qtd": 4},
+		],
+		"recompensa": {"itens": {"maca": 3}, "texto": "A escadaria do castelo está livre"},
+		"encerramento": "A elite imperial cai. Os moradores espiam das janelas: a escadaria do castelo está livre.",
+		"dialogos": {
+			"suri": ["Psiu. Chaves e mapas, só para quem sabe perguntar. O castelo tem pátio, salão do trono e um obelisco enorme atrás do trono.", "Dizem que o Vane espera no pátio do duelo. E que ele já não é o mesmo."],
+		},
+	},
+	"C5-M2": {
+		"capitulo": 5,
+		"titulo": "O Duelo de Vane",
+		"requer": "C5-M1",
+		"auto_apos": "C5-M1",
+		"objetivos": [
+			{"id": "vane", "texto": "Derrotar o Vane no pátio do duelo", "tipo": "derrotar", "alvo": "vane_duelo", "qtd": 1},
+		],
+		"recompensa": {"itens": {"carne": 2}, "texto": "O portão do salão do trono se abre"},
+		"encerramento": "Vane cai de joelhos, o Ferro Negro apagando em suas mãos. O portão do salão do trono se abre.",
+	},
+	"C5-M3": {
+		"capitulo": 5,
+		"titulo": "Quebrar o Grande Obelisco",
+		"requer": "C5-M2",
+		"auto_apos": "C5-M2",
+		"objetivos": [
+			{"id": "focos", "texto": "Desativar os 4 focos de energia do salão", "tipo": "destruir", "alvo": "ancora", "qtd": 4},
+		],
+		"recompensa": {"itens": {"maca": 3}, "texto": "O obelisco se apagou"},
+		"encerramento": "Os quatro focos caem e a luz negra do Grande Obelisco se apaga. No trono, o Imperador Solon se levanta.",
+	},
+	"C5-M4": {
+		"capitulo": 5,
+		"titulo": "A Queda do Imperador Solon",
+		"requer": "C5-M3",
+		"auto_apos": "C5-M3",
+		"objetivos": [
+			{"id": "solon", "texto": "Derrotar o Imperador Solon (com a ajuda do Fagulha)", "tipo": "derrotar", "alvo": "solon", "qtd": 1},
+		],
+		"recompensa": {"itens": {}, "texto": "O Império caiu"},
+		"encerramento": "O Imperador Solon cai. O Império de Drakkar acabou.",
 	},
 }

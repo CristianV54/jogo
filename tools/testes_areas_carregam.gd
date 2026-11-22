@@ -2,7 +2,7 @@ extends SceneTree
 # Carrega cada área e confere: sem erro de script, chefe criado, spawns e portal de volta existentes.
 func _init() -> void:
 	var falhas := 0
-	for nome in ["refugio_do_pinhal", "bosque_velado", "fronteira_ferrogris", "cratera_ignis", "valdoria"]:
+	for nome in ["refugio_do_pinhal", "bosque_velado", "fronteira_ferrogris", "cratera_ignis", "valdoria", "castelo_imperial"]:
 		var area: AreaBase = load("res://scenes/areas/%s.tscn" % nome).instantiate()
 		root.add_child(area)
 		await process_frame

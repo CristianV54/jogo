@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/vane.tscn" id="2"]
+
+[node name="VaneDuelista" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Vane"
+chefe = true
+vida_max = 380
+dano = 14
+velocidade = 4.4
+enfurece_em = 0.5
+escala_visual = 1.05
+altura_colisao = 2.0
+alcance_ataque = 2.2
+anim_andar = "Walk"
+anim_correr = "Jog_Fwd"
+anim_atacar = "Sword_Attack"
+momento_do_ataque = 0.45
+intervalo_ataque = 1.2
+especie = "vane_duelo"

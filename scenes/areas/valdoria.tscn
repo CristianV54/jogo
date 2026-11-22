@@ -1,16 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/mundo/arena_chefe.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/inimigos/solon.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/mundo/valdoria.gd" id="1"]
 
 [node name="Valdoria" type="Node3D"]
 script = ExtResource("1")
-estilo = "castelo"
-nome_da_area = "Valdoria, o castelo central"
-id_chefe = "solon"
-cena_chefe = ExtResource("2")
-comuns = PackedStringArray("res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/guarda_imperial.tscn")
-destino_volta = "cratera_ignis"
-spawn_volta = "DeValdoria"
-destino_proximo = ""
-semente = 41

@@ -11,6 +11,7 @@ const AREAS := {
 	"fronteira_ferrogris": "res://scenes/areas/fronteira_ferrogris.tscn",
 	"cratera_ignis": "res://scenes/areas/cratera_ignis.tscn",
 	"valdoria": "res://scenes/areas/valdoria.tscn",
+	"castelo_imperial": "res://scenes/areas/castelo_imperial.tscn",
 }
 ## Quem guarda cada passagem: para entrar na área, é preciso ter derrotado o chefe indicado.
 const REQUISITOS := {
@@ -19,13 +20,14 @@ const REQUISITOS := {
 	"valdoria": "ignis_maw",
 }
 ## Missão que precisa estar concluída para o Halk abrir a passagem.
-const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1", "valdoria": "C4-M4"}
+const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1", "valdoria": "C4-M4", "castelo_imperial": "C5-M1"}
 const MENSAGEM_REQUISITO := {
 	"bosque_velado": "Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).",
+	"castelo_imperial": "A escadaria do castelo está guardada pela elite imperial: cumpra Portões e Ruas de Valdoria (mercado, suprimentos, guarda de elite).",
 	"valdoria": "A estrada para Valdoria só abre com a lâmina final: leve o minério vulcânico e a escama à Brenn (A Lâmina Forjada no Fogo).",
 	"fronteira_ferrogris": "A ponte está quebrada e o vau é vigiado. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento).",
 }
-const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "solon": "Imperador Solon"}
+const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "vane": "Vane", "solon": "Imperador Solon"}
 
 signal area_carregada(nome: String)
 signal chefe_derrotado(id: String)
@@ -160,8 +162,15 @@ func _ao_derrotar_chefe(id: String) -> void:
 		hud.mensagem("%s foi derrotado%s" % [NOMES_DOS_CHEFES.get(id, id), dica], 4.5)
 	chefe_derrotado.emit(id)
 	if id == "solon":
-		hud.mensagem("Fim da base jogável. O destino dos dragões está nas suas mãos.", 0.0)
-		fim_de_jogo.emit()
+		cena_dialogo([
+			["Epílogo", "Solon cai. Os obeliscos começam a se apagar em todas as regiões, um a um."],
+			["Epílogo", "Fagulha voa sobre Valdoria enquanto os moradores abrem os portões."],
+			["Epílogo", "Brenn começa a desmontar as armas imperiais para fazer ferramentas."],
+			["Epílogo", "Torin recusa o trono e ajuda a formar um conselho de moradores, exilados, mineiros e antigos prisioneiros."],
+			["Epílogo", "Longe dali, numa região que ninguém visitou, uma pequena luz de Ferro Negro ainda pulsa."],
+		], func() -> void:
+			hud.mensagem("Fim. O destino dos dragões está nas suas mãos.", 0.0)
+			fim_de_jogo.emit())
 
 
 func _ao_morrer() -> void:
