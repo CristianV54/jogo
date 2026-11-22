@@ -33,6 +33,7 @@ func _init() -> void:
 	root.add_child(cena)
 	jog = cena.get_node("Jogador")
 	fag = cena.get_node("Fagulha")
+	fag.distancia_correr = 12.0   # a corrida curta do teste não chega a 18 m; só o gatilho do Run é reduzido
 	cam_jogo = cena.get_node("Camera/Braco/Lente")
 	cam_lateral = Camera3D.new()
 	cena.add_child(cam_lateral)
@@ -114,7 +115,7 @@ func _resultado() -> void:
 		"Fagulha mostrou Idle, Walk, Run e Fly": vistas.has("Idle") and vistas.has("Walk") and vistas.has("Run") and vistas.has("Fly"),
 		"Torin mostrou Idle, Jog_Fwd e Sprint": vistas_torin.has("Idle") and vistas_torin.has("Jog_Fwd") and vistas_torin.has("Sprint"),
 		"Jogador andou para frente (-Z) mais de 30 m": avancou > 30.0,
-		"Fagulha parado nunca ficou a mais de 3,5 m": dist_parado_max <= 3.5,
+		"Fagulha parado nunca ficou a mais de distancia_parar + 0,5 m": dist_parado_max <= fag.distancia_parar + 0.5,
 		"Fagulha ficou no chão (y <= 0,01) até o voo": altura_max_no_chao <= 0.01,
 		"Fagulha subiu a pelo menos 2,3 m no voo": altura_max_voo >= 2.3,
 	}
