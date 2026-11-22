@@ -419,7 +419,7 @@ func _npcs() -> void:
 		[{"ir": Vector3(-4.5, 0, 33.0)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(-6.0, 0, 34.5)},
 		 {"ir": Vector3(4.5, 0, 33.5)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(6.0, 0, 34.5)},
 		 {"ir": Vector3(3.0, 0, 27.5)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(0, 0, 31)}])
-	_npc("Tessa", "Mensageira", "res://scenes/personagens/tessa.tscn", Vector3(1.5, 0, -21.0), "Idle_Talking",
+	_npc("Tessa", "Mensageira", "res://scenes/personagens/tessa.tscn", Vector3(1.5, 0, -18.0), "Idle_Talking",
 		PackedStringArray(["Vi rastros de botas imperiais perto da estrada. Avise o Vane.", "Corro mais do que qualquer um aqui."]), Vector3(0, 0, -27),
 		[{"esperar": 4.0, "anim": "Idle_Talking", "olhar": Vector3(0, 0, -27)}, {"ir": Vector3(0, 0, -10.0), "vel": 3.2, "anim": "Jog_Fwd"},
 		 {"ir": Vector3(10, 0, -8.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(20, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"},

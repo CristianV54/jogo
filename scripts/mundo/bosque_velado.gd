@@ -410,8 +410,8 @@ func _corredor() -> void:
 		_rocha(Vector2(-10.5, z), 4.2 + _rng.randf() * 1.0, true, 60.0 + k)
 		_rocha(Vector2(10.5, z), 4.2 + _rng.randf() * 1.0, true, 80.0 + k)
 	_trilho(Vector2(-2, -50), Vector2(-2, -96))
-	var triagem := _casa_da_mina("Triagem", Vector3(-17, 0, -62), PI / 2.0, REF.ESTILO_PEDRA, "Sala de Triagem")
-	var deposito := _casa_da_mina("DepositoDeMinerio", Vector3(17, 0, -84), -PI / 2.0, REF.ESTILO_MADEIRA, "Depósito de Minério")
+	var triagem := _casa_da_mina("Triagem", Vector3(-21, 0, -62), PI / 2.0, REF.ESTILO_PEDRA, "Sala de Triagem")
+	var deposito := _casa_da_mina("DepositoDeMinerio", Vector3(24, 0, -84), -PI / 2.0, REF.ESTILO_MADEIRA, "Depósito de Minério")
 	var agua := VilaRefugio._mat(Color(0.08, 0.24, 0.4, 0.8))   # galeria alagada
 	agua.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	var alagado := VilaRefugio._caixa(Vector3(5.0, _y(Vector2(5, -70)) + 0.1, -70.0), Vector3(6.0, 0.14, 22.0), agua)

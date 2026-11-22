@@ -5,6 +5,7 @@ extends AreaBase
 
 var terreno: Terreno
 var tam := 300.0
+var paleta_casas := {}   # tinta das casas da região (ver ConstrutorCasa.tingir)
 var _rng := RandomNumberGenerator.new()
 var _solidos: StaticBody3D
 var _cor_do_chao := Color.WHITE
@@ -175,7 +176,7 @@ func _torre_de_vigia(pos: Vector2, altura := 9.0) -> Vector3:
 
 ## Prédio do ConstrutorCasa (com interior) com uma placa sobre a porta.
 func _edificio(nome_ed: String, pos: Vector2, giro: float, estilo: Dictionary, placa: String, interior := "deposito") -> void:
-	var casa := ConstrutorCasa.montar(4, 4, estilo, true, interior)
+	var casa := ConstrutorCasa.montar(4, 4, estilo, true, interior, paleta_casas)
 	casa.name = nome_ed
 	casa.position = Vector3(pos.x, altura_em(pos.x, pos.y), pos.y)
 	casa.rotation.y = giro

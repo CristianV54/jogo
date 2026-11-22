@@ -64,6 +64,9 @@ func _em_regiao(id: String, lista: Array, raio: float) -> void:
 	for item in lista:
 		for k in int(item[1]):
 			var p := c + Vector2(_rng.randf_range(-raio, raio), _rng.randf_range(-raio, raio))
+			var t = mundo.regioes[id].get("terreno")
+			if t is Terreno and (t as Terreno).na_agua(p.x - c.x, p.y - c.y, 7.0):
+				continue   # nem dentro do rio nem na parede do leito
 			_criar(item[0], p)
 
 
@@ -83,7 +86,23 @@ func _na_estrada(id: String, lista: Array) -> void:
 			_criar(item[0], p)
 
 
+## Perto de uma serra de rocha ou da borda do mundo bicho nenhum nasce (ficaria dentro da pedra).
+func _perto_de_barreira(p: Vector2) -> bool:
+	var lim := MundoDados.LIMITES
+	if not lim.grow(-12.0).has_point(p):
+		return true
+	for c in MundoDados.CRISTAS:
+		var a: Vector2 = c["de"]
+		var b: Vector2 = c["para"]
+		var t := clampf((p - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		if p.distance_to(a + (b - a) * t) < 16.0:
+			return true
+	return false
+
+
 func _criar(especie: String, p: Vector2) -> void:
+	if _perto_de_barreira(p):
+		return
 	contagem[especie] = int(contagem.get(especie, 0)) + 1
 	var y := mundo.terreno.altura_em(p.x, p.y)
 	match especie:

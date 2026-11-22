@@ -33,7 +33,7 @@ static func construir(area: Node3D, altura_em: Callable) -> Array:
 	ocupado.append(_curral(Vector3(-15.0, 0.0, -28.0), 8.0, 6.0, "l", ["Cocho"]))
 	ocupado.append(_curral(Vector3(-30.0, 0.0, 13.0), 9.0, 8.0, "l", ["Cocho", "Feno"]))
 	ocupado.append(_galinheiro(Vector3(12.0, 0.0, 22.0)))
-	ocupado.append(_horta(Vector3(15.0, 0.0, -14.0)))
+	ocupado.append(_horta(Vector3(12.0, 0.0, -14.0)))
 	ocupado.append(_poco(Vector3(-9.0, 0.0, 5.0)))
 	ocupado.append(_canil(Vector3(35.5, 0.0, -5.5)))
 	_praca()
@@ -252,13 +252,13 @@ static func _poco(c: Vector3) -> Array:
 
 
 static func _horta(centro: Vector3) -> Array:
-	_cerca_retangular(centro, 20.0, 13.0, "s", 3.2)
-	var plantacao := Plantacao.new()
+	var plantacao := Plantacao.new()   # a cerca, o portão e o espantalho vêm junto com o campo
 	plantacao.largura = 14.0
 	plantacao.profundidade = 9.0
 	plantacao.position = Vector3(centro.x, _y(centro.x, centro.z), centro.z)
+	plantacao.rotation.y = PI   # portão para o sul (+Z), do lado do pátio
 	_area.add_child(plantacao)
-	return [Vector2(centro.x, centro.z), 13.5]
+	return [Vector2(centro.x, centro.z), 12.5]
 
 
 static func _canil(c: Vector3) -> Array:

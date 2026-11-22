@@ -11,6 +11,7 @@ const PORTAO_Z := 110.0
 const NORTE_Z := -85.0
 const LADO := 80.0
 const TOPO_Y := 7.0
+const PALETAS_CASAS := [{"parede": Color(0.8, 0.82, 0.9), "telhado": Color(0.48, 0.5, 0.6)}, {"parede": Color(1.0, 0.9, 0.75), "telhado": Color(1.0, 0.95, 0.9)}, {"parede": Color(0.9, 0.78, 0.66), "telhado": Color(0.6, 0.38, 0.32)}, {"parede": Color(0.72, 0.74, 0.74), "telhado": Color(0.4, 0.42, 0.5)}]
 const COR_DRAKKAR := Color(0.65, 0.1, 0.08)
 
 var elite: Array[Inimigo] = []
@@ -250,7 +251,7 @@ func _bairro() -> void:
 	var n := 0
 	for col in colunas:
 		for z in col[2]:
-			var casa := ConstrutorCasa.montar(3, 2, REF.ESTILO_PEDRA if n % 2 == 0 else REF.ESTILO_MADEIRA, true, "moradia")
+			var casa := ConstrutorCasa.montar(3, 2, REF.ESTILO_PEDRA if n % 2 == 0 else REF.ESTILO_MADEIRA, true, "moradia", PALETAS_CASAS[n % PALETAS_CASAS.size()])
 			casa.name = "Casa%d" % n
 			casa.position = Vector3(col[0], altura_em(col[0], z), z)
 			casa.rotation.y = col[1]
@@ -350,8 +351,8 @@ func _gente() -> void:
 		[{"fazer": "Interact", "seg": 8.0, "olhar": Vector2(6.0, 20.0)}, {"ir": Vector2(-8.0, 12.0), "vel": 1.0}, {"fazer": "Interact", "seg": 8.0, "olhar": Vector2(-8.0, 20.0)}, {"ir": Vector2(6.0, 12.0), "vel": 1.0}])
 	_npc("Bram", "Carregador", "res://scenes/personagens/soldado_ferido.tscn", Vector2(52.0, -40.0), PackedStringArray(["Caixas para o mercado, sempre. As costas não perdoam."]),
 		[{"ir": Vector2(48.0, 2.0), "vel": 1.6}, {"esperar": 4.0, "anim": "Interact", "olhar": Vector2(48.0, 8.0)}, {"ir": Vector2(52.0, -40.0), "vel": 1.6}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(58.0, -48.0)}])
-	_npc("Ollo", "Tratador de animais", "res://scenes/personagens/orin.tscn", Vector2(36.0, -24.0), PackedStringArray(["O cavalo da cidade come mais que eu. Não me queixo."]),
-		[{"fazer": "Interact", "seg": 6.0, "olhar": Vector2(30.0, -28.0)}, {"ir": Vector2(36.0, -30.0), "vel": 1.2}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(30.0, -28.0)}, {"ir": Vector2(36.0, -24.0), "vel": 1.2}])
+	_npc("Ollo", "Tratador de animais", "res://scenes/personagens/orin.tscn", Vector2(39.0, -24.0), PackedStringArray(["O cavalo da cidade come mais que eu. Não me queixo."]),
+		[{"fazer": "Interact", "seg": 6.0, "olhar": Vector2(30.0, -28.0)}, {"ir": Vector2(39.0, -30.0), "vel": 1.2}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(30.0, -28.0)}, {"ir": Vector2(39.0, -24.0), "vel": 1.2}])
 	_npc("Corretor Ágil", "Discutindo preços", "res://scenes/personagens/soldado_rebelde.tscn", Vector2(-4.0, 30.0), PackedStringArray(["Dobrou o preço do pão! Você vê isso?"]),
 		[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": Vector2(4.0, 30.0)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(4.0, 30.0)}])
 	_npc("Comprador Zangado", "Discutindo preços", "res://scenes/personagens/cativo.tscn", Vector2(4.0, 30.0), PackedStringArray(["Pago o que sempre paguei, nem um tostão a mais."]),

@@ -21,6 +21,7 @@ var _fase := 0
 
 func _ready() -> void:
 	nome_area = "Fortaleza de Ferrogris"
+	paleta_casas = {"parede": Color(0.62, 0.62, 0.66), "telhado": Color(0.3, 0.3, 0.36)}   # fortaleza de ferro e pedra cinza
 	tam = 300.0
 	_rng.seed = 67
 	_ambiente_padrao()

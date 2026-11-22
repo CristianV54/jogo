@@ -29,6 +29,7 @@ var _brasas: Array[Fogo] = []
 
 func _ready() -> void:
 	nome_area = "Cratera de Ignis"
+	paleta_casas = {"parede": Color(0.5, 0.4, 0.38), "telhado": Color(0.3, 0.22, 0.22)}   # barracões escurecidos pela fuligem
 	tam = 300.0
 	_rng.seed = 73
 	_ambiente()

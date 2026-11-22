@@ -157,7 +157,7 @@ func _planejar() -> void:
 
 
 func _registrar_povoado(p: Dictionary, centro: Vector2, dir: Vector2, ponto_estrada: Vector2) -> void:
-	terreno.planos.append(Vector3(centro.x, centro.y, float(p["raio"]) * 0.7))   # o chão do povoado fica nivelado
+	terreno.planos.append(Vector3(centro.x, centro.y, float(p["raio"]) * 1.0))   # o chão do povoado fica nivelado (campos e quintal inclusos)
 	povoados[p["id"]] = {"id": p["id"], "lado": p["lado"], "centro": centro, "nome": p["nome"], "raio": p["raio"], "tipo": p["tipo"], "dir": dir, "ponto_da_estrada": ponto_estrada}
 
 

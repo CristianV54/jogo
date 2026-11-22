@@ -36,13 +36,15 @@ func _rodar() -> void:
 	var m: Mundo = jogo.mundo
 	var h := func(x: float, z: float) -> float: return m.terreno.altura_em(x, z)
 	await _foto("horta_refugio", Vector3(15, 6.0, -2), Vector3(15, 0.5, -14), Vector3(0, 2, 0))
-	var c: Vector2 = m.povoados["campina"]["centro"]
-	var pov: Node3D = m.povoados["campina"]["no"]
-	var campos: Array[Node] = pov.find_children("*", "Plantacao", true, false)
-	var f: Node3D = campos[0]
-	var fp := Vector2(f.global_position.x, f.global_position.z)
-	var fy: float = h.call(fp.x, fp.y)
-	var jog := Vector3(fp.x + 20.0, fy + 2.0, fp.y)
-	await _foto("fazenda_alto", Vector3(fp.x - 18.0, fy + 18.0, fp.y + 22.0), Vector3(fp.x, fy, fp.y), jog)
-	await _foto("fazenda_baixo", Vector3(fp.x - 9.0, fy + 1.8, fp.y + 12.0), Vector3(fp.x + 2.0, fy + 0.7, fp.y - 2.0), jog)
+	for id in ["campina", "beira_rio"]:
+		var c: Vector2 = m.povoados[id]["centro"]
+		var y: float = h.call(c.x, c.y)
+		var jog := Vector3(c.x, y + 2.0, c.y + 3.0)
+		await _foto("%s_cima" % id, Vector3(c.x + 6.0, y + 95.0, c.y + 62.0), Vector3(c.x, y, c.y + 18.0), jog)
+		var pov: Node3D = m.povoados[id]["no"]
+		var campos: Array[Node] = pov.find_children("*", "Plantacao", true, false)
+		var f: Node3D = campos[0]
+		var fp := Vector2(f.global_position.x, f.global_position.z)
+		await _foto("%s_campo" % id, Vector3(fp.x - 20.0, y + 12.0, fp.y - 20.0), Vector3(fp.x, y, fp.y), jog)
+	await _foto("horta_cima", Vector3(15, 28.0, 8), Vector3(15, 0.5, -12), Vector3(0, 2, 0))
 	quit(0)

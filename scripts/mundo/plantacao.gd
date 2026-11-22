@@ -13,17 +13,13 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	Clima.registrar_globais()
-	set_meta("raio_capim", Vector2(largura, profundidade).length() / 2.0 + 3.0)   # o capim do mundo não nasce aqui
+	set_meta("raio_capim", Vector2(largura, profundidade).length() / 2.0 + 4.0)   # o capim do mundo não nasce aqui
 	_rng.seed = 5
 	_terra()
 	_fileiras()
-	_espantalho(Vector3(0.0, 0.0, 0.0))
-	_fardos()
-	_bebedouro()
-	for p in [Vector3(-largura / 2.0 + 0.3, 1.25, profundidade / 2.0), Vector3(largura / 2.0 - 0.3, 1.25, -profundidade / 2.0)]:   # corvos na cerca
-		var corvo := Corvo.new()
-		corvo.position = p
-		add_child(corvo)
+	_cerca()
+	var meio := Vector3(0.0, 0.0, 0.0)   # o espantalho fica no meio do campo, entre as plantas
+	_espantalho(meio)
 
 
 func _mat(cor: Color) -> StandardMaterial3D:
@@ -36,7 +32,7 @@ func _mat(cor: Color) -> StandardMaterial3D:
 func _terra() -> void:
 	var chao := MeshInstance3D.new()   # terra batida de fundo: aparece nas trilhas entre os talhões
 	var b := BoxMesh.new()
-	b.size = Vector3(largura, 0.06, profundidade)
+	b.size = Vector3(largura + 1.2, 0.06, profundidade + 1.2)
 	b.material = _mat(Color(0.36, 0.26, 0.16))
 	chao.mesh = b
 	chao.position.y = 0.03
@@ -47,20 +43,20 @@ func _terra() -> void:
 func _terra_do_talhao(x0: float, larg: float, sulcos: bool) -> void:
 	var t := MeshInstance3D.new()
 	var tb := BoxMesh.new()
-	tb.size = Vector3(larg, 0.08, profundidade - 1.0)
+	tb.size = Vector3(larg, 0.08, profundidade)
 	tb.material = _mat(Color(0.2, 0.13, 0.08))
 	t.mesh = tb
 	t.position = Vector3(x0 + larg / 2.0, 0.05, 0.0)
 	add_child(t)
 	if not sulcos:
 		return
-	for i in int((profundidade - 1.0) / 0.9):
+	for i in int((profundidade - 0.6) / 0.9):
 		var s := MeshInstance3D.new()
 		var sb := BoxMesh.new()
 		sb.size = Vector3(larg - 0.3, 0.16, 0.45)
 		sb.material = _mat(Color(0.3, 0.19, 0.11) if i % 2 == 0 else Color(0.25, 0.16, 0.1))
 		s.mesh = sb
-		s.position = Vector3(x0 + larg / 2.0, 0.1, -profundidade / 2.0 + 1.0 + i * 0.9)
+		s.position = Vector3(x0 + larg / 2.0, 0.1, -profundidade / 2.0 + 0.6 + i * 0.9)
 		add_child(s)
 
 
@@ -175,21 +171,21 @@ func _espalhar(malha: Mesh, mat: Material, transf: Array[Transform3D], nome: Str
 ## fazenda de verdade: trigo maduro (dourado), trigo novo (verde), milho alto, repolho, verduras, abóboras e terra em pousio.
 func _fileiras() -> void:
 	var n := maxi(1, int(round(largura / 7.0)))
-	var larg_t := (largura - (n - 1) * 1.0 - 1.0) / n
+	var larg_t := (largura - (n - 1) * 1.0) / n
 	var ordem := ["trigo", "milho", "trigo", "repolho", "trigo_novo", "verdura", "pousio", "abobora", "trigo", "milho"]
 	var grupos: Dictionary = {}
 	var primeiro := _rng.randi() % ordem.size()
 	for i in n:
 		var tipo: String = ordem[(primeiro + i) % ordem.size()]
-		var x0 := -largura / 2.0 + 0.5 + i * (larg_t + 1.0)
+		var x0 := -largura / 2.0 + i * (larg_t + 1.0)
 		_terra_do_talhao(x0, larg_t, tipo != "trigo" and tipo != "trigo_novo" and tipo != "milho")
 		var passo: float = {"trigo": 0.16, "trigo_novo": 0.16, "milho": 0.5, "repolho": 0.62, "verdura": 0.34, "abobora": 1.15, "pousio": 99.0}[tipo]
 		if not grupos.has(tipo):
 			grupos[tipo] = []
 		var lista: Array = grupos[tipo]
-		var z := -profundidade / 2.0 + 1.0
+		var z := -profundidade / 2.0 + 0.5
 		var fila := 0
-		while z < profundidade / 2.0 - 0.9:
+		while z < profundidade / 2.0 - 0.4:
 			var x := x0 + 0.3
 			while x < x0 + larg_t - 0.25:
 				var p := Vector3(x + _rng.randf_range(-0.07, 0.07), 0.14, z + _rng.randf_range(-0.07, 0.07))
@@ -254,7 +250,7 @@ func _fileiras() -> void:
 func _espantalho(pos: Vector3) -> void:
 	var p := Node3D.new()
 	p.name = "Espantalho"
-	p.position = Vector3(pos.x, 0.0, -profundidade / 2.0 - 0.8)
+	p.position = Vector3(pos.x, 0.12, pos.z)
 	add_child(p)
 	var madeira := _mat(Color(0.32, 0.22, 0.12))
 	for it in [[Vector3(0, 1.0, 0), Vector3(0.1, 2.0, 0.1), madeira], [Vector3(0, 1.55, 0), Vector3(1.5, 0.1, 0.1), madeira],
@@ -294,51 +290,46 @@ func _espantalho(pos: Vector3) -> void:
 	p.add_child(corpo)
 
 
-func _fardos() -> void:
-	var feno := _mat(Color(0.6, 0.46, 0.17))
-	for k in 3:
-		var mi := MeshInstance3D.new()
-		var c := CylinderMesh.new()
-		c.top_radius = 0.55
-		c.bottom_radius = 0.55
-		c.height = 0.9
-		c.material = feno
-		mi.mesh = c
-		mi.rotation_degrees.x = 90.0
-		mi.position = Vector3(largura / 2.0 + 1.4, 0.55 + (0.9 if k == 2 else 0.0), -1.2 + (k % 2) * 1.0)
-		add_child(mi)
-	var cs := CollisionShape3D.new()
-	var f := BoxShape3D.new()
-	f.size = Vector3(1.2, 1.8, 2.4)
-	cs.shape = f
-	cs.position = Vector3(largura / 2.0 + 1.4, 0.9, -0.7)
+## Cerca de estacas e travessas em volta do campo, no eixo do próprio campo (gira junto com ele), com um portão aberto
+## do lado -Z (o lado do quintal, onde ficam a casa e o poço) e uma trilha de terra do portão até o primeiro talhão.
+func _cerca() -> void:
+	var mx := largura / 2.0 + 0.9
+	var mz := profundidade / 2.0 + 0.9
 	var corpo := StaticBody3D.new()
-	corpo.add_child(cs)
+	corpo.name = "Cerca"
 	add_child(corpo)
-
-
-func _bebedouro() -> void:
-	var tronco := MeshInstance3D.new()
-	var b := BoxMesh.new()
-	b.size = Vector3(1.8, 0.5, 0.7)
-	b.material = _mat(Color(0.3, 0.2, 0.11))
-	tronco.mesh = b
-	tronco.position = Vector3(-largura / 2.0 - 1.6, 0.25, 1.0)
-	add_child(tronco)
-	var agua := MeshInstance3D.new()
-	var a := BoxMesh.new()
-	a.size = Vector3(1.5, 0.04, 0.45)
-	var m := _mat(Color(0.12, 0.3, 0.5, 0.85))
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	a.material = m
-	agua.mesh = a
-	agua.position = Vector3(-largura / 2.0 - 1.6, 0.48, 1.0)
-	add_child(agua)
-	var cs := CollisionShape3D.new()
-	var f := BoxShape3D.new()
-	f.size = Vector3(1.8, 0.5, 0.7)
-	cs.shape = f
-	cs.position = Vector3(-largura / 2.0 - 1.6, 0.25, 1.0)
-	var corpo := StaticBody3D.new()
-	corpo.add_child(cs)
-	add_child(corpo)
+	var lados := [
+		[Vector3(-mx, 0.0, -mz), Vector3(1, 0, 0), mx * 2.0, true],
+		[Vector3(-mx, 0.0, mz), Vector3(1, 0, 0), mx * 2.0, false],
+		[Vector3(-mx, 0.0, -mz), Vector3(0, 0, 1), mz * 2.0, false],
+		[Vector3(mx, 0.0, -mz), Vector3(0, 0, 1), mz * 2.0, false]]
+	for l in lados:
+		var ini: Vector3 = l[0]
+		var d: Vector3 = l[1]
+		var comp: float = l[2]
+		var n := maxi(1, int(round(comp / 2.06)))
+		var passo := comp / n
+		for i in n:
+			var t := (i + 0.5) * passo
+			if l[3] and absf(t - comp / 2.0) < 1.7:
+				continue   # vão do portão
+			var pos: Vector3 = ini + d * t
+			pos.y = 0.0
+			var peca := ConstrutorCasa.peca("Prop_WoodenFence_Single")
+			peca.position = pos
+			peca.rotation.y = atan2(-d.z, d.x)
+			peca.scale.x = passo / 2.06
+			add_child(peca)
+			var cs := CollisionShape3D.new()
+			var forma := BoxShape3D.new()
+			forma.size = Vector3(passo, 1.2, 0.3)
+			cs.shape = forma
+			cs.transform = Transform3D(Basis(Vector3.UP, peca.rotation.y), pos + Vector3(0.0, 0.6, 0.0))
+			corpo.add_child(cs)
+	var trilha := MeshInstance3D.new()
+	var tb := BoxMesh.new()
+	tb.size = Vector3(2.4, 0.05, 2.2)
+	tb.material = _mat(Color(0.4, 0.3, 0.19))
+	trilha.mesh = tb
+	trilha.position = Vector3(0.0, 0.03, -mz - 0.4)
+	add_child(trilha)

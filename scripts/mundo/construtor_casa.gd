@@ -22,6 +22,7 @@ static func peca(nome: String) -> Node3D:
 
 static func _colocar(pai: Node3D, nome: String, pos: Vector3, giro_graus: float) -> Node3D:
 	var p := peca(nome)
+	p.set_meta("peca", nome)
 	p.position = pos
 	p.rotation_degrees.y = giro_graus
 	pai.add_child(p)
@@ -34,7 +35,7 @@ static func _existe(nome: String) -> bool:
 
 ## estilo: {"parede", "porta", "janela", "piso", "canto", "telhado" (opcional)}
 ## interior: "moradia", "forja" ou "vazio"
-static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := true, interior := "moradia") -> Node3D:
+static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := true, interior := "moradia", paleta := {}) -> Node3D:
 	var casa := Node3D.new()
 	casa.name = "Casa"
 	casa.add_to_group("casas")   # os NPCs procuram a casa mais perto para se abrigar
@@ -88,14 +89,57 @@ static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := tru
 		_colocar(casa, nome_frontao, Vector3(0.0, ALTURA_PAREDE, meia_z), 0.0)
 		_colocar(casa, nome_frontao, Vector3(0.0, ALTURA_PAREDE, -meia_z), 180.0)
 
+	var plinto := MeshInstance3D.new()   # base de pedra sob o piso: em chão inclinado a casa não fica flutuando de um lado
+	plinto.name = "Plinto"
+	var pb := BoxMesh.new()
+	pb.size = Vector3(meia_x * 2.0 + 0.3, 3.0, meia_z * 2.0 + 0.3)
+	var pm := StandardMaterial3D.new()
+	pm.albedo_color = Color(0.4, 0.38, 0.35)
+	pm.roughness = 1.0
+	pb.material = pm
+	plinto.mesh = pb
+	plinto.position = Vector3(0.0, -1.5 - 0.03, 0.0)
+	casa.add_child(plinto)
 	casa.set_meta("colunas", colunas)
 	casa.set_meta("linhas", linhas)
 	casa.set_meta("x_porta", x_porta)
 	_interior(casa, colunas, linhas, interior)
+	if not paleta.is_empty():
+		tingir(casa, paleta.get("parede", Color.WHITE), paleta.get("telhado", Color.WHITE))
 	if colisao:
 		casa.add_child(_colisao(meia_x, meia_z, x_porta))
 		casa.add_child(_teto_para_camera(colunas, linhas))
 	return casa
+
+
+## Cor da casa: multiplica a cor das paredes e do telhado (o kit só tem tijolo, reboco e telha; a tinta dá palha, taipa,
+## pedra escura, ardósia...). Portas, janelas e móveis ficam como são.
+static func tingir(casa: Node3D, parede: Color, telhado: Color) -> void:
+	var cache: Dictionary = {}
+	for no in casa.get_children():
+		if not no.has_meta("peca"):
+			continue
+		var nome: String = no.get_meta("peca")
+		var tinta := Color.WHITE
+		if nome.begins_with("Roof_") and not nome.begins_with("Roof_Front"):
+			tinta = telhado
+		elif nome.begins_with("Wall_") or nome.begins_with("Corner_") or nome.begins_with("Roof_Front"):
+			tinta = parede
+		else:
+			continue
+		for mi in no.find_children("*", "MeshInstance3D", true, false):
+			var malha := (mi as MeshInstance3D).mesh
+			if malha == null:
+				continue
+			for i in malha.get_surface_count():
+				var m := malha.surface_get_material(i)
+				if m is StandardMaterial3D:
+					var chave := str(m.get_instance_id(), tinta)
+					if not cache.has(chave):
+						var d := (m as StandardMaterial3D).duplicate() as StandardMaterial3D
+						d.albedo_color = d.albedo_color * tinta
+						cache[chave] = d
+					(mi as MeshInstance3D).set_surface_override_material(i, cache[chave])
 
 
 ## Porta aberta: batente no vão e a folha girada para dentro, presa pela dobradiça do lado esquerdo.

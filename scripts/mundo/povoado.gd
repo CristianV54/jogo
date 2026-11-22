@@ -55,8 +55,25 @@ func _y(p: Vector2) -> float:
 	return mundo.terreno.altura_em(p.x, p.y)
 
 
+## Cor das casas deste povoado: cada tipo (e cada povoado do mesmo tipo) tem a sua, para não ser tudo igual.
+func _paleta() -> Dictionary:
+	var opcoes: Array
+	match String(dados["tipo"]):
+		"fazenda":   # palha e taipa, madeira escura ou caiada com telha
+			opcoes = [{"parede": Color(0.66, 0.5, 0.34), "telhado": Color(0.86, 0.7, 0.34)}, {"parede": Color(0.5, 0.37, 0.25), "telhado": Color(0.62, 0.5, 0.3)}, {"parede": Color(1.0, 0.96, 0.86), "telhado": Color(0.95, 0.75, 0.55)}]
+		"vila":      # blocos de pedra: cinza com ardósia ou arenito quente com telha
+			opcoes = [{"parede": Color(0.82, 0.84, 0.9), "telhado": Color(0.5, 0.5, 0.58)}, {"parede": Color(1.0, 0.88, 0.7), "telhado": Color(1.0, 0.9, 0.85)}, {"parede": Color(0.75, 0.78, 0.76), "telhado": Color(0.62, 0.42, 0.34)}]
+		"cabana":
+			opcoes = [{"parede": Color(0.42, 0.31, 0.2), "telhado": Color(0.55, 0.45, 0.28)}, {"parede": Color(0.55, 0.52, 0.48), "telhado": Color(0.45, 0.4, 0.3)}]
+		"posto_imperial":
+			opcoes = [{"parede": Color(0.55, 0.55, 0.62), "telhado": Color(0.3, 0.3, 0.38)}]
+		_:
+			opcoes = [{"parede": Color(0.5, 0.42, 0.34), "telhado": Color(0.45, 0.4, 0.34)}]
+	return opcoes[hash(String(dados["id"])) % opcoes.size()]
+
+
 func _casa(nome_c: String, p: Vector2, colunas: int, linhas: int, estilo: Dictionary, interior := "moradia") -> Node3D:
-	var casa := ConstrutorCasa.montar(colunas, linhas, estilo, true, interior)
+	var casa := ConstrutorCasa.montar(colunas, linhas, estilo, true, interior, _paleta())
 	casa.name = nome_c
 	casa.position = Vector3(p.x, _y(p), p.y)
 	casa.rotation.y = atan2(-para_longe.x, -para_longe.y)   # a porta (+Z local) olha para a estrada
@@ -71,14 +88,57 @@ func _lado_da_estrada() -> String:
 	return "n" if para_longe.y > 0.0 else "s"
 
 
+## Campo de cultivo: o bloco de talhões, a cerca e o espantalho são um conjunto só, alinhado com o povoado (o portão olha
+## para o quintal, do lado da estrada).
 func _plantacao(p: Vector2, larg: float, prof: float) -> void:
-	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg + 5.0, prof + 4.0, _lado_da_estrada(), 4.0)
 	var pl := Plantacao.new()
 	pl.largura = larg
 	pl.profundidade = prof
 	pl.position = Vector3(p.x, _y(p), p.y)
-	pl.rotation.y = atan2(dir.x, dir.y) + PI / 2.0
+	pl.rotation.y = atan2(para_longe.x, para_longe.y)   # +Z do campo aponta para dentro do povoado; o portão fica em -Z
 	add_child(pl)
+
+
+## Palheiro: fardos redondos e um monte de feno, junto ao celeiro ou ao curral (nunca dentro do campo).
+func _feno(p: Vector2) -> void:
+	var feno := VilaRefugio._mat(Color(0.66, 0.5, 0.2))
+	var y := _y(p)
+	for k in 3:
+		var fardo := VilaRefugio._cilindro(Vector3(p.x + (k % 2) * 1.2, y + 0.55 + (0.95 if k == 2 else 0.0), p.y + (k % 2) * 0.3 + (0.3 if k == 2 else 0.0)), 0.55, 1.0, feno, false, 12)
+		fardo.rotation_degrees.x = 90.0
+		fardo.rotation.y = atan2(dir.x, dir.y)
+	var cone := MeshInstance3D.new()
+	var cm := CylinderMesh.new()   # monte de feno cônico
+	cm.top_radius = 0.1
+	cm.bottom_radius = 1.4
+	cm.height = 2.2
+	cm.material = feno
+	cone.mesh = cm
+	cone.position = Vector3(p.x + 3.6, y + 1.1, p.y)
+	add_child(cone)
+	var cs := CollisionShape3D.new()
+	var f := BoxShape3D.new()
+	f.size = Vector3(5.2, 1.8, 2.4)
+	cs.shape = f
+	cs.position = Vector3(p.x + 1.8, y + 0.9, p.y)
+	_solidos.add_child(cs)
+
+
+## Bebedouro de tronco, dentro do curral ou ao lado do celeiro.
+func _bebedouro(p: Vector2) -> void:
+	var y := _y(p)
+	var g := atan2(dir.x, dir.y)
+	VilaRefugio._caixa(Vector3(p.x, y + 0.25, p.y), Vector3(1.8, 0.5, 0.7), VilaRefugio._mat(Color(0.3, 0.2, 0.11)), true, g)
+	var agua := MeshInstance3D.new()
+	var a := BoxMesh.new()
+	a.size = Vector3(1.5, 0.04, 0.45)
+	var m := VilaRefugio._mat(Color(0.12, 0.3, 0.5, 0.85))
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	a.material = m
+	agua.mesh = a
+	agua.position = Vector3(p.x, y + 0.48, p.y)
+	agua.rotation.y = g
+	add_child(agua)
 
 
 func _placa(p: Vector2, texto: String) -> void:
@@ -135,8 +195,9 @@ func _animal(modelo: String, nome_a: String, especie: String, p: Vector2, esc: f
 
 func _curral(p: Vector2, larg: float, prof: float, bichos: Array) -> void:
 	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg, prof, _lado_da_estrada(), 3.4)
+	_bebedouro(p + Vector2(larg / 2.0 - 1.6, prof / 2.0 - 1.1))   # a água fica dentro do curral, junto à cerca do fundo
 	for b in bichos:   # [modelo, nome, especie, escala, drops]
-		var q := p + Vector2(_rng.randf_range(-larg / 2.5, larg / 2.5), _rng.randf_range(-prof / 2.5, prof / 2.5))
+		var q := p + Vector2(_rng.randf_range(-larg / 3.5, larg / 3.5), _rng.randf_range(-prof / 3.5, prof / 3.5))   # longe do bebedouro e da cerca
 		_animal(b[0], b[1], b[2], q, b[3], 2.0, 30, b[4])
 
 
@@ -177,31 +238,32 @@ func _lavrador(nome_n: String, cena: String, campo: Vector2, falas: PackedString
 func _fazenda() -> void:
 	_casa("CasaDaFazenda", _p(0.0, 4.0), 3, 3, REF.ESTILO_MADEIRA)
 	_casa("Celeiro", _p(-22.0, 10.0), 4, 4, REF.ESTILO_MADEIRA, "deposito")
-	var c1 := _p(30.0, 34.0)
-	var c2 := _p(0.0, 60.0)
-	_plantacao(c1, 24.0, 16.0)
-	_plantacao(c2, 28.0, 16.0)
+	var c1 := _p(0.0, 43.0)   # um campo grande atrás da casa, com o poço e o palheiro no quintal entre os dois
+	var c2 := c1
+	_plantacao(c1, 32.0, 18.0)
+	_feno(_p(-12.0, 16.0))
 	VilaRefugio._poco(Vector3(_p(10.0, 8.0).x, 0.0, _p(10.0, 8.0).y))
-	_curral(_p(-26.0, 30.0), 14.0, 10.0, [["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["ovelha", "Ovelha", "ovelha", 1.0, {"carne": [1, 2], "la": [1, 2]}]])
+	_curral(_p(-30.0, 28.0), 14.0, 10.0, [["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["vaca", "Vaca", "vaca", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["ovelha", "Ovelha", "ovelha", 1.0, {"carne": [1, 2], "la": [1, 2]}]])
 	for k in 4:
-		_animal("galinha", "Galinha", "galinha", _p(-12.0 + k * 3.0, 2.0), 1.0, 3.0, 8, {"carne": [1, 1]})
+		_animal("galinha", "Galinha", "galinha", _p(-9.0 + k * 3.0, -3.0), 1.0, 3.0, 8, {"carne": [1, 1]})
 	_lavrador("Hugo", "oren", c1, PackedStringArray(["Planto trigo e milho desde menino. O Império leva metade, e eu agradeço quando levam só metade.", "Chuva boa essa semana. Pena que o céu anda carregado."]))
-	_lavrador("Marta", "tessa", c2, PackedStringArray(["As abóboras estão no ponto. Quer uma? Não posso dar de graça, o patrão conta tudo."]))
-	_npc("Caio", "Pastor", "nilo", _p(-26.0, 22.0), PackedStringArray(["Cuido das vacas e das ovelhas. O lobo ronda à noite, por isso as recolho cedo."]),
-		[{"fazer": "Interact", "seg": 7.0, "olhar": _p(-26.0, 30.0)}, {"ir": _p(-20.0, 24.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(-26.0, 30.0)}, {"ir": _p(-26.0, 22.0), "vel": 1.0}])
+	_lavrador("Marta", "tessa", c2 + dir * 10.0, PackedStringArray(["As abóboras estão no ponto. Quer uma? Não posso dar de graça, o patrão conta tudo."]))
+	_npc("Caio", "Pastor", "nilo", _p(-20.0, 22.0), PackedStringArray(["Cuido das vacas e das ovelhas. O lobo ronda à noite, por isso as recolho cedo."]),
+		[{"fazer": "Interact", "seg": 7.0, "olhar": _p(-30.0, 28.0)}, {"ir": _p(-14.0, 24.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(-30.0, 28.0)}, {"ir": _p(-20.0, 22.0), "vel": 1.0}])
 
 
 func _vila() -> void:
-	_casa("Taverna", _p(0.0, 6.0), 4, 4, REF.ESTILO_MADEIRA, "moradia")
+	_casa("Taverna", _p(0.0, 6.0), 4, 4, REF.ESTILO_PEDRA, "moradia")
 	_casa("Casa1", _p(-24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
-	_casa("Casa2", _p(24.0, 6.0), 3, 2, REF.ESTILO_MADEIRA)
+	_casa("Casa2", _p(24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
 	_casa("Ferraria", _p(-14.0, 26.0), 3, 3, REF.ESTILO_PEDRA, "forja")
-	_casa("Casa3", _p(14.0, 28.0), 3, 2, REF.ESTILO_MADEIRA)
+	_casa("Casa3", _p(14.0, 28.0), 3, 2, REF.ESTILO_PEDRA)
 	VilaRefugio._poco(Vector3(_p(0.0, 16.0).x, 0.0, _p(0.0, 16.0).y))
 	var c1 := _p(-34.0, 42.0)
 	var c2 := _p(30.0, 46.0)
 	_plantacao(c1, 22.0, 14.0)
 	_plantacao(c2, 22.0, 14.0)
+	_feno(_p(14.0, 44.0))
 	_curral(_p(0.0, 48.0), 16.0, 10.0, [["porco", "Porco", "porco", 1.0, {"carne": [2, 3]}], ["porco", "Porco", "porco", 1.0, {"carne": [2, 3]}], ["cavalo", "Cavalo", "cavalo", 1.0, {"carne": [2, 3], "couro": [1, 1]}]])
 	_movel("Table_Large", _p(-6.0, 14.0))
 	_movel("Bench", _p(-6.0, 12.0), 90.0)

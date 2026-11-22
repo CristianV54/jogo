@@ -58,7 +58,7 @@ const POVOADOS := [
 	{"id": "campos_altos", "nome": "Vila Campos Altos", "tipo": "vila", "estrada": "campos", "t": 0.5, "lado": 1.0, "raio": 80.0},
 	{"id": "posto_rebelde", "nome": "Posto Rebelde", "tipo": "posto", "estrada": "ruptura", "t": 0.45, "lado": -1.0, "raio": 45.0},
 	{"id": "posto_imperial", "nome": "Posto da Estrada Imperial", "tipo": "posto_imperial", "estrada": "imperial", "t": 0.35, "lado": 1.0, "raio": 50.0},
-	{"id": "fazenda_imperial", "nome": "Fazenda Imperial", "tipo": "fazenda", "estrada": "imperial", "t": 0.8, "lado": -1.0, "raio": 60.0},
+	{"id": "fazenda_imperial", "nome": "Fazenda Imperial", "tipo": "fazenda", "estrada": "imperial", "t": 0.55, "lado": -1.0, "raio": 60.0},
 ]
 
 ## Cristas de rocha: muralhas naturais que fecham o mundo por trás de cada passagem de história. Só passa quem usa o vão,
@@ -85,7 +85,7 @@ const BARREIRAS := [
 ## Mais povoados, espalhados pelo mundo (centro explícito; `dir` é para onde a porta da frente das casas olha ao contrário).
 const POVOADOS_LIVRES := [
 	{"id": "beira_rio", "nome": "Aldeia Beira-Rio", "tipo": "vila", "centro": Vector2(-200, 270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
-	{"id": "rio_claro", "nome": "Fazenda Rio Claro", "tipo": "fazenda", "centro": Vector2(210, 240), "dir": Vector2(1, 0), "lado": -1.0, "raio": 55.0, "liga": "campos"},
+	{"id": "rio_claro", "nome": "Fazenda Rio Claro", "tipo": "fazenda", "centro": Vector2(210, 240), "dir": Vector2(1, 0), "lado": 1.0, "raio": 55.0, "liga": "campos"},
 	{"id": "pescador", "nome": "Cabana do Pescador", "tipo": "cabana", "centro": Vector2(-490, 200), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "pomar"},
 	{"id": "pedras_altas", "nome": "Vila Pedras Altas", "tipo": "vila", "centro": Vector2(-610, -40), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
 	{"id": "posto_de_caca", "nome": "Posto de Caça", "tipo": "posto", "centro": Vector2(160, -270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "bosque"},

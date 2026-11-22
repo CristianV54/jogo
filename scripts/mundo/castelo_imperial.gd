@@ -41,6 +41,7 @@ func altura_em(x: float, z: float) -> float:
 
 func _ready() -> void:
 	nome_area = "Castelo Imperial"
+	paleta_casas = {"parede": Color(0.95, 0.95, 1.0), "telhado": Color(0.45, 0.5, 0.7)}   # pedra clara real e telhado azul-ardósia
 	tam = 300.0
 	_rng.seed = 97
 	_ambiente()
