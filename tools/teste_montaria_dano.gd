@@ -88,6 +88,22 @@ func _rodar() -> void:
 	marcar("Ovelha morreu (22 de dano, 20 de vida)", ovelha.morto, "vida %d" % ovelha.vida)
 	marcar("Ovelha tocou Death", ovelha._anim.current_animation == "Death", ovelha._anim.current_animation)
 	await foto("ovelha_morta")
+	await esperar(0.3)
+	var total := 0
+	for k in jog.inventario:
+		total += int(jog.inventario[k])
+	marcar("Itens da ovelha foram largados e recolhidos (carne e lã)", jog.inventario.has("carne") and jog.inventario.has("la"), str(jog.inventario))
+	# foto dos 4 itens no chão, longe do jogador
+	var ponto := jog.global_position + Vector3(8, 0, 0)
+	Pickup.largar(jogo.area, ponto, {"carne": [1, 1], "couro": [1, 1], "la": [1, 1], "presa": [1, 1]})
+	jogo.camera.yaw = PI / 2.0
+	await esperar(0.5)
+	await foto("itens_no_chao")
+	marcar("Quatro itens largados no chão", jogo.area.find_children("*", "Pickup", false, false).size() == 4)
+	jog.global_position = ponto
+	await esperar(0.5)
+	await esperar(5.5)
+	marcar("Corpo da ovelha se desintegrou (nó liberado)", not is_instance_valid(ovelha))
 	var tessa: Npc = null
 	for n in jogo.area.npcs:
 		if n.nome == "Tessa":
@@ -111,6 +127,12 @@ func _rodar() -> void:
 	await esperar(0.5)
 	marcar("Jogador montou o cavalo", jog.montaria != null and jog.montaria.nome == "Cavalo")
 	cavalo = jog.montaria.dono   # há dois cavalos: o montado é o mais perto, não necessariamente o primeiro
+	marcar("Animação de montar em andamento", jog._transicao > 0.0 and jog.visual.animacoes.current_animation == "Sitting_Enter", jog.visual.animacoes.current_animation)
+	await esperar(0.4)
+	var y_meio := jog.visual.global_position.y
+	marcar("Cavaleiro sobe durante a transição", y_meio > jog.global_position.y + 0.2, "visual y %.2f / corpo y %.2f" % [y_meio, jog.global_position.y])
+	await esperar(1.0)
+	marcar("Transição terminou e cavaleiro está sentado", jog._transicao <= 0.0 and jog.visual.animacoes.current_animation == "Sitting_Idle", jog.visual.animacoes.current_animation)
 	jogo.camera.yaw = jog.rotation.y + 1.3   # câmera de lado, para ver a posição do cavaleiro
 	await esperar(0.4)
 	await foto("cavalo_lado")
@@ -137,9 +159,18 @@ func _rodar() -> void:
 	marcar("Cavalo acompanha o corpo do jogador", dist_cavalo < 0.1, "%.2f m" % dist_cavalo)
 	jog.entrada_forcada = Vector2.ZERO
 	jog.correndo_forcado = false
-	await esperar(0.5)
+	await esperar(0.8)
+	var y_chao := jog.global_position.y
+	jog.pular()
+	await esperar(0.3)
+	marcar("Cavalo pulou (subiu mais de 0,8 m)", jog.global_position.y > y_chao + 0.8, "+%.2f m" % (jog.global_position.y - y_chao))
+	marcar("Cavalo toca Jump no ar", cavalo._anim.current_animation == "Jump", cavalo._anim.current_animation)
+	await esperar(1.2)
+	marcar("Cavalo voltou ao chão", jog.is_on_floor())
 	jogo.interagir()
-	await esperar(0.5)
+	await esperar(0.15)
+	marcar("Animação de desmontar em andamento", jog._saindo > 0.0 and jog.visual.animacoes.current_animation == "Sitting_Exit", jog.visual.animacoes.current_animation)
+	await esperar(1.0)
 	marcar("Jogador desmontou", jog.montaria == null)
 	marcar("Visual do jogador voltou ao lugar", jog.visual.position.length() < 0.01)
 
@@ -186,6 +217,38 @@ func _rodar() -> void:
 	marcar("Jogador desmontou do Fagulha", jog.montaria == null)
 	await esperar(1.5)
 	marcar("Fagulha volta a seguir o jogador", fag._anim.current_animation != "" )
+
+	# ---------------- portas
+	print("== PORTAS ==")
+	var casa: Node3D = jogo.area.get_node("Cabana1")
+	var porta: PortaCasa = casa.get_node("Porta")
+	jog.global_position = casa.to_global(Vector3(0, 0.5, 12.0))
+	await esperar(1.0)
+	marcar("Porta começa fechada e bloqueando", not porta.aberta and porta.corpo.collision_layer == 1)
+	jog.global_position = casa.to_global(Vector3(0, 0.5, 5.2))
+	await esperar(1.2)
+	marcar("Porta abre quando o jogador chega perto", porta.aberta and porta.angulo > 90.0, "ângulo %.0f" % porta.angulo)
+	marcar("Vão fica livre com a porta aberta", porta.corpo.collision_layer == 0)
+	await foto("porta_aberta")
+	jog.global_position = casa.to_global(Vector3(0, 0.5, 12.0))
+	await esperar(1.2)
+	marcar("Porta fecha quando o jogador se afasta", not porta.aberta and porta.angulo < 5.0, "ângulo %.0f" % porta.angulo)
+
+	# ---------------- fogo
+	print("== FOGO ==")
+	jog.vida = jog.vida_max
+	jog.global_position = Vector3(0, jogo.area.altura_em(0, 0) + 0.3, 0)
+	jog.velocity = Vector3.ZERO
+	await esperar(0.3)
+	var vida_antes := jog.vida
+	await foto("fogo_dano")
+	await esperar(2.5)
+	marcar("Fogueira queimou o jogador", jog.vida < vida_antes - 6, "%d -> %d" % [vida_antes, jog.vida])
+	jog.global_position = Vector3(3.5, jogo.area.altura_em(3.5, 0) + 0.3, 0)
+	await esperar(0.5)
+	var vida_longe := jog.vida
+	await esperar(2.0)
+	marcar("Longe do fogo não queima", jog.vida >= vida_longe, "%d -> %d" % [vida_longe, jog.vida])
 
 	var falhas := 0
 	for k in checks:

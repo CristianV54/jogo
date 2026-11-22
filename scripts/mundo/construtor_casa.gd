@@ -101,9 +101,27 @@ static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := tru
 static func _porta(casa: Node3D, pos: Vector3) -> void:
 	if _existe("DoorFrame_Flat_WoodDark"):
 		_colocar(casa, "DoorFrame_Flat_WoodDark", pos, GIRO_FACHADA)
-	if _existe("Door_1_Flat"):
-		var folha := _colocar(casa, "Door_1_Flat", pos + Vector3(-0.55, 0.0, -0.1), GIRO_FACHADA + 100.0)
-		folha.name = "PortaAberta"
+	if not _existe("Door_1_Flat"):
+		return
+	var porta := PortaCasa.new()
+	porta.name = "Porta"
+	porta.position = pos + Vector3(-0.55, 0.0, -0.1)   # a dobradiça fica na esquerda do vão
+	porta.giro_base = GIRO_FACHADA
+	casa.add_child(porta)
+	var folha := peca("Door_1_Flat")
+	folha.name = "Folha"
+	porta.add_child(folha)
+	porta.folha = folha
+	var corpo := StaticBody3D.new()   # fecha o vão enquanto a porta está fechada
+	corpo.name = "ColisaoPorta"
+	var cs := CollisionShape3D.new()
+	var bx := BoxShape3D.new()
+	bx.size = Vector3(LARGURA_VAO_PORTA, 2.3, 0.2)
+	cs.shape = bx
+	corpo.add_child(cs)
+	corpo.position = pos + Vector3(0.0, 1.15, -0.1)
+	casa.add_child(corpo)
+	porta.corpo = corpo
 
 
 ## Janela com esquadria e venezianas abertas, na mesma posição e giro da parede.
@@ -315,12 +333,13 @@ static func _forja(casa: Node3D, corpo: StaticBody3D, ix: float, iz: float) -> v
 	cs.shape = bx
 	cs.position = Vector3(-ix + 0.75, 0.55, -iz + 0.6)
 	corpo.add_child(cs)
-	var brasa := OmniLight3D.new()
-	brasa.light_color = Color(1.0, 0.45, 0.15)
-	brasa.light_energy = 2.2
-	brasa.omni_range = 7.0
-	brasa.position = Vector3(-ix + 0.75, 1.6, -iz + 0.6)
-	casa.add_child(brasa)
+	var fogo := Fogo.new()   # labaredas sobre a brasa da fornalha (só visual: o topo fica a 1,1 m)
+	fogo.name = "FogoDaForja"
+	fogo.escala = 0.55
+	fogo.energia_luz = 2.2
+	fogo.alcance_luz = 7.0
+	fogo.position = Vector3(-ix + 0.75, 1.15, -iz + 0.6)
+	casa.add_child(fogo)
 	_movel(casa, corpo, "Anvil", -ix + 1.4, -iz + 2.0, 90.0)
 	_movel(casa, corpo, "Workbench", ix - 0.52, -0.3, -90.0)
 	_movel(casa, corpo, "Pot_1", ix - 0.5, 0.2, 0.0, 0.89, false)

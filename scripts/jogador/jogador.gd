@@ -7,6 +7,7 @@ extends CharacterBody3D
 
 signal vida_mudou(atual: int, maximo: int)
 signal morreu
+signal item_coletado(item: String, quantidade: int, inventario: Dictionary)
 
 @export var camera: CameraTerceiraPessoa
 @export var velocidade_andando := 4.0
@@ -27,6 +28,7 @@ var entrada_forcada := Vector2.ZERO   # x: direita(+), y: trás(+). Zero = usa o
 var correndo_forcado := false
 var animacao_atual := ""
 var vida := 100
+var inventario := {}                   # {id do item: quantidade}
 var travado := false                   # diálogo aberto ou cena especial: não anda nem golpeia
 var morto := false
 var _golpeando := false
@@ -42,6 +44,11 @@ var _invulneravel := 0.0
 var _reacao := 0.0
 var montaria: Montaria = null            # criatura que o jogador está montando (cavalo, Fagulha)
 var _voando := false
+var _transicao := 0.0                    # > 0: está subindo na montaria (animação de montar)
+var _inicio_montar := Vector3.ZERO       # onde o cavaleiro estava ao começar a subir
+var _saindo := 0.0                       # > 0: está descendo da montaria (não anda ainda)
+const DURACAO_MONTAR := 0.9
+const DURACAO_DESMONTAR := 0.7
 var _camera_antes := Vector2.ZERO        # altura do foco e distância da câmera antes de montar
 const QUADRIL_SENTADO := 0.5             # altura do quadril de Sitting_Idle acima dos pés do modelo
 
@@ -57,6 +64,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_invulneravel = maxf(0.0, _invulneravel - delta)
 	_reacao = maxf(0.0, _reacao - delta)
+	_saindo = maxf(0.0, _saindo - delta)
 	_pouso = maxf(0.0, _pouso - delta)
 	_regenerar(delta)
 	if montaria != null:
@@ -64,7 +72,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var entrada := Vector2.ZERO
 	var correndo := false
-	if not travado and not morto and not _golpeando and _reacao <= 0.0:
+	if not travado and not morto and not _golpeando and _reacao <= 0.0 and _saindo <= 0.0:
 		entrada = _ler_entrada()
 		correndo = correndo_forcado or Input.is_physical_key_pressed(KEY_SHIFT)
 	var yaw := camera.yaw if camera else 0.0
@@ -95,7 +103,7 @@ func _physics_process(delta: float) -> void:
 
 	if direcao.length() > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-direcao.x, -direcao.z), giro * delta)
-	if not _golpeando and not _rolando and not morto and _reacao <= 0.0:
+	if not _golpeando and not _rolando and not morto and _reacao <= 0.0 and _saindo <= 0.0:
 		_animar(direcao.length(), correndo)
 
 
@@ -128,7 +136,7 @@ func _animar(movimento: float, correndo: bool) -> void:
 
 ## Pulo: sobe na vertical e segue com o movimento horizontal atual.
 func pular() -> void:
-	if montaria == null:
+	if montaria == null or montaria.forca_pulo > 0.0:
 		_pulo_pedido = true
 
 
@@ -219,6 +227,11 @@ func receber_dano(quantidade: int, _de: Node3D = null) -> void:
 		visual.tocar("Hit_Chest", 0.05)
 
 
+func coletar(item: String, quantidade: int) -> void:
+	inventario[item] = int(inventario.get(item, 0)) + quantidade
+	item_coletado.emit(item, quantidade, inventario)
+
+
 func reviver() -> void:
 	vida = vida_max
 	morto = false
@@ -244,7 +257,7 @@ func _ler_entrada() -> Vector2:
 	return v.limit_length(1.0)
 
 
-## Sobe na montaria: o corpo do jogador passa a mover a criatura, e o cavaleiro fica sentado no osso do assento.
+## Sobe na montaria: o cavaleiro salta do chão até o assento (Sitting_Enter) e só então o controle passa para a montaria.
 func montar(m: Montaria) -> void:
 	montaria = m
 	m.montada = true
@@ -252,37 +265,62 @@ func montar(m: Montaria) -> void:
 	_golpeando = false
 	_rolando = false
 	velocity = Vector3.ZERO
-	animacao_atual = "Sitting_Idle"
-	visual.tocar("Sitting_Idle", 0.2)
+	_transicao = DURACAO_MONTAR
+	_inicio_montar = visual.global_position
+	animacao_atual = "Sitting_Enter"
+	visual.tocar("Sitting_Enter", 0.1)
 	if camera:
 		_camera_antes = Vector2(camera.altura_do_foco, camera.distancia)
-		camera.altura_do_foco = m.camera_altura
-		camera.distancia = m.camera_distancia
-		camera.braco.spring_length = m.camera_distancia
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(camera, "altura_do_foco", m.camera_altura, 0.8)
+		tw.tween_property(camera, "distancia", m.camera_distancia, 0.8)
+		tw.tween_property(camera.braco, "spring_length", m.camera_distancia, 0.8)
 
 
-## Desce ao lado da criatura (no chão), devolvendo o corpo e a câmera ao normal.
+## Desce ao lado da criatura (no chão): o cavaleiro salta do assento (Sitting_Exit) até o chão.
 func desmontar() -> void:
 	if montaria == null:
 		return
 	var m := montaria
+	var assento := visual.global_position
 	montaria = null
 	m.montada = false
 	_voando = false
+	_transicao = 0.0
 	var lado := global_transform.basis.x
 	global_position = m.dono.global_position + lado * (4.5 if m.voa else 2.2)
-	visual.position = Vector3.ZERO
 	velocity = Vector3.ZERO
-	animacao_atual = ""
+	visual.global_position = assento
+	_saindo = DURACAO_DESMONTAR
+	animacao_atual = "Sitting_Exit"
+	visual.tocar("Sitting_Exit", 0.1)
+	var de := visual.position   # posição local do assento, medida depois de mover o corpo
+	var tw2 := create_tween()
+	tw2.tween_method(func(t: float) -> void:
+		visual.position = de.lerp(Vector3.ZERO, t) + Vector3(0.0, sin(t * PI) * 0.5, 0.0), 0.0, 1.0, DURACAO_DESMONTAR)
+	tw2.tween_callback(func() -> void: visual.position = Vector3.ZERO)
 	if camera:
-		camera.altura_do_foco = _camera_antes.x
-		camera.distancia = _camera_antes.y
-		camera.braco.spring_length = _camera_antes.y
+		var tw3 := create_tween().set_parallel(true)
+		tw3.tween_property(camera, "altura_do_foco", _camera_antes.x, 0.8)
+		tw3.tween_property(camera, "distancia", _camera_antes.y, 0.8)
+		tw3.tween_property(camera.braco, "spring_length", _camera_antes.y, 0.8)
 
 
 ## Movimento montado: WASD relativo à câmera, Shift acelera. Montaria voadora: Espaço sobe, C desce.
 func _mover_montado(delta: float) -> void:
 	var m := montaria
+	if _transicao > 0.0:   # subindo: o cavaleiro salta do chão ao assento; a montaria espera parada
+		_transicao -= delta
+		var t := clampf(1.0 - _transicao / DURACAO_MONTAR, 0.0, 1.0)
+		velocity.x = 0.0
+		velocity.z = 0.0
+		velocity.y = 0.0 if is_on_floor() else velocity.y - gravidade * delta
+		move_and_slide()
+		m.tocar("Idle")
+		m.posicionar(global_position, rotation.y)
+		var assento := m.assento_global() - Vector3(0.0, QUADRIL_SENTADO, 0.0)
+		visual.global_position = _inicio_montar.lerp(assento, t * t * (3.0 - 2.0 * t)) + Vector3(0.0, sin(t * PI) * 0.6, 0.0)
+		return
 	var entrada := Vector2.ZERO
 	var rapido := false
 	var vertical := 0.0
@@ -309,15 +347,18 @@ func _mover_montado(delta: float) -> void:
 		velocity.x = dir.x * vt
 		velocity.z = dir.z * vt
 		if is_on_floor():
-			velocity.y = 0.0
+			velocity.y = m.forca_pulo if (_pulo_pedido and m.forca_pulo > 0.0) else 0.0
 		else:
 			velocity.y -= gravidade * delta
+	_pulo_pedido = false
 	move_and_slide()
 	if dir.length() > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), giro * 0.6 * delta)
 	var animacao := "Idle"
 	if m.voa and _voando:
 		animacao = "Fly"
+	elif not is_on_floor() and m.forca_pulo > 0.0:
+		animacao = "Jump"
 	elif dir.length() > 0.01:
 		animacao = "Run" if rapido else "Walk"
 	m.tocar(animacao)

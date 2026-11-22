@@ -21,6 +21,8 @@ enum Estado { PARADO, PERSEGUINDO, ATACANDO, DANO, MORTO }
 @export var enfurece_em := 0.0          # fração da vida; 0 = nunca
 @export var cena_visual: PackedScene
 @export var escala_visual := 1.0
+@export var especie := ""           # chave de VariacaoDeCores
+@export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer (só inimigos comuns)
 @export var raio_colisao := 0.5
 @export var altura_colisao := 1.8
 @export var chefe := false
@@ -47,6 +49,7 @@ func _ready() -> void:
 	visual.rotation_degrees.y = 180.0
 	visual.scale = Vector3.ONE * escala_visual
 	add_child(visual)
+	VariacaoDeCores.aplicar(visual, especie)
 	var cs := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
 	cap.radius = raio_colisao
@@ -155,4 +158,5 @@ func _morrer() -> void:
 		tw.parallel().tween_property(visual, "position:y", -0.6 * escala_visual, 1.6)
 	morreu.emit(self)
 	if not chefe:
-		get_tree().create_timer(4.0).timeout.connect(queue_free)
+		Pickup.largar(get_parent(), global_position, drops)
+		get_tree().create_timer(4.0).timeout.connect(func() -> void: Efeitos.desintegrar(self, visual))

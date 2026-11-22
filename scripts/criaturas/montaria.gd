@@ -12,6 +12,7 @@ extends Node
 @export var velocidade_voo := 14.0
 @export var velocidade_voo_rapido := 24.0
 @export var velocidade_vertical := 8.0
+@export var forca_pulo := 0.0           # > 0: a montaria pula com Espaço (cavalo)
 @export var camera_altura := 2.2
 @export var camera_distancia := 7.0
 @export var persistente := false       # true: sobrevive à troca de área (o Fagulha); false: o jogador desmonta ao trocar

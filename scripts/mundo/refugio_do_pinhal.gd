@@ -26,6 +26,7 @@ func _ready() -> void:
 	_cerca()
 	_fogueira()
 	_adereços()
+	_chao_vivo()
 	_npcs()
 	_animais()
 	_saidas()
@@ -194,6 +195,16 @@ func _cerca() -> void:
 		corpo.add_child(cs)
 
 
+## Manchas de cor no solo, tufos de grama e anéis de flores, longe das casas, do fogo e dos caminhos.
+func _chao_vivo() -> void:
+	var exclusoes: Array = [[Vector2.ZERO, 3.2]]   # a fogueira
+	for no in get_children():
+		if no.has_meta("colunas"):
+			var meia := Vector2(no.get_meta("colunas"), no.get_meta("linhas"))   # meia largura = colunas (módulo de 2 m)
+			exclusoes.append([Vector2(no.position.x, no.position.z), meia.length() + 1.2])
+	VegetacaoRasteira.espalhar(self, terreno, _rng, RAIO_CERCA - 2.0, exclusoes)
+
+
 func _fogueira() -> void:
 	var f := Node3D.new()
 	f.name = "Fogueira"
@@ -215,32 +226,13 @@ func _fogueira() -> void:
 		tora.rotation = Vector3(deg_to_rad(65.0), TAU * i / 3.0, 0.0)
 		tora.position = Vector3(0, 0.15, 0)
 		f.add_child(tora)
-	var luz := OmniLight3D.new()
-	luz.light_color = Color(1.0, 0.62, 0.3)
-	luz.light_energy = 2.4
-	luz.omni_range = 16.0
-	luz.position = Vector3(0, 1.2, 0)
-	f.add_child(luz)
-	var chama := CPUParticles3D.new()
-	chama.amount = 28
-	chama.lifetime = 0.9
-	chama.direction = Vector3.UP
-	chama.spread = 14.0
-	chama.gravity = Vector3.ZERO
-	chama.initial_velocity_min = 1.0
-	chama.initial_velocity_max = 1.9
-	chama.scale_amount_min = 0.5
-	chama.scale_amount_max = 1.1
-	chama.position = Vector3(0, 0.4, 0)
-	var bola := SphereMesh.new()
-	bola.radius = 0.13
-	bola.height = 0.26
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(1.0, 0.55, 0.12)
-	bola.material = m
-	chama.mesh = bola
-	f.add_child(chama)
+	var fogo := Fogo.new()   # chama, fumaça, fagulhas, luz que tremula; queima quem entra
+	fogo.name = "Fogo"
+	fogo.escala = 1.0
+	fogo.dano = 6
+	fogo.raio_dano = 0.8
+	fogo.position = Vector3(0.0, 0.15, 0.0)
+	f.add_child(fogo)
 
 
 func _adereços() -> void:
@@ -302,6 +294,13 @@ func _npcs() -> void:
 
 const NOMES_DE_ANIMAIS := {"vaca": "Vaca", "cavalo": "Cavalo", "ovelha": "Ovelha", "porco": "Porco", "cao": "Cão"}
 const VIDA_DE_ANIMAIS := {"vaca": 40, "cavalo": 50, "ovelha": 20, "porco": 25, "cao": 20}
+const DROPS_DE_ANIMAIS := {
+	"vaca": {"carne": [2, 3], "couro": [1, 1]},
+	"cavalo": {"carne": [2, 3], "couro": [1, 2]},
+	"ovelha": {"carne": [1, 2], "la": [1, 2]},
+	"porco": {"carne": [2, 3]},
+	"cao": {"couro": [1, 1]},
+}
 const RAIO_DE_ANIMAIS := {"vaca": 1.0, "cavalo": 1.1, "ovelha": 0.6, "porco": 0.6, "cao": 0.4}
 
 
@@ -312,6 +311,8 @@ func _animal(arquivo: String, pos: Vector3, raio: float, velocidade: float) -> v
 	a.vida_max = VIDA_DE_ANIMAIS[arquivo]
 	a.raio_colisao = RAIO_DE_ANIMAIS[arquivo]
 	a.montavel = arquivo == "cavalo"
+	a.especie = arquivo
+	a.drops = DROPS_DE_ANIMAIS[arquivo]
 	a.modelo = load("res://assets/models/criaturas/%s/%s.glb" % [arquivo, arquivo])
 	a.raio_vagar = raio
 	a.velocidade = velocidade

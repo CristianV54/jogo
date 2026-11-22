@@ -18,3 +18,8 @@ anim_correr = "Run"
 anim_atacar = "Jump"
 anim_dano = ""
 anim_morte = "Death"
+especie = "javali"
+drops = {
+"carne": [2, 3],
+"presa": [1, 2]
+}

@@ -20,6 +20,7 @@ var _dialogo_caixa: ColorRect
 var _dialogo_nome: Label
 var _dialogo_texto: Label
 var _mensagem: Label
+var _inventario_label: Label
 var _tween_area: Tween
 
 var dialogo_aberto := false
@@ -52,6 +53,10 @@ func _ready() -> void:
 	_chefe_nome.position = Vector2(340, 50)
 	_chefe_nome.add_theme_font_size_override("font_size", 20)
 	_chefe_caixa.add_child(_chefe_nome)
+
+	_inventario_label = _rotulo("", Vector2(1080, 24), 18)
+	_inventario_label.size = Vector2(176, 120)
+	_inventario_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 	_area_label = _rotulo("", Vector2(0, 90), 34)
 	_area_label.size = Vector2(1280, 50)
@@ -129,6 +134,15 @@ func mostrar_area(nome: String) -> void:
 	_tween_area = create_tween()
 	_tween_area.tween_interval(2.2)
 	_tween_area.tween_property(_area_label, "modulate:a", 0.0, 1.2)
+
+
+## Atualiza a lista de itens do canto direito e avisa do que acabou de ser coletado.
+func item_coletado(item: String, quantidade: int, inventario: Dictionary) -> void:
+	var linhas: Array[String] = []
+	for id in inventario:
+		linhas.append("%s  x%d" % [Pickup.NOMES.get(id, id), inventario[id]])
+	_inventario_label.text = "\n".join(linhas)
+	mensagem("+%d %s" % [quantidade, Pickup.NOMES.get(item, item)], 1.5)
 
 
 func dica(texto: String) -> void:

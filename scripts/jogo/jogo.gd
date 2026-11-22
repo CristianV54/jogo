@@ -40,6 +40,7 @@ func _ready() -> void:
 	jogador.camera = camera
 	jogador.vida_mudou.connect(hud.definir_vida)
 	jogador.morreu.connect(_ao_morrer)
+	jogador.item_coletado.connect(hud.item_coletado)
 	hud.definir_vida(jogador.vida, jogador.vida_max)
 	ir_para("refugio_do_pinhal", "Principal")
 

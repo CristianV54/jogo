@@ -7,8 +7,10 @@ func _init() -> void:
 	_rodar.call_deferred()
 
 
-func _andar(area: Node3D, ponto_inicial: Vector3, direcao: Vector3, segundos: float) -> Vector3:
+func _andar(area: Node3D, ponto_inicial: Vector3, direcao: Vector3, segundos: float, como_jogador := true) -> Vector3:
 	var corpo := CharacterBody3D.new()
+	if como_jogador:
+		corpo.add_to_group("jogador")   # as portas só abrem para o jogador
 	var cs := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
 	cap.radius = 0.35
@@ -49,6 +51,9 @@ func _rodar() -> void:
 		var fim := await _andar(area, ini, dir, 2.6)
 		var l := t.affine_inverse() * fim
 		var entrou := absf(l.x) < meia_x - 0.2 and absf(l.z) < meia_z - 0.2
+		# 1b) porta fechada: quem não é o jogador não passa
+		var fim_b := await _andar(area, ini, dir, 2.6, false)
+		var barrou_porta := (t.affine_inverse() * fim_b).z > meia_z - 0.2
 		# 2) pela parede lateral (meio da lateral +X)
 		var ini2 := t * Vector3(meia_x + 3.0, 0.4, 0.0)
 		var dir2 := (t.basis * Vector3(-1, 0, 0)).normalized()
@@ -56,8 +61,8 @@ func _rodar() -> void:
 		var l2 := t.affine_inverse() * fim2
 		var barrou := l2.x > meia_x - 0.15
 		print("CASA ", nome, " ", colunas, "x", linhas, " | porta: fim local (", snapped(l.x, 0.1), ", ", snapped(l.z, 0.1), ") entrou=", entrou,
-			" | parede lateral: fim local x=", snapped(l2.x, 0.1), " barrou=", barrou)
-		if not entrou or not barrou:
+			" | parede lateral: fim local x=", snapped(l2.x, 0.1), " barrou=", barrou, " | porta fechada barra não-jogador=", barrou_porta)
+		if not entrou or not barrou or not barrou_porta:
 			falhas += 1
 	print("RESULTADO_CASAS ", "OK" if falhas == 0 else "FALHAS %d" % falhas)
 	quit(0 if falhas == 0 else 1)

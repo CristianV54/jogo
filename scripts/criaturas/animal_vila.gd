@@ -14,6 +14,8 @@ extends Node3D
 @export var vida_max := 20
 @export var raio_colisao := 0.6       # alcance do golpe do jogador contra este animal
 @export var montavel := false
+@export var especie := ""           # chave de VariacaoDeCores
+@export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer
 
 var altura_em: Callable   # (x, z) -> altura do chão; se vazio, o animal fica em y = 0
 var vida := 0
@@ -34,6 +36,7 @@ func _ready() -> void:
 	_visual = modelo.instantiate()
 	add_child(_visual)
 	_anim = _visual.find_child("AnimationPlayer", true, false)
+	VariacaoDeCores.aplicar(_visual, especie)
 	_casa = position
 	_espera = randf_range(0.5, 4.0)
 	vida = vida_max
@@ -45,6 +48,7 @@ func _ready() -> void:
 		montaria.elevacao = 0.2
 		montaria.velocidade_andando = 6.0
 		montaria.velocidade_correndo = 13.0
+		montaria.forca_pulo = 8.5
 		montaria.camera_altura = 2.3
 		montaria.camera_distancia = 6.5
 		add_child(montaria)
@@ -97,8 +101,9 @@ func receber_dano(quantidade: int, de: Node3D = null) -> void:
 			montaria.ativa = false
 		if _tem("Death"):
 			_anim.play("Death", 0.1)
-		await get_tree().create_timer(12.0).timeout
-		queue_free()
+		Pickup.largar(get_parent(), global_position, drops)
+		await get_tree().create_timer(5.0).timeout
+		Efeitos.desintegrar(self, _visual)
 		return
 	var longe := global_position - (de.global_position if de else global_position - Vector3.FORWARD)
 	longe.y = 0.0
