@@ -1,0 +1,288 @@
+{
+  "contagem": {
+    "CRITICO|penhasco no terreno": 86,
+    "CRITICO|ser flutuando ou enterrado": 77,
+    "VISUAL|água no ar sobre chão mais baixo": 10
+  },
+  "etapa": "baseline",
+  "exemplos": [
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.6 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -736.0,
+      "z": -76.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 5.2 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -736.0,
+      "z": -70.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 5.6 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -736.0,
+      "z": 2.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.6 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -736.0,
+      "z": 8.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.7 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -730.0,
+      "z": -106.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 6.4 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -730.0,
+      "z": 26.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 6.1 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -730.0,
+      "z": 32.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 5.4 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -718.0,
+      "z": 44.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.8 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -712.0,
+      "z": 56.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.6 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -706.0,
+      "z": -2062.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.9 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -706.0,
+      "z": -2032.0
+    },
+    {
+      "categoria": "penhasco no terreno",
+      "causa": "desnível de 4.5 m em 6 m: o jogador não sobe nem desce",
+      "objeto": "terreno",
+      "severidade": "CRITICO",
+      "x": -706.0,
+      "z": -2002.0
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "624 de 942 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -381.5,
+      "z": 113.2
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "680 de 1032 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 342.8,
+      "z": 58.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "342 de 516 amostras; pior 1.0 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 776.4,
+      "z": -387.1
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "259 de 768 amostras; pior 0.8 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -336.2,
+      "z": -60.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "268 de 804 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -225.2,
+      "z": -480.8
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "150 de 450 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": 271.4,
+      "z": -451.5
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "325 de 972 amostras; pior 0.7 m abaixo da faixa de água",
+      "objeto": "refugio_do_pinhal/rio",
+      "severidade": "VISUAL",
+      "x": 40.8,
+      "z": -50.2
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "150 de 450 amostras; pior 0.6 m abaixo da faixa de água",
+      "objeto": "pomar_alto/rio",
+      "severidade": "VISUAL",
+      "x": -353.6,
+      "z": -161.7
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "226 de 624 amostras; pior 0.8 m abaixo da faixa de água",
+      "objeto": "bosque_velado/rio",
+      "severidade": "VISUAL",
+      "x": 71.2,
+      "z": -508.4
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "397 de 606 amostras; pior 1.2 m abaixo da faixa de água",
+      "objeto": "acampamento_ruptura/rio",
+      "severidade": "VISUAL",
+      "x": 619.9,
+      "z": -339.3
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -1.4 m do chão",
+      "objeto": "@Node3D@28777",
+      "severidade": "CRITICO",
+      "x": -462.7,
+      "z": -284.0
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a 3.3 m do chão",
+      "objeto": "@Node3D@28793",
+      "severidade": "CRITICO",
+      "x": -418.0,
+      "z": -167.7
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -2.4 m do chão",
+      "objeto": "@Node3D@28809",
+      "severidade": "CRITICO",
+      "x": -504.1,
+      "z": -300.7
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a 1.8 m do chão",
+      "objeto": "@Node3D@28815",
+      "severidade": "CRITICO",
+      "x": -489.4,
+      "z": -205.2
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a 2.6 m do chão",
+      "objeto": "@Node3D@28821",
+      "severidade": "CRITICO",
+      "x": -466.4,
+      "z": -160.7
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -1.3 m do chão",
+      "objeto": "@Node3D@28827",
+      "severidade": "CRITICO",
+      "x": -465.1,
+      "z": -282.6
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -0.9 m do chão",
+      "objeto": "@Node3D@28833",
+      "severidade": "CRITICO",
+      "x": -461.1,
+      "z": -273.1
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -2.0 m do chão",
+      "objeto": "@Node3D@28848",
+      "severidade": "CRITICO",
+      "x": -428.4,
+      "z": -299.7
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -1.0 m do chão",
+      "objeto": "@Node3D@28851",
+      "severidade": "CRITICO",
+      "x": -395.6,
+      "z": -275.7
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -3.1 m do chão",
+      "objeto": "@Node3D@28854",
+      "severidade": "CRITICO",
+      "x": -423.6,
+      "z": -326.9
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a -2.9 m do chão",
+      "objeto": "@Node3D@28857",
+      "severidade": "CRITICO",
+      "x": -417.1,
+      "z": -322.9
+    },
+    {
+      "categoria": "ser flutuando ou enterrado",
+      "causa": "a 2.4 m do chão",
+      "objeto": "@Node3D@28860",
+      "severidade": "CRITICO",
+      "x": -389.9,
+      "z": -191.1
+    }
+  ],
+  "por_severidade": {
+    "BLOQUEADOR": 0,
+    "CRITICO": 163,
+    "MENOR": 0,
+    "VISUAL": 10
+  }
+}

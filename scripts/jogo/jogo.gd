@@ -61,6 +61,9 @@ var _t_chao := 0.0
 
 func _ready() -> void:
 	add_to_group("jogo")
+	var admin := Admin.new()   # teclas de teste e Drone de auditoria: não fazem parte do jogo normal
+	admin.name = "Admin"
+	add_child(admin)
 	Clima.registrar_globais()
 	clima = Clima.new()
 	clima.name = "Clima"
@@ -132,14 +135,18 @@ func _condicoes_das_barreiras() -> Dictionary:
 	}
 
 
-func ir_para(destino: String, spawn: String) -> void:
+func ir_para(destino: String, spawn: String, forcar := false) -> void:
 	if _trocando:
 		return
-	if REQUISITOS.has(destino) and not derrotados.has(REQUISITOS[destino]):
+	if forcar:
+		pass   # teleporte de teste (teclas F1 a F8): ignora os requisitos da história
+	elif REQUISITOS.has(destino) and not derrotados.has(REQUISITOS[destino]):
 		hud.mensagem("Caminho bloqueado: derrote %s antes." % NOMES_DOS_CHEFES[REQUISITOS[destino]], 2.5)
 		_empurrar_para_tras()
 		return
-	if REQUISITOS_MISSAO.has(destino) and not missoes.concluidas.has(REQUISITOS_MISSAO[destino]):
+	if forcar:
+		pass
+	elif REQUISITOS_MISSAO.has(destino) and not missoes.concluidas.has(REQUISITOS_MISSAO[destino]):
 		hud.mensagem(MENSAGEM_REQUISITO.get(destino, "Caminho bloqueado."), 3.5)
 		_empurrar_para_tras()
 		return
