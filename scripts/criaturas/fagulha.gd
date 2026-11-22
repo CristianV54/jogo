@@ -15,6 +15,7 @@ extends Node3D
 
 var modo_voo := false
 var montaria: Montaria
+var corpo: AnimatableBody3D            # tronco sólido (as asas não bloqueiam); some enquanto está montada
 var animacao_atual := ""
 
 @onready var _modelo: Node3D = $Modelo
@@ -36,6 +37,7 @@ func _ready() -> void:
 	montaria.camera_altura = 3.5
 	montaria.camera_distancia = 12.0
 	add_child(montaria)
+	corpo = Solidos.corpo_movel(self, AABB(Vector3(-0.8, 0.0, -2.8), Vector3(1.6, 1.9, 4.6)))
 	_tocar("Idle")
 
 
@@ -47,6 +49,7 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	corpo.collision_layer = 0 if montaria.montada else Solidos.CAMADA_SERES
 	if montaria.montada or alvo == null:
 		return
 	var ate := alvo.global_position - global_position

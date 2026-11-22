@@ -58,7 +58,7 @@ const QUADRIL_SENTADO := 0.5             # altura do quadril de Sitting_Idle aci
 
 func _ready() -> void:
 	vida = vida_max
-	collision_mask |= ConstrutorCasa.CAMADA_MOVEIS   # colide com os móveis das casas
+	collision_mask |= ConstrutorCasa.CAMADA_MOVEIS | Solidos.CAMADA_SERES   # móveis das casas, animais, pessoas e o Fagulha
 	add_to_group("jogador")
 
 

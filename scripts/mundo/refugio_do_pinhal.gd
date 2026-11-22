@@ -218,6 +218,17 @@ func _fogueira() -> void:
 		mi.scale = Vector3.ONE * 0.38
 		mi.position = Vector3(cos(ang) * 1.1, 0.0, sin(ang) * 1.1)
 		f.add_child(mi)
+		if i == 0:
+			continue   # abertura de ~0,9 m no círculo: dá para chegar ao fogo (e se queimar)
+		var pedra_solida := StaticBody3D.new()   # cada pedra do círculo bloqueia (só o fogo em si é atravessável)
+		var cs_pedra := CollisionShape3D.new()
+		var cil_pedra := CylinderShape3D.new()
+		cil_pedra.radius = 0.34
+		cil_pedra.height = 0.6
+		cs_pedra.shape = cil_pedra
+		pedra_solida.position = mi.position + Vector3(0.0, 0.3, 0.0)
+		pedra_solida.add_child(cs_pedra)
+		f.add_child(pedra_solida)
 	for i in 3:
 		var tora := MeshInstance3D.new()
 		tora.mesh = FabricaNatureza.toras()
@@ -244,11 +255,16 @@ func _adereços() -> void:
 		["Prop_Crate", Vector3(4.0, 0, -19.8), 80.0],
 		["Prop_Crate", Vector3(23.0, 0, 16.5), 35.0],
 	]
+	var solidos := StaticBody3D.new()   # carroça, caixotes, lenha e pedras da fogueira: o jogador não os atravessa
+	solidos.name = "SolidosDoCenario"
+	add_child(solidos)
 	for it in itens:
 		var p := ConstrutorCasa.peca(it[0])
 		p.position = it[1]
 		p.rotation_degrees.y = it[2]
 		add_child(p)
+		p.add_to_group("props_solidos")
+		Solidos.colidir_com(p, solidos, 0.92)
 	# pilha de lenha do Dorn
 	var mat := FabricaNatureza.material()
 	for fila in 3:
@@ -259,6 +275,12 @@ func _adereços() -> void:
 			t.rotation = Vector3(0.0, 0.0, deg_to_rad(90.0))
 			t.position = Vector3(19.5 + (i + fila * 0.5) * 0.4, 0.2 + fila * 0.33, -26.0)
 			add_child(t)
+	var lenha := CollisionShape3D.new()   # a pilha inteira como um bloco
+	var caixa_lenha := BoxShape3D.new()
+	caixa_lenha.size = Vector3(1.9, 1.0, 0.5)
+	lenha.shape = caixa_lenha
+	lenha.position = Vector3(20.3, 0.5, -26.0)
+	solidos.add_child(lenha)
 
 
 func _npc(nome_npc: String, papel: String, cena: String, pos: Vector3, anim: String, falas: PackedStringArray, olhar_para: Vector3 = Vector3.ZERO) -> Npc:

@@ -127,3 +127,11 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Código:** `scripts/jogo/itens.gd` (catálogo: nome, descrição, modelo, cura; ordem de exibição), `scripts/interface/painel_inventario.gd` (grade 6x4, ícones renderizados do modelo 3D em SubViewport), `jogador.coletar/usar_item` e os sinais `item_coletado` e `inventario_mudou`, `hud.gd` (lista rápida no canto direito e painel), `jogo.gd` (tecla I, travar o jogador).
 - **Limites:** o inventário só guarda contagem (sem peso, capacidade, equipar, largar ou vender) e **não é salvo** ao fechar o jogo; couro, lã e presa ainda não têm uso. Para adicionar um item novo: uma entrada em `Itens.DADOS`/`ORDEM` e o modelo.
 - **Teste:** `tools/teste_inventario.gd` (21 verificações com teclas de verdade e cliques) e capturas `inv_*.png`.
+
+## Colisão de seres vivos e do cenário (22/11/2026)
+
+- **O que passou a ser sólido para o jogador:** animais de vila (caixa do tamanho do corpo, 80%), as 6 pessoas, o Fagulha (só o tronco; as asas não bloqueiam), a carroça, os 5 caixotes, a pilha de lenha e as pedras da fogueira (com uma abertura de ~0,9 m para chegar ao fogo). Camadas: 1 = mundo, 4 = móveis, 8 = seres vivos e peças soltas; a câmera só vê 1 e 2, então não tropeça neles. Código: `scripts/mundo/solidos.gd`.
+- **Regras:** animal morto ou montado perde o corpo sólido (o cavaleiro mora dentro dele); o Fagulha também, enquanto montado. Os animais agora desviam também uns dos outros, das pessoas e do Fagulha (os raios deles enxergam as camadas 1 e 8).
+- **Armadilha corrigida:** `AnimatableBody3D` vem com `sync_to_physics` ligado e, quando o pai é movido por código, a posição física fica atrasada (0,4 a 0,6 m): o jogador atravessava os animais que já tinham andado. Desligado em `Solidos.corpo_movel`.
+- **Auditoria:** `tools/auditar_colisao.gd` lista toda malha grande sem colisão por área. Sobra só as venezianas abertas das janelas de Ferrogris (decoração fina colada à parede).
+- **Teste:** `tools/teste_solidos.gd` (jogador anda contra cada coisa e mede a menor distância; passou 3 vezes seguidas).

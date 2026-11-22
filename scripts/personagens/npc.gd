@@ -24,6 +24,18 @@ func _ready() -> void:
 	add_child(visual)
 	name = nome if nome != "" else name
 	add_to_group("atingiveis")
+	var corpo := StaticBody3D.new()   # o jogador não atravessa as pessoas
+	corpo.name = "CorpoSolido"
+	corpo.collision_layer = Solidos.CAMADA_SERES
+	corpo.collision_mask = 0
+	var cs := CollisionShape3D.new()
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.35
+	cap.height = 1.8
+	cs.shape = cap
+	cs.position.y = 0.9
+	corpo.add_child(cs)
+	add_child(corpo)
 
 
 func olhar_para(alvo: Vector3) -> void:

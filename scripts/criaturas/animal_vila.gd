@@ -21,6 +21,7 @@ var altura_em: Callable   # (x, z) -> altura do chão; se vazio, o animal fica e
 var vida := 0
 var morto := false
 var montaria: Montaria
+var corpo: AnimatableBody3D            # corpo sólido: o jogador não o atravessa (some com o animal morto ou montado)
 
 var _casa := Vector3.ZERO
 var _destino := Vector3.ZERO
@@ -37,6 +38,7 @@ func _ready() -> void:
 	add_child(_visual)
 	_anim = _visual.find_child("AnimationPlayer", true, false)
 	VariacaoDeCores.aplicar(_visual, especie)
+	corpo = Solidos.corpo_movel(self, Solidos.caixa_de(_visual, 0.8))
 	_casa = position
 	_espera = randf_range(0.5, 4.0)
 	vida = vida_max
@@ -56,7 +58,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if morto or (montaria and montaria.montada):
+	var livre_de_corpo := morto or (montaria != null and montaria.montada)   # morto ou montado: sem corpo (o cavaleiro mora dentro dele)
+	corpo.collision_layer = 0 if livre_de_corpo else Solidos.CAMADA_SERES
+	if livre_de_corpo:
 		return
 	if _fuga > 0.0:
 		_fuga -= delta
@@ -120,7 +124,8 @@ func _caminho_livre(direcao: Vector3, distancia := 0.0) -> bool:
 	var espaco := get_world_3d().direct_space_state
 	for desvio in [-1.0, 0.0, 1.0]:
 		var de: Vector3 = Vector3(global_position.x, chao + 0.6, global_position.z) + lateral * desvio
-		var q := PhysicsRayQueryParameters3D.create(de, de + direcao * alcance, 1)
+		var q := PhysicsRayQueryParameters3D.create(de, de + direcao * alcance, 1 | Solidos.CAMADA_SERES)   # mundo + outros seres
+		q.exclude = [corpo.get_rid()]
 		if not espaco.intersect_ray(q).is_empty():
 			return false
 	return true

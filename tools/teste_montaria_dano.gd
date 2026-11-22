@@ -120,6 +120,8 @@ func _rodar() -> void:
 
 	# ---------------- cavalo
 	print("== CAVALO ==")
+	jogo.fagulha.set_physics_process(false)   # o Fagulha (sólido) trota atrás do jogador e pode parar no caminho do cavalo
+	jogo.fagulha.global_position = Vector3(0.0, 0.0, -60.0)
 	var cavalo := animal("Cavalo")
 	perto_de(cavalo, 2.5)
 	await esperar(0.6)
@@ -138,9 +140,11 @@ func _rodar() -> void:
 	await esperar(0.4)
 	await foto("cavalo_lado")
 	jogo.camera.yaw = jog.rotation.y
-	var rumo := Vector3.ZERO - jog.global_position   # rumo ao centro da clareira, longe de paredes
-	jogo.camera.yaw = atan2(-rumo.x, -rumo.z)
-	await esperar(0.3)
+	jog.global_position = Vector3(14.0, jogo.area.altura_em(14.0, 12.0) + 0.3, 12.0)   # pista aberta (carroça, casas e pessoas bloqueiam o resto)
+	jog.velocity = Vector3.ZERO
+	jogo.camera.yaw = PI / 2.0   # anda para -X
+	jog.rotation.y = PI / 2.0
+	await esperar(0.5)
 	var p0 := jog.global_position
 	jog.entrada_forcada = Vector2(0, -1)
 	jog.correndo_forcado = false
@@ -151,9 +155,10 @@ func _rodar() -> void:
 	await foto("cavalo_andando")
 	jog.correndo_forcado = true
 	var p1 := jog.global_position
-	await esperar(2.0)
+	await esperar(0.8)   # só o começo do galope: mais adiante a carroça (agora sólida) pode estar no caminho
 	var correu := jog.global_position.distance_to(p1)
-	marcar("Cavalo galopou ~13 m/s", correu > 20.0 and correu < 30.0, "%.1f m em 2 s" % correu)
+	marcar("Cavalo galopou ~13 m/s", correu > 8.0 and correu < 14.0, "%.1f m em 0,8 s" % correu)
+	await esperar(0.4)
 	marcar("Cavalo toca Run", cavalo._anim.current_animation == "Run", cavalo._anim.current_animation)
 	await foto("cavalo_galope")
 	var dist_cavalo := cavalo.global_position.distance_to(jog.global_position)
@@ -178,6 +183,7 @@ func _rodar() -> void:
 	# ---------------- Fagulha
 	print("== FAGULHA ==")
 	var fag := jogo.fagulha
+	fag.set_physics_process(true)
 	fag.modo_voo = false
 	fag.global_position = Vector3(10.0, jogo.area.altura_em(10.0, 12.0), 12.0)   # ponto aberto: longe de NPCs e cavalos
 	await esperar(0.5)
