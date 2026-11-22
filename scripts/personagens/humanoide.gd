@@ -16,7 +16,8 @@ const BIBLIOTECA: AnimationLibrary = preload("res://assets/animations/ual/ual1_b
 @export var arma_cena: PackedScene
 @export var arma_escala := 0.25
 @export var arma_giro := Vector3.ZERO
-@export var arma_deslocamento := Vector3.ZERO
+@export var arma_deslocamento := Vector3.ZERO     # onde o punho fecha, no espaço do osso hand_r
+@export var arma_empunhadura := Vector3.ZERO      # ponto do cabo na arma (sem escala): é ele que vai para o punho
 ## Animação em loop que toca ao entrar na cena.
 @export var animacao_inicial := "Idle"
 
@@ -29,7 +30,7 @@ func _ready() -> void:
 	_tingir_cabelo()
 	_tingir_traje()
 	if arma_cena:
-		equipar_arma(arma_cena, arma_escala, arma_giro, arma_deslocamento)
+		equipar_arma(arma_cena, arma_escala, arma_giro, arma_deslocamento, arma_empunhadura)
 	animacoes = AnimationPlayer.new()
 	animacoes.name = "Animacoes"
 	add_child(animacoes)
@@ -71,14 +72,15 @@ func _tingir_traje() -> void:
 		if nome_malha.begins_with("Male_") or nome_malha.begins_with("Female_"):
 			for i in mi.mesh.get_surface_count():
 				var mat: Material = mi.get_active_material(i)
-				if mat is BaseMaterial3D:
+				if mat is BaseMaterial3D and not mat.resource_name.begins_with("MI_Regular"):   # a pele (MI_Regular_*) não é tingida
 					var copia: BaseMaterial3D = mat.duplicate()
 					copia.albedo_color = tom_traje
 					mi.set_surface_override_material(i, copia)
 
 
-## Coloca uma arma na mão direita (osso hand_r). `ajuste` é a posição/giro da arma em relação ao osso.
-func equipar_arma(arma: PackedScene, escala_arma: float, giro_graus: Vector3, deslocamento: Vector3) -> Node3D:
+## Coloca uma arma na mão direita (osso hand_r). O ponto `empunhadura` do cabo (nas medidas da arma, sem escala) vai
+## para `deslocamento` (onde o punho fecha, no espaço do osso). `giro_graus` é a rotação da arma em relação ao osso.
+func equipar_arma(arma: PackedScene, escala_arma: float, giro_graus: Vector3, deslocamento: Vector3, empunhadura := Vector3.ZERO) -> Node3D:
 	var esq: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
 	var anexo := BoneAttachment3D.new()
 	anexo.name = "ArmaMaoDireita"
@@ -87,6 +89,6 @@ func equipar_arma(arma: PackedScene, escala_arma: float, giro_graus: Vector3, de
 	var inst: Node3D = arma.instantiate()
 	inst.scale = Vector3.ONE * escala_arma
 	inst.rotation_degrees = giro_graus
-	inst.position = deslocamento
 	anexo.add_child(inst)
+	inst.position = deslocamento - inst.transform.basis * empunhadura
 	return inst

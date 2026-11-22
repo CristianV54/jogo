@@ -93,6 +93,7 @@ static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := tru
 	_interior(casa, colunas, linhas, interior)
 	if colisao:
 		casa.add_child(_colisao(meia_x, meia_z, x_porta))
+		casa.add_child(_teto_para_camera(colunas, linhas))
 	return casa
 
 
@@ -139,6 +140,30 @@ static func _colisao(meia_x: float, meia_z: float, x_porta: float) -> StaticBody
 		bx.size = c[1]
 		cs.shape = bx
 		cs.position = c[0]
+		corpo.add_child(cs)
+	return corpo
+
+
+## Duas placas inclinadas no lugar das águas do telhado, na camada 2: só a câmera as enxerga. Sem isso a câmera
+## atravessa o telhado quando o jogador está dentro da casa. (Altura da cumeeira ajustada às medidas do kit.)
+static func _teto_para_camera(colunas: int, linhas: int) -> StaticBody3D:
+	var corpo := StaticBody3D.new()
+	corpo.name = "TetoParaCamera"
+	corpo.collision_layer = 2
+	corpo.collision_mask = 0
+	var largura := colunas * MODULO
+	var profundidade := linhas * MODULO + 1.6
+	var a := Vector2(-(largura / 2.0 + 1.1), ALTURA_TELHADO - 0.9)   # abaixo da face de baixo do forro, para a lente nunca encostar nele
+	var b := Vector2(0.0, ALTURA_TELHADO + 0.75 + 0.585 * largura)
+	var v := b - a
+	var angulo := atan2(v.y, v.x)
+	for lado in [-1, 1]:
+		var cs := CollisionShape3D.new()
+		var bx := BoxShape3D.new()
+		bx.size = Vector3(v.length(), 0.3, profundidade)
+		cs.shape = bx
+		var centro := (a + b) / 2.0
+		cs.transform = Transform3D(Basis(Vector3(0, 0, 1), angulo * -lado), Vector3(centro.x * -lado, centro.y, 0.0))
 		corpo.add_child(cs)
 	return corpo
 

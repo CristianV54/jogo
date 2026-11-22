@@ -1,6 +1,7 @@
 class_name Jogador
 extends CharacterBody3D
-## Corpo do jogador (Torin): anda e corre em relação à câmera (WASD, Shift), golpeia (J ou clique) e leva dano.
+## Corpo do jogador (Torin): anda e corre em relação à câmera (WASD, Shift), pula (Espaço), golpeia (J ou clique),
+## rola (K) e leva dano.
 ## O visual é o Torin real; o modelo olha para +Z, então o nó Visual fica girado 180° para olhar para a frente (-Z).
 ## A entrada pode ser forçada por código, só para os testes automáticos.
 
@@ -17,6 +18,7 @@ signal morreu
 @export var alcance_golpe := 2.4
 @export var momento_do_golpe := 0.5     # segundos depois do início de Sword_Attack em que a lâmina acerta
 @export var duracao_golpe := 1.0
+@export var forca_pulo := 7.5               # com gravidade 20: sobe ~1,4 m
 @export var velocidade_rolamento := 9.0
 @export var duracao_rolamento := 0.65
 @export var regeneracao_apos := 4.0        # segundos sem levar dano para começar a recuperar vida
@@ -31,6 +33,10 @@ var _golpeando := false
 var _rolando := false
 var _dir_rolamento := Vector3.ZERO
 var _sem_dano := 0.0
+var _pulo_pedido := false
+var _tempo_no_ar := 0.0
+var _pouso := 0.0
+var _estava_no_chao := true
 var _regen := 0.0
 var _invulneravel := 0.0
 var _reacao := 0.0
@@ -46,6 +52,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_invulneravel = maxf(0.0, _invulneravel - delta)
 	_reacao = maxf(0.0, _reacao - delta)
+	_pouso = maxf(0.0, _pouso - delta)
 	_regenerar(delta)
 	var entrada := Vector2.ZERO
 	var correndo := false
@@ -61,8 +68,22 @@ func _physics_process(delta: float) -> void:
 	if _rolando:
 		velocity.x = _dir_rolamento.x * velocidade_rolamento
 		velocity.z = _dir_rolamento.z * velocidade_rolamento
-	velocity.y = 0.0 if is_on_floor() else velocity.y - gravidade * delta
+	if _pulo_pedido and is_on_floor() and not travado and not morto and not _golpeando and not _rolando:
+		velocity.y = forca_pulo   # pulo para CIMA; o movimento horizontal continua o que o jogador está fazendo
+		_tempo_no_ar = 0.0
+	elif is_on_floor():
+		velocity.y = 0.0
+	else:
+		velocity.y -= gravidade * delta
+	_pulo_pedido = false
 	move_and_slide()
+	if is_on_floor():
+		if not _estava_no_chao:
+			_pouso = 0.3
+		_tempo_no_ar = 0.0
+	else:
+		_tempo_no_ar += delta
+	_estava_no_chao = is_on_floor()
 
 	if direcao.length() > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-direcao.x, -direcao.z), giro * delta)
@@ -76,6 +97,8 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_J:
 		golpear()
 	elif evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_SPACE:
+		pular()
+	elif evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_K:
 		rolar()
 	elif evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT \
 			and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -85,12 +108,19 @@ func _unhandled_input(evento: InputEvent) -> void:
 func _animar(movimento: float, correndo: bool) -> void:
 	var nome := "Idle"
 	if not is_on_floor():
-		nome = "Jump"
+		nome = "Jump_Start" if _tempo_no_ar < 0.25 and velocity.y > 0.0 else "Jump"
+	elif _pouso > 0.0 and movimento < 0.01:
+		nome = "Jump_Land"
 	elif movimento > 0.01:
 		nome = "Sprint" if correndo else "Jog_Fwd"
 	if nome != animacao_atual:
 		visual.tocar(nome)
 		animacao_atual = nome
+
+
+## Pulo: sobe na vertical e segue com o movimento horizontal atual.
+func pular() -> void:
+	_pulo_pedido = true
 
 
 ## Golpe de espada: toca Sword_Attack e, no momento do impacto, fere os inimigos à frente.

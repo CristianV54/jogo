@@ -67,7 +67,7 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 ## armas/ (shortsword, longsword, club, katana, simpleaxe)
 
 - **Origem:** *MedievalPack* do Quaternius (a licença CC0 consta no catálogo `pacotes_livres/CATALOGO.md` do SSD; o pacote em si não traz arquivo de licença). Convertidas de OBJ para glb por `tools/criaturas/converter_animais_e_armas.py`, com a textura religada.
-- **Calibração na mão (osso hand_r):** espadas e katana com giro (180, 0, 0); clava com giro (90, 0, 0). Escalas: curta 0,25, longa e katana 0,2, clava 0,32. Conferido por captura de 8 giros.
+- **Calibração na mão (revisão 21/11/2026):** a primeira calibração estava errada: eu assumia o cabo no eixo Y, mas o importador gira o nó da malha 90° em X, então o cabo fica em **+Z da raiz** (espadas) e a katana é invertida (lâmina para +Z). Agora cada cena usa o **centro do punho medido na malha da luva** `(-0,017, 0,098, 0,006)` (`tools/medir_punho.gd`), o **centro do cabo medido na raiz da arma** (`tools/medir_arma.gd`) e o giro escolhido olhando 8 candidatos (`tools/calibrar_arma.gd`). Espada curta e guarda: giro (180,0,0), cabo (0,0,0,8), escala 0,25; espada longa: (180,0,0), cabo (0,0,0,78), 0,2; katana: (0,0,0), cabo (0,0,-0,65), 0,2; clava: (0,0,-90), cabo (0,0,1,0), 0,32. Os dedos não são animados, então o punho é o mesmo em todas as animações.
 - **Pendência:** `simpleaxe.glb` foi convertida e não é usada; não há escudo.
 
 ## criaturas/ (Filhote de Asa, Ignis-Maw, Javali, Lobo)

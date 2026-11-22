@@ -1,0 +1,9 @@
+CAMERA pitch=-0.2 yaw=0.0 lente_local=(1.0, 2.51, 4.51) dentro_da_planta=true y_do_telhado_ali=7.31 lente_abaixo_do_telhado=true
+CAMERA pitch=-0.2 yaw=1.57 lente_local=(3.32, 2.07, 0.0) dentro_da_planta=true y_do_telhado_ali=4.42 lente_abaixo_do_telhado=true
+CAMERA pitch=-0.2 yaw=3.14 lente_local=(1.0, 2.51, -4.51) dentro_da_planta=true y_do_telhado_ali=7.31 lente_abaixo_do_telhado=true
+CAMERA pitch=-0.2 yaw=-1.57 lente_local=(-3.33, 2.48, 0.0) dentro_da_planta=true y_do_telhado_ali=4.41 lente_abaixo_do_telhado=true
+CAMERA pitch=-1.0 yaw=0.0 lente_local=(1.0, 5.47, 2.49) dentro_da_planta=true y_do_telhado_ali=7.31 lente_abaixo_do_telhado=true
+CAMERA pitch=-1.0 yaw=1.57 lente_local=(2.78, 4.37, 0.0) dentro_da_planta=true y_do_telhado_ali=5.1 lente_abaixo_do_telhado=true
+CAMERA pitch=-1.0 yaw=3.14 lente_local=(1.0, 5.47, -2.49) dentro_da_planta=true y_do_telhado_ali=7.31 lente_abaixo_do_telhado=true
+CAMERA pitch=-1.0 yaw=-1.57 lente_local=(-1.49, 5.47, 0.0) dentro_da_planta=true y_do_telhado_ali=6.71 lente_abaixo_do_telhado=true
+RESULTADO_CAMERA OK

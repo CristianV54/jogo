@@ -1,0 +1,6 @@
+PULO parado | subiu 1.47 m | deslocamento horizontal 0.0 m | no chão no fim=true | animações=["Idle", "Jump_Start", "Jump", "Jump_Land"]
+PULO andando para frente | subiu 1.47 m | deslocamento horizontal 6.4 m | no chão no fim=true | animações=["Jog_Fwd", "Jump_Start", "Jump"]
+  PASSOU pulo parado sobe na vertical (1,0 a 1,9 m) e não desliza
+  PASSOU pulo andando mantém o avanço e pousa
+  PASSOU toca Jump_Start e Jump no ar
+RESULTADO_PULO OK

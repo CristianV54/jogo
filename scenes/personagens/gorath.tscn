@@ -9,6 +9,8 @@ script = ExtResource("1")
 cor_cabelo = Color(0.1, 0.08, 0.07, 1)
 arma_cena = ExtResource("3")
 arma_escala = 0.32
-arma_giro = Vector3(90, 0, 0)
+arma_giro = Vector3(0, 0, -90)
+arma_deslocamento = Vector3(-0.017, 0.101, 0.006)
+arma_empunhadura = Vector3(0, 0.1, 0)
 
 [node name="Modelo" parent="." instance=ExtResource("2")]

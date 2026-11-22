@@ -10,6 +10,8 @@ tom_traje = Color(0.62, 0.3, 0.78, 1)
 cor_cabelo = Color(0.75, 0.7, 0.6, 1)
 arma_cena = ExtResource("3")
 arma_escala = 0.2
-arma_giro = Vector3(180, 0, 0)
+arma_giro = Vector3(0, 0, 0)
+arma_deslocamento = Vector3(-0.017, 0.098, 0.006)
+arma_empunhadura = Vector3(0, 0, -0.65)
 
 [node name="Modelo" parent="." instance=ExtResource("2")]
