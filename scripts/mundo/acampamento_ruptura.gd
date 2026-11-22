@@ -118,12 +118,16 @@ func _process(_delta: float) -> void:
 	_vane.pausar()
 	_vane.olhar_para((js[0] as Node3D).global_position)
 	jogo.cena_dialogo([
-		["Vane", "Torin. Você trouxe o dragão até aqui. Isso muda tudo."],
+		["Vane", "Torin. Você trouxe um dragão até aqui. Isso muda tudo."],
 		["Torin", "Fagulha não é arma, Vane. É um amigo."],
-		["Vane", "Os dragões são o poder que o Império roubou. Eu vou tomar esse poder de volta, e você vai me ajudar."],
-		["Torin", "Você prometeu destruir os obeliscos, não usá-los."],
-		["Vane", "Promessas servem a quem está fraco. O bando agora é meu, e quem não segue, sai."],
-		["Vane", "Se quiser seguir viva a sua causa, passe pelo vau a norte. Ferrogris vai te ensinar o que o Império faz com quem pensa como você."],
+		["Vane", "Você viu o que um dragão pode fazer. Com três deles ao nosso lado, Ferrogris cairia em uma noite."],
+		["Torin", "Você não quer libertá-los. Quer pôr os dragões sob as suas ordens."],
+		["Vane", "Liberdade é uma palavra bonita para quem nunca precisou vencer uma guerra. Eu enterrei vinte dos nossos, Torin. Vinte. Cada um deles confiou em mim."],
+		["Torin", "E quando você vencer? Vai soltar as correntes ou pô-las em outras pessoas?"],
+		["Vane", "Você prometeu destruir os obeliscos comigo. Eu prometi proteger o bando. Uma das duas promessas tem que quebrar, e não vai ser a minha."],
+		["Soldado do Vane", "Desculpe, Torin. O Vane é o único que nunca teve medo do Império. Eu fico com ele."],
+		["Vane", "O bando agora é meu. Quem não segue, sai. A Brenn já escolheu o lado dela: foi para o seu."],
+		["Vane", "Se quiser seguir a sua causa, passe pelo vau a norte. Ferrogris vai lhe ensinar o que o Império faz com quem pensa como você."],
 	], func() -> void:
 		_vane.retomar()
 		GerenciadorMissoes.evento("interagir", "confronto_visto"))

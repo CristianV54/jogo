@@ -602,12 +602,16 @@ func _npc(nome_npc: String, papel: String, cena: String, pos: Vector2, falas: Pa
 
 func _npcs() -> void:
 	var c := ACAMPAMENTO
+	Cartaz.colocar(self, Vector3(6.0, _y(Vector2(6.0, -56.0)), -56.0), -PI / 2.0, "Carta do Imperador", [
+		"AO CAPATAZ GORATH: por ordem do Imperador Solon, toda criatura alada encontrada na região deverá ser capturada e enviada à Cratera de Ignis.",
+		"O medo é preferível ao caos. A obediência de um dragão salvará mil vidas humanas.",
+		"Na dobra do papel, alguém escreveu a lápis: \"Mil vidas. E as dos dragões, quantas são?\""])
 	_npc("Elda", "Caçadora", "res://scenes/personagens/elda.tscn", c + Vector2(4, 4),
-		PackedStringArray(["Sou a Elda. Caço neste bosque há vinte anos e conheço cada trilha.", "Vejo que você sabe andar. Quer aprender a seguir rastro de verdade? Fale comigo de novo."]),
+		PackedStringArray(["Sou a Elda. Caço neste bosque há vinte anos e conheço cada trilha. Hoje o bosque está mais quieto do que eu me lembro.", "Os pássaros foram embora quando acenderam aquela coisa na mina. Eu os chamo de volta toda manhã e eles não respondem.", "Vejo que você sabe andar. Quer aprender a seguir rastro de verdade? Fale comigo de novo."]),
 		[{"esperar": 7.0, "anim": "Idle_Talking", "olhar": c}, {"ir": c + Vector2(4, 10), "vel": 1.3}, {"fazer": "Interact", "seg": 6.0, "olhar": c + Vector2(0, 9)}, {"ir": c + Vector2(4, 4), "vel": 1.3}],
 		"C2-M1")
 	_npc("Borin", "Mineiro fugitivo", "res://scenes/personagens/borin.tscn", Vector2(-49, 30),
-		PackedStringArray(["Fale baixo. Os guardas do Império vasculham a mata atrás de mim.", "Fugi da mina. Foi ali que vi o que o Império faz."]),
+		PackedStringArray(["Fale baixo. Os guardas do Império vasculham a mata atrás de mim.", "Fugi da mina. Foi ali que vi o que o Império faz com um dragão, e com quem cava para ele.", "Se eu fechar os olhos, ainda ouço o som das correntes. Por favor, me deixe contar o resto."]),
 		[{"esperar": 8.0, "anim": "Crouch_Idle", "olhar": Vector2(0, 60)}, {"esperar": 5.0, "anim": "Idle", "olhar": Vector2(-70, 30)}])
 	_npc("Sava", "Prisioneira", "res://scenes/personagens/sava.tscn", Vector2(-6, -74),
 		PackedStringArray(["Eu cuido dos filhotes que o Império prende. Cada jaula tem um guarda com a chave.", "Se você puder libertá-los, fale comigo de novo."]),

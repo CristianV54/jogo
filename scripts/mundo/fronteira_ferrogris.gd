@@ -140,14 +140,24 @@ func _cela(tipo: String, pos: Vector2, ocupantes_cenas: Array) -> void:
 func _prisao_e_jaulas() -> void:
 	_edificio("Prisao", Vector2(-48.0, 14.0), PI / 2.0, REF.ESTILO_PEDRA, "Prisão", "deposito")
 	_cela("civis", Vector2(-34.0, 0.0), [
-		["Cativo da Aldeia", "Civil", "Pegaram a minha aldeia inteira. Ainda ouço as correntes.", "res://scenes/personagens/cativo.tscn"],
-		["Cativa da Aldeia", "Civil", "Meu filho levaram para a mina. Por favor, abra.", "res://scenes/personagens/cativa.tscn"]])
+		["Cativo da Aldeia", "Civil", "Pegaram a minha aldeia inteira. Ainda ouço as correntes. Não abra a cela ao lado sem olhar: tem gente lá dentro que já esqueceu o próprio nome.", "res://scenes/personagens/cativo.tscn"],
+		["Cativa da Aldeia", "Civil", "Meu filho levaram para a mina. Por favor, abra. Prometo não correr: só quero ir atrás dele.", "res://scenes/personagens/cativa.tscn"]])
 	_cela("soldados", Vector2(-34.0, -14.0), [
-		["Soldado Rebelde", "Soldado preso", "Lutei contra o Império até me renderem. Tire-nos daqui.", "res://scenes/personagens/soldado_rebelde.tscn"],
-		["Soldado Ferido", "Soldado preso", "Estou ferido, mas ainda seguro uma espada.", "res://scenes/personagens/soldado_ferido.tscn"]])
+		["Soldado Rebelde", "Soldado preso", "Lutei contra o Império até me renderem. Kaelor não luta pelo Solon: luta porque acredita que ordem é melhor que liberdade. É isso que o torna perigoso. Tire-nos daqui.", "res://scenes/personagens/soldado_rebelde.tscn"],
+		["Soldado Ferido", "Soldado preso", "Estou ferido, mas ainda seguro uma espada. Tire-nos daqui e eu sigo você até onde der.", "res://scenes/personagens/soldado_ferido.tscn"]])
 	_guarda(Vector2(-27.0, -7.0), true, "Carcereiro")
 	_edificio("JaulasDosDragoes", Vector2(48.0, 14.0), -PI / 2.0, REF.ESTILO_MADEIRA, "Jaulas dos Dragões", "deposito")
 	_cela("dragao", Vector2(36.0, -7.0), [])
+	_npc("Cuidadora dos Dragões", "Cuidadora", "res://scenes/personagens/cativa.tscn", Vector2(28.0, -1.0),
+		PackedStringArray(["Não bata nas jaulas. Eles já não sabem diferenciar uma ameaça de uma tentativa de ajuda.", "Eu era tratadora de cavalos. Me deram um uniforme e uma ordem: manter vivo o que eles chamam de matéria-prima. Eu mantenho vivo e peço perdão todos os dias."]),
+		[{"esperar": 8.0, "anim": "Idle", "olhar": Vector2(36.0, -7.0)}, {"esperar": 5.0, "anim": "Crouch_Idle", "olhar": Vector2(36.0, -7.0)}])
+	_npc("Soldado Rendido", "Soldado", "res://scenes/personagens/soldado_rebelde.tscn", Vector2(-20.0, 30.0),
+		PackedStringArray(["Larguei a lança quando vi o que eles fazem com os dragões. Não sou herói. Só não aguentei mais.", "Se vai ao pátio central, cuidado: o Kaelor sempre chama reforço quando a luta aperta."]),
+		[{"esperar": 8.0, "anim": "Idle", "olhar": Vector2(0.0, 30.0)}, {"esperar": 6.0, "anim": "Crouch_Idle", "olhar": Vector2(0.0, 30.0)}])
+	Cartaz.colocar(self, Vector3(14.0, _y(Vector2(14.0, 118.0)), 118.0), PI, "Ordem a Kaelor", [
+		"AO GENERAL KAELOR, COMANDANTE DE FERROGRIS: o Imperador Solon exige o envio de dragões à Cratera de Ignis até o fim do inverno. Nenhuma jaula deve ficar vazia.",
+		"Os que resistirem à captura serão corrigidos. A obediência de um dragão salvará mil vidas humanas.",
+		"Assinado: Solon. À margem, em letra miúda do próprio Kaelor: \"Cumpri a ordem. Não pedi que me agradassem.\""])
 	_guarda(Vector2(27.0, -7.0), true, "Domador Imperial")
 	_placa_em_poste(Vector2(-24.0, 12.0), "Prisão")
 	_placa_em_poste(Vector2(24.0, 12.0), "Jaulas dos Dragões")

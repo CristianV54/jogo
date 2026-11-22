@@ -27,6 +27,7 @@ func _ready() -> void:
 	_galpao()
 	_moinho()
 	_detalhes()
+	_gente()
 	VegetacaoRasteira.decorar_zonas(self, terreno, _rng, [[Vector2(0, -10), 80.0, 1.8], [Vector2(0, 60), 40.0, 1.2]], [[Vector2(44.0, -34.0), 9.0]])
 	_saidas()
 	if GerenciadorMissoes.instancia:
@@ -209,6 +210,37 @@ func _moinho() -> void:
 	var roda := RodaDagua.new()   # roda d'água na lateral direita, sobre o riacho
 	roda.position = Vector3(3.6, 1.7, 0.0)
 	casa.add_child(roda)
+
+
+## Quem vive e trabalha no pomar: uma colhedora, um ajudante e o edital do Império pregado perto do moinho.
+func _gente() -> void:
+	_figurante("Ilsa", "Colhedora", "res://scenes/personagens/mara.tscn", Vector3(-14.0, 0.0, -2.0),
+		PackedStringArray(["Cada árvore aqui foi plantada por alguém que não chegou a ver a primeira colheita.", "Se o Império tomar este pomar, o Refúgio não perde só maçãs: perde o direito de alimentar a própria gente.", "O moinho está parado há três dias. O moleiro sumiu com a chave quando os soldados chegaram, e eu não o culpo."]),
+		[{"fazer": "PickUp_Table", "seg": 5.0, "olhar": Vector3(-14.0, 0.0, -6.0)}, {"ir": Vector3(-8.0, 0.0, -2.0), "vel": 1.1}, {"fazer": "PickUp_Table", "seg": 5.0, "olhar": Vector3(-8.0, 0.0, -6.0)}, {"ir": Vector3(-14.0, 0.0, -2.0), "vel": 1.1}])
+	_figurante("Teo", "Ajudante do pomar", "res://scenes/personagens/oren.tscn", Vector3(10.0, 0.0, 28.0),
+		PackedStringArray(["Eu cuido dos cestos. Quando o vento derruba um, a Ilsa me olha como se eu tivesse derrubado a árvore.", "Soldado do Império passou aqui semana passada e levou duas sacas. Disseram que era imposto. Eu só vi ladrão de uniforme."]),
+		[{"esperar": 7.0, "anim": "Idle", "olhar": Vector3(10.0, 0.0, 20.0)}, {"fazer": "Interact", "seg": 5.0, "olhar": Vector3(12.0, 0.0, 26.0)}])
+	Cartaz.colocar(self, Vector3(34.0, altura_em(34.0, -26.0), -26.0), -PI / 2.0, "Edital do Império", [
+		"EM NOME DO IMPERADOR SOLON: o Pomar Alto fica sujeito ao tributo de metade da colheita. Moinhos que se recusarem a moer para o Império serão fechados.",
+		"A ordem é a única misericórdia que o Império oferece. Quem a recusa conhecerá a outra."])
+
+
+func _figurante(nome_n: String, papel: String, cena: String, pos: Vector3, falas: PackedStringArray, rotina: Array) -> void:
+	var n := Npc.new()
+	n.nome = nome_n
+	n.papel = papel
+	n.falas = falas
+	n.cena = load(cena)
+	n.rotina = rotina
+	n.altura_em = altura_em
+	n.position = Vector3(pos.x, altura_em(pos.x, pos.z), pos.z)
+	for passo in rotina:
+		for chave in ["ir", "olhar"]:
+			if passo.has(chave) and passo[chave] is Vector3:
+				var v: Vector3 = passo[chave]
+				passo[chave] = Vector3(v.x, altura_em(v.x, v.z), v.z)
+	add_child(n)
+	npcs.append(n)
 
 
 func _saidas() -> void:

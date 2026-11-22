@@ -330,11 +330,11 @@ func _salao() -> void:
 
 
 func _gente() -> void:
-	_npc("Garth", "Mestre de Armas", "res://scenes/personagens/dorn.tscn", Vector2(44.0, 72.0), PackedStringArray(["Treino a guarda real há vinte anos. Hoje ninguém mais quer lutar."]),
+	_npc("Garth", "Mestre de Armas", "res://scenes/personagens/dorn.tscn", Vector2(44.0, 72.0), PackedStringArray(["Treino a guarda real há vinte anos. Hoje ninguém mais quer lutar.", "O Vane chegou aqui pedindo emprego e eu o testei. Lutava como quem tem uma dor que não larga. Falei para o Imperador que era perigoso. Ele sorriu."]),
 		[{"fazer": "Sword_Attack", "seg": 8.0, "olhar": Vector2(38.0, 70.0)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(0.0, 72.0)}])
 	_npc("Tom", "Estribeiro", "res://scenes/personagens/orin.tscn", Vector2(-40.0, 70.0), PackedStringArray(["Os cavalos reais não gostam do cheiro de dragão. Fique longe deles."]),
 		[{"fazer": "Interact", "seg": 6.0, "olhar": Vector2(-34.0, 62.0)}, {"ir": Vector2(-38.0, 76.0), "vel": 1.2}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(-34.0, 62.0)}, {"ir": Vector2(-40.0, 70.0), "vel": 1.2}])
-	_npc("Arauto", "Arauto do Império", "res://scenes/personagens/oren.tscn", Vector2(0.0, 30.0), PackedStringArray(["O Império de Drakkar é eterno! ...ou era, até hoje cedo."]),
+	_npc("Arauto", "Arauto do Império", "res://scenes/personagens/oren.tscn", Vector2(0.0, 30.0), PackedStringArray(["O Império de Drakkar é eterno! ...ou era, até hoje cedo.", "Eu li as ordens do Imperador por trinta anos. Nunca ouvi a voz dele: só o papel. Hoje desconfio que ele também esqueceu como se fala."]),
 		[{"esperar": 7.0, "anim": "Idle_Talking", "olhar": Vector2(0.0, 60.0)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(0.0, 60.0)}])
 	_npc("Lis", "Criada do castelo", "res://scenes/personagens/cativa.tscn", Vector2(-20.0, 40.0), PackedStringArray(["Levo toalhas para a ala do Imperador. Ele não sai de lá."]),
 		[{"ir": Vector2(-20.0, 20.0), "vel": 1.4}, {"esperar": 3.0, "anim": "Interact", "olhar": Vector2(-20.0, 14.0)}, {"ir": Vector2(-20.0, 40.0), "vel": 1.4}, {"esperar": 3.0, "anim": "Idle", "olhar": Vector2(0.0, 40.0)}])

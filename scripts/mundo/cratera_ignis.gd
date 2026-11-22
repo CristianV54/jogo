@@ -245,8 +245,12 @@ func _arena() -> void:
 
 
 func _gente() -> void:
+	Cartaz.colocar(self, Vector3(-36.0, _y(Vector2(-36.0, 26.0)), 26.0), PI / 2.0, "Ordem às Forjas", [
+		"AOS CAPATAZES DAS FORJAS NEGRAS: o Imperador Solon determina que as correntes de Ignis-Maw não sejam afrouxadas, por nenhuma razão.",
+		"Cada dragão acorrentado alimenta mil lanças. Não há crueldade onde há propósito.",
+		"Alguém riscou a palavra \"propósito\" e escreveu \"medo\"."])
 	var tarn := _npc("Tarn", "Trabalhador da forja", "res://scenes/personagens/cativo.tscn", Vector2(-38.0, 20.0),
-		PackedStringArray(["Estou há anos aqui. O calor não perdoa.", "Se vai mexer nas forjas, cuidado com a lava."]),
+		PackedStringArray(["Estou há anos aqui. O calor não perdoa. Eu cheguei por dívida e fiquei por medo.", "Se vai mexer nas forjas, cuidado com a lava. E com o capataz: ele vigia mais do que respira."]),
 		[{"esperar": 8.0, "anim": "Idle_Talking", "olhar": Vector2(-10.0, 20.0)}, {"fazer": "Interact", "seg": 6.0, "olhar": Vector2(-44.0, 20.0)}])
 	tarn.nome = "Tarn"
 	_npc("Trabalhador Cansado", "Trabalhador", "res://scenes/personagens/soldado_ferido.tscn", Vector2(-30.0, 4.0),

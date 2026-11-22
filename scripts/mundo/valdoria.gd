@@ -228,10 +228,10 @@ func _mercado() -> void:
 	var frente: Array[Vector2] = []
 	for k in 6:
 		frente.append(_barraca(posicoes[k], giros[k], titulos[k], cores[k]))
-	_mercador("Miro", "Vendedor de poções", posicoes[0], giros[0], PackedStringArray(["Poções para tudo. Dizem que a do castelo anda cara.", "Se traz raízes do Riacho da Névoa, eu troco por caldo forte."]))
-	_mercador("Lena", "Comerciante de alimentos", posicoes[1], giros[1], PackedStringArray(["Pão, carne e maçã. Com a guarda de olho, o preço sobe.", "Rumor: o Imperador não sai do salão do trono desde que o obelisco foi aceso."]))
-	_mercador("Darrik", "Vendedor de armas usadas", posicoes[2], giros[2], PackedStringArray(["Espadas de soldados que não voltaram. Barato, pouca pergunta.", "O Vane treina todo dia no pátio do duelo. Cuidado com ele."]))
-	_mercador("Suri", "Contrabandista de chaves e mapas", posicoes[3], giros[3], PackedStringArray(["Chaves e mapas, só por troca. Fale baixo.", "O castelo tem estábulos reais, sala de armas, galeria de estandartes e prisão subterrânea."]))
+	_mercador("Miro", "Vendedor de poções", posicoes[0], giros[0], PackedStringArray(["Poções para tudo, de tosse a ferida de espada. Dizem que a do castelo anda cara.", "Sou o único aqui que troca raiz por caldo forte e maçã por poção da casa. Quem traz raiz do Riacho da Névoa sai daqui mais forte.", "Quando a guarda cair, eu abro o estoque inteiro. Sem cobrar. Eu só preciso saber que vai valer a pena."]))
+	_mercador("Lena", "Comerciante de alimentos", posicoes[1], giros[1], PackedStringArray(["Pão, carne e maçã. Com a guarda de olho, o preço sobe.", "Se você trouxer carne, eu troco por couro ou por maçã: carne boa vale mais que moeda nesta cidade.", "Rumor: o Imperador não sai do salão do trono desde que o obelisco foi aceso. Eu acho que ele tem medo do que criou."]))
+	_mercador("Darrik", "Vendedor de armas usadas", posicoes[2], giros[2], PackedStringArray(["Espadas de soldados que não voltaram. Barato, pouca pergunta.", "Troco presa por maçã e lã por carne. Couro e lã de fora valem ouro aqui, onde só entra o que o Império deixa.", "O Vane treina todo dia no pátio do duelo. Não ri mais. Cuidado com ele."]))
+	_mercador("Suri", "Contrabandista de chaves e mapas", posicoes[3], giros[3], PackedStringArray(["Chaves e mapas, só por troca. Fale baixo.", "Dou uma chave por um Ferro Negro bruto: o que eu faço com o metal, é problema meu. Você precisa abrir portas, eu preciso saber onde elas estão.", "O castelo tem estábulos reais, sala de armas, galeria de estandartes e prisão subterrânea. Eu desenhei cada corredor. Dois guardas me deixaram viva pelo mapa."]))
 	_troca(frente[0] + Vector2(-0.9, 0.0), "Miro: 2 raízes por 1 carne (caldo forte)", "raiz", 2, "carne", 1)
 	_troca(frente[0] + Vector2(0.9, 0.0), "Miro: 3 maçãs por 1 raiz (poção da casa)", "maca", 3, "raiz", 1)
 	_troca(frente[1] + Vector2(-0.9, 0.0), "Lena: 2 maçãs por 1 carne", "maca", 2, "carne", 1)
@@ -305,6 +305,20 @@ func _predios_publicos() -> void:
 		add_child(a)
 
 
+## Estátua do Imperador Solon ao pé da escadaria: pedestal, corpo, cabeça com coroa e espada, e a placa de pedra.
+func _estatua_do_imperador(p: Vector2) -> void:
+	var pedra := VilaRefugio._mat(Color(0.55, 0.54, 0.52))
+	var ouro := VilaRefugio._mat(Color(0.75, 0.6, 0.2))
+	var y := _y(p)
+	VilaRefugio._caixa(Vector3(p.x, y + 0.6, p.y), Vector3(2.6, 1.2, 2.6), pedra, true)
+	VilaRefugio._caixa(Vector3(p.x, y + 2.4, p.y), Vector3(1.0, 2.4, 0.7), pedra)
+	VilaRefugio._caixa(Vector3(p.x, y + 3.9, p.y), Vector3(0.7, 0.7, 0.7), pedra)
+	VilaRefugio._cilindro(Vector3(p.x, y + 4.45, p.y), 0.42, 0.3, ouro, false, 8)   # coroa
+	VilaRefugio._caixa(Vector3(p.x + 0.8, y + 2.4, p.y), Vector3(0.12, 2.6, 0.12), ouro)   # espada erguida
+	Cartaz.colocar(self, Vector3(p.x, y, p.y + 2.2), 0.0, "Estátua de Solon", [
+		"SOLON, O IMPERADOR QUE ORDENA. Sob as suas correntes, o reino não conhece fome, nem guerra, nem dúvida."], true)
+
+
 # ---------------------------------------------------------------- escadaria
 
 func _escadaria() -> void:
@@ -339,15 +353,20 @@ func _escadaria() -> void:
 # ---------------------------------------------------------------- gente e guardas
 
 func _gente() -> void:
+	_estatua_do_imperador(Vector2(-16.0, -72.0))
+	Cartaz.colocar(self, Vector3(16.0, _y(Vector2(16.0, -72.0)), -72.0), PI, "Decreto do Imperador", [
+		"DECRETO DE SOLON, O IMPERADOR: a cidade de Valdoria está em estado de ordem permanente. Reuniões de mais de cinco pessoas são proibidas após o pôr do sol.",
+		"A guarda tem autorização de fechar o portão ao primeiro sinal de rebelião. Não haverá aviso.",
+		"Rasgado no canto, preso por um prego: \"Dizem que o Imperador não sai do salão do trono. Será que ele sabe como é a rua?\""])
 	_npc("Hobb", "Ferreiro", "res://scenes/personagens/dorn.tscn", Vector2(-24.0, 90.0), PackedStringArray(["Forjo para a guarda. Não pergunto para quem é a lâmina."]),
 		[{"fazer": "Sword_Attack", "seg": 9.0, "olhar": Vector2(-30.0, 90.0)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(0.0, 90.0)}])
-	_npc("Rurik", "Carpinteiro", "res://scenes/personagens/oren.tscn", Vector2(-24.0, 66.0), PackedStringArray(["Madeira para as barracas do mercado. Metade já está podre."]),
+	_npc("Rurik", "Carpinteiro", "res://scenes/personagens/oren.tscn", Vector2(-24.0, 66.0), PackedStringArray(["Madeira para as barracas do mercado. Metade já está podre.", "Fiz a cadeira do Imperador quando eu era jovem. Ninguém me contou que ele nunca mais sairia dela."]),
 		[{"fazer": "Interact", "seg": 7.0, "olhar": Vector2(-30.0, 66.0)}, {"ir": Vector2(-24.0, 70.0), "vel": 1.2}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(0.0, 70.0)}, {"ir": Vector2(-24.0, 66.0), "vel": 1.2}])
 	_npc("Yara", "Curtidora", "res://scenes/personagens/mira.tscn", Vector2(24.0, 88.0), PackedStringArray(["Couro de tudo que corre. O Império paga pouco e atrasado."]),
 		[{"fazer": "Interact", "seg": 6.0, "olhar": Vector2(30.0, 88.0)}, {"esperar": 4.0, "anim": "Idle_Talking", "olhar": Vector2(0.0, 88.0)}])
-	_npc("Pim", "Tecelão", "res://scenes/personagens/nilo.tscn", Vector2(24.0, 66.0), PackedStringArray(["Fiando bandeiras de Drakkar o dia inteiro. Eu preferia fiar cobertores."]),
+	_npc("Pim", "Tecelão", "res://scenes/personagens/nilo.tscn", Vector2(24.0, 66.0), PackedStringArray(["Fiando bandeiras de Drakkar o dia inteiro. Eu preferia fiar cobertores.", "Já bordei o rosto do Imperador mais de mil vezes. Ele nunca tem a mesma expressão duas vezes. Eu nunca consegui lembrar a de verdade."]),
 		[{"fazer": "Interact", "seg": 8.0, "olhar": Vector2(30.0, 66.0)}, {"esperar": 3.0, "anim": "Idle", "olhar": Vector2(0.0, 66.0)}])
-	_npc("Jessa", "Varredora", "res://scenes/personagens/cativa.tscn", Vector2(6.0, 12.0), PackedStringArray(["Varro a praça todo dia. A fonte seca não ajuda."]),
+	_npc("Jessa", "Varredora", "res://scenes/personagens/cativa.tscn", Vector2(6.0, 12.0), PackedStringArray(["Varro a praça todo dia. A fonte seca não ajuda.", "A estátua do Imperador na escadaria ganhou uma pichação ontem. Eu limpei antes de a guarda ver. Não me peça para explicar por quê."]),
 		[{"fazer": "Interact", "seg": 8.0, "olhar": Vector2(6.0, 20.0)}, {"ir": Vector2(-8.0, 12.0), "vel": 1.0}, {"fazer": "Interact", "seg": 8.0, "olhar": Vector2(-8.0, 20.0)}, {"ir": Vector2(6.0, 12.0), "vel": 1.0}])
 	_npc("Bram", "Carregador", "res://scenes/personagens/soldado_ferido.tscn", Vector2(52.0, -40.0), PackedStringArray(["Caixas para o mercado, sempre. As costas não perdoam."]),
 		[{"ir": Vector2(48.0, 2.0), "vel": 1.6}, {"esperar": 4.0, "anim": "Interact", "olhar": Vector2(48.0, 8.0)}, {"ir": Vector2(52.0, -40.0), "vel": 1.6}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(58.0, -48.0)}])

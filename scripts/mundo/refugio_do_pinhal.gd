@@ -396,45 +396,49 @@ func _patio_de_treino() -> void:
 
 
 func _npcs() -> void:
+	Cartaz.colocar(self, Vector3(31.0, terreno.altura_em(31.0, 9.5), 9.5), -PI / 2.0, "Aviso do Império", [
+		"POR ORDEM DO IMPERADOR SOLON: toda criatura alada encontrada nas terras do pinhal deve ser entregue aos oficiais do Império de Drakkar.",
+		"Quem ocultar dragão será tratado como traidor, e o povo que o abrigar responderá por ele.",
+		"Alguém riscou a última linha e escreveu por cima, com carvão: \"Eles chamam isso de ordem. Nós chamamos de correntes.\""])
 	_npc("Vane", "Líder do bando", "res://scenes/personagens/vane.tscn", Vector3(0, 0, -19.0), "Idle",
-		PackedStringArray(["Torin. Os dragões voltaram a rondar a fronteira.", "Quem sobrevive aqui, sobrevive junto. Lembre disso."]), Vector3.ZERO,
+		PackedStringArray(["Torin. Os dragões voltaram a rondar a fronteira, e o Império vem atrás deles.", "Eu prometi a esses homens que ninguém mais seria acorrentado. Enquanto eu respirar, é uma promessa que eu cumpro.", "Às vezes, de noite, penso que se tivéssemos a força que eles têm, ninguém nos tocaria. Esqueça. É o frio falando.", "Quem sobrevive aqui, sobrevive junto. Lembre disso."]), Vector3.ZERO,
 		[{"esperar": 5.0, "anim": "Idle"}, {"ir": Vector3(0, 0, -5.0), "vel": 1.4}, {"esperar": 7.0, "anim": "Idle_Talking", "olhar": Vector3.ZERO},
 		 {"ir": Vector3(0, 0, -19.0), "vel": 1.4}])
 	_npc("Brenn", "Ferreira", "res://scenes/personagens/brenn.tscn", Vector3(-21.3, 0, -1.5), "Idle",
-		PackedStringArray(["Traga couro, ferro e carvão que eu melhoro essa lâmina.", "Ferro bom não se compra, se arranca da mina."]), BIGORNA,
+		PackedStringArray(["Traga couro, ferro e carvão que eu melhoro essa lâmina.", "Ferro bom não se compra, se arranca da mina. Ferro Negro eu não toco: ele carrega a assinatura do Império e obedece a ela.", "Este braço de metal veio de uma dessas correntes, Torin. Eu sei do que estou falando."]), BIGORNA,
 		[{"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"esperar": 3.0, "anim": "Idle_Talking"},
 		 {"fazer": "Sword_Attack", "seg": 9.0, "olhar": BIGORNA}, {"ir": Vector3(-20.0, 0, -5.5)},
 		 {"esperar": 2.5, "anim": "Idle", "olhar": Vector3(-27, 0, -4)}, {"ir": Vector3(-21.3, 0, -1.5)}])
 	_npc("Halk", "Guarda do portão", "res://scenes/personagens/orin.tscn", Vector3(37.0, 0, 5.5), "Idle",
-		PackedStringArray(["Portão do Refúgio. Ninguém sai sem a minha palavra.", "Batedores do Império rondam a estrada. Volte vivo, rapaz."]),
+		PackedStringArray(["Portão do Refúgio. Ninguém sai sem a minha palavra.", "Pregaram um aviso do Imperador na estrada. Solon manda e o mundo obedece... ou apanha. Já li três vezes e ainda não entendi como alguém assina isso.", "Batedores do Império rondam a estrada. Volte vivo, rapaz. Já enterrei gente demais deste bando."]),
 		Vector3(60, 0, 5.5),
 		[{"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, 5.5)}, {"ir": Vector3(37.0, 0, -5.5), "vel": 1.3},
 		 {"esperar": 6.0, "anim": "Idle", "olhar": Vector3(60, 0, -5.5)}, {"ir": Vector3(37.0, 0, 5.5), "vel": 1.3}])
 	_npc("Oren", "Agricultor", "res://scenes/personagens/oren.tscn", Vector3(12.8, 0, -12.3), "Idle",
-		PackedStringArray(["Sem o pomar, o Refúgio passa fome. Cada maçã conta.", "Se passar pelo pomar, traga cestos cheios."]), Vector3(12.4, 0, -13.4),
+		PackedStringArray(["Sem o pomar, o Refúgio passa fome. Cada maçã conta.", "Plantei aquelas mudas com meu pai. Ele não viu a primeira colheita, mas comeu a promessa.", "Se passar pelo pomar, traga cestos cheios."]), Vector3(12.4, 0, -13.4),
 		[{"fazer": "Fixing_Kneeling", "seg": 9.0, "olhar": Vector3(12.4, 0, -13.4)}, {"ir": Vector3(17.6, 0, -12.3)},
 		 {"fazer": "Fixing_Kneeling", "seg": 9.0, "olhar": Vector3(17.6, 0, -13.4)}, {"ir": Vector3(12.8, 0, -12.3)}])
 	_npc("Mara", "Cuidadora do curral", "res://scenes/personagens/mara.tscn", Vector3(3.0, 0, 27.5), "Idle",
-		PackedStringArray(["Os animais sentem o medo da gente. Calma, e o cavalo vem.", "Mantenha as ovelhas longe da cerca: os lobos rondam."]), Vector3(0, 0, 31),
+		PackedStringArray(["Os animais sentem o medo da gente. Calma, e o cavalo vem.", "Reparei numa coisa: quando o Vane fala manso, os bichos se aquietam. Quando ele fica calado demais, se agitam.", "Mantenha as ovelhas longe da cerca: os lobos rondam."]), Vector3(0, 0, 31),
 		[{"ir": Vector3(-4.5, 0, 33.0)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(-6.0, 0, 34.5)},
 		 {"ir": Vector3(4.5, 0, 33.5)}, {"fazer": "PickUp_Table", "seg": 3.0, "olhar": Vector3(6.0, 0, 34.5)},
 		 {"ir": Vector3(3.0, 0, 27.5)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(0, 0, 31)}])
-	_npc("Tessa", "Mensageira", "res://scenes/personagens/tessa.tscn", Vector3(1.5, 0, -18.0), "Idle_Talking",
-		PackedStringArray(["Vi rastros de botas imperiais perto da estrada. Avise o Vane.", "Corro mais do que qualquer um aqui."]), Vector3(0, 0, -27),
+	_npc("Tessa", "Mensageira", "res://scenes/personagens/tessa.tscn", Vector3(5.5, 0, -17.0), "Idle_Talking",
+		PackedStringArray(["Vi rastros de botas imperiais perto da estrada. Avise o Vane.", "Dizem que o Imperador Solon nunca saiu de Valdoria, que manda em tudo de dentro de uma sala. Eu não confio em quem manda de longe.", "Corro mais do que qualquer um aqui. Foi assim que sobrevivi."]), Vector3(0, 0, -27),
 		[{"esperar": 4.0, "anim": "Idle_Talking", "olhar": Vector3(0, 0, -27)}, {"ir": Vector3(0, 0, -10.0), "vel": 3.2, "anim": "Jog_Fwd"},
 		 {"ir": Vector3(10, 0, -8.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(20, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"},
 		 {"ir": Vector3(34, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(60, 0, -1)},
 		 {"ir": Vector3(20, 0, -1.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(10, 0, -8.0), "vel": 3.2, "anim": "Jog_Fwd"},
 		 {"ir": Vector3(0, 0, -10.0), "vel": 3.2, "anim": "Jog_Fwd"}, {"ir": Vector3(1.5, 0, -21.0), "vel": 3.2, "anim": "Jog_Fwd"}])
 	var nilo := _npc("Nilo", "Menino curioso", "res://scenes/personagens/nilo.tscn", Vector3(-3.0, 0, -16.0), "Idle",
-		PackedStringArray(["Você tem um dragão! Posso ver de perto?", "Quando crescer, vou ser caçador como a Mira."]))
+		PackedStringArray(["Você tem um dragão! Posso ver de perto?", "O Vane disse que dragão é arma. A Mira disse que é gente. Quem tem razão?", "Quando crescer, vou ser caçador como a Mira."]))
 	nilo.segue_jogador = true
 	_npc("Dorn", "Lenhador", "res://scenes/personagens/dorn.tscn", Vector3(22.4, 0, -24.2), "Idle",
-		PackedStringArray(["Esses pinheiros seguram o telhado do mundo.", "A trilha do norte leva à mina. Cuidado com o Gorath."]), CEPO,
+		PackedStringArray(["Esses pinheiros seguram o telhado do mundo.", "A trilha do norte leva à mina. Dizem que o capataz Gorath come soldado cru no almoço. Acho que é exagero. Acho.", "Se o Império derrubar o pinhal, o Refúgio perde o abrigo e o vento perde o freio."]), CEPO,
 		[{"fazer": "Sword_Attack", "seg": 10.0, "olhar": CEPO}, {"ir": Vector3(20.4, 0, -24.6)},
 		 {"esperar": 3.0, "anim": "PickUp_Table", "olhar": Vector3(20.3, 0, -26.0)}, {"ir": Vector3(22.4, 0, -24.2)}])
 	_npc("Mira", "Caçadora", "res://scenes/personagens/mira.tscn", Vector3(-12.0, 0, 14.0), "Idle",
-		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Fale baixo."]), Vector3.ZERO,
+		PackedStringArray(["Rastros frescos no Bosque Velado. Algo grande passou por lá.", "Já vi dragão agonizando numa corrente, Torin. Quem faz aquilo não é caçador. É criador de dor.", "Fale baixo."]), Vector3.ZERO,
 		[{"ir": Vector3(-23.0, 0, 19.0), "vel": 1.3}, {"esperar": 6.0, "anim": "Crouch_Idle", "olhar": Vector3(-60, 0, 22)},
 		 {"ir": Vector3(3.9, 0, 2.2), "vel": 1.4}, {"fazer": "Interact", "seg": 7.0, "olhar": CALDEIRAO},
 		 {"ir": Vector3(-12.0, 0, 14.0), "vel": 1.4}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector3(-12, 0, 30)}])

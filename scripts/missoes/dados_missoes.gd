@@ -21,10 +21,10 @@ const MISSOES := {
 			{"id": "tochas", "texto": "Acender as tochas de treinamento", "tipo": "interagir", "alvo": "tocha_treino", "qtd": 3},
 		],
 		"recompensa": {"itens": {"carne": 2}, "texto": "Quadro de avisos liberado"},
-		"encerramento": "Vane: \"Você aguenta o básico. Veja o quadro de avisos na praça: sempre falta alguém para algum serviço.\"",
+		"encerramento": "Vane: \"Você aguenta o básico. Veja o quadro de avisos na praça: sempre falta alguém para algum serviço. E obrigado por não perguntar por que eu preciso saber.\"",
 		"dialogos": {
-			"vane": ["Torin. Antes de qualquer trabalho, quero ver como você se vira.", "Fale com a Brenn, teste a espada no boneco do pátio de treino e acenda as três tochas. Depois conversamos."],
-			"brenn": ["Então o Vane mandou você testar a lâmina. Dê uma boa olhada nela: ferro bom aguenta, ferro ruim quebra no primeiro golpe.", "O pátio de treino fica ali, perto da casa dele. Bata no boneco sem dó."],
+			"vane": ["Torin. Antes de qualquer trabalho, quero ver como você se vira.", "Eu prometi proteger este bando, e proteger dá trabalho. Preciso saber que você aguenta o básico antes que o Império apareça de novo.", "Fale com a Brenn, teste a espada no boneco do pátio e acenda as três tochas. Depois conversamos."],
+			"brenn": ["Então o Vane mandou você testar a lâmina. Dê uma boa olhada nela: ferro bom aguenta, ferro ruim quebra no primeiro golpe.", "O pátio de treino fica ali, perto da casa dele. Bata no boneco sem dó. E nunca confie em arma que brilha demais."],
 		},
 	},
 	"C1-M2": {
@@ -41,7 +41,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"carne": 2}, "texto": "O pomar volta a abastecer o Refúgio"},
 		"encerramento": "Mara: \"Olha como eles comem! Obrigada, Torin. O pomar vai abastecer o Refúgio mais um inverno.\"",
 		"dialogos": {
-			"oren": ["O pomar é a nossa despensa. Colha seis maçãs nas macieiras e endireite aquele cesto que o vento derrubou.", "Depois leve três maçãs à Mara. Os animais também precisam de ânimo."],
+			"oren": ["O pomar é a nossa despensa e a nossa teimosia. Se o Império tomar isso, o Refúgio perde o direito de alimentar a própria gente.", "Colha seis maçãs, endireite o cesto que o vento derrubou e leve três à Mara. Os animais também precisam de ânimo."],
 		},
 	},
 	"C1-M3": {
@@ -57,7 +57,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"couro": 2}, "texto": "Trilha do Pinhal revelada"},
 		"encerramento": "Mara: \"Ele voltou inteiro! A Tessa viu pegadas estranhas no pinhal, a trilha escondida ao norte. Vá com cuidado.\"",
 		"dialogos": {
-			"mara": ["Lobos nas ovelhas e um cavalo que fugiu pela estrada leste! Proteja o cercado e traga o cavalo de volta, por favor.", "Para trazê-lo, monte nele: ele só obedece a quem tem calma."],
+			"mara": ["Lobos nas ovelhas e um cavalo fugido pela estrada leste! Eu cuido deles como família. Proteja o cercado e traga o cavalo de volta, por favor.", "Para trazê-lo, monte nele: ele só obedece a quem tem calma."],
 		},
 	},
 	"C1-M4": {
@@ -72,9 +72,9 @@ const MISSOES := {
 			{"id": "fagulha", "texto": "Alimentar o dragão ferido com carne", "tipo": "entregar", "alvo": "fagulha", "item": "carne", "qtd": 1},
 		],
 		"recompensa": {"itens": {"maca": 3}, "texto": "Fagulha passa a acompanhar Torin; o portão norte abre"},
-		"encerramento": "Um dragãozinho ferido ergue a cabeça e solta uma faísca. Fagulha agora acompanha você. Halk abrirá o portão norte.",
+		"encerramento": "Um dragãozinho ferido ergue a cabeça e solta uma faísca. Ele não foge de você: confia, mesmo ferido. Fagulha agora acompanha você. Halk abrirá o portão norte.",
 		"dialogos": {
-			"tessa": ["Vi rastros de botas imperiais na trilha escondida do pinhal, ao norte. Eles prendem algo lá. Vá ver, mas leve carne, pelo que ouvi é um dragão.", "Batedores do Império costumam andar em três. Cuidado."],
+			"tessa": ["Vi rastros de botas imperiais na trilha escondida do pinhal, ao norte. Eles prendem algo lá, e ouvi um som que não era de homem nem de lobo. Leve carne: pelo que ouvi, é um dragão.", "Batedores do Império costumam andar em três. E Torin: se for mesmo um dragão, não conte ao Vane antes de ver com os próprios olhos."],
 		},
 	},
 	"C2-M1": {
@@ -90,7 +90,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"carne": 2}, "texto": "Elda confia em você"},
 		"encerramento": "Elda: \"Você lê rastro melhor que muito veterano. Fale com a Sava, na mina: ela cuida dos filhotes de dragão que o Império prendeu.\"",
 		"dialogos": {
-			"elda": ["Rastro bom a gente segue com calma. Há dois conjuntos de pegadas saindo do acampamento: as de lobo levam à toca, as de bota levam a um beco sem saída.", "Traga quatro couros ou presas da caça e quatro raízes do riacho. Evite o urso da margem norte."],
+			"elda": ["Rastro bom a gente segue com calma. Há dois conjuntos de pegadas saindo do acampamento: as de lobo levam à toca, as de bota levam a um beco sem saída.", "Não mate por diversão, Torin. O bosque já perdeu bicho demais para o Ferro Negro. Traga quatro couros ou presas e quatro raízes do riacho.", "E fique longe do urso da margem norte: ele não defende território. Está enlouquecido."],
 		},
 	},
 	"C2-M2": {
@@ -105,7 +105,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"maca": 2}, "texto": "Os filhotes voltam ao céu"},
 		"encerramento": "Sava: \"Olha eles voando! Procure o Borin, o mineiro fugido, perto do riacho. Ele sabe o que prende os dragões.\"",
 		"dialogos": {
-			"sava": ["Eles não comem, não dormem: o Ferro Negro os deixa tontos. Há três jaulas na encosta, na triagem e no depósito.", "Cada jaula tem um guarda com a chave. Tire a chave dele e abra."],
+			"sava": ["Eles não comem, não dormem: o Ferro Negro os deixa tontos. São filhotes, Torin. Perto do que os pais foram, são crianças.", "Há três jaulas: na encosta, na triagem e no depósito. Cada guarda tem a chave. Tire a chave dele e abra. E fale baixo: eles aprenderam a ter medo de voz de homem."],
 		},
 	},
 	"C2-M3": {
@@ -119,9 +119,9 @@ const MISSOES := {
 			{"id": "minerio", "texto": "Coletar o Ferro Negro bruto que sobra", "tipo": "coletar", "alvo": "minerio_bruto", "qtd": 3},
 		],
 		"recompensa": {"itens": {"maca": 2}, "texto": "A névoa do bosque recua"},
-		"encerramento": "O obelisco desaba. A névoa recua, os animais correm para longe e os filhotes que restavam se vão. Mas o capataz da mina ouviu o estrondo.",
+		"encerramento": "O obelisco desaba. A névoa recua, os animais correm para longe e Fagulha estremece, sentindo as correntes do mundo afrouxarem. Mas o capataz da mina ouviu o estrondo.",
 		"dialogos": {
-			"borin": ["Eu cavei sete meses naquele buraco. O obelisco no meio da mina é o que deixa os dragões loucos: ele os prende por correntes invisíveis.", "Não adianta bater no corpo dele. Quebre as três âncoras ao redor, e a pedra cai sozinha. Os guardas vão tentar impedir."],
+			"borin": ["Eu cavei sete meses naquele buraco. O obelisco no meio da mina é o que deixa os dragões loucos: ele os prende por correntes que ninguém vê.", "Achei uma carta do Imperador Solon na mesa do capataz. Dizia que o medo é preferível ao caos. Passei a noite sem dormir, pensando em que tipo de gente escreve uma frase dessas.", "Não adianta bater no corpo dele. Quebre as três âncoras ao redor e a pedra cai sozinha. Os guardas vão tentar impedir."],
 		},
 	},
 	"C2-M4": {
@@ -133,7 +133,10 @@ const MISSOES := {
 			{"id": "gorath", "texto": "Derrotar o capataz Gorath na praça da mina", "tipo": "derrotar", "alvo": "gorath", "qtd": 1},
 		],
 		"recompensa": {"itens": {"couro": 2}, "texto": "A estrada para Ferrogris se abre"},
-		"encerramento": "Gorath tomba. A estrada leste para a Fortaleza de Ferrogris está livre.",
+		"encerramento": "Gorath tomba, e entre os escombros ficam fragmentos do obelisco. A estrada leste para a Fortaleza de Ferrogris está livre.",
+		"dialogos": {
+			"borin": ["O Gorath não é louco: é obediente. Isso é pior. Ele tem filhos na vila do Império e vive apavorado de falhar com o Solon.", "Mesmo assim, ele vai tentar esmagar você. Não confunda explicação com perdão."],
+		},
 	},
 	"C3-M1": {
 		"capitulo": 3,
@@ -145,9 +148,9 @@ const MISSOES := {
 			{"id": "forja", "texto": "Levar 3 Ferro Negro bruto à Brenn para o equipamento reforçado", "tipo": "entregar", "alvo": "brenn", "item": "minerio_bruto", "qtd": 3},
 		],
 		"recompensa": {"itens": {"maca": 2}, "texto": "Equipamento reforçado: golpe +8 e vida máxima +20"},
-		"encerramento": "Brenn: \"Pronto. Ferro Negro bem batido não vira arma do Império, vira escudo contra ele. A ponte quebrada tem vau a norte: Ferrogris é por ali.\"",
+		"encerramento": "Brenn: \"Pronto. Ferro Negro bem batido não serve ao Império, serve contra ele. Mas é só um escudo, Torin: a lâmina de verdade vem depois. A ponte quebrada tem vau a norte, e Ferrogris é por ali.\"",
 		"dialogos": {
-			"brenn": ["Eu avisei que o Vane ia acabar assim. Agora ele quer o poder que jurou destruir.", "Traga o Ferro Negro bruto que você tirou do obelisco. Se eu bater ele direito, serve para reforçar sua espada e sua armadura."],
+			"brenn": ["Eu avisei que o Vane ia acabar assim. Ele não perdeu o juízo de uma vez: foi perdendo aos poucos, a cada vitória que o Ferro Negro lhe deu.", "Traga o Ferro Negro bruto que você tirou do obelisco. Se eu bater direito, serve para reforçar sua espada e sua armadura. Bruto, ele ainda obedece às runas: eu preciso de fogo para tirar isso dele."],
 		},
 	},
 	"C3-M2": {
@@ -173,7 +176,7 @@ const MISSOES := {
 			{"id": "setores", "texto": "Abrir os 3 setores: cela dos civis, cela dos soldados e jaula do dragão", "tipo": "interagir", "alvo": "setor_prisao", "qtd": 3},
 		],
 		"recompensa": {"itens": {"maca": 3}, "texto": "Os cativos estão livres"},
-		"encerramento": "Civis, soldados e um dragão jovem fogem pelo portão. Uma voz seca ordena das muralhas: o General Kaelor sai da sala de comando.",
+		"encerramento": "Civis, soldados e um dragão jovem fogem pelo portão. Fagulha ruge baixo, reconhecendo um dos seus. Uma voz seca ordena das muralhas: o General Kaelor sai da sala de comando.",
 	},
 	"C3-M4": {
 		"capitulo": 3,
@@ -198,7 +201,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"maca": 2}, "texto": "Você atravessou a Cratera"},
 		"encerramento": "O calor aperta, mas o alojamento está de pé. Os trabalhadores sabem como as forjas negras mantêm Ignis-Maw acorrentado.",
 		"dialogos": {
-			"tarn": ["Você veio pela ponte de basalto? Então já viu o que o Império construiu sobre o vulcão.", "Três forjas negras alimentam as correntes de Ignis-Maw. Desligue as três, uma de cada vez, e as correntes enfraquecem."],
+			"tarn": ["Você veio pela ponte de basalto? Então já viu o que o Império construiu sobre o vulcão. Eu ajudei a levantar cada tijolo e me arrependo de cada um.", "Três forjas negras alimentam as correntes de Ignis-Maw. Desligue as três, uma de cada vez, e as correntes enfraquecem."],
 		},
 	},
 	"C4-M2": {
@@ -224,7 +227,7 @@ const MISSOES := {
 			{"id": "ancoras", "texto": "Quebrar as 4 âncoras do Ignis-Maw (cuidado com fogo, cauda e ondas de calor)", "tipo": "destruir", "alvo": "ancora", "qtd": 4},
 		],
 		"recompensa": {"itens": {"maca": 3}, "texto": "Ignis-Maw está livre"},
-		"encerramento": "A última âncora cai. Ignis-Maw ruge, ergue-se e voa para longe, derrubando parte das forjas. Uma escama ancestral ficou na arena.",
+		"encerramento": "A última âncora cai. Ignis-Maw ruge, ergue-se e voa para longe, derrubando parte das forjas. Torin: \"Ele não era um monstro. Só tentava sobreviver à dor.\" Fagulha responde com um rugido baixo. Uma escama ancestral ficou na arena.",
 	},
 	"C4-M4": {
 		"capitulo": 4,
@@ -236,9 +239,9 @@ const MISSOES := {
 			{"id": "escama", "texto": "Entregar a escama ancestral à Brenn", "tipo": "entregar", "alvo": "brenn", "item": "escama_ancestral", "qtd": 1},
 		],
 		"recompensa": {"itens": {"maca": 3}, "texto": "Lâmina final: golpe +14"},
-		"encerramento": "Brenn: \"Minério vulcânico e escama de dragão livre. Essa lâmina não foi feita para o Império, Torin. Foi feita para acabar com ele. Valdoria espera ao norte.\"",
+		"encerramento": "Brenn: \"Ferro Negro, brasa do vulcão e escama de dragão livre. Essa liga não obedece mais a runa nenhuma. Essa lâmina não foi feita para o Império, Torin: foi feita para acabar com ele. Valdoria espera ao norte.\"",
 		"dialogos": {
-			"brenn": ["Trouxe tudo? Quatro minérios vulcânicos e a escama. Dá cá, vou acender a forja de campo.", "Ferro Negro, brasa e escama de dragão livre: é a única liga que o obelisco não consegue dobrar."],
+			"brenn": ["Trouxe tudo? Quatro minérios vulcânicos e a escama. Dá cá, vou acender a forja de campo.", "O Ferro Negro bruto obedece às runas do obelisco: ainda carrega a marca do Império. Mas misturado à brasa vulcânica e à escama de um dragão livre, ele perde a obediência. Não é o metal que resiste, Torin. É a liga."],
 		},
 	},
 	"C5-M1": {
@@ -254,7 +257,7 @@ const MISSOES := {
 		"recompensa": {"itens": {"maca": 3}, "texto": "A escadaria do castelo está livre"},
 		"encerramento": "A elite imperial cai. Os moradores espiam das janelas: a escadaria do castelo está livre.",
 		"dialogos": {
-			"suri": ["Psiu. Chaves e mapas, só para quem sabe perguntar. O castelo tem pátio, salão do trono e um obelisco enorme atrás do trono.", "Dizem que o Vane espera no pátio do duelo. E que ele já não é o mesmo."],
+			"suri": ["Psiu. Chaves e mapas, só para quem sabe perguntar. O castelo tem pátio, salão do trono e um obelisco enorme atrás do trono.", "Dizem que o Vane espera no pátio do duelo. E que ele já não é o mesmo: ri pouco, e quando ri, ninguém por perto ri junto."],
 		},
 	},
 	"C5-M2": {

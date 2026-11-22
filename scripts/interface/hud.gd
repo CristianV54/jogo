@@ -259,4 +259,5 @@ func mensagem(texto: String, segundos := 3.0) -> void:
 	_mensagem.text = texto
 	_mensagem.visible = true
 	if segundos > 0.0:
+		segundos = maxf(segundos, float(texto.length()) * 0.05)   # texto longo fica na tela o tempo de ser lido
 		get_tree().create_timer(segundos).timeout.connect(func() -> void: _mensagem.visible = false)

@@ -318,7 +318,33 @@ func _forjar_lamina_final() -> void:
 
 
 ## Cena de diálogo sem NPC específico: `linhas` é uma lista de [nome, texto]; E avança; no fim chama `ao_fim`.
-func cena_dialogo(linhas: Array, ao_fim := Callable()) -> void:
+## Divide um texto longo em páginas que cabem na caixa de diálogo (3 linhas, ~125 caracteres), quebrando de preferência
+## no fim de uma frase e, se preciso, entre palavras.
+static func paginar(texto: String, maximo := 125) -> PackedStringArray:
+	var paginas := PackedStringArray()
+	var atual := ""
+	for frase in texto.replace(". ", ".\u0001").replace("? ", "?\u0001").replace("! ", "!\u0001").split("\u0001"):
+		var f := String(frase)
+		if atual != "" and (atual + " " + f).length() > maximo:
+			paginas.append(atual)
+			atual = ""
+		while f.length() > maximo:   # frase sozinha maior que a caixa: corta entre palavras
+			var corte := f.rfind(" ", maximo)
+			if corte <= 0:
+				break
+			paginas.append(f.substr(0, corte))
+			f = f.substr(corte + 1)
+		atual = f if atual == "" else atual + " " + f
+	if atual != "":
+		paginas.append(atual)
+	return paginas
+
+
+func cena_dialogo(linhas_cruas: Array, ao_fim := Callable()) -> void:
+	var linhas: Array = []
+	for l in linhas_cruas:   # cada fala longa vira mais de uma página, com o mesmo falante
+		for pg in paginar(String(l[1])):
+			linhas.append([l[0], pg])
 	_cena = linhas
 	_cena_i = 0
 	_cena_fim = ao_fim
@@ -468,6 +494,10 @@ func interagir() -> void:
 	_falas_atuais = missoes.dialogo_de(n.nome.to_lower())
 	if _falas_atuais.is_empty():
 		_falas_atuais = n.falas
+	var paginadas := PackedStringArray()
+	for fala in _falas_atuais:
+		paginadas.append_array(paginar(fala))
+	_falas_atuais = paginadas
 	if _falas_atuais.size() == 0:
 		return
 	_dialogo_npc = n

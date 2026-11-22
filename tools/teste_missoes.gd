@@ -80,7 +80,7 @@ func _rodar() -> void:
 	await perto(quadro.global_position, 1.3)
 	avisos.clear()
 	jogo.interagir()
-	marcar("Quadro liberado depois da missão", m.quadro_liberado and avisos.size() == 1 and avisos[0].contains("Nenhum aviso"), str(avisos))
+	marcar("Quadro liberado depois da missão", m.quadro_liberado and avisos.size() == 1 and (avisos[0].contains("Nenhum aviso") or avisos[0].contains("Missão:")), str(avisos))   # desde o Marco 3 o quadro já oferece a próxima missão
 	var falhas := 0
 	for k in checks:
 		if not checks[k]:
