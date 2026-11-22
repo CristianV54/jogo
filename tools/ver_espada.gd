@@ -1,5 +1,6 @@
 extends SceneTree
-# Fotografa o Torin correndo (espada nas costas) e parado (espada na mão), de costas e de lado.
+# Fotografa o Torin correndo e parado (espada sempre na mão), de costas, de lado e de frente.
+#   godot --path . --script res://tools/ver_espada.gd -- gx gy gz   (giro extra da corrida, em graus)
 func _init() -> void:
 	var luz := DirectionalLight3D.new()
 	luz.rotation_degrees = Vector3(-45, -30, 0)
@@ -21,11 +22,10 @@ func _init() -> void:
 
 
 func _rodar(t: Humanoide, cam: Camera3D) -> void:
-	var giro := OS.get_cmdline_user_args()
-	if giro.size() >= 3:
-		t._arma_costas.rotation_degrees = Vector3(float(giro[0]), float(giro[1]), float(giro[2]))
-	if giro.size() >= 6:
-		t._arma_costas.position = Vector3(float(giro[3]), float(giro[4]), float(giro[5]))
+	var g := OS.get_cmdline_user_args()
+	if g.size() >= 3:
+		t.corrida_giro = Vector3(float(g[0]), float(g[1]), float(g[2]))
+	var tag := "_".join(g) if g.size() >= 3 else "atual"
 	for par in [["parado", "Idle"], ["correndo", "Jog_Fwd"]]:
 		t.tocar(par[1], 0.0)
 		await create_timer(0.7).timeout
@@ -34,5 +34,5 @@ func _rodar(t: Humanoide, cam: Camera3D) -> void:
 			cam.look_at(Vector3(0, 1.1, 0))
 			await create_timer(0.35).timeout
 			RenderingServer.force_draw()
-			root.get_viewport().get_texture().get_image().save_png("tools/capturas/espada_%s_%s.png" % [par[0], v[0]])
+			root.get_viewport().get_texture().get_image().save_png("tools/capturas/espada_%s_%s_%s.png" % [tag, par[0], v[0]])
 	quit(0)

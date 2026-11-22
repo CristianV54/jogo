@@ -23,14 +23,13 @@ const BIBLIOTECA: AnimationLibrary = preload("res://assets/animations/ual/ual1_b
 ## Animação em loop que toca ao entrar na cena.
 @export var animacao_inicial := "Idle"
 
-## Ao correr a espada vai para as costas (na mão, o braço balançando a levava para a cabeça).
-@export var costas_giro := Vector3(90.0, 0.0, 40.0)
-@export var costas_deslocamento := Vector3(0.0, -0.08, -0.22)
+## Ao correr a espada continua na mão, mas a lâmina abaixa (graus, no espaço do osso da mão): braço balançando com ela
+## de pé levava a ponta para a cabeça.
+@export var corrida_giro := Vector3(-135.0, 0.0, 0.0)
 
 @onready var modelo: Node3D = $Modelo
 var animacoes: AnimationPlayer
 var _arma_mao: Node3D
-var _arma_costas: Node3D
 var _correndo_antes := false
 
 
@@ -45,7 +44,6 @@ func _ready() -> void:
 			esq0.set_bone_pose_scale(osso, Vector3.ONE * cabeca_grande)
 	if arma_cena:
 		_arma_mao = equipar_arma(arma_cena, arma_escala, arma_giro, arma_deslocamento, arma_empunhadura)
-		_guardar_nas_costas()
 	animacoes = AnimationPlayer.new()
 	animacoes.name = "Animacoes"
 	add_child(animacoes)
@@ -54,31 +52,22 @@ func _ready() -> void:
 	tocar(animacao_inicial)
 
 
-func _guardar_nas_costas() -> void:
-	var esq: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
-	if esq == null or esq.find_bone("spine_03") < 0:
-		return
-	var anexo := BoneAttachment3D.new()
-	anexo.name = "ArmaNasCostas"
-	anexo.bone_name = "spine_03"
-	esq.add_child(anexo)
-	_arma_costas = arma_cena.instantiate()
-	_arma_costas.scale = Vector3.ONE * arma_escala
-	_arma_costas.rotation_degrees = costas_giro
-	_arma_costas.position = costas_deslocamento
-	_arma_costas.visible = false
-	anexo.add_child(_arma_costas)
-
-
 func _process(_delta: float) -> void:
-	if _arma_mao == null or _arma_costas == null or animacoes == null:
+	if _arma_mao == null or animacoes == null:
 		return
 	var a := animacoes.current_animation
 	var correndo := a == "Sprint" or a == "Jog_Fwd" or a == "Jog_Bwd" or a == "Jog_Left" or a == "Jog_Right"
 	if correndo != _correndo_antes:
 		_correndo_antes = correndo
-		_arma_mao.visible = not correndo
-		_arma_costas.visible = correndo
+		aplicar_pose_arma(correndo)
+
+
+## Pose da arma na mão: normal ou de corrida (giro extra em volta do punho; o cabo continua no mesmo ponto).
+func aplicar_pose_arma(correndo: bool) -> void:
+	var base := Basis.from_euler(arma_giro * PI / 180.0)
+	var extra := Basis.from_euler(corrida_giro * PI / 180.0) if correndo else Basis.IDENTITY
+	_arma_mao.basis = (extra * base).scaled(Vector3.ONE * arma_escala)
+	_arma_mao.position = arma_deslocamento - _arma_mao.basis * arma_empunhadura
 
 
 func tocar(nome: String, mistura := 0.2) -> void:
