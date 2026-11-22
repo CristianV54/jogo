@@ -6,6 +6,7 @@ extends Node3D
 const AREAS := {
 	"refugio_do_pinhal": "res://scenes/areas/refugio_do_pinhal.tscn",
 	"pomar_alto": "res://scenes/areas/pomar_alto.tscn",
+	"acampamento_ruptura": "res://scenes/areas/acampamento_ruptura.tscn",
 	"bosque_velado": "res://scenes/areas/bosque_velado.tscn",
 	"fronteira_ferrogris": "res://scenes/areas/fronteira_ferrogris.tscn",
 	"cratera_ignis": "res://scenes/areas/cratera_ignis.tscn",
@@ -13,12 +14,16 @@ const AREAS := {
 }
 ## Quem guarda cada passagem: para entrar na área, é preciso ter derrotado o chefe indicado.
 const REQUISITOS := {
-	"fronteira_ferrogris": "gorath",
+	"acampamento_ruptura": "gorath",
 	"cratera_ignis": "kaelor",
 	"valdoria": "ignis_maw",
 }
 ## Missão que precisa estar concluída para o Halk abrir a passagem.
-const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4"}
+const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1"}
+const MENSAGEM_REQUISITO := {
+	"bosque_velado": "Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).",
+	"fronteira_ferrogris": "A ponte está quebrada e o vau é vigiado. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento).",
+}
 const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "solon": "Imperador Solon"}
 
 signal area_carregada(nome: String)
@@ -31,6 +36,9 @@ var derrotados: Dictionary = {}
 var missoes: GerenciadorMissoes
 var fagulha_livre := false      # só acompanha o Torin depois do resgate (C1-M4)
 var _falas_atuais := PackedStringArray()
+var _cena: Array = []
+var _cena_i := 0
+var _cena_fim: Callable
 var _dialogo_npc: Npc
 var _dialogo_indice := 0
 var _trocando := false
@@ -43,6 +51,7 @@ var _trocando := false
 
 
 func _ready() -> void:
+	add_to_group("jogo")
 	jogador.camera = camera
 	jogador.vida_mudou.connect(hud.definir_vida)
 	jogador.morreu.connect(_ao_morrer)
@@ -60,7 +69,9 @@ func _ready() -> void:
 	missoes.missao_concluida.connect(func(id: String) -> void:
 		hud.definir_rastreador(missoes.rastreador())
 		if id == "C1-M4":
-			liberar_fagulha())
+			liberar_fagulha()
+		elif id == "C3-M1":
+			_reforcar_equipamento())
 	fagulha.alvo = null   # a Fagulha começa ferida na clareira do pinhal
 	fagulha.montaria.ativa = false
 	ir_para("refugio_do_pinhal", "Principal")
@@ -75,7 +86,7 @@ func ir_para(destino: String, spawn: String) -> void:
 		_empurrar_para_tras()
 		return
 	if REQUISITOS_MISSAO.has(destino) and not missoes.concluidas.has(REQUISITOS_MISSAO[destino]):
-		hud.mensagem("Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).", 3.5)
+		hud.mensagem(MENSAGEM_REQUISITO.get(destino, "Caminho bloqueado."), 3.5)
 		_empurrar_para_tras()
 		return
 	_trocando = true
@@ -135,7 +146,7 @@ func _ao_derrotar_chefe(id: String) -> void:
 	var dica := ""
 	match id:
 		"gorath":
-			dica = "\nA Fortaleza de Ferrogris, a leste do Refúgio, está liberada."
+			dica = "\nO Acampamento da Ruptura, a leste do Refúgio, está liberado."
 		"kaelor":
 			dica = "\nO portal para a Cratera de Ignis se abriu."
 		"ignis_maw":
@@ -205,6 +216,36 @@ func _objeto_mais_perto_que(coisa: Interagivel, npc: Npc) -> bool:
 	return coisa.global_position.distance_to(jogador.global_position) < npc.global_position.distance_to(jogador.global_position)
 
 
+## A Brenn forja o equipamento reforçado (C3-M1): mais dano de golpe e mais vida máxima.
+func _reforcar_equipamento() -> void:
+	jogador.dano_golpe += 8
+	jogador.vida_max += 20
+	jogador.vida = jogador.vida_max
+	hud.definir_vida(jogador.vida, jogador.vida_max)
+	hud.mensagem("Equipamento reforçado pela Brenn: golpe +8, vida máxima +20.", 5.0)
+
+
+## Cena de diálogo sem NPC específico: `linhas` é uma lista de [nome, texto]; E avança; no fim chama `ao_fim`.
+func cena_dialogo(linhas: Array, ao_fim := Callable()) -> void:
+	_cena = linhas
+	_cena_i = 0
+	_cena_fim = ao_fim
+	jogador.travado = true
+	hud.dialogo(linhas[0][0], linhas[0][1])
+
+
+func _avancar_cena() -> void:
+	_cena_i += 1
+	if _cena_i >= _cena.size():
+		hud.fechar_dialogo()
+		jogador.travado = false
+		_cena = []
+		if _cena_fim.is_valid():
+			_cena_fim.call()
+		return
+	hud.dialogo(_cena[_cena_i][0], _cena[_cena_i][1])
+
+
 func _interagivel_mais_perto() -> Interagivel:
 	var melhor: Interagivel = null
 	var dmin := 99.0
@@ -264,6 +305,9 @@ func _ao_usar_item(item: String) -> void:
 
 
 func interagir() -> void:
+	if not _cena.is_empty():
+		_avancar_cena()
+		return
 	if jogador.montaria and not hud.dialogo_aberto:
 		if jogador.montaria.voa and not jogador.perto_do_chao():
 			hud.mensagem("Pouse (tecla C) para desmontar.", 2.0)

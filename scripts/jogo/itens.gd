@@ -3,7 +3,7 @@ extends RefCounted
 ## Catálogo dos itens do jogo: nome, descrição, modelo 3D (usado no chão e no ícone do inventário) e efeito.
 ## `cura` > 0: o item é comestível e recupera essa vida ao ser usado.
 
-const ORDEM := ["maca", "raiz", "carne", "couro", "la", "presa", "minerio_bruto", "chave"]
+const ORDEM := ["maca", "raiz", "carne", "couro", "la", "presa", "minerio_bruto", "chave", "aco_imperial"]
 
 const DADOS := {
 	"raiz": {
@@ -16,6 +16,12 @@ const DADOS := {
 		"nome": "Ferro Negro bruto",
 		"descricao": "Minério com veios azuis que pulsam de leve. A Brenn sabe o que fazer com ele (ainda sem uso).",
 		"modelo": "res://assets/models/itens/minerio_bruto/minerio_bruto.glb",
+		"cura": 0,
+	},
+	"aco_imperial": {
+		"nome": "Aço Imperial",
+		"descricao": "Barras de aço do depósito de Ferrogris, marcadas com a listra do Império. Brenn dá valor a isso (ainda sem uso).",
+		"modelo": "res://assets/models/itens/aco_imperial/aco_imperial.glb",
 		"cura": 0,
 	},
 	"chave": {

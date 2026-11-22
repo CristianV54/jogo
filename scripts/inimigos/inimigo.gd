@@ -21,6 +21,7 @@ enum Estado { PARADO, PERSEGUINDO, ATACANDO, DANO, MORTO }
 @export var enfurece_em := 0.0          # fração da vida; 0 = nunca
 @export var cena_visual: PackedScene
 @export var escala_visual := 1.0
+@export var projetil := false         # arqueiro: desenha uma flecha até o alvo ao atacar
 @export var acessorio := ""        # ver Acessorios
 @export var especie := ""           # chave de VariacaoDeCores
 @export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer (só inimigos comuns)
@@ -111,6 +112,8 @@ func _physics_process(delta: float) -> void:
 			if not _atacou and _tempo >= momento_do_ataque:
 				_atacou = true
 				if dist <= alcance_ataque * 1.35:
+					if projetil:
+						Efeitos.flecha(self, alvo)
 					alvo.receber_dano(dano, self)
 			if _tempo >= intervalo_ataque:
 				estado = Estado.PERSEGUINDO

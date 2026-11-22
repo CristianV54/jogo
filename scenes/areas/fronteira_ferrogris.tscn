@@ -1,16 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/mundo/arena_chefe.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/inimigos/kaelor.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/mundo/fronteira_ferrogris.gd" id="1"]
 
 [node name="FronteiraFerrogris" type="Node3D"]
 script = ExtResource("1")
-estilo = "forte"
-nome_da_area = "Fortaleza de Ferrogris"
-id_chefe = "kaelor"
-cena_chefe = ExtResource("2")
-comuns = PackedStringArray("res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/guarda_imperial.tscn", "res://scenes/inimigos/filhote_de_asa.tscn")
-destino_volta = "refugio_do_pinhal"
-spawn_volta = "DaFronteira"
-destino_proximo = "cratera_ignis"
-semente = 23

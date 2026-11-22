@@ -5,7 +5,7 @@ extends RefCounted
 ## "visitar" (alvo = id de uma ZonaDeEvento) e "entregar" (alvo = NPC; "item" = o que gastar do inventário).
 ## Nenhuma missão conclui por proximidade: só por contagem real de eventos.
 
-const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes"}
+const CAPITULOS := {1: "Capítulo I: Refúgio do Pinhal", 2: "Capítulo II: Bosque Velado e Mina das Correntes", 3: "Capítulo III: Ruptura e Fortaleza de Ferrogris"}
 ## Ordem em que o quadro de avisos oferece as missões do capítulo.
 const ORDEM_CAP1 := ["C1-M1", "C1-M2", "C1-M3", "C1-M4"]
 ## No capítulo II as missões são oferecidas pelos NPCs (Elda e Sava) ou começam em cadeia.
@@ -126,5 +126,56 @@ const MISSOES := {
 		],
 		"recompensa": {"itens": {"couro": 2}, "texto": "A estrada para Ferrogris se abre"},
 		"encerramento": "Gorath tomba. A estrada leste para a Fortaleza de Ferrogris está livre.",
+	},
+	"C3-M1": {
+		"capitulo": 3,
+		"titulo": "A Quebra do Juramento",
+		"requer": "C2-M4",
+		"auto_apos": "C2-M4",
+		"objetivos": [
+			{"id": "confronto", "texto": "Chegar ao Acampamento da Ruptura e ouvir o Vane", "tipo": "interagir", "alvo": "confronto_visto", "qtd": 1},
+			{"id": "forja", "texto": "Levar 3 Ferro Negro bruto à Brenn para o equipamento reforçado", "tipo": "entregar", "alvo": "brenn", "item": "minerio_bruto", "qtd": 3},
+		],
+		"recompensa": {"itens": {"maca": 2}, "texto": "Equipamento reforçado: golpe +8 e vida máxima +20"},
+		"encerramento": "Brenn: \"Pronto. Ferro Negro bem batido não vira arma do Império, vira escudo contra ele. A ponte quebrada tem vau a norte: Ferrogris é por ali.\"",
+		"dialogos": {
+			"brenn": ["Eu avisei que o Vane ia acabar assim. Agora ele quer o poder que jurou destruir.", "Traga o Ferro Negro bruto que você tirou do obelisco. Se eu bater ele direito, serve para reforçar sua espada e sua armadura."],
+		},
+	},
+	"C3-M2": {
+		"capitulo": 3,
+		"titulo": "Brecha nas Muralhas",
+		"requer": "C3-M1",
+		"auto_apos": "C3-M1",
+		"objetivos": [
+			{"id": "guardas", "texto": "Derrotar os guardas de Ferrogris", "tipo": "derrotar", "alvo": "guarda_ferrogris", "qtd": 4},
+			{"id": "caes", "texto": "Derrotar os cães de guerra do canil", "tipo": "derrotar", "alvo": "cao_guerra", "qtd": 2},
+			{"id": "aco", "texto": "Pegar 3 Aços Imperiais no depósito", "tipo": "coletar", "alvo": "aco_imperial", "qtd": 3},
+		],
+		"recompensa": {"itens": {"carne": 2}, "texto": "Brecha aberta nas muralhas"},
+		"encerramento": "As muralhas externas já não protegem o pátio. Os presos devem estar na prisão do lado oeste e nas jaulas do lado leste.",
+	},
+	"C3-M3": {
+		"capitulo": 3,
+		"titulo": "Libertação dos Cativos",
+		"requer": "C3-M2",
+		"auto_apos": "C3-M2",
+		"objetivos": [
+			{"id": "chaves", "texto": "Tirar as chaves dos guardas da prisão, das jaulas e da sala de comando", "tipo": "coletar", "alvo": "chave", "qtd": 3},
+			{"id": "setores", "texto": "Abrir os 3 setores: cela dos civis, cela dos soldados e jaula do dragão", "tipo": "interagir", "alvo": "setor_prisao", "qtd": 3},
+		],
+		"recompensa": {"itens": {"maca": 3}, "texto": "Os cativos estão livres"},
+		"encerramento": "Civis, soldados e um dragão jovem fogem pelo portão. Uma voz seca ordena das muralhas: o General Kaelor sai da sala de comando.",
+	},
+	"C3-M4": {
+		"capitulo": 3,
+		"titulo": "O Comandante de Ferrogris",
+		"requer": "C3-M3",
+		"auto_apos": "C3-M3",
+		"objetivos": [
+			{"id": "kaelor", "texto": "Derrotar o General Kaelor no pátio central", "tipo": "derrotar", "alvo": "kaelor", "qtd": 1},
+		],
+		"recompensa": {"itens": {"couro": 2}, "texto": "O portão dos fundos se abre para a Cratera de Ignis"},
+		"encerramento": "Kaelor tomba sem gritar. O portão dos fundos da fortaleza se abre: o caminho segue para a Cratera de Ignis.",
 	},
 }

@@ -128,3 +128,15 @@ objeto(C, ferro2, vertices=5, radius=0.012, depth=0.2, location=(0, 0, 0.09))
 objeto(C, ferro2, vertices=4, radius=0.02, depth=0.03, location=(0.03, 0, 0.02), rotation=(0, math.pi / 2, 0))
 objeto(C, ferro2, vertices=4, radius=0.02, depth=0.03, location=(0.03, 0, 0.06), rotation=(0, math.pi / 2, 0))
 juntar_e_exportar("chave")
+
+# aço imperial: três barras de aço empilhadas, com listra vermelha do Império
+novo()
+aco = material("Aco", (0.45, 0.47, 0.5))
+listra = material("ListraImperial", (0.5, 0.05, 0.04))
+CUBO = bpy.ops.mesh.primitive_cube_add
+for dz, dx in ((0.04, -0.07), (0.04, 0.07), (0.12, 0.0)):
+    o = objeto(CUBO, aco, size=1.0, location=(dx, 0, dz))
+    o.scale = (0.12, 0.3, 0.07)
+    f = objeto(CUBO, listra, size=1.0, location=(dx, 0, dz + 0.0))
+    f.scale = (0.125, 0.04, 0.072)
+juntar_e_exportar("aco_imperial")

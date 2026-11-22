@@ -480,7 +480,7 @@ func _saidas() -> void:
 	_novo_spawn("DoPomar", Vector3(-43, 0, 0), Vector3(0, 0, 0))
 	_portal(Vector3(-150, terreno.altura_em(-150, 0), 0), "pomar_alto", "Entrada").rotation.y = deg_to_rad(90.0)
 	_portal(Vector3(0, terreno.altura_em(0, -150), -150), "bosque_velado", "Entrada")
-	_portal(Vector3(150, terreno.altura_em(150, -1), -1), "fronteira_ferrogris", "Entrada").rotation.y = deg_to_rad(90.0)
+	_portal(Vector3(150, terreno.altura_em(150, -1), -1), "acampamento_ruptura", "Entrada").rotation.y = deg_to_rad(90.0)
 
 
 ## Onde a Fagulha ferida fica deitada até o resgate (C1-M4).

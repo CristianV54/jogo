@@ -4,7 +4,7 @@ extends SceneTree
 const PASTA := "tools/capturas/"
 var vistas: Array = []
 var etapa := -1
-var espera := 40
+var espera := 150
 var cam: Camera3D
 var prefixo := ""
 func _init() -> void:
@@ -49,6 +49,7 @@ func _process(_d: float) -> bool:
 	if espera > 0:
 		return false
 	if etapa >= 0:
+		RenderingServer.force_draw()
 		root.get_viewport().get_texture().get_image().save_png(PASTA + prefixo + "_" + vistas[etapa][0] + ".png")
 		print("CAPTURA ", prefixo, "_", vistas[etapa][0])
 	etapa += 1
@@ -56,5 +57,5 @@ func _process(_d: float) -> bool:
 		return true
 	cam.global_position = vistas[etapa][1]
 	cam.look_at(vistas[etapa][2])
-	espera = 8
+	espera = 30
 	return false

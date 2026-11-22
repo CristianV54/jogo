@@ -54,3 +54,24 @@ static func desintegrar(no: Node3D, visual: Node3D, duracao := 1.2) -> void:
 	var tw := no.create_tween()
 	tw.tween_property(visual, "scale", Vector3.ONE * 0.02, duracao).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(no.queue_free)
+
+
+## Flecha visual do arqueiro até o alvo (o dano é aplicado pelo inimigo; isto é só o desenho).
+static func flecha(origem: Node3D, alvo: Node3D) -> void:
+	var flecha_mesh := MeshInstance3D.new()
+	var b := BoxMesh.new()
+	b.size = Vector3(0.05, 0.05, 1.0)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.45, 0.32, 0.18)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	b.material = m
+	flecha_mesh.mesh = b
+	var pai := origem.get_parent()
+	pai.add_child(flecha_mesh)
+	var de := origem.global_position + Vector3(0.0, 1.4, 0.0)
+	var para := alvo.global_position + Vector3(0.0, 1.1, 0.0)
+	flecha_mesh.global_position = de
+	flecha_mesh.look_at(para, Vector3.UP)
+	var tw := flecha_mesh.create_tween()
+	tw.tween_property(flecha_mesh, "global_position", para, maxf(0.12, de.distance_to(para) / 60.0))
+	tw.tween_callback(flecha_mesh.queue_free)

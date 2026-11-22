@@ -11,6 +11,6 @@ id_chefe = "ignis_maw"
 cena_chefe = ExtResource("2")
 comuns = PackedStringArray("res://scenes/inimigos/filhote_de_asa.tscn", "res://scenes/inimigos/filhote_de_asa.tscn", "res://scenes/inimigos/filhote_de_asa.tscn")
 destino_volta = "fronteira_ferrogris"
-spawn_volta = "Entrada"
+spawn_volta = "DaCratera"
 destino_proximo = "valdoria"
 semente = 31

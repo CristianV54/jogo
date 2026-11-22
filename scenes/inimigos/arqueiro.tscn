@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inimigos/inimigo.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/personagens/guarda_imperial.tscn" id="2"]
+
+[node name="Arqueiro" type="CharacterBody3D"]
+script = ExtResource("1")
+cena_visual = ExtResource("2")
+nome = "Arqueiro Imperial"
+vida_max = 50
+dano = 6
+velocidade = 0.0
+alcance_visao = 30.0
+alcance_ataque = 26.0
+momento_do_ataque = 0.5
+intervalo_ataque = 2.6
+anim_atacar = "Spell_Simple_Shoot"
+projetil = true
+especie = "arqueiro"
