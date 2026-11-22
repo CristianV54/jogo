@@ -81,6 +81,8 @@ func _rodar() -> void:
 		await esperar(0.2)
 	await esperar(1.0)
 	m = jogo.missoes
+	jogo.clima.congelado = true   # o tempo não muda no meio do teste
+	jogo.clima.tempo_automatico = false
 	for id in ["C1-M1", "C1-M2", "C1-M3", "C1-M4", "C2-M1", "C2-M2", "C2-M3", "C2-M4", "C3-M1", "C3-M2", "C3-M3", "C3-M4"]:
 		m.concluidas.append(id)
 	m.ativas.clear()

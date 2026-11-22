@@ -29,7 +29,10 @@ func _livre_em(x: float, z: float, mascara := 5) -> Array:   # [livre, y]
 	sq.shape = _cap
 	sq.transform = Transform3D(Basis.IDENTITY, Vector3(x, y + 0.25 + 0.9, z))
 	sq.collision_mask = mascara
-	return [espaco.intersect_shape(sq, 1).is_empty(), y]
+	for r in espaco.intersect_shape(sq, 12):   # só conta o que é parede, chão e móvel (gente e bicho andam)
+		if r.collider is StaticBody3D:
+			return [false, y]
+	return [true, y]
 
 
 func _rodar() -> void:
@@ -38,6 +41,9 @@ func _rodar() -> void:
 	for i in 6:
 		await physics_frame
 	var m: Mundo = jogo.mundo
+	jogo.jogador.global_position = Vector3(9000.0, 500.0, 9000.0)   # tira o Torin do caminho: o corpo dele também é uma parede para os raios
+	jogo.jogador.set_physics_process(false)
+	await physics_frame
 	# abre todos os portões das áreas e as portas das casas (as portas abrem sozinhas)
 	for p in m.find_children("*", "Portao", true, false):
 		(p as Portao).abrir()
@@ -204,8 +210,8 @@ func _livre_perto(livre: PackedByteArray, nx: int, nz: int, ci: int, cj: int) ->
 
 
 func _alcanca(visto: PackedByteArray, nx: int, nz: int, rect: Rect2, passo: float, pos: Vector3) -> bool:
-	var ci := int(round((pos.x - rect.position.x) / passo))
-	var cj := int(round((pos.z - rect.position.y) / passo))
+	var ci := clampi(int(round((pos.x - rect.position.x) / passo)), 0, nx - 1)   # pontas de estrada ficam na borda ou um pouco além
+	var cj := clampi(int(round((pos.z - rect.position.y) / passo)), 0, nz - 1)
 	for di in range(-3, 4):
 		for dj in range(-3, 4):
 			var i := ci + di

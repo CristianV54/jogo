@@ -218,6 +218,11 @@ func eh_noite() -> bool:
 	return sol_dir().y < 0.0
 
 
+## Hora de recolher: das 19h30 às 5h30 (e quando chove forte) o povo vai para casa.
+func hora_de_dormir() -> bool:
+	return hora >= 19.5 or hora < 5.5
+
+
 func sol_dir() -> Vector3:
 	var a := (hora - 6.0) / 24.0 * TAU
 	return Vector3(cos(a), sin(a), 0.3).normalized()

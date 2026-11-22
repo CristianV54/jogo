@@ -93,7 +93,7 @@ func _distancia_a_area(p: Vector2) -> float:
 func _altura_crua(x: float, z: float) -> float:
 	var d := _distancia_a_area(Vector2(x, z))
 	var amp := smoothstep(30.0, 220.0, d)
-	var colinas := (_ruido_mundo.get_noise_2d(x, z) * 0.5 + 0.5) * 22.0 + _ruido_fino.get_noise_2d(x * 0.6, z * 0.6) * 0.8
+	var colinas := (_ruido_mundo.get_noise_2d(x, z) * 0.5 + 0.5) * 10.0 + _ruido_fino.get_noise_2d(x * 0.6, z * 0.6) * 0.8
 	var h := colinas * amp
 	var melhor := 1e9   # as estradas ficam niveladas com o terreno em volta do eixo
 	var eixo := Vector2.ZERO
@@ -106,7 +106,7 @@ func _altura_crua(x: float, z: float) -> float:
 			melhor = par[0]
 			eixo = par[1]
 	if melhor < 7.0:
-		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 22.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo))
+		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
 	return h
 

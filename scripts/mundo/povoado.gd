@@ -24,8 +24,7 @@ func montar() -> void:
 	name = String(dados["id"])
 	centro = dados["centro"]
 	dir = dados["dir"]
-	var lado := float(MundoDados.POVOADOS.filter(func(p: Dictionary) -> bool: return p["id"] == dados["id"]).front()["lado"])
-	para_longe = Vector2(-dir.y, dir.x) * lado
+	para_longe = Vector2(-dir.y, dir.x) * float(dados["lado"])
 	_rng.seed = hash(String(dados["id"]))
 	_solidos = StaticBody3D.new()
 	_solidos.name = "Solidos"
@@ -65,8 +64,15 @@ func _casa(nome_c: String, p: Vector2, colunas: int, linhas: int, estilo: Dictio
 	return casa
 
 
+## Lado da cerca (n, s, o, l) que olha para a estrada: é por onde se entra e se sai.
+func _lado_da_estrada() -> String:
+	if absf(para_longe.x) > absf(para_longe.y):
+		return "o" if para_longe.x > 0.0 else "l"
+	return "n" if para_longe.y > 0.0 else "s"
+
+
 func _plantacao(p: Vector2, larg: float, prof: float) -> void:
-	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg + 5.0, prof + 4.0, "s", 3.0)
+	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg + 5.0, prof + 4.0, _lado_da_estrada(), 4.0)
 	var pl := Plantacao.new()
 	pl.largura = larg
 	pl.profundidade = prof
@@ -128,7 +134,7 @@ func _animal(modelo: String, nome_a: String, especie: String, p: Vector2, esc: f
 
 
 func _curral(p: Vector2, larg: float, prof: float, bichos: Array) -> void:
-	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg, prof, "s", 3.0)
+	VilaRefugio._cerca_retangular(Vector3(p.x, _y(p), p.y), larg, prof, _lado_da_estrada(), 3.4)
 	for b in bichos:   # [modelo, nome, especie, escala, drops]
 		var q := p + Vector2(_rng.randf_range(-larg / 2.5, larg / 2.5), _rng.randf_range(-prof / 2.5, prof / 2.5))
 		_animal(b[0], b[1], b[2], q, b[3], 2.0, 30, b[4])
@@ -186,7 +192,7 @@ func _fazenda() -> void:
 
 
 func _vila() -> void:
-	_casa("Taverna", _p(0.0, 6.0), 4, 3, REF.ESTILO_MADEIRA, "moradia")
+	_casa("Taverna", _p(0.0, 6.0), 4, 4, REF.ESTILO_MADEIRA, "moradia")
 	_casa("Casa1", _p(-24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
 	_casa("Casa2", _p(24.0, 6.0), 3, 2, REF.ESTILO_MADEIRA)
 	_casa("Ferraria", _p(-14.0, 26.0), 3, 3, REF.ESTILO_PEDRA, "forja")
@@ -240,7 +246,7 @@ func _posto() -> void:
 
 
 func _posto_imperial() -> void:
-	_casa("Estalagem", _p(0.0, 6.0), 4, 3, REF.ESTILO_PEDRA)
+	_casa("Estalagem", _p(0.0, 6.0), 4, 4, REF.ESTILO_PEDRA)
 	_casa("Estabulo", _p(-24.0, 8.0), 3, 3, REF.ESTILO_MADEIRA, "deposito")
 	for k in 3:   # caravanas paradas
 		var q := _p(12.0 + k * 8.0, 20.0)

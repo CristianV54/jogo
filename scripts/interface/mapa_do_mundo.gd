@@ -67,47 +67,73 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var tela := get_viewport_rect().size
-	var area := Rect2(tela.x * 0.08, tela.y * 0.08, tela.x * 0.84, tela.y * 0.82)
 	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.02, 0.02, 0.02, 0.97))   # cobre a tela toda (some vida, rastreador e dicas)
-	draw_rect(area, COR_FUNDO)
-	draw_rect(area, COR_ESTRADA, false, 2.0)
 	var fonte := ThemeDB.fallback_font
-	draw_string(fonte, area.position + Vector2(24, 40), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, COR_ACENTO)
-	draw_string(fonte, area.position + Vector2(area.size.x - 260, 40), "M fecha", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.8, 0.8, 0.8))
-	var mapa := Rect2(area.position + Vector2(20, 60), area.size - Vector2(40, 150))
-	for e in ESTRADAS:   # estradas, tracejadas quando a região de destino ainda está trancada
-		var a := mapa.position + mapa.size * Vector2(REGIOES[e[0]]["pos"])
-		var b := mapa.position + mapa.size * Vector2(REGIOES[e[1]]["pos"])
-		var aberta: bool = liberadas.get(e[1], false) and liberadas.get(e[0], false)
-		if aberta:
-			draw_line(a, b, COR_ESTRADA, 6.0)
-		else:
-			var n := int(a.distance_to(b) / 16.0)
-			for i in n:
-				if i % 2 == 0:
-					draw_line(a.lerp(b, float(i) / n), a.lerp(b, float(i + 1) / n), Color(0.35, 0.3, 0.25), 4.0)
+	draw_string(fonte, Vector2(40, 52), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, COR_ACENTO)
+	draw_string(fonte, Vector2(tela.x - 160, 52), "M fecha", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.8, 0.8, 0.8))
+	var mundo := Mundo.instancia
+	if mundo == null:
+		return
+	var lim := MundoDados.LIMITES
+	var area := Rect2(40, 70, tela.x * 0.42, tela.y - 100)
+	var esc := minf(area.size.x / lim.size.x, area.size.y / lim.size.y)
+	var origem := area.position + (area.size - lim.size * esc) / 2.0
+	draw_rect(Rect2(origem, lim.size * esc), Color(0.1, 0.13, 0.09))
+	draw_rect(Rect2(origem, lim.size * esc), COR_ESTRADA, false, 2.0)
+	var mundo_para_mapa := func(p: Vector2) -> Vector2: return origem + (p - lim.position) * esc
+	for r in mundo.terreno.rios:   # rios
+		var pts := PackedVector2Array()
+		for p in r["pontos"]:
+			pts.append(mundo_para_mapa.call(p))
+		draw_polyline(pts, Color(0.25, 0.5, 0.75), 2.5)
+	for id in mundo.estradas:      # estradas
+		var pts := PackedVector2Array()
+		for p in mundo.estradas[id]:
+			pts.append(mundo_para_mapa.call(p))
+		draw_polyline(pts, COR_ESTRADA, 3.0)
 	for id in REGIOES:
-		var p := mapa.position + mapa.size * Vector2(REGIOES[id]["pos"])
+		var rect := MundoDados.retangulo(id)
+		var a: Vector2 = mundo_para_mapa.call(rect.position)
+		var b: Vector2 = mundo_para_mapa.call(rect.end)
 		var livre: bool = liberadas.get(id, false)
-		var cor := Color(0.35, 0.6, 0.35) if livre else Color(0.3, 0.28, 0.27)
-		draw_circle(p, 17.0, Color(0.05, 0.05, 0.05))
-		draw_circle(p, 14.0, cor)
+		draw_rect(Rect2(a, b - a), Color(0.22, 0.42, 0.24, 0.85) if livre else Color(0.28, 0.26, 0.25, 0.85))
+		draw_rect(Rect2(a, b - a), Color(0.6, 0.55, 0.45), false, 1.5)
 		if id == alvo:   # a missão ativa fica nesta região
-			draw_arc(p, 24.0 + sin(_t * 4.0) * 3.0, 0.0, TAU, 32, COR_ACENTO, 3.0)
+			draw_rect(Rect2(a - Vector2(4, 4), b - a + Vector2(8, 8)), COR_ACENTO, false, 2.0 + sin(_t * 4.0))
 		if id == atual:
-			draw_circle(p, 6.0, Color(1, 1, 1))
-		var linhas: PackedStringArray = String(REGIOES[id]["nome"]).split("\n")
-		for k in linhas.size():
-			draw_string(fonte, p + Vector2(-80, 40 + k * 20), linhas[k], HORIZONTAL_ALIGNMENT_CENTER, 160, 17, Color(0.95, 0.92, 0.85) if livre else Color(0.6, 0.55, 0.5))
-	var y := area.position.y + area.size.y - 80
-	draw_circle(area.position + Vector2(34, y - area.position.y + 6), 6.0, Color(1, 1, 1))
-	draw_string(fonte, area.position + Vector2(48, y - area.position.y + 12), "Você está aqui: " + String(REGIOES.get(atual, {}).get("nome", "?")).replace("\n", " "), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.95, 0.95, 0.95))
+			draw_rect(Rect2(a + Vector2(2, 2), b - a - Vector2(4, 4)), Color(1, 1, 1, 0.6), false, 1.0)
+	for pid in mundo.povoados:     # povoados e fazendas
+		var q: Vector2 = mundo_para_mapa.call(mundo.povoados[pid]["centro"])
+		draw_rect(Rect2(q - Vector2(3, 3), Vector2(6, 6)), Color(0.9, 0.75, 0.35))
+	for bid in mundo.barreiras:    # barreiras: vermelhas fechadas, verdes abertas
+		var bar: Barreira = mundo.barreiras[bid]
+		var q: Vector2 = mundo_para_mapa.call(Vector2(bar.global_position.x, bar.global_position.z))
+		draw_rect(Rect2(q - Vector2(5, 2), Vector2(10, 4)), Color(0.4, 0.85, 0.4) if bar.aberta else Color(0.9, 0.25, 0.2))
+	var jog := get_tree().get_first_node_in_group("jogador") as Node3D
+	if jog:   # o Torin: seta branca apontando para onde ele olha
+		var q: Vector2 = mundo_para_mapa.call(Vector2(jog.global_position.x, jog.global_position.z))
+		var f := Vector2(-sin(jog.global_rotation.y), -cos(jog.global_rotation.y))
+		var r := Vector2(-f.y, f.x)
+		draw_colored_polygon(PackedVector2Array([q + f * 9.0, q - f * 5.0 + r * 5.0, q - f * 5.0 - r * 5.0]), Color(1, 1, 1))
+	draw_string(fonte, origem + Vector2(lim.size.x * esc / 2.0 - 4.0, 16.0), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.8, 0.8, 0.8))
+	# coluna da direita: regiões, lugares e a missão
+	var x := tela.x * 0.50
+	var y := 100.0
+	draw_string(fonte, Vector2(x, y), "Regiões", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, COR_ACENTO)
+	y += 10.0
+	for id in REGIOES:
+		y += 26.0
+		var livre: bool = liberadas.get(id, false)
+		draw_rect(Rect2(x, y - 14.0, 12, 12), Color(0.35, 0.65, 0.35) if livre else Color(0.35, 0.33, 0.32))
+		var txt: String = String(REGIOES[id]["nome"]).replace("\n", " ")
+		var cor_txt := Color(0.95, 0.92, 0.85) if livre else Color(0.6, 0.55, 0.5)
+		draw_string(fonte, Vector2(x + 22, y), txt + (" (você está aqui)" if id == atual else ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, cor_txt)
+		if motivos.has(id):
+			y += 20.0
+			draw_string(fonte, Vector2(x + 22, y), motivos[id], HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 14, Color(0.7, 0.62, 0.5))
+	y += 40.0
+	draw_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, quadrado dourado = povoado, barra vermelha = barreira fechada", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, Color(0.75, 0.75, 0.75))
+	y += 34.0
 	if missao_texto != "":
-		draw_arc(area.position + Vector2(34, y - area.position.y + 36), 8.0, 0.0, TAU, 20, COR_ACENTO, 3.0)
-		draw_string(fonte, area.position + Vector2(48, y - area.position.y + 42), "Missão: " + missao_texto + (" (anel dourado)" if alvo != "" else ""), HORIZONTAL_ALIGNMENT_LEFT, area.size.x - 80, 18, COR_ACENTO)
-	if motivos.has(atual) == false:
-		var trancadas: PackedStringArray = []
-		for id in motivos:
-			trancadas.append("%s: %s" % [String(REGIOES[id]["nome"]).replace("\n", " "), motivos[id]])
-		if trancadas.size() > 0:
-			draw_string(fonte, area.position + Vector2(48, y - area.position.y + 66), trancadas[0], HORIZONTAL_ALIGNMENT_LEFT, area.size.x - 80, 16, Color(0.75, 0.7, 0.65))
+		draw_rect(Rect2(x, y - 14.0, 12, 12), COR_ACENTO, false, 2.0)
+		draw_string(fonte, Vector2(x + 22, y), "Missão: " + missao_texto, HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.44, 18, COR_ACENTO)

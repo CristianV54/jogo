@@ -33,6 +33,18 @@ var _preso := 0.0
 var _comentario := 6.0
 var _marca: Label3D       # "!" (oferece missão) ou "?" (a missão ativa pede para falar ou entregar a ele)
 var _t_marca := 0.0
+var pernoita := true      # vai para casa à noite e quando chove (guardas e vigias continuam no posto)
+var casa := Vector3.INF   # ponto diante da porta da casa mais perto (coordenadas do pai)
+var _recolhido := false
+var _t_horario := 0.0
+var _anim_descanso := ""
+var _melhor_dist := 1e9   # progresso rumo à casa (para detectar quem empacou)
+var _t_sem_progresso := 0.0
+var _t_desvio := 0.0
+var _dir_desvio := Vector3.ZERO
+var _trilha := PackedVector3Array()   # caminho de verdade até casa, pela malha de navegação
+var _i_trilha := 0
+var _recalculos := 0
 var _pausas := 0          # > 0: conversando ou levando um golpe; a rotina espera
 
 
@@ -83,6 +95,130 @@ func _qual_marca() -> String:
 	return ""
 
 
+## O dia do NPC: trabalha de dia; das 19h30 às 5h30, ou com chuva forte, vai para a porta da casa mais perto e descansa.
+## Devolve true quando o horário está no comando (a rotina de trabalho fica parada).
+func _horario(delta: float) -> bool:
+	_t_horario -= delta
+	if _t_horario <= 0.0:
+		_t_horario = 1.5 + float(hash(nome) % 100) / 100.0
+		var jogo := get_tree().get_first_node_in_group("jogo")
+		var clima: Clima = jogo.get("clima") if jogo else null
+		if clima:
+			var quer := clima.hora_de_dormir() or clima.chuva > 0.4
+			if quer and not _recolhido:
+				if papel.findn("guarda") >= 0 or papel.findn("vigia") >= 0 or papel.findn("sentinela") >= 0 or papel.findn("preso") >= 0:
+					pernoita = false
+					return false
+				_recolhido = true
+				_melhor_dist = 1e9
+				_trilha = PackedVector3Array()
+				_recalculos = 0
+				if casa == Vector3.INF:
+					casa = _achar_casa()
+			elif not quer and _recolhido:
+				_recolhido = false
+				_melhor_dist = 1e9
+				if not rotina.is_empty():
+					_proximo_passo()
+	if not _recolhido:
+		return false
+	if _pausas > 0:
+		return true   # conversando
+	var ate := casa - position
+	ate.y = 0.0
+	if ate.length() > 0.7:
+		if _seguir_trilha(delta):
+			return true
+		var dir := ate.normalized()
+		if ate.length() < _melhor_dist - 0.4:
+			_melhor_dist = ate.length()
+			_t_sem_progresso = 0.0
+		else:
+			_t_sem_progresso += delta
+			if _t_sem_progresso > 3.0 and _t_desvio <= 0.0:   # empacou: anda uns segundos para o lado e tenta de novo
+				_t_sem_progresso = 0.0
+				_t_desvio = 2.5
+				_dir_desvio = dir.rotated(Vector3.UP, randf_range(0.9, 2.2) * (1.0 if randf() < 0.5 else -1.0))
+				_melhor_dist = ate.length()
+		var livre := _caminho_livre(dir)
+		if _t_desvio > 0.0:
+			_t_desvio -= delta
+			dir = _dir_desvio
+			livre = _caminho_livre(dir)
+		elif not livre:   # cerca ou casa no caminho: contorna, tentando desvios para os dois lados
+			for desvio in [0.7, -0.7, 1.4, -1.4, 2.1, -2.1]:
+				var d2 := dir.rotated(Vector3.UP, desvio)
+				if _caminho_livre(d2):
+					dir = d2
+					livre = true
+					break
+		if livre:
+			position += dir * 2.4 * delta
+			rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
+			visual.tocar("Jog_Fwd" if ate.length() > 30.0 else "Walk", 0.2)
+			if altura_em.is_valid():
+				position.y = altura_em.call(position.x, position.z)
+		else:
+			visual.tocar("Idle", 0.2)
+	else:
+		if _anim_descanso == "":
+			_anim_descanso = "Idle"
+			for a in visual.animacoes.get_animation_list():
+				if String(a).begins_with("Sitting_Idle") or String(a) == "Sitting_Idle_Loop":
+					_anim_descanso = a
+					break
+		visual.tocar(_anim_descanso, 0.4)
+	return true
+
+
+## Anda pelo caminho que a malha de navegação traçou até casa. Devolve false se não há malha (aí vale a linha reta com desvios).
+func _seguir_trilha(delta: float) -> bool:
+	var mapa := get_world_3d().navigation_map
+	var pai := get_parent() as Node3D
+	var destino := pai.to_global(casa) if pai else casa
+	if _trilha.is_empty() and _recalculos < 3:
+		_recalculos += 1
+		_trilha = NavigationServer3D.map_get_path(mapa, global_position, destino, true)
+		_i_trilha = 1
+	if _trilha.size() < 2:
+		return false
+	if _i_trilha >= _trilha.size():
+		_trilha = PackedVector3Array()   # chegou ao fim da trilha: se ainda não está na porta, recalcula (até 3 vezes)
+		return _recalculos < 3 and (destino - global_position).length() > 1.5
+	var alvo := _trilha[_i_trilha]
+	var d := alvo - global_position
+	d.y = 0.0
+	if d.length() < 0.6:
+		_i_trilha += 1
+		return true
+	var dir := d.normalized()
+	position += dir * 2.4 * delta
+	rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 6.0 * delta)
+	visual.tocar("Jog_Fwd" if (destino - global_position).length() > 30.0 else "Walk", 0.2)
+	if altura_em.is_valid():
+		position.y = altura_em.call(position.x, position.z)
+	return true
+
+
+## Ponto diante da porta da casa mais perto (até 120 m); sem casa por perto, fica onde está.
+func _achar_casa() -> Vector3:
+	var melhor: Node3D = null
+	var dmin := 120.0
+	for c: Node3D in get_tree().get_nodes_in_group("casas"):
+		var d := c.global_position.distance_to(global_position)
+		if d < dmin and c.has_meta("x_porta"):
+			dmin = d
+			melhor = c
+	if melhor == null:
+		return position
+	var porta := melhor.to_global(Vector3(float(melhor.get_meta("x_porta")), 0.0, float(melhor.get_meta("linhas")) + 1.8))
+	var pai := get_parent() as Node3D
+	var local := pai.to_local(porta) if pai else porta
+	var folga := float(hash(nome) % 100) / 100.0 * 2.4 - 1.2   # cada um fica num lugar da soleira
+	local += Vector3(folga, 0.0, 0.0).rotated(Vector3.UP, melhor.global_rotation.y)
+	return local
+
+
 func olhar_para(alvo: Vector3) -> void:
 	var d := alvo - global_position
 	rotation.y = atan2(-d.x, -d.z)
@@ -101,6 +237,8 @@ func retomar() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not segue_jogador and pernoita and _horario(delta):
+		return
 	if segue_jogador and _pausas == 0:
 		_seguir(delta)
 		return

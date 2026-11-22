@@ -63,6 +63,8 @@ func _rodar() -> void:
 		await esperar(0.2)
 	await esperar(1.0)
 	m = jogo.missoes
+	jogo.clima.congelado = true   # o tempo não muda no meio do teste
+	jogo.clima.tempo_automatico = false
 	# Marco 1 (já testado em teste_missoes): conclui por eventos
 	for e in [["falar", "vane", 1], ["falar", "brenn", 1], ["golpear", "boneco_treino", 3], ["interagir", "tocha_treino", 3]]:
 		GerenciadorMissoes.evento(e[0], e[1], e[2])

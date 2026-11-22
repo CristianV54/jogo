@@ -60,6 +60,8 @@ func _rodar() -> void:
 		await esperar(0.2)
 	await esperar(1.0)
 	m = jogo.missoes
+	jogo.clima.congelado = true   # o tempo não muda no meio do teste
+	jogo.clima.tempo_automatico = false
 	for id in ["C1-M1", "C1-M2", "C1-M3", "C1-M4"]:   # Capítulo I já concluído (testado no Marco 3)
 		m.concluidas.append(id)
 	m.ativas.clear()   # a C1-M1 começou sozinha com o jogo: o Capítulo I está concluído

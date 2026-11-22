@@ -37,6 +37,7 @@ static func _existe(nome: String) -> bool:
 static func montar(colunas: int, linhas: int, estilo: Dictionary, colisao := true, interior := "moradia") -> Node3D:
 	var casa := Node3D.new()
 	casa.name = "Casa"
+	casa.add_to_group("casas")   # os NPCs procuram a casa mais perto para se abrigar
 	var meia_x := colunas * MODULO / 2.0
 	var meia_z := linhas * MODULO / 2.0
 	var i_porta := colunas / 2

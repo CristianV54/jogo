@@ -15,7 +15,8 @@ var terreno: TerrenoMundo
 var estradas: Dictionary = {}      # id -> PackedVector2Array (curva do eixo)
 var barreiras: Dictionary = {}     # id -> Barreira
 var condicoes: Dictionary = {}     # id -> Callable (o Jogo diz quando cada barreira abre)
-var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio)
+var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio, tipo, no)
+var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var _rng := RandomNumberGenerator.new()
 
@@ -132,6 +133,28 @@ func construir() -> void:
 	await get_tree().process_frame
 	_floresta()
 	_horizonte()
+	progresso.emit("Erguendo povoados e fazendas...")
+	await get_tree().process_frame
+	for id in povoados:
+		var pv := Povoado.new()
+		pv.mundo = self
+		pv.dados = povoados[id]
+		add_child(pv)
+		pv.montar()
+		povoados[id]["no"] = pv
+		var cp: Vector2 = povoados[id]["centro"]
+		NavegacaoLocal.assar(pv, Vector3(cp.x, terreno.altura_em(cp.x, cp.y), cp.y), Vector2(1, 1) * float(povoados[id]["raio"]) * 0.65, true)
+	progresso.emit("Traçando os caminhos da gente...")
+	await get_tree().process_frame
+	NavegacaoLocal.assar(regioes["refugio_do_pinhal"], Vector3(0, 0, 0), Vector2(48, 48), false)
+	var vcen := MundoDados.centro("valdoria")
+	NavegacaoLocal.assar(regioes["valdoria"], Vector3(vcen.x, 0, vcen.y), Vector2(80, 105), false)
+	progresso.emit("Soltando os bichos...")
+	await get_tree().process_frame
+	fauna = FaunaDoMundo.new()
+	fauna.mundo = self
+	add_child(fauna)
+	fauna.povoar()
 	progresso.emit("Pronto.")
 
 
@@ -158,7 +181,8 @@ func _planejar() -> void:
 		var dir: Vector2 = par[1]
 		var esq := Vector2(-dir.y, dir.x)
 		var centro: Vector2 = par[0] + esq * float(p["lado"]) * float(p["raio"]) * 0.55
-		povoados[p["id"]] = {"centro": centro, "nome": p["nome"], "raio": p["raio"], "tipo": p["tipo"], "estrada": p["estrada"], "dir": dir, "ponto_da_estrada": par[0]}
+		terreno.planos.append(Vector3(centro.x, centro.y, float(p["raio"]) * 0.7))   # o chão do povoado fica nivelado
+		povoados[p["id"]] = {"id": p["id"], "lado": p["lado"], "centro": centro, "nome": p["nome"], "raio": p["raio"], "tipo": p["tipo"], "estrada": p["estrada"], "dir": dir, "ponto_da_estrada": par[0]}
 
 
 ## Lê o ar da região (névoa, sol, céu) do ambiente que a área criou e tira o ambiente dela: quem manda no céu é o Clima.
@@ -415,7 +439,7 @@ func _barreiras() -> void:
 		bar.largura = float(b.get("largura", 18.0))
 		bar.condicao = condicoes.get(b["id"], Callable())
 		bar.position = Vector3(p.x, 6.7 if b.has("pos") else terreno.altura_em(p.x, p.y), p.y)
-		bar.rotation.y = atan2(dir.x, dir.y) + PI / 2.0
+		bar.rotation.y = atan2(dir.x, dir.y)   # a barreira atravessa a estrada: o lado largo (X local) é perpendicular a ela
 		add_child(bar)
 		barreiras[b["id"]] = bar
 

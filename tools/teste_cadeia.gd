@@ -18,6 +18,8 @@ func _rodar() -> void:
 		await create_timer(0.2).timeout
 	await create_timer(1.0).timeout
 	m = jogo.missoes
+	jogo.clima.congelado = true   # o tempo não muda no meio do teste
+	jogo.clima.tempo_automatico = false
 	Engine.time_scale = 8.0
 	var ordem := DadosMissoes.MISSOES.keys()
 	var falhas := 0
