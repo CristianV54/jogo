@@ -131,8 +131,23 @@ func _physics_process(delta: float) -> void:
 
 	if velocidade > 0.0:
 		var direcao := plano.normalized()
-		global_position += direcao * minf(velocidade * delta, distancia)
-		rotation.y = lerp_angle(rotation.y, atan2(direcao.x, direcao.z), giro * delta)
+		var passo := direcao * minf(velocidade * delta, distancia)
+		var voando_alto := modo_voo and global_position.y - alvo.global_position.y > 4.5   # lá em cima passa por cima de casa e árvore
+		if not voando_alto and not _livre(direcao, passo.length() + 0.8):
+			var achou := false
+			for giro_lado in [0.7, -0.7, 1.4, -1.4]:   # contorna: tenta desvios de 40 e 80 graus
+				var d2: Vector3 = direcao.rotated(Vector3.UP, giro_lado)
+				if _livre(d2, passo.length() + 0.8):
+					direcao = d2
+					passo = d2 * passo.length()
+					achou = true
+					break
+			if not achou:
+				passo = Vector3.ZERO   # encurralada (parede, casa fechada): espera o Torin
+				nome = "Idle"
+		global_position += passo
+		if passo != Vector3.ZERO:
+			rotation.y = lerp_angle(rotation.y, atan2(direcao.x, direcao.z), giro * delta)
 
 	var altura := (altura_voo if fase >= 3 else ALTURA_PLANADO) if modo_voo else 0.0
 	if modo_voo and fase == 2:
@@ -144,6 +159,12 @@ func _physics_process(delta: float) -> void:
 	global_position.y = move_toward(global_position.y, altura, velocidade_subida * delta)
 	_tocar(nome)
 	_atacar(delta)
+
+
+## Há espaço para o corpo (esfera de ~1 m na altura do peito) andar `dist` metros nessa direção? Contra o mundo e os outros seres.
+func _livre(dir: Vector3, dist: float) -> bool:
+	var raio := 1.15 * float(ESCALA_DA_FASE[fase])
+	return Solidos.caminho_livre(self, global_position + Vector3(0.0, 1.1 * float(ESCALA_DA_FASE[fase]) + raio * 0.2, 0.0), dir, dist, raio, [corpo.get_rid()])
 
 
 ## Defende o Torin: morde (fases 1 e 2) ou cospe fogo (fase 3) em quem está perseguindo ou atacando perto dele.

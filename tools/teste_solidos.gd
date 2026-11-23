@@ -87,6 +87,7 @@ func _rodar() -> void:
 		marcar("Não atravessa %s (%s)" % [a.nome, a.name], p >= 0.38, "menor distância %.2f m" % p)
 	print("== PESSOAS ==")
 	for n in area.npcs:
+		n.set_physics_process(false)   # o teste mede a colisão com a pessoa parada onde está; as rotinas faziam o alvo sair do lugar durante a caminhada
 		var p := await empurrar_contra(n.global_position)
 		marcar("Não atravessa %s" % n.nome, p >= 0.38, "menor distância %.2f m" % p)
 	print("== FAGULHA ==")
@@ -118,7 +119,7 @@ func _rodar() -> void:
 	await esperar(1.0)
 	marcar("... e queima", jog.vida < jog.vida_max, "vida %d" % jog.vida)
 	print("== CERCA ==")
-	jog.global_position = Vector3(-37.0, area.altura_em(-37.0, 5.0) + 0.3, 5.0)
+	jog.global_position = Vector3(-33.0, area.altura_em(-33.0, -12.2) + 0.3, -12.2)   # dentro da palicada (raio 40) e fora das saídas, que ocupam |z| < 8 (a Estrada do Pomar sai pelo oeste)
 	jog.velocity = Vector3.ZERO
 	jogo.camera.yaw = atan2(1.0, 0.0)
 	jog.rotation.y = jogo.camera.yaw
@@ -126,7 +127,7 @@ func _rodar() -> void:
 	jog.entrada_forcada = Vector2(0, -1)
 	await esperar(1.6)
 	jog.entrada_forcada = Vector2.ZERO
-	marcar("Não atravessa a cerca (oeste)", jog.global_position.x > -40.4, "x=%.1f" % jog.global_position.x)
+	marcar("Não atravessa a cerca (oeste)", jog.global_position.x > -39.6, "x=%.1f" % jog.global_position.x)
 
 	print("== CAVALO MONTADO ==")
 	for a in area.find_children("*", "AnimalVila", false, false):
@@ -146,7 +147,7 @@ func _rodar() -> void:
 	jogo.camera.yaw = atan2(-(Vector3.ZERO - jog.global_position).x, -(Vector3.ZERO - jog.global_position).z)
 	await esperar(1.0)
 	jog.entrada_forcada = Vector2.ZERO
-	marcar("Cavalgou normalmente", jog.global_position.distance_to(q0) > 4.0, "%.1f m" % jog.global_position.distance_to(q0))
+	marcar("Cavalgou (e a cerca do curral agora barra o corpo do cavalo: com a caixa de colisão da montaria ele não atravessa a cerca)", jog.global_position.distance_to(q0) > 1.5, "%.1f m" % jog.global_position.distance_to(q0))
 	jogo.interagir()
 	await esperar(1.2)
 	marcar("Desmontou e o cavalo voltou a ser sólido", jog.montaria == null and cavalo.corpo.collision_layer == Solidos.CAMADA_SERES)

@@ -43,11 +43,11 @@ const RIOS := [
 		"pontos": [Vector2(78, 150), Vector2(180, 150), Vector2(280, 110), Vector2(360, 40), Vector2(400, -80), Vector2(404, -200), Vector2(404, -336.5)]},
 	{"id": "cinzento_fim", "nome": "Rio Cinzento", "largura": 6.0, "margem": 8.0, "fundo": 1.2,
 		"pontos": [Vector2(690, -337), Vector2(740, -360), Vector2(790, -400), Vector2(840, -520), Vector2(860, -640)]},
-	{"id": "pomar", "nome": "Riacho do Moinho", "largura": 3.0, "margem": 6.0, "fundo": 0.7,
+	{"id": "pomar", "nome": "Riacho do Moinho", "largura": 4.6, "margem": 6.0, "fundo": 0.7,
 		"pontos": [Vector2(-371, -420), Vector2(-371, -362), Vector2(-350, -132), Vector2(-340, -40), Vector2(-325, 40), Vector2(-305, 96)]},
-	{"id": "nevoa_oeste", "nome": "Riacho da Névoa", "largura": 3.8, "margem": 6.0, "fundo": 0.7,
+	{"id": "nevoa_oeste", "nome": "Riacho da Névoa", "largura": 4.6, "margem": 6.0, "fundo": 0.7,
 		"pontos": [Vector2(-156, -509.4), Vector2(-230, -480), Vector2(-290, -410), Vector2(-292, -300), Vector2(-296, -200), Vector2(-322, -130), Vector2(-340, -40)]},
-	{"id": "nevoa_leste", "nome": "Riacho da Névoa", "largura": 3.8, "margem": 6.0, "fundo": 0.7,
+	{"id": "nevoa_leste", "nome": "Riacho da Névoa", "largura": 4.6, "margem": 6.0, "fundo": 0.7,
 		"pontos": [Vector2(156, -510.6), Vector2(250, -470), Vector2(330, -400), Vector2(404, -338)]},
 ]
 

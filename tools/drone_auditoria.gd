@@ -127,7 +127,14 @@ func _agua(m: Mundo) -> void:
 						var p: Vector2 = a + lado * (o * (meia + extra))
 						amostras += 1
 						var h: float = ter.altura_em(p.x, p.y)
-						var falta: float = y_agua - h
+						var sobre_outro := false   # o ponto está dentro do leito de OUTRO rio (confluência): ali a água que vale é a dele
+						for outro in ter.rios:
+							if outro.get("nome") != r.get("nome") and outro.get("agua", true):
+								var par := ter._eixo_mais_perto(p, outro["pontos"])
+								if float(par[0]) < float(outro["largura"]) / 2.0 + 1.5:
+									sobre_outro = true
+						var y_borda := minf(y_agua, h + 0.1) if extra == 0.0 else y_agua   # a borda da fita acompanha o chão (como em Terreno._agua); 1,5 m além dela o chão tem que estar na altura da água
+						var falta: float = (y_borda - h) if not sobre_outro else 0.0
 						if falta > 0.3:
 							flutuando += 1
 							if falta > pior:

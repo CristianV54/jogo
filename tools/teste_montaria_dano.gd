@@ -111,6 +111,7 @@ func _rodar() -> void:
 	for n in jogo.area.npcs:
 		if n.nome == "Tessa":
 			tessa = n
+	tessa.set_physics_process(false)   # a Tessa é a mensageira que corre pelo Refúgio: parada, para o golpe acertar onde ela estava
 	perto_de(tessa, 1.3)
 	await esperar(1.6)
 	jog.golpear()

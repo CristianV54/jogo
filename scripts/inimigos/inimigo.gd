@@ -123,8 +123,60 @@ func _physics_process(delta: float) -> void:
 			velocity.z = move_toward(velocity.z, 0.0, 20.0 * delta)
 			if _tempo >= 0.4:
 				estado = Estado.PERSEGUINDO
+	if estado == Estado.PARADO and dist >= alcance_visao and especie in ["lobo", "javali", "urso"]:
+		_cacar(delta)
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 20.0 * delta
 	move_and_slide()
+
+
+## Caça: bicho selvagem que não vê o jogador ataca gente e bicho de fazenda que chega perto (10 m). A gente se encolhe e foge (não
+## perde vida nem morre); o bicho de fazenda perde vida e pode morrer.
+var _vitima: Node3D
+var _t_busca := 0.0
+var _t_mordida := 0.0
+
+
+func _cacar(delta: float) -> void:
+	_t_busca -= delta
+	_t_mordida -= delta
+	if _vitima != null and (not is_instance_valid(_vitima) or not _vitima.visible or (_vitima is AnimalVila and (_vitima as AnimalVila).morto)):
+		_vitima = null
+	if _vitima == null and _t_busca <= 0.0:
+		_t_busca = 0.8
+		var melhor := 10.0
+		for g in ["npcs", "animais"]:
+			for n in get_tree().get_nodes_in_group(g):
+				var n3 := n as Node3D
+				if n3 == null or not n3.visible:
+					continue
+				if n3 is AnimalVila and ((n3 as AnimalVila).fugitivo or (n3 as AnimalVila).morto):
+					continue   # só bicho de fazenda; caça selvagem foge sozinha
+				if n3 is Npc and ((n3 as Npc).papel.findn("guarda") >= 0 or (n3 as Npc).segue_jogador or (n3 as Npc)._deitado):
+					continue
+				var d := n3.global_position.distance_to(global_position)
+				if d < melhor:
+					melhor = d
+					_vitima = n3
+	if _vitima == null:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		return
+	var ate := _vitima.global_position - global_position
+	ate.y = 0.0
+	if ate.length() > alcance_ataque * 0.9:
+		var dir := ate.normalized()
+		velocity.x = dir.x * velocidade
+		velocity.z = dir.z * velocidade
+		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 12.0 * delta)
+		_tocar(anim_andar if ate.length() > 6.0 or anim_correr == "" else anim_correr)
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		rotation.y = lerp_angle(rotation.y, atan2(-ate.x, -ate.z), 14.0 * delta)
+		if _t_mordida <= 0.0:
+			_t_mordida = intervalo_ataque
+			_tocar(anim_atacar, 0.1)
+			_vitima.receber_dano(maxi(2, int(dano * 0.6)), self)
 
 
 ## O golpe só acerta quem está à frente (a menos de ~70 graus do rumo do corpo) e sem parede entre os dois: nada de bater de
