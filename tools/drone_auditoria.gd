@@ -53,6 +53,7 @@ func _rodar() -> void:
 	_pontes(m, espaco)
 	_seres(m, espaco)
 	_casas(m)
+	_povoados(m)
 	_escrever()
 	quit(0)
 
@@ -248,6 +249,38 @@ func _casas(m: Mundo) -> void:
 			_achado("CRITICO", "casa sem porta", casa.global_position.x, casa.global_position.z, String(casa.name), "sem peça de porta")
 		if casa.get_node_or_null("Colisao") == null:
 			_achado("CRITICO", "casa sem colisão", casa.global_position.x, casa.global_position.z, String(casa.name), "sem corpo de colisão")
+
+
+## 7) Povoados: cada tipo tem o que uma comunidade assim precisa (fazenda: casa, celeiro, campo, poço, curral; vila: casas e ferraria...).
+func _povoados(m: Mundo) -> void:
+	var exigencias := {
+		"fazenda": {"casas": 2, "campos": 1, "pocos": 1, "npcs": 2},
+		"vila": {"casas": 4, "campos": 2, "pocos": 1, "npcs": 4},
+		"cabana": {"casas": 1, "campos": 0, "pocos": 0, "npcs": 1},
+		"pescador": {"casas": 1, "campos": 0, "pocos": 0, "npcs": 1},
+		"posto": {"casas": 0, "campos": 0, "pocos": 0, "npcs": 2},
+		"posto_imperial": {"casas": 2, "campos": 0, "pocos": 0, "npcs": 2},
+	}
+	for pid in m.povoados:
+		var d: Dictionary = m.povoados[pid]
+		if not d.has("no"):
+			continue
+		var no: Node3D = d["no"]
+		var ex: Dictionary = exigencias.get(String(d["tipo"]), {})
+		var casas := no.find_children("*", "Node3D", true, false).filter(func(n): return n.has_meta("colunas")).size()
+		var campos := no.find_children("*", "Plantacao", true, false).size()
+		var pocos := no.get_children().filter(func(n): return String(n.name).begins_with("Poco") or (n is Node3D and n.get_node_or_null("Balde") != null)).size()
+		var npcs := (no as Povoado).npcs.size()
+		var falta: Array[String] = []
+		if casas < int(ex.get("casas", 0)):
+			falta.append("casas %d/%d" % [casas, int(ex["casas"])])
+		if campos < int(ex.get("campos", 0)):
+			falta.append("campos %d/%d" % [campos, int(ex["campos"])])
+		if npcs < int(ex.get("npcs", 0)):
+			falta.append("NPCs %d/%d" % [npcs, int(ex["npcs"])])
+		if not falta.is_empty():
+			var c: Vector2 = d["centro"]
+			_achado("VISUAL", "povoado incompleto", c.x, c.y, String(pid) + " (" + String(d["tipo"]) + ")", "falta: " + ", ".join(falta))
 
 
 func _escrever() -> void:

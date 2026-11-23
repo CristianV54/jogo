@@ -86,7 +86,7 @@ const BARREIRAS := [
 const POVOADOS_LIVRES := [
 	{"id": "beira_rio", "nome": "Aldeia Beira-Rio", "tipo": "vila", "centro": Vector2(-200, 270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
 	{"id": "rio_claro", "nome": "Fazenda Rio Claro", "tipo": "fazenda", "centro": Vector2(210, 240), "dir": Vector2(1, 0), "lado": 1.0, "raio": 55.0, "liga": "campos"},
-	{"id": "pescador", "nome": "Cabana do Pescador", "tipo": "cabana", "centro": Vector2(-490, 200), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "pomar"},
+	{"id": "pescador", "nome": "Cabana do Pescador", "tipo": "pescador", "centro": Vector2(-490, 166), "dir": Vector2(1, 0), "lado": -1.0, "raio": 22.0, "liga": "pomar"},
 	{"id": "pedras_altas", "nome": "Vila Pedras Altas", "tipo": "vila", "centro": Vector2(-610, -40), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": "pomar"},
 	{"id": "posto_de_caca", "nome": "Posto de Caça", "tipo": "posto", "centro": Vector2(160, -270), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "bosque"},
 	{"id": "nevoa_azul", "nome": "Aldeia Névoa Azul", "tipo": "vila", "centro": Vector2(-430, -820), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": ""},

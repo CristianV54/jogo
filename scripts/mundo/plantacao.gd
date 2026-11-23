@@ -319,6 +319,9 @@ func _cerca() -> void:
 			peca.position = pos
 			peca.rotation.y = atan2(-d.z, d.x)
 			peca.scale.x = passo / 2.06
+			if _rng.randf() < 0.08:   # cerca quebrada: o trecho tomba para um lado
+				peca.rotation.z = _rng.randf_range(0.5, 0.9)
+				peca.position.y -= 0.25
 			add_child(peca)
 			var cs := CollisionShape3D.new()
 			var forma := BoxShape3D.new()

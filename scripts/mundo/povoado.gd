@@ -37,6 +37,8 @@ func montar() -> void:
 			_vila()
 		"cabana":
 			_cabana()
+		"pescador":
+			_pescador()
 		"posto":
 			_posto()
 		_:
@@ -65,6 +67,8 @@ func _paleta() -> Dictionary:
 			opcoes = [{"parede": Color(0.82, 0.84, 0.9), "telhado": Color(0.5, 0.5, 0.58)}, {"parede": Color(1.0, 0.88, 0.7), "telhado": Color(1.0, 0.9, 0.85)}, {"parede": Color(0.75, 0.78, 0.76), "telhado": Color(0.62, 0.42, 0.34)}]
 		"cabana":
 			opcoes = [{"parede": Color(0.42, 0.31, 0.2), "telhado": Color(0.55, 0.45, 0.28)}, {"parede": Color(0.55, 0.52, 0.48), "telhado": Color(0.45, 0.4, 0.3)}]
+		"pescador":
+			opcoes = [{"parede": Color(0.5, 0.45, 0.36), "telhado": Color(0.42, 0.34, 0.26)}]
 		"posto_imperial":
 			opcoes = [{"parede": Color(0.55, 0.55, 0.62), "telhado": Color(0.3, 0.3, 0.38)}]
 		_:
@@ -279,6 +283,136 @@ func _vila() -> void:
 	_npc("Lia", "Moleca", "mira", _p(8.0, 20.0), PackedStringArray(["Meu pai disse que tem um dragão no Refúgio. É verdade?"]), [])
 	_npc("Mercador Davi", "Mercador de feira", "soldado_rebelde", _p(10.0, 14.0), PackedStringArray(["Compro peles e lã. Vendo sal e notícias."]),
 		[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": _p(0.0, 14.0)}, {"ir": _p(16.0, 14.0), "vel": 1.2}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(0.0, 14.0)}, {"ir": _p(10.0, 14.0), "vel": 1.2}])
+
+
+## Pescador: cabana de madeira sobre palafitas, perto da água, com doca, barco, redes e caixas de peixe. A doca sai da
+## margem do rio mais perto (procurada na hora, na direção do rio) e avança sobre a água.
+func _pescador() -> void:
+	var casa := _casa("Cabana", _p(0.0, 5.0), 2, 2, REF.ESTILO_MADEIRA)
+	var madeira := VilaRefugio._mat(Color(0.34, 0.24, 0.14))
+	var c0 := Vector2(casa.position.x, casa.position.z)
+	for dx in [-2.0, 2.0]:   # palafitas: toras grossas sob os cantos da casa (a casa já tem a base de pedra; as toras aparecem à frente)
+		for dz in [-2.0, 2.0]:
+			var q := c0 + Vector2(dx, dz).rotated(casa.rotation.y)
+			VilaRefugio._cilindro(Vector3(q.x, _y(q) + 0.4, q.y), 0.22, 1.0, madeira, false, 6)
+	_fogueira(_p(5.0, 11.0), 0.6)
+	_movel("Barrel", _p(-6.0, 8.0))
+	var ponto: Variant = _margem_mais_perto()
+	if ponto != null:
+		_doca(ponto[0], ponto[1])
+	_npc("Pescador Edu", "Pescador", "dorn", _p(3.0, 12.0), PackedStringArray(["O rio dá o que come, desde que a gente não tire demais.", "Os soldados vieram pedir tributo de peixe. Eu disse que o peixe é do rio, não do Imperador. Eles não riram."]),
+		[{"fazer": "Interact", "seg": 9.0, "olhar": _p(0.0, -8.0)}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(0.0, -8.0)}])
+	_animal("cao", "Cão do pescador", "cao", _p(-3.0, 10.0), 0.5, 3.0, 25, {})
+
+
+## Procura a margem do rio do mundo mais perto do povoado (dentro de 60 m) e devolve [ponto na margem, sentido para a água].
+func _margem_mais_perto() -> Variant:
+	var melhor := 1e9
+	var res: Variant = null
+	for r in mundo.terreno.rios:
+		var pts: PackedVector2Array = r["pontos"]
+		for i in range(pts.size() - 1):
+			var ab := pts[i + 1] - pts[i]
+			var t := clampf((centro - pts[i]).dot(ab) / ab.length_squared(), 0.0, 1.0)
+			var q := pts[i] + ab * t
+			var d := centro.distance_to(q)
+			if d < melhor and d < 70.0:
+				melhor = d
+				var para_agua := (q - centro).normalized()
+				var borda := q - para_agua * (float(r["largura"]) / 2.0 + 2.6)   # o pé da doca fica na barranca, antes da água
+				res = [borda, para_agua]
+	return res
+
+
+## Doca de tábuas sobre a água, com um barco amarrado, uma rede estendida e caixas de peixe.
+func _doca(base: Vector2, para_agua: Vector2) -> void:
+	var madeira := VilaRefugio._mat(Color(0.36, 0.25, 0.14))
+	var escura := VilaRefugio._mat(Color(0.24, 0.16, 0.1))
+	var giro := atan2(para_agua.x, para_agua.y)
+	var y := mundo.terreno.altura_em(base.x, base.y)
+	var comp := 9.0
+	var tabuas := Node3D.new()
+	tabuas.position = Vector3(base.x, y + 0.45, base.y)
+	tabuas.rotation.y = giro
+	add_child(tabuas)
+	for k in int(comp / 0.55):
+		var t := MeshInstance3D.new()
+		var b := BoxMesh.new()
+		b.size = Vector3(2.2, 0.09, 0.5)
+		b.material = madeira
+		t.mesh = b
+		t.position = Vector3(0.0, 0.0, 0.3 + k * 0.55)
+		tabuas.add_child(t)
+	var piso := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var f := BoxShape3D.new()
+	f.size = Vector3(2.2, 0.2, comp)
+	cs.shape = f
+	cs.position = Vector3(0.0, -0.05, comp / 2.0)
+	piso.add_child(cs)
+	tabuas.add_child(piso)
+	for k in 4:   # estacas de cada lado
+		for lado in [-1.0, 1.0]:
+			var e := MeshInstance3D.new()
+			var c := CylinderMesh.new()
+			c.top_radius = 0.12
+			c.bottom_radius = 0.14
+			c.height = 2.2
+			c.radial_segments = 6
+			c.material = escura
+			e.mesh = c
+			e.position = Vector3(lado * 1.05, -0.5, 1.0 + k * 2.5)
+			tabuas.add_child(e)
+	var casco := MeshInstance3D.new()   # barco amarrado ao lado da doca: casco, proa e um banco
+	var cb := BoxMesh.new()
+	cb.size = Vector3(1.3, 0.5, 3.4)
+	cb.material = VilaRefugio._mat(Color(0.3, 0.2, 0.12))
+	casco.mesh = cb
+	casco.position = Vector3(2.0, -0.38, 6.5)
+	tabuas.add_child(casco)
+	var proa := MeshInstance3D.new()
+	var pb := PrismMesh.new()
+	pb.size = Vector3(1.3, 0.5, 1.0)
+	pb.material = cb.material
+	proa.mesh = pb
+	proa.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+	proa.position = Vector3(2.0, -0.38, 8.6)
+	tabuas.add_child(proa)
+	var banco := MeshInstance3D.new()
+	var bb := BoxMesh.new()
+	bb.size = Vector3(1.2, 0.08, 0.35)
+	bb.material = madeira
+	banco.mesh = bb
+	banco.position = Vector3(2.0, -0.08, 6.4)
+	tabuas.add_child(banco)
+	var rede := MeshInstance3D.new()   # rede estendida num varal na cabeceira da doca
+	var rb := BoxMesh.new()
+	rb.size = Vector3(2.4, 1.1, 0.03)
+	var rm := VilaRefugio._mat(Color(0.55, 0.5, 0.38, 0.55))
+	rm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	rb.material = rm
+	rede.mesh = rb
+	rede.position = Vector3(-2.3, 1.2, 1.2)
+	tabuas.add_child(rede)
+	for lado in [-3.4, -1.2]:
+		var m2 := MeshInstance3D.new()
+		var mb := CylinderMesh.new()
+		mb.top_radius = 0.06
+		mb.bottom_radius = 0.08
+		mb.height = 1.8
+		mb.material = escura
+		m2.mesh = mb
+		m2.position = Vector3(lado, 0.8, 1.2)
+		tabuas.add_child(m2)
+	var cx := ConstrutorCasa.peca("Prop_Crate")   # caixas de peixe na cabeceira
+	cx.scale = Vector3.ONE * 0.7
+	cx.position = Vector3(-0.6, 0.05, 0.9)
+	tabuas.add_child(cx)
+	var cx2 := ConstrutorCasa.peca("Prop_Crate")
+	cx2.scale = Vector3.ONE * 0.7
+	cx2.position = Vector3(0.5, 0.05, 1.4)
+	cx2.rotation_degrees.y = 25.0
+	tabuas.add_child(cx2)
 
 
 func _cabana() -> void:
