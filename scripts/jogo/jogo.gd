@@ -87,11 +87,16 @@ func _ready() -> void:
 		hud.definir_rastreador(missoes.rastreador())
 		if id == "C1-M4":
 			liberar_fagulha()
+		elif id == "C2-M3":
+			fagulha.definir_fase(2, true)
+		elif id == "C3-M4":
+			fagulha.definir_fase(3, true)
 		elif id == "C3-M1":
 			_reforcar_equipamento()
 		elif id == "C4-M4":
 			_forjar_lamina_final())
 	fagulha.alvo = null   # a Fagulha começa ferida na clareira do pinhal
+	fagulha.definir_fase(1)
 	fagulha.montaria.ativa = false
 	_trocando = true   # o mundo está sendo construído
 	jogador.set_physics_process(false)
@@ -298,7 +303,7 @@ func liberar_fagulha() -> void:
 	fagulha.visible = true
 	fagulha.alvo = jogador
 	fagulha.set_physics_process(true)
-	fagulha.montaria.ativa = true
+	fagulha.montaria.ativa = fagulha.fase >= 3
 	hud.mensagem("Fagulha agora acompanha você.", 4.0)
 
 

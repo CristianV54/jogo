@@ -155,7 +155,7 @@ func _rodar() -> void:
 	jogo.interagir()
 	await esperar(0.3)
 	marcar("Fagulha alimentada: C1-M4 concluída", m.concluidas.has("C1-M4"))
-	marcar("Fagulha passa a acompanhar o Torin e pode ser montada", jogo.fagulha_livre and jogo.fagulha.alvo == jog and jogo.fagulha.montaria.ativa)
+	marcar("Fagulha passa a acompanhar o Torin (fase 1: segue no chão, ainda não pode ser montada)", jogo.fagulha_livre and jogo.fagulha.alvo == jog and jogo.fagulha.fase == 1 and not jogo.fagulha.montaria.ativa)
 	await ir_para_area("bosque_velado", "Entrada")
 	marcar("Portão norte aberto depois do resgate", jogo.area_nome == "bosque_velado")
 

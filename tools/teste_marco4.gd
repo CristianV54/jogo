@@ -145,6 +145,9 @@ func _rodar() -> void:
 		await esperar(0.3)
 	marcar("Ferro Negro bruto coletado: C2-M3 concluída", m.concluidas.has("C2-M3"), str(jog.inventario))
 	marcar("Gorath surge na praça", a.chefe != null)
+	while jogo.hud.dialogo_aberto or not jogo._cena.is_empty():   # a cena da Fagulha fase 2 abre ao concluir a C2-M3
+		jogo.interagir()
+		await esperar(0.1)
 	await esperar(6.6)
 	marcar("C2-M4 começa sozinha", m.ativas == ["C2-M4"], str(m.ativas))
 

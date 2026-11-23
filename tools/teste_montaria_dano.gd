@@ -65,6 +65,7 @@ func _rodar() -> void:
 		await esperar(0.2)
 	await esperar(2.0)
 	jogo.liberar_fagulha()   # desde o Marco 3 a Fagulha só segue o jogador depois do resgate
+	jogo.fagulha.definir_fase(3)   # a montaria da Fagulha só existe na fase 3
 
 	# ---------------- dano
 	print("== DANO ==")

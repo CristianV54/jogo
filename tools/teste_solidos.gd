@@ -72,6 +72,7 @@ func _rodar() -> void:
 		await esperar(0.2)
 	await esperar(1.5)
 	jogo.liberar_fagulha()   # desde o Marco 3 a Fagulha só segue o jogador depois do resgate
+	jogo.fagulha.definir_fase(3)
 	var area := jogo.area
 	for a in area.find_children("*", "AnimalVila", false, false):
 		(a as AnimalVila).set_physics_process(false)   # congela o passeio: o teste mede só a colisão
