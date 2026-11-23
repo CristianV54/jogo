@@ -133,7 +133,9 @@ func _agua(m: Mundo) -> void:
 								var par := ter._eixo_mais_perto(p, outro["pontos"])
 								if float(par[0]) < float(outro["largura"]) / 2.0 + 1.5:
 									sobre_outro = true
-						var y_borda := minf(y_agua, h + 0.1) if extra == 0.0 else y_agua   # a borda da fita acompanha o chão (como em Terreno._agua); 1,5 m além dela o chão tem que estar na altura da água
+						var par_axis := ter._eixo_mais_perto(p, pts)   # nível da água no ponto do eixo MAIS PERTO da amostra (é assim que a margem é esculpida); num trecho íngreme o nível do início do segmento é mais alto e dava falso alarme
+						var y_local: float = ter._altura_base(par_axis[1].x, par_axis[1].y) - 0.55
+						var y_borda := minf(y_local, h + 0.1) if extra == 0.0 else y_local   # a borda da fita acompanha o chão (como em Terreno._agua); 1,5 m além dela o chão tem que estar na altura da água
 						var falta: float = (y_borda - h) if not sobre_outro else 0.0
 						if falta > 0.3:
 							flutuando += 1

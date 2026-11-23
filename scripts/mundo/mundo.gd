@@ -134,7 +134,7 @@ func _planejar() -> void:
 		terreno.estradas_mundo.append(curva)
 	var rios: Array = []
 	for r in MundoDados.RIOS:
-		rios.append({"pontos": Terreno.curva(r["pontos"], 4.0), "largura": r["largura"], "margem": r["margem"], "fundo": r["fundo"], "agua": true})
+		rios.append({"id": r["id"], "nome": r["nome"], "pontos": Terreno.curva(r["pontos"], 4.0), "largura": r["largura"], "margem": r["margem"], "fundo": r["fundo"], "agua": true})
 	terreno.rios = rios
 	for p in MundoDados.POVOADOS:   # povoados na beira de uma estrada: ao lado dela, do lado indicado
 		var s := float(p["t"]) * comprimento_da_estrada(p["estrada"])

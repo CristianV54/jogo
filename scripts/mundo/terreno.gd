@@ -205,24 +205,6 @@ func _agua(r: Dictionary) -> Node3D:
 		var a := Vector3(pts[i].x + lado.x, ya, pts[i].y + lado.y)
 		var b := Vector3(pts[i].x - lado.x, yb, pts[i].y - lado.y)
 		anteriores.append([a, b, acumulado])
-	# o afluente para na margem do rio maior (a água dele já cobre o resto): sem faixa de água pendurada sobre o leito do rio principal
-	for ponta in [0, 1]:
-		while anteriores.size() > 3:
-			var item: Array = anteriores[0] if ponta == 0 else anteriores[anteriores.size() - 1]
-			var centro := Vector2((item[0].x + item[1].x) / 2.0, (item[0].z + item[1].z) / 2.0)
-			var dentro_de_outro := false
-			for outro in rios:
-				if outro.get("nome") == r.get("nome") or not outro.get("agua", true):   # (o `r` recebido é uma cópia: compara pelo nome; trechos do mesmo rio não se cortam)
-					continue
-				var par := _eixo_mais_perto(centro, outro["pontos"])
-				if float(par[0]) < float(outro["largura"]) / 2.0 + 2.0:
-					dentro_de_outro = true
-			if not dentro_de_outro:
-				break
-			if ponta == 0:
-				anteriores.remove_at(0)
-			else:
-				anteriores.remove_at(anteriores.size() - 1)
 	var total: float = anteriores[anteriores.size() - 1][2] - anteriores[0][2]
 	var s0: float = anteriores[0][2]
 	for item in anteriores:
