@@ -578,7 +578,8 @@ func _floresta() -> void:
 	arvores.altura_em = terreno.altura_em
 	add_child(arvores)
 	arvores.iniciar(220)
-	var tiles: Dictionary = {}   # Vector2i -> Array[Transform3D]
+	var tiles: Dictionary = {}   # "bloco_x,bloco_z,tipo" -> Array[Transform3D]; tipo: 0 pinheiro, 1 folhosa, 2 morta, 3 arbusto, 4 pedra, 5 cogumelo
+	var cores_pedra: Dictionary = {}   # mesma chave -> Array[Color]
 	var passo := 7.5
 	var lim := MundoDados.LIMITES
 	var gw := int(lim.size.x / 20.0) + 1
@@ -587,14 +588,12 @@ func _floresta() -> void:
 	mata.resize(gw * gh)
 	var nx := int(lim.size.x / passo)
 	var nz := int(lim.size.y / passo)
+	var contagem_bioma: Dictionary = {}
 	for i in nx:
 		for j in nz:
 			var x := lim.position.x + (i + _rng.randf()) * passo
 			var z := lim.position.y + (j + _rng.randf()) * passo
 			var p := Vector2(x, z)
-			var dens := smoothstep(0.38, 0.78, rng_f.get_noise_2d(x, z) * 0.5 + 0.5)   # bosques e clareiras
-			if _rng.randf() > dens * 0.85 + 0.06:
-				continue
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
 			var no_povoado := false
@@ -604,15 +603,42 @@ func _floresta() -> void:
 					break
 			if no_povoado:
 				continue
+			var bioma := Biomas.em(x, z)
 			var y := terreno.altura_em(x, z)
-			var s := _rng.randf_range(0.8, 1.7)
-			var t := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, y - 0.15, z))
-			var k := Vector2i(int(floor(x / 160.0)), int(floor(z / 160.0)))
-			if not tiles.has(k):
-				tiles[k] = []
-			(tiles[k] as Array).append(t)
-			arvores.adicionar(x, z, 0.45 * s)
-			mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
+			var k := "%d,%d," % [int(floor(x / 160.0)), int(floor(z / 160.0))]
+			var dens := smoothstep(0.38, 0.78, rng_f.get_noise_2d(x, z) * 0.5 + 0.5)   # bosques e clareiras
+			var chance: float = (dens * 0.85 + 0.06) * float(Biomas.DENSIDADE[bioma])
+			if _rng.randf() <= chance:
+				var tp := Biomas.tipo(bioma, _rng.randf())
+				var s := _rng.randf_range(0.8, 1.7) if tp != 3 else _rng.randf_range(0.7, 1.4)
+				var t := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.9, 1.2), s)), Vector3(x, y - 0.15, z))
+				var kk := k + str(tp)
+				if not tiles.has(kk):
+					tiles[kk] = []
+				(tiles[kk] as Array).append(t)
+				if tp != 3:
+					arvores.adicionar(x, z, (0.45 if tp == 0 else 0.4 if tp == 1 else 0.3) * s)
+				mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
+				contagem_bioma[bioma] = int(contagem_bioma.get(bioma, 0)) + 1
+			elif _rng.randf() <= float(Biomas.PEDRAS[bioma]):   # pedra solta (e com tronco/colisão se for grande)
+				var tam := _rng.randf_range(0.5, 1.6) * (1.6 if bioma == "cratera" or bioma == "ferrogris" else 1.0)
+				var tr := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(tam, tam * _rng.randf_range(0.6, 1.0), tam)), Vector3(x, y - 0.2 * tam, z))
+				var kk := k + "4"
+				if not tiles.has(kk):
+					tiles[kk] = []
+					cores_pedra[kk] = []
+				(tiles[kk] as Array).append(tr)
+				(cores_pedra[kk] as Array).append(Biomas.TOM_PEDRA[bioma])
+				if tam > 0.9:
+					arvores.adicionar(x, z, 0.55 * tam)
+			elif Biomas.COGUMELOS.has(bioma) and _rng.randf() <= float(Biomas.COGUMELOS[bioma]):
+				var kk := k + "5"
+				if not tiles.has(kk):
+					tiles[kk] = []
+				for c in _rng.randi_range(3, 6):
+					var q := Vector2(x, z) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2))
+					var e := _rng.randf_range(0.8, 1.6)
+					(tiles[kk] as Array).append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, e, e)), Vector3(q.x, terreno.altura_em(q.x, q.y) - 0.02, q.y)))
 	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa em pergaminho: a mata esverdeia o papel
 	for gz in gh:
 		for gx in gw:
@@ -625,25 +651,32 @@ func _floresta() -> void:
 				continue
 			img.set_pixel(gx, gz, Color(0.85, 0.77, 0.58).lerp(Color(0.5, 0.58, 0.36), clampf(mata[gz * gw + gx] / 6.0, 0.0, 1.0)))
 	mapa_floresta = ImageTexture.create_from_image(img)
-	var malha := FabricaNatureza.pinheiro()
+	var malhas := [FabricaNatureza.pinheiro(), FabricaNatureza.folhosa(), FabricaNatureza.morta(), FabricaNatureza.arbusto(2.0), FabricaNatureza.pedra(5.0), FabricaNatureza.cogumelo()]
 	var mat := FabricaNatureza.material()
 	var total := 0
-	for k in tiles:   # um MultiMesh por bloco de 160 m: o motor esconde os distantes e os fora da tela
-		var lista: Array = tiles[k]
+	for kk in tiles:   # um MultiMesh por bloco de 160 m e por tipo: o motor esconde os distantes e os fora da tela
+		var lista: Array = tiles[kk]
+		var tipo_i := int(String(kk).split(",")[2])
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = malha
+		mm.use_colors = tipo_i == 4
+		mm.mesh = malhas[tipo_i]
 		mm.instance_count = lista.size()
 		for i in lista.size():
 			mm.set_instance_transform(i, lista[i])
+			if tipo_i == 4:
+				mm.set_instance_color(i, (cores_pedra[kk] as Array)[i])
 		var inst := MultiMeshInstance3D.new()
-		inst.name = "Floresta_%d_%d" % [k.x, k.y]
+		inst.name = "Mata_" + String(kk).replace(",", "_")
 		inst.multimesh = mm
 		inst.material_override = mat
-		inst.visibility_range_end = 420.0
+		inst.visibility_range_end = 420.0 if tipo_i < 3 else 200.0
+		if tipo_i >= 4:
+			inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(inst)
-		total += lista.size()
-	print("Mundo: ", total, " árvores em ", tiles.size(), " blocos")
+		if tipo_i < 3:
+			total += lista.size()
+	print("Mundo: ", total, " árvores em ", tiles.size(), " blocos; por bioma ", contagem_bioma)
 
 
 ## Montanhas em volta do mundo inteiro e chão até onde a vista alcança.

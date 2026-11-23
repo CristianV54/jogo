@@ -110,3 +110,38 @@ static func toras() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_cilindro(st, 0.0, 1.6, 0.18, 0.18, 6, Color(0.40, 0.28, 0.17), Color(0.36, 0.25, 0.15))
 	return st.commit()
+
+
+## Árvore folhosa: tronco claro e três copas redondas.
+static func folhosa() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_cilindro(st, 0.0, 2.3, 0.3, 0.2, 6, Color(0.40, 0.29, 0.18), Color(0.33, 0.23, 0.15))
+	for c in [[Vector3(0.0, 1.9, 0.0), 1.75, 3.0], [Vector3(0.95, 2.5, 0.3), 1.25, 5.0], [Vector3(-0.85, 2.4, -0.4), 1.35, 7.0]]:
+		var copa := _blob(c[2], 1.0, 0.9, Color(0.17, 0.37, 0.14), Color(0.36, 0.56, 0.2))
+		st.append_from(copa, 0, Transform3D(Basis().scaled(Vector3.ONE * float(c[1])), c[0]))
+	return st.commit()
+
+
+## Árvore morta ou queimada: tronco escuro e galhos secos sem folhas.
+static func morta() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_cilindro(st, 0.0, 3.4, 0.26, 0.1, 5, Color(0.2, 0.17, 0.15), Color(0.28, 0.24, 0.21))
+	for g in [[1.6, 0.0, 0.9], [2.3, 2.1, 0.8], [2.8, 4.2, 0.7], [1.2, 3.4, 0.6]]:
+		var ramo := SurfaceTool.new()
+		ramo.begin(Mesh.PRIMITIVE_TRIANGLES)
+		_cilindro(ramo, 0.0, float(g[2]) * 1.6, 0.09, 0.02, 4, Color(0.22, 0.19, 0.16), Color(0.3, 0.26, 0.22))
+		var m := ramo.commit()
+		var giro := Basis(Vector3.UP, float(g[1])) * Basis(Vector3.FORWARD, 1.0)
+		st.append_from(m, 0, Transform3D(giro, Vector3(0.0, float(g[0]), 0.0)))
+	return st.commit()
+
+
+## Cogumelo vermelho de mata úmida.
+static func cogumelo() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_cilindro(st, 0.0, 0.22, 0.05, 0.04, 5, Color(0.85, 0.82, 0.72), Color(0.8, 0.77, 0.68))
+	_cone(st, 0.2, 0.16, 0.16, 6, Color(0.6, 0.12, 0.1), Color(0.78, 0.2, 0.14))
+	return st.commit()

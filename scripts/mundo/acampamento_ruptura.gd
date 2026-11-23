@@ -14,6 +14,7 @@ var _visto := false
 
 func _ready() -> void:
 	nome_area = "Acampamento da Ruptura"
+	tipo_de_arvore = "folhosa"
 	tam = 260.0
 	_rng.seed = 53
 	_ambiente_padrao()

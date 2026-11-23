@@ -5,6 +5,7 @@ extends AreaBase
 
 var terreno: Terreno
 var tam := 300.0
+var tipo_de_arvore := "pinheiro"   # "pinheiro", "folhosa" ou "morta": a mata da região segue o bioma
 var paleta_casas := {}   # tinta das casas da região (ver ConstrutorCasa.tingir)
 var _rng := RandomNumberGenerator.new()
 var _solidos: StaticBody3D
@@ -70,7 +71,7 @@ func _floresta(tentativas: int, livre: Callable) -> void:
 		_solidos.add_child(cs)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = FabricaNatureza.pinheiro()
+	mm.mesh = FabricaNatureza.folhosa() if tipo_de_arvore == "folhosa" else (FabricaNatureza.morta() if tipo_de_arvore == "morta" else FabricaNatureza.pinheiro())
 	mm.instance_count = pinheiros.size()
 	for i in pinheiros.size():
 		mm.set_instance_transform(i, pinheiros[i])

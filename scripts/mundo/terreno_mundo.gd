@@ -154,17 +154,7 @@ func distancia_caminho(x: float, z: float) -> float:
 
 ## Cor do chão do mundo: capim nos campos, cinza e seco rumo à fortaleza, vulcânico perto da cratera, ocre perto de Valdoria.
 func cor_do_mundo(x: float, z: float) -> Color:
-	var capim := Color(0.3, 0.42, 0.2)
-	var seco := Color(0.38, 0.36, 0.28)
-	var cinza := Color(0.3, 0.29, 0.28)
-	var vulcao := Color(0.27, 0.18, 0.16)
-	var ocre := Color(0.44, 0.38, 0.27)
-	var c := capim.lerp(seco, smoothstep(-500.0, -800.0, z))
-	c = c.lerp(cinza, smoothstep(-800.0, -1000.0, z))
-	c = c.lerp(vulcao, smoothstep(-1050.0, -1250.0, z))
-	c = c.lerp(ocre, smoothstep(-1550.0, -1750.0, z))
-	c = c.lerp(Color(0.3, 0.45, 0.22), smoothstep(-1950.0, -2100.0, z))   # os campos em volta do castelo são verdes e cuidados
-	return c * (0.9 + 0.2 * (_ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5))
+	return Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
 
 
 func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
