@@ -39,7 +39,7 @@ func _rodar() -> void:
 		var imgs: Array[Image] = []
 		for p in pontos:
 			drone.olhar(p[1], p[2])
-			jogo.jogador.global_position = Vector3(p[1].x, h + 1.0, p[1].z)   # perto, para as regiões em volta ligarem
+			jogo.jogador.global_position = Vector3(p[1].x, m.chao_em(p[1].x, p[1].z) + 1.0, p[1].z)   # perto, para as regiões em volta ligarem (no chão do ponto, não no da região)
 			m.atualizar_atividade()
 			await create_timer(2.2).timeout
 			RenderingServer.force_draw()

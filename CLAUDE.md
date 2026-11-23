@@ -38,6 +38,10 @@ Idioma de trabalho: português do Brasil. Explicar arquitetura em linguagem dire
 
 Mudou um nome? Atualizar aqui e varrer o projeto inteiro. Nomes de outros lugares, bestas comuns e NPCs menores ainda não foram definidos: propor e aprovar antes de usar.
 
+## Leis do jogo e auditoria
+
+Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo: as regras que nunca podem ser quebradas e o teste de cada uma. A varredura do mundo todo sem o Torin é `tools/drone_auditoria.gd` (relatórios em `docs/auditoria/`, um por etapa). Branch de trabalho da reconstrução: `reconstrucao` (baseline na tag `baseline-reconstrucao`, ver `BASELINE.md`). Nunca declarar uma etapa pronta por uma foto só: rodar a suíte inteira e a varredura.
+
 ## Regras de trabalho
 
 ### Arquitetura

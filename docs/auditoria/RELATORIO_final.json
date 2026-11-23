@@ -1,0 +1,30 @@
+{
+  "contagem": {
+    "VISUAL|água no ar sobre chão mais baixo": 2
+  },
+  "etapa": "final",
+  "exemplos": [
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "2 de 628 amostras; pior 1.1 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -308.7,
+      "z": 87.0
+    },
+    {
+      "categoria": "água no ar sobre chão mais baixo",
+      "causa": "5 de 512 amostras; pior 0.8 m abaixo da faixa de água",
+      "objeto": "mundo/rio",
+      "severidade": "VISUAL",
+      "x": -337.4,
+      "z": -54.2
+    }
+  ],
+  "por_severidade": {
+    "BLOQUEADOR": 0,
+    "CRITICO": 0,
+    "MENOR": 0,
+    "VISUAL": 2
+  }
+}
