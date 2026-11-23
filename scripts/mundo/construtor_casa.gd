@@ -12,6 +12,7 @@ const ALTURA_PAREDE := 3.12
 const GIRO_FACHADA := 0.0
 const ALTURA_TELHADO := 3.12
 const ESPESSURA_COLISAO := 0.5
+const CAMADA_CONTRA_MONSTROS := 16   # bit 5: só monstros colidem (porta de casa sempre fechada para eles)
 const LARGURA_VAO_PORTA := 1.7
 
 
@@ -167,6 +168,17 @@ static func _porta(casa: Node3D, pos: Vector3) -> void:
 	corpo.position = pos + Vector3(0.0, 1.15, -0.1)
 	casa.add_child(corpo)
 	porta.corpo = corpo
+	var contra_monstros := StaticBody3D.new()   # o vão da porta sempre barra os monstros (camada 16, que o jogador e a câmera não enxergam)
+	contra_monstros.name = "BarreiraContraMonstros"
+	contra_monstros.collision_layer = CAMADA_CONTRA_MONSTROS
+	contra_monstros.collision_mask = 0
+	var cs2 := CollisionShape3D.new()
+	var bx2 := BoxShape3D.new()
+	bx2.size = Vector3(LARGURA_VAO_PORTA + 0.3, 2.4, 0.5)
+	cs2.shape = bx2
+	contra_monstros.add_child(cs2)
+	contra_monstros.position = pos + Vector3(0.0, 1.2, 0.0)
+	casa.add_child(contra_monstros)
 
 
 ## Janela com esquadria e venezianas abertas, na mesma posição e giro da parede.

@@ -163,10 +163,13 @@ func _criar_chuva() -> CPUParticles3D:
 	c.initial_velocity_min = 22.0
 	c.initial_velocity_max = 28.0
 	var malha := BoxMesh.new()
-	malha.size = Vector3(0.015, 0.7, 0.015)
+	malha.size = Vector3(0.008, 0.4, 0.008)   # fino e curto: perto da câmera as gotas viravam barras brancas enormes
 	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.75, 0.85, 1.0, 0.55)
+	m.albedo_color = Color(0.75, 0.85, 1.0, 0.5)
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA   # as gotas coladas na câmera somem (a 1,5 m invisíveis, a 6 m inteiras)
+	m.distance_fade_min_distance = 1.5
+	m.distance_fade_max_distance = 6.0
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	malha.material = m
 	c.mesh = malha

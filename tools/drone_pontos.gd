@@ -13,7 +13,8 @@ func _r() -> void:
 	var a := OS.get_cmdline_user_args()
 	jogo.clima.congelado = true
 	jogo.clima.definir_hora(11.0)
-	jogo.clima.forcar_tempo(Clima.Tempo.LIMPO)
+	jogo.clima.definir_hora(float(a[2]) if a.size() > 2 else 11.0)
+	jogo.clima.forcar_tempo(int(a[3]) if a.size() > 3 else Clima.Tempo.LIMPO)
 	var m: Mundo = jogo.mundo
 	var drone: Drone = jogo.get_node("Admin").drone
 	drone.ligar(jogo, jogo.jogador.global_position)

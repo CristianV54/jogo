@@ -46,6 +46,7 @@ var _atacou := false
 
 func _ready() -> void:
 	vida = vida_max
+	collision_mask |= ConstrutorCasa.CAMADA_CONTRA_MONSTROS   # não entra em casa pela porta
 	add_to_group("inimigos")
 	visual = cena_visual.instantiate()
 	visual.rotation_degrees.y = 180.0
@@ -108,10 +109,10 @@ func _physics_process(delta: float) -> void:
 			velocity.x = 0.0
 			velocity.z = 0.0
 			if dist > 0.1:
-				rotation.y = lerp_angle(rotation.y, atan2(-ate.x, -ate.z), 6.0 * delta)
+				rotation.y = lerp_angle(rotation.y, atan2(-ate.x, -ate.z), 14.0 * delta)
 			if not _atacou and _tempo >= momento_do_ataque:
 				_atacou = true
-				if dist <= alcance_ataque * 1.35:
+				if dist <= alcance_ataque * 1.35 and _acerta_o_alvo():
 					if projetil:
 						Efeitos.flecha(self, alvo)
 					alvo.receber_dano(dano, self)
@@ -124,6 +125,25 @@ func _physics_process(delta: float) -> void:
 				estado = Estado.PERSEGUINDO
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 20.0 * delta
 	move_and_slide()
+
+
+## O golpe só acerta quem está à frente (a menos de ~70 graus do rumo do corpo) e sem parede entre os dois: nada de bater de
+## costas nem através de parede.
+func _acerta_o_alvo() -> bool:
+	var para_alvo := alvo.global_position - global_position
+	para_alvo.y = 0.0
+	if para_alvo.length() > 0.2:
+		var frente := -global_transform.basis.z
+		frente.y = 0.0
+		if frente.normalized().dot(para_alvo.normalized()) < (0.0 if projetil else 0.35):
+			return false
+	if projetil:
+		return true   # a flecha voa por cima de muro e parapeito: o arqueiro só precisa estar virado para o alvo
+	var de := global_position + Vector3(0.0, 1.2, 0.0)
+	var q := PhysicsRayQueryParameters3D.create(de, alvo.global_position + Vector3(0.0, 1.2, 0.0), 1)
+	q.exclude = [get_rid(), alvo.get_rid()]
+	var h := get_world_3d().direct_space_state.intersect_ray(q)
+	return h.is_empty() or String((h.collider as Node).name) == "Colisao"   # o chão do terreno (ladeira entre os dois) não é parede
 
 
 func receber_dano(quantidade: int, de: Node3D = null) -> void:

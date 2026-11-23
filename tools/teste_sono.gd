@@ -36,7 +36,7 @@ func _rodar() -> void:
 	Engine.time_scale = 6.0
 	for i in 200:
 		await create_timer(0.1).timeout
-		if civis.all(func(n: Npc) -> bool: return n._deitado):
+		if civis.all(func(n: Npc) -> bool: return n._deitado and not n._entrando_na_casa):
 			break
 	Engine.time_scale = 1.0
 	var deitados := civis.filter(func(n: Npc) -> bool: return n._deitado)

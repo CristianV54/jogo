@@ -286,9 +286,38 @@ func _ler_entrada() -> Vector2:
 
 
 ## Sobe na montaria: o cavaleiro salta do chão até o assento (Sitting_Enter) e só então o controle passa para a montaria.
+## Corpo da montaria que colide enquanto se cavalga: uma caixa do tamanho do bicho (o corpo do cavalo desliga a própria colisão ao ser
+## montado, e a cápsula do Torin é fina; sem esta caixa o cavalo atravessava pedra e parede). Montaria que voa não ganha caixa.
+var _forma_montaria: CollisionShape3D
+
+
+func _criar_forma_montaria(m: Montaria) -> void:
+	_remover_forma_montaria()
+	if m.voa:
+		return
+	var caixa := Solidos.caixa_de(m.dono, 0.85)   # no espaço do dono (o dono gira PI em relação ao corpo do jogador)
+	if caixa.size.length() < 0.5:
+		return
+	_forma_montaria = CollisionShape3D.new()
+	_forma_montaria.name = "FormaDaMontaria"
+	var bx := BoxShape3D.new()
+	bx.size = Vector3(caixa.size.x, caixa.size.y, caixa.size.z)
+	_forma_montaria.shape = bx
+	var c := caixa.get_center()
+	_forma_montaria.position = Vector3(-c.x, c.y - (m.dono.global_position.y - global_position.y), -c.z)   # o dono está virado PI: x e z invertem
+	add_child(_forma_montaria)
+
+
+func _remover_forma_montaria() -> void:
+	if _forma_montaria and is_instance_valid(_forma_montaria):
+		_forma_montaria.queue_free()
+	_forma_montaria = null
+
+
 func montar(m: Montaria) -> void:
 	montaria = m
 	m.montada = true
+	_criar_forma_montaria(m)
 	_voando = false
 	_golpeando = false
 	_rolando = false
@@ -317,6 +346,7 @@ func desmontar() -> void:
 	if montaria == null:
 		return
 	var m := montaria
+	_remover_forma_montaria()
 	var assento := visual.global_position
 	montaria = null
 	m.montada = false

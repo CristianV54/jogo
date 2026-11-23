@@ -55,5 +55,27 @@ func _rodar() -> void:
 		if n._dentro_de_casa:
 			ainda += 1
 	_marcar("sem o lobo eles saem de novo", ainda == 0, "%d ainda dentro" % ainda)
+	# lobo PARADO (nunca perseguiu ninguém) perto da vila também assusta, e depois do susto as camas voltam a ficar livres
+	var l3 := (load("res://scenes/inimigos/lobo.tscn") as PackedScene).instantiate() as Inimigo
+	jogo.mundo.add_child(l3)
+	l3.global_position = alvos[1].global_position + Vector3(8.0, 0.0, 0.0)
+	l3.set_physics_process(false)   # fica parado
+	for i in 80:
+		await create_timer(0.1).timeout
+	var assustados := 0
+	for n in alvos:
+		if n._medo or n._dentro_de_casa:
+			assustados += 1
+	_marcar("lobo parado a menos de 16 m também assusta", assustados >= 1, "%d assustados" % assustados)
+	l3.queue_free()
+	for i in 200:
+		await create_timer(0.1).timeout
+		if alvos.all(func(n: Npc) -> bool: return not n._dentro_de_casa and not n._recolhido):
+			break
+	var camas_presas := 0
+	for c in get_nodes_in_group("interagiveis"):
+		if c is Cama and (c as Cama).dono != "":
+			camas_presas += 1
+	_marcar("passado o susto de dia, nenhuma cama fica reservada", camas_presas == 0, "%d camas presas" % camas_presas)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
 	quit(0)

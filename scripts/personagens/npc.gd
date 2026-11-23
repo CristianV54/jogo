@@ -40,9 +40,11 @@ var _t_horario := 0.0
 var _medo := false          # um monstro caça por perto: corre para dentro da casa mais perto
 var _t_sem_ameaca := 0.0
 var _dentro_de_casa := false
+var _ameaca_pos := Vector3.INF   # onde está o monstro que assusta (para fugir na direção contrária)
 var _cama: Cama = null     # a cama em que dorme
 var _casa_no: Node3D = null
 var _deitado := false
+var _entrando_na_casa := false   # caminhando da porta até a cama
 var _anim_descanso := ""
 var _melhor_dist := 1e9   # progresso rumo à casa (para detectar quem empacou)
 var _t_sem_progresso := 0.0
@@ -121,6 +123,7 @@ func acomodar_ao_horario() -> void:
 	elif not quer and _recolhido:
 		_recolhido = false
 		_acordar()
+		_soltar_reserva()
 		_sair_de_casa()
 		if not rotina.is_empty():
 			_proximo_passo()
@@ -159,6 +162,7 @@ func _horario(delta: float) -> bool:
 			elif not quer and _recolhido:
 				_recolhido = false
 				_acordar()
+				_soltar_reserva()
 				_sair_de_casa()
 				_melhor_dist = 1e9
 				if not rotina.is_empty():
@@ -166,7 +170,7 @@ func _horario(delta: float) -> bool:
 	if not _recolhido:
 		return false
 	if _deitado:
-		return true   # dormindo na cama até de manhã
+		return true   # dormindo (ou a caminho da cama) até de manhã
 	if _pausas > 0:
 		return true   # conversando
 	var ate := casa - position
@@ -249,6 +253,11 @@ func _achar_casa() -> Vector3:
 	var dmin := 200.0
 	for c: Node3D in get_tree().get_nodes_in_group("casas"):
 		var d := c.global_position.distance_to(global_position)
+		if _ameaca_pos != Vector3.INF:   # fugindo: casa na direção do monstro conta como mais longe (não corre para cima dele)
+			var para_casa := (c.global_position - global_position).normalized()
+			var para_monstro := (_ameaca_pos - global_position).normalized()
+			if para_casa.dot(para_monstro) > 0.4:
+				d += 45.0
 		if d < dmin and c.has_meta("x_porta") and _cama_livre(c) != null:
 			dmin = d
 			melhor = c
@@ -273,7 +282,16 @@ func _cama_livre(c: Node3D) -> Cama:
 	return null
 
 
+## Passou o susto de dia: solta a cama reservada ao escolher o abrigo (senão as camas ficavam presas a quem nem dorme lá).
+func _soltar_reserva() -> void:
+	if _cama and not _deitado:
+		_cama.dono = ""
+		_cama = null
+		casa = Vector3.INF
+
+
 ## Chegou à porta e é hora de dormir: entra, vai até a cama e deita (a casa esconde o NPC por fora).
+## Entra pela porta, anda até a cama e deita. Se o jogador não está olhando (a mais de 40 m), deita direto, sem a caminhada.
 func _deitar() -> void:
 	if _deitado or _cama == null or _casa_no == null:
 		return
@@ -282,9 +300,35 @@ func _deitar() -> void:
 	for d in _casa_no.get_meta("camas", []):
 		if d["no"] == _cama:
 			dados = d
-	var alvo: Vector3 = _casa_no.to_global(dados["pos"] as Vector3)
+	var cama_global: Vector3 = _casa_no.to_global(dados["pos"] as Vector3)
+	var porta_dentro: Vector3 = _casa_no.to_global(Vector3(float(_casa_no.get_meta("x_porta")), 0.0, float(_casa_no.get_meta("linhas")) - 1.0))
 	var pai := get_parent() as Node3D
-	position = pai.to_local(alvo) if pai else alvo
+	var jogador := get_tree().get_first_node_in_group("jogador") as Node3D
+	var perto := jogador != null and jogador.global_position.distance_to(global_position) < 40.0
+	if not perto:
+		_ao_chegar_na_cama(dados, cama_global, pai)
+		return
+	var pontos: Array[Vector3] = [Vector3(global_position.x, 0.0, global_position.z), porta_dentro, Vector3(cama_global.x, 0.0, cama_global.z)]
+	var tw := create_tween()
+	_entrando_na_casa = true
+	visual.tocar("Walk", 0.2)
+	var atual := global_position
+	for p in pontos.slice(1):
+		var dest := Vector3(p.x, global_position.y if p != pontos[2] else cama_global.y, p.z)
+		var dur := maxf(0.3, atual.distance_to(dest) / 1.6)
+		tw.tween_callback(func() -> void:
+			var d: Vector3 = dest - global_position
+			if d.length() > 0.05:
+				rotation.y = atan2(-d.x, -d.z))
+		tw.tween_property(self, "global_position", dest, dur)
+		atual = dest
+	tw.tween_callback(func() -> void:
+		_entrando_na_casa = false
+		_ao_chegar_na_cama(dados, cama_global, pai))
+
+
+func _ao_chegar_na_cama(dados: Dictionary, cama_global: Vector3, pai: Node3D) -> void:
+	position = pai.to_local(cama_global) if pai else cama_global
 	position.y += 0.05
 	visual.tocar("Death01", 0.1)
 	if visual.animacoes:
@@ -330,6 +374,7 @@ func _acordar() -> void:
 	if not _deitado:
 		return
 	_deitado = false
+	_entrando_na_casa = false
 	if visual.animacoes:
 		visual.animacoes.play("Idle")
 	if casa != Vector3.INF:
@@ -342,11 +387,15 @@ func _acordar() -> void:
 
 ## Algum monstro (ou guarda) em perseguição a menos de 28 m? Quem está parado não assusta.
 func _ameacado() -> bool:
+	_ameaca_pos = Vector3.INF
 	for e in get_tree().get_nodes_in_group("inimigos"):
 		var ini := e as Inimigo
-		if ini == null or ini.estado == Inimigo.Estado.MORTO or ini.estado == Inimigo.Estado.PARADO:
+		if ini == null or ini.estado == Inimigo.Estado.MORTO:
 			continue
-		if ini.global_position.distance_to(global_position) < 28.0:
+		var d := ini.global_position.distance_to(global_position)
+		var bicho_selvagem := ini.especie in ["lobo", "javali", "urso", "cao_guerra"]
+		if (ini.estado != Inimigo.Estado.PARADO and d < 28.0) or (bicho_selvagem and d < 16.0):   # um lobo parado mas perto também assusta
+			_ameaca_pos = ini.global_position
 			return true
 	return false
 
