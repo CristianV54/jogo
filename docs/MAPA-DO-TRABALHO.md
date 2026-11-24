@@ -59,6 +59,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `tools/teste_animais_obstaculos.gd` | Animais colados na cerca e nas casas vagam por 40 s de jogo (tempo acelerado 4x): nenhum pode atravessar. |
 | `tools/teste_caca.gd` | O lobo ataca gente e bicho de fazenda de verdade: o NPC é mordido (se encolhe, reclama), foge para casa e volta ao trabalho quando o |
 | `tools/teste_bordas.gd` | A beirada de cada região não pode ser um degrau: o Torin entra andando nas 8 regiões pelos 4 lados (96 entradas) e não pode parar na linha da borda. |
+| `tools/planta_do_mapa.py` | Desenha a PLANTA do mapa novo (ilha de 3 x 3 km, reino no centro) em docs/mapa-novo/, para aprovar antes de construir. |
 | `tools/teste_cadeia.gd` | Cadeia de missões do jogo inteiro: começa no zero, cumpre os objetivos de cada missão pelos eventos reais e confere que |
 | `tools/teste_camera_casa.gd` | A câmera de 3ª pessoa dentro da casa do Vane: 8 combinações de giro e inclinação, com captura e verificação numérica. |
 | `tools/teste_cartaz.gd` | Cartaz lido com E abre a cena de diálogo com todas as linhas; os NPCs novos (Pomar, Ferrogris) existem e falam. |
@@ -113,6 +114,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 |---|---|
 | `docs/HISTORIA-E-MISSOES.md` | Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados |
 | `docs/INVENTARIO-DE-DEFEITOS.md` | Inventário de defeitos de 24/11/2026 (lista única, com foto ou medida de cada um; fotos em `docs/inventario/`) |
+| `docs/mapa-novo/PLANTA_v1.md` | Planta do mapa novo, versão 1: tamanho, lugares, temas e o que fica para depois |
 | `docs/LEIS-DO-JOGO.md` | Leis do jogo (Reino de Cinzas) |
 | `docs/MAPA-DO-TRABALHO.md` | Mapa do trabalho (gerado lendo os arquivos em 23/11/2026; atualizar quando criar algo novo) |
 | `docs/SESSAO-2026-11-23.md` | Sessão de 22 e 23/11/2026: o que foi feito, os erros e o que falta |
