@@ -1,7 +1,7 @@
 extends SceneTree
-# 6 indivíduos de cada espécie, para conferir a variação de cor e a textura de pelo.
+# 10 indivíduos de cada espécie, para conferir a variação de cor e a textura de pelo.
 #   godot --path . --resolution 1700x900 --script res://tools/ver_pelagens.gd
-const ESPECIES := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali"]
+const ESPECIES := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali", "galinha"]
 
 
 func _init() -> void:
@@ -27,12 +27,12 @@ func _init() -> void:
 	seed(5)
 	var z := -9.0
 	for esp in ESPECIES:
-		for k in 6:
+		for k in 10:
 			var a := AnimalVila.new()
 			a.modelo = load("res://assets/models/criaturas/%s/%s.glb" % [esp, esp])
 			a.especie = esp
 			a.raio_vagar = 0.01
-			a.position = Vector3(-7.5 + k * 3.0, 0, z)
+			a.position = Vector3(-13.5 + k * 3.0, 0, z)
 			a.rotation.y = PI / 2
 			root.add_child(a)
 		z += 2.6
@@ -44,8 +44,8 @@ func _rodar() -> void:
 	cam.fov = 45
 	root.add_child(cam)
 	cam.current = true
-	cam.global_position = Vector3(0, 22, 14)
-	cam.look_at(Vector3(0, 0, 1))
+	cam.global_position = Vector3(0, 27, 19)
+	cam.look_at(Vector3(0, 0, 1.5))
 	for i in 25:
 		await process_frame
 	root.get_viewport().get_texture().get_image().save_png("tools/capturas/pelagens.png")

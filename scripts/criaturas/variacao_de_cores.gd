@@ -51,25 +51,29 @@ const PALETAS := {
 		"Beige": [Color(0.92, 0.82, 0.62), Color(0.12, 0.12, 0.13), Color(0.5, 0.3, 0.16), Color(0.93, 0.93, 0.92), Color(0.55, 0.55, 0.58)],
 		"Brown": [Color(0.12, 0.09, 0.08), Color(0.3, 0.18, 0.1)],
 	},
-	"lobo": {
-		"Beige": [Color(0.5, 0.5, 0.53), Color(0.36, 0.36, 0.39), Color(0.66, 0.63, 0.58), Color(0.28, 0.27, 0.27)],
-		"Brown": [Color(0.12, 0.12, 0.14), Color(0.2, 0.2, 0.22)],
-	},
 	"javali": {
 		"Material.003": [Color(0.3, 0.2, 0.15), Color(0.2, 0.15, 0.12), Color(0.42, 0.28, 0.18), Color(0.12, 0.1, 0.1)],
 	},
 }
 
-## Espécies cuja pelagem vem pintada por vértice no próprio modelo (não usam paleta).
-const PINTADAS_POR_VERTICE := ["lobo"]
+## Espécies cuja pelagem vem pintada por vértice no próprio modelo: em vez de paleta, um tom que multiplica a pintura.
+## Cada entrada é [peso, tom]: o peso diz o quanto aquele tom é comum. A alcateia é quase toda da cor do modelo (pardo-acinzentado); de vez em quando
+## aparece um lobo mais castanho e, mais raro, um preto ou um branco.
+const TONS_POR_VERTICE := {
+	"lobo": [[64, Color(1.0, 1.0, 1.0)], [14, Color(1.05, 0.9, 0.74)], [11, Color(0.3, 0.3, 0.33)], [11, Color(2.2, 2.2, 2.25)]],
+}
 
 static var _pelo: ImageTexture
 
 
 static func aplicar(raiz: Node3D, especie: String) -> void:
 	var paleta: Dictionary = PALETAS.get(especie, {})
-	if paleta.is_empty():
+	var tom_vertice := Color.WHITE
+	if TONS_POR_VERTICE.has(especie):
+		tom_vertice = _sortear_por_peso(TONS_POR_VERTICE[especie])
+	elif paleta.is_empty():
 		return
+	var claridade := randf_range(0.84, 1.12)   # cada indivíduo um pouco mais claro ou escuro que o vizinho
 	for mi in raiz.find_children("*", "MeshInstance3D", true, false):
 		var malha := mi as MeshInstance3D
 		for i in malha.mesh.get_surface_count():
@@ -77,9 +81,9 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 			if base == null:
 				continue
 			var m := base.duplicate() as StandardMaterial3D
-			if especie in PINTADAS_POR_VERTICE:   # a pelagem já vem pintada no modelo: mantém
+			if TONS_POR_VERTICE.has(especie):   # a pelagem já vem pintada no modelo: mantém, com o tom do indivíduo
 				m.vertex_color_use_as_albedo = true
-				m.albedo_color = Color.WHITE
+				m.albedo_color = Color(tom_vertice.r * claridade, tom_vertice.g * claridade, tom_vertice.b * claridade)
 				malha.set_surface_override_material(i, m)
 				continue
 			m.vertex_color_use_as_albedo = false   # os bichos de fazenda trazem cor de vértice toda branca: ligada, ela apagava a pelagem
@@ -87,11 +91,24 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 			if opcoes.is_empty():
 				malha.set_surface_override_material(i, m)
 				continue
-			m.albedo_color = opcoes[randi() % opcoes.size()]
+			var cor: Color = opcoes[randi() % opcoes.size()]
+			m.albedo_color = Color(cor.r * claridade, cor.g * claridade, cor.b * claridade)
 			m.albedo_texture = _textura_de_pelo()
 			m.uv1_triplanar = true
 			m.uv1_scale = Vector3.ONE * 0.5
 			malha.set_surface_override_material(i, m)
+
+
+static func _sortear_por_peso(opcoes: Array) -> Color:
+	var total := 0.0
+	for o in opcoes:
+		total += float(o[0])
+	var r := randf() * total
+	for o in opcoes:
+		r -= float(o[0])
+		if r <= 0.0:
+			return o[1]
+	return opcoes[0][1]
 
 
 ## Ruído em tons de cinza claro, que escurece a cor aos pontos: dá a aparência de pelo.

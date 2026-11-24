@@ -31,6 +31,7 @@ enum Estado { PARADO, PERSEGUINDO, ATACANDO, DANO, MORTO }
 @export var anim_parado := "Idle"
 @export var anim_andar := "Walk"
 @export var anim_correr := "Jog_Fwd"
+@export var ritmo_correr := 1.0     # acelera a animação de correr para as patas acompanharem a velocidade do corpo
 @export var anim_atacar := "Punch_Jab"
 @export var anim_dano := "Hit_Chest"
 @export var anim_morte := "Death01"
@@ -68,6 +69,7 @@ func _ready() -> void:
 func _tocar(nome_anim: String, mistura := 0.2) -> void:
 	if visual and visual.has_method("tem") and visual.tem(nome_anim):
 		visual.tocar(nome_anim, mistura)
+		visual.animacoes.speed_scale = ritmo_correr if nome_anim == anim_correr else 1.0
 
 
 func _physics_process(delta: float) -> void:
@@ -105,7 +107,7 @@ func _physics_process(delta: float) -> void:
 				velocity.x = dir.x * velocidade
 				velocity.z = dir.z * velocidade
 				rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 8.0 * delta)
-				_tocar(anim_correr if dist > 10.0 and anim_correr != "" else anim_andar)
+				_tocar(anim_correr if anim_correr != "" else anim_andar)   # persegue sempre na velocidade de corrida: a animação é a de correr
 		Estado.ATACANDO:
 			velocity.x = 0.0
 			velocity.z = 0.0
@@ -169,7 +171,7 @@ func _cacar(delta: float) -> void:
 		velocity.x = dir.x * velocidade
 		velocity.z = dir.z * velocidade
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 12.0 * delta)
-		_tocar(anim_andar if ate.length() > 6.0 or anim_correr == "" else anim_correr)
+		_tocar(anim_correr if anim_correr != "" else anim_andar)
 	else:
 		velocity.x = 0.0
 		velocity.z = 0.0

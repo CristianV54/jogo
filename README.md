@@ -17,6 +17,14 @@ O usuário não é engenheiro: explique em português direto, mostre prova (foto
 
 ## Rodar o jogo
 
+Na primeira vez depois de baixar (ou de trocar de branch), importe os arquivos uma vez:
+
+```bash
+godot --headless --path . --import
+```
+
+Depois é só rodar:
+
 ```bash
 godot --path . --resolution 1280x720          # cena principal: scenes/jogo.tscn
 ```

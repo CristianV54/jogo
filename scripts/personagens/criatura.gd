@@ -4,6 +4,8 @@ extends Node3D
 ## Mesma interface do Humanoide (tocar, tem), para o Inimigo tratar os dois do mesmo jeito.
 
 @export var animacao_inicial := "Idle"
+## Animações que repetem sem parar (para modelos cujo arquivo não traz essa marca, como o lobo).
+@export var animacoes_em_laco: PackedStringArray = []
 
 @onready var modelo: Node3D = $Modelo
 var animacoes: AnimationPlayer
@@ -13,6 +15,9 @@ func _ready() -> void:
 	_cores_por_vertice()
 	animacoes = modelo.find_child("AnimationPlayer", true, false)
 	if animacoes:
+		for nome in animacoes_em_laco:
+			if animacoes.has_animation(nome):
+				animacoes.get_animation(nome).loop_mode = Animation.LOOP_LINEAR
 		tocar(animacao_inicial)
 
 

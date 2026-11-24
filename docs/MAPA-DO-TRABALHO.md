@@ -18,6 +18,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `tools/auditoria_portais.gd` | Todo portal leva a uma área que existe, a um spawn que existe, e a área de destino tem portal de volta. |
 | `tools/bancada.gd` | BANCADA: mundo plano e vazio que fotografa cada item do jogo sozinho (frente, lado e costas; parado e andando quando tem animação), |
 | `tools/bancada_movimento.gd` | BANCADA DE MOVIMENTO: 6 quadros de cada animação de cada ser (vista de lado) e medidas de amplitude, passo e velocidade pedida contra a do jogo. |
+| `tools/criaturas/consertar_andar_do_lobo.py` | Blender: religa as pernas do lobo aos alvos de IK e grava a pose nos ossos (Walk, Run), cria o Idle e refaz a morte, direto no `lobo.glb`. |
 | `tools/calibrar_arma.gd` | Fotografa uma arma segurada de 8 jeitos (direção da lâmina x torção do cabo) e imprime o giro de cada um. |
 | `tools/calibrar_punho.gd` | Com a orientação da lâmina já escolhida, varre o ponto do punho (x e y no espaço de hand_r) e fotografa de 2 ângulos. |
 | `tools/campanha_jogavel.gd` | Agente de controle: joga o jogo pela janela, só com teclas de verdade (Input.parse_input_event), região por região: teleporte F1..F8, |

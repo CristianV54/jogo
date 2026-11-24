@@ -22,7 +22,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 |---|---|---|---|
 | B1 | O lobo não ataca a vaca no curral (vida 40 → 40) | teste `teste_caca` | não investigada |
 | B2 | Lobo "ataca de costas": nesta versão a cabeça aponta para onde ele anda (0,94). O ataque em si ainda não foi filmado | medi (`diag_frente_lobo`) | pendente de filme do ataque |
-| B3 | Inimigo persegue a menos de 10 m com a animação de ANDAR na velocidade de CORRER | li (`inimigo.gd`, linha 108) | regra de escolha da animação |
+| B3 | **CORRIGIDO em 24/11** (persegue sempre com a animação de correr). Inimigo persegue a menos de 10 m com a animação de ANDAR na velocidade de CORRER | li (`inimigo.gd`, linha 108) | regra de escolha da animação |
 | B4 | NPC foge de inimigo: o teste passa, mas só cobre um caso (lobo solto perto de 3 civis) | teste `teste_medo` | cobertura fraca do teste |
 
 ## C. Animais e criaturas: aparência
@@ -32,13 +32,13 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | C1 | **CORRIGIDO em 24/11** (fotos em `docs/ajustes/2026-11-24_cor_e_olhos/`). Vaca, cavalo, ovelha, porco, cervo e javali saem **brancos puros**, sem pelagem. Cão, coelho, urso e cão de guerra saem coloridos | foto (`bancada_A1`, `A2`, `A4`, `A5`), também nas fotos do Mac | `variacao_de_cores.gd`: a regra feita para o lobo ("malha com cor por vértice mantém") pega também os bichos de fazenda, cujas malhas têm cor de vértice branca, e apaga a pelagem |
 | C2 | **CORRIGIDO em 24/11** (olho assentado na pele; mesmas fotos). Olhos nas laterais e saltados para fora da cabeça (ovelha, cão de guerra, urso, lobo); de frente só aparece um, ou nenhum | foto (`bancada_A2`, `A5`, `A6`, `lobo_bancada`) | `olhos.gd` posiciona pelo osso, não pela superfície da cabeça |
 | C3 | **CORRIGIDO em 24/11**. Porco e javali sem olho visível; vaca com olho minúsculo | foto (`bancada_A2`, `A5`) | mesma tabela de olhos |
-| C4 | Galinha sem olhos e sem nenhuma animação | foto e medi | modelo feito sem esqueleto |
+| C4 | **Olhos CORRIGIDOS em 24/11** (falta a animação). Galinha sem olhos e sem nenhuma animação | foto e medi | modelo feito sem esqueleto |
 | C5 | Coelho é o cachorro pug com duas varetas na cabeça e rabo de porco | foto (`bancada_A3`) | falta modelo de coelho |
 | C6 | Urso é o pug marrom com orelhas de bola e rabo enrolado | foto (`bancada_A5`) | falta modelo de urso |
 | C7 | Cão de guerra é o pug cinza de olho vermelho | foto (`bancada_A6`) | falta modelo de cão de guerra |
 | C8 | Cervo é o cavalo pequeno com dois palitos | foto (`bancada_A4`) | falta modelo de cervo |
 | C9 | Javali é o porco com espinhos e presas | foto (`bancada_A5`) | falta modelo de javali |
-| C10 | Lobo: corpo comprido (2,16 m), pelagem em duas cores chapadas | foto (`lobo_bancada`) | modelo simples |
+| C10 | **Cor variada em 24/11** (cinza comum; pardo, preto e branco raros). Lobo: corpo comprido (2,16 m), pelagem em duas cores chapadas | foto (`lobo_bancada`) | modelo simples |
 | C11 | Todos os bichos são de cor chapada, sem textura de pelo, crina, focinho ou casco pintados | foto | pacote low-poly sem textura |
 | C12 | Fagulha, Filhote de Asa e Ignis-Maw são o mesmo dragão em três cores e tamanhos | foto (`bancada_A6`) | um modelo só |
 
@@ -46,10 +46,10 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 
 | # | Defeito | Como vi | Causa |
 |---|---|---|---|
-| D1 | Lobo: andar e correr **não mexem as pernas** (ele desliza como estátua). Só o bote e a morte animam | foto (`movimento_lobo`) | as animações mexem ossos de controle que não puxam a malha |
-| D2 | Lobo: parado não tem animação nenhuma (amplitude 0,00 m) | medi | animação vazia |
-| D3 | Lobo: nenhuma animação está marcada para repetir (andar e correr tocam uma vez e param) | medi | `gerar_lobo.py` não marcou o loop |
-| D4 | Pé desliza em quase todos: o corpo anda muito mais rápido que as patas. Lobo ~10x, ovelha ~10x, porco ~13x, coelho ~13x, cão ~7x, javali ~13x, urso ~3x (números aproximados) | medi | velocidade do jogo escolhida a olho; andar copiado da vaca para outros bichos |
+| D1 | **CORRIGIDO em 24/11** (`tools/criaturas/consertar_andar_do_lobo.py`). Lobo: andar e correr **não mexem as pernas** (ele desliza como estátua). Só o bote e a morte animam | foto (`movimento_lobo`) | as animações mexem ossos de controle que não puxam a malha |
+| D2 | **CORRIGIDO em 24/11** (respiração, cabeça e rabo). Lobo: parado não tem animação nenhuma (amplitude 0,00 m) | medi | animação vazia |
+| D3 | **CORRIGIDO em 24/11** (Idle, Walk e Run repetem, ligado em `lobo_visual.tscn`). Lobo: nenhuma animação está marcada para repetir (andar e correr tocam uma vez e param) | medi | `gerar_lobo.py` não marcou o loop |
+| D4 | **Lobo CORRIGIDO em 24/11** (corrida tocada 3,2x, velocidade 5,0 m/s; os outros bichos seguem abertos). Pé desliza em quase todos: o corpo anda muito mais rápido que as patas. Lobo ~10x, ovelha ~10x, porco ~13x, coelho ~13x, cão ~7x, javali ~13x, urso ~3x (números aproximados) | medi | velocidade do jogo escolhida a olho; andar copiado da vaca para outros bichos |
 | D5 | Cavalo montado galopa a 13 m/s com uma corrida que pede ~3,6 m/s | medi e li | idem |
 | D6 | Ovelha, porco, cão, coelho, javali e urso usam o andar da vaca copiado: passo curto e duro | foto (`movimento_ovelha`, `movimento_urso`) | animação transplantada |
 | D7 | Sem animação de levar dano: lobo, javali, urso, cão de guerra, dragões | medi | não existe no modelo |

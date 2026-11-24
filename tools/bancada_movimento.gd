@@ -223,7 +223,8 @@ func _rodar() -> void:
 			var papel := String(an[1])
 			var eh_andar: bool = papel == "andar" or String(an[0]) in ["Walk", "WalkSlow", "Jog_Fwd"]
 			var eh_correr: bool = papel == "correr" or String(an[0]) in ["Run", "Sprint"]
-			var pedida := 2.0 * passo / dur if (eh_andar or eh_correr) else 0.0
+			var ritmo := (no as Inimigo).ritmo_correr if (no is Inimigo and eh_correr) else 1.0   # o jogo toca a corrida acelerada
+			var pedida := 2.0 * passo * ritmo / dur if (eh_andar or eh_correr) else 0.0
 			var do_jogo := float(vels.get("andar" if eh_andar else "correr", 0.0)) if (eh_andar or eh_correr) else 0.0
 			var obs: PackedStringArray = []
 			if amplitude < altura * 0.02:
