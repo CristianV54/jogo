@@ -15,14 +15,14 @@ const ESQUELETO_LOBO := ["Bone.003", "Bone.003_end"]
 const TABELA := {
 	"vaca": [ESQUELETO_FAZENDA, 0.4, 25, 30, 0.07, Color(0.1, 0.06, 0.04), null],
 	"ovelha": [ESQUELETO_FAZENDA, 0.4, 25, 35, 0.07, Color(0.1, 0.07, 0.04), null],
-	"porco": [ESQUELETO_FAZENDA, 0.45, 12, 40, 0.06, Color(0.08, 0.05, 0.04), null],
+	"porco": [ESQUELETO_FAZENDA, 0.5, 20, 52, 0.06, Color(0.08, 0.05, 0.04), null],
 	"cavalo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.065, Color(0.1, 0.06, 0.03), null],
 	"cervo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.075, Color(0.09, 0.05, 0.03), null],
 	"cao": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.12, Color(0.12, 0.07, 0.04), null],
 	"coelho": [ESQUELETO_FAZENDA, 0.2, 35, 40, 0.13, Color(0.1, 0.05, 0.04), null],
 	"urso": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.08, 0.05, 0.03), null],
 	"cao_guerra": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.75, 0.12, 0.06), Color(0.03, 0.02, 0.02)],
-	"javali": [ESQUELETO_FAZENDA, 0.45, 12, 40, 0.06, Color(0.3, 0.07, 0.04), null],
+	"javali": [ESQUELETO_FAZENDA, 0.5, 20, 52, 0.06, Color(0.3, 0.07, 0.04), null],
 	"lobo": [ESQUELETO_LOBO, 0.25, 40, 60, 0.062, Color(0.88, 0.62, 0.1), Color(0.03, 0.02, 0.02)],
 }
 
