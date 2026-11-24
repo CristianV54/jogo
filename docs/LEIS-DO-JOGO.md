@@ -6,6 +6,7 @@ Rodar tudo: ver "Suíte completa" no fim.
 | Lei | Teste |
 |---|---|
 | Não existe ponto jogável sem piso; ninguém cai do mundo | `drone_auditoria` (grade de 6 m), `auditoria_buracos`, `teste_queda` |
+| A beirada de uma região nunca é um degrau: entra-se andando por qualquer lado | `teste_bordas` |
 | Nenhum desnível de terreno passa de 45° (6 m em 6 m) | `drone_auditoria` |
 | A água nunca fica pendurada sobre chão mais baixo; margem acima da água | `drone_auditoria` (categoria "água no ar") |
 | Todo rio termina em outro rio, no mar ou numa borda de região; pontas livres afinam | `drone_auditoria` (rio sem começo ou fim) |

@@ -12,7 +12,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | # | Defeito | Como vi | Causa |
 |---|---|---|---|
 | A1 | **NÃO ERA DEFEITO DO JOGO (24/11).** As 46 violações vinham do teste desatualizado: uma vaca de teste nascia dentro do Depósito de Grãos e outra saía pelo portão oeste, ambos criados depois do teste. Teste corrigido: 0 violações em 3 rodadas de 1240 amostras. Animais atravessam parede de casa e cerca: 46 violações em 1280 amostras (40 em casa, 6 em cerca) | teste `teste_animais_obstaculos` | não investigada |
-| A2 | O Torin trava em x=-160 na entrada oeste do Refúgio, vindo do Pomar. O percurso real Refúgio→Castelo está reprovado | relatório da sessão anterior (não repeti) | não confirmada |
+| A2 | **CORRIGIDO em 24/11.** Causa: o chão do mundo descia 0,2 m exatamente na linha da borda oeste e norte de cada região e a beirada do chão da região virava um degrau. Não era só o Refúgio: o Torin ficava preso em 18 de 96 entradas (Refúgio, Pomar, Bosque, Ferrogris, Cratera, Castelo); depois da correção em `terreno_mundo.gd`, 0 de 96 (`tools/teste_bordas.gd`). O percurso real Refúgio→Castelo ainda não foi repetido. O Torin trava em x=-160 na entrada oeste do Refúgio, vindo do Pomar. O percurso real Refúgio→Castelo está reprovado | relatório da sessão anterior (não repeti) | não confirmada |
 | A3 | 158 peças grandes sem colisão (60 na Cratera, 19 em Valdoria, 16 em casas, 9 no Refúgio, resto em prédios) | medi (`auditar_colisao`) | falta separar o que é decoração fina do que é parede |
 | A4 | "Cair no fim do nada e morrer": as varreduras dizem 0 buracos, mas você viu acontecer. Falta achar o lugar | não reproduzi | desconhecida. Preciso que você diga a região, ou eu ando o mapa todo com o agente |
 

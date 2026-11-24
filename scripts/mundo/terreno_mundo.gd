@@ -198,7 +198,10 @@ func _malha() -> ArrayMesh:
 			var dz := (alturas[i * lz + j1] - alturas[i * lz + j0]) / ((j1 - j0) * passo)
 			var normal := Vector3(-dx, 1.0, -dz).normalized()
 			var k := i * lz + j
-			vertices[k] = Vector3(x, alturas[k] - (0.2 if _dentro_de_area(Vector2(x, z)) else 0.0), z)   # a parte da célula que cai dentro da área fica logo abaixo do chão dela
+			# A parte da célula que cai DENTRO da área fica logo abaixo do chão dela. O vértice que cai exatamente na borda não desce:
+			# descendo, o chão do mundo chegava 0,2 m abaixo do chão da área e a beirada virava um degrau que travava o Torin
+			# (lados oeste e norte de cada região; a trava de x=-160 na entrada do Refúgio vinda do Pomar).
+			vertices[k] = Vector3(x, alturas[k] - (0.2 if _dentro_de_area(Vector2(x, z), -0.01) else 0.0), z)
 			normais[k] = normal
 			cores[k] = _cor_vertice(x, z, normal).srgb_to_linear()
 	var indices := PackedInt32Array()
