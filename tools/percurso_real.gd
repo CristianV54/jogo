@@ -255,7 +255,7 @@ func _r() -> void:
 	var rota: Array = [
 		["Refúgio -> saída oeste (desvia do curral)", Vector2(-22, -2)], ["Portão oeste da palicada", Vector2(-48, 0)], ["Estrada do Pomar (início)", Vector2(-160, 0)], ["Estrada do Pomar (meio)", Vector2(-330, -20)], ["Pomar Alto (centro)", Vector2(-420, -125)],
 		["Pomar -> volta ao Refúgio", Vector2(-250, 15)], ["Portão oeste (volta)", Vector2(-48, 0)], ["Refúgio (centro) 1", Vector2(-10, 0)],
-		["Refúgio -> Trilha do Bosque", Vector2(0, -160)], ["Bosque Velado (entrada)", Vector2(0, -390)], ["Bosque Velado e Mina (centro)", Vector2(0, -550)],
+		["Contorna a casa do Vane pelo oeste", Vector2(-9, -20)], ["Atrás da casa do Vane", Vector2(-9, -35)], ["Portão norte da palicada", Vector2(0, -43)], ["Refúgio -> Trilha do Bosque", Vector2(0, -160)], ["Bosque Velado (entrada)", Vector2(0, -390)], ["Bosque Velado e Mina (centro)", Vector2(0, -550)],
 		["Bosque -> volta ao Refúgio", Vector2(0, -160)], ["Refúgio (centro) 2", Vector2(20, 5)],
 		["Refúgio -> Campos Altos", Vector2(160, 0)], ["Campos Altos (meio)", Vector2(420, -40)], ["Ruptura (entrada)", Vector2(560, -195)], ["Acampamento da Ruptura (centro)", Vector2(560, -330)],
 		["Ruptura -> Caminho da Ruptura", Vector2(584, -465)], ["Ferrogris (entrada)", Vector2(584, -685)], ["Fortaleza de Ferrogris (centro)", Vector2(584, -840)],
