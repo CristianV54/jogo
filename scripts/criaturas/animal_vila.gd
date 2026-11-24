@@ -47,6 +47,7 @@ func _ready() -> void:
 	_cabeca = _visual.find_child("Cabeca", true, false) as Node3D
 	VariacaoDeCores.aplicar(_visual, especie)
 	Acessorios.aplicar(_visual, acessorio)
+	Olhos.aplicar(_visual, especie)
 	var caixa := Solidos.caixa_de(_visual, 0.8)
 	corpo = Solidos.corpo_movel(self, AABB(caixa.position * escala, caixa.size * escala))
 	_casa = position

@@ -54,6 +54,7 @@ func _ready() -> void:
 	add_child(visual)
 	VariacaoDeCores.aplicar(visual, especie)
 	Acessorios.aplicar(visual, acessorio)
+	Olhos.aplicar(visual, especie)
 	var cs := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
 	cap.radius = raio_colisao

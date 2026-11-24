@@ -24,6 +24,9 @@ func esperar(s: float) -> void:
 
 
 func foto(nome: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		print("FOTO ", nome, " (pulada: sem janela)")
+		return
 	for i in 3:
 		await process_frame
 	root.get_viewport().get_texture().get_image().save_png(PASTA + "md_" + nome + ".png")
