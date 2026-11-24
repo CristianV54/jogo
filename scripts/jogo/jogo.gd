@@ -424,17 +424,10 @@ func _alternar_mapa() -> void:
 		hud.mapa_aberto = false
 		jogador.travado = false
 		return
-	var liberadas := {}
+	var liberadas := {}   # mundo aberto: toda região pode ser visitada a pé desde o começo
 	var motivos := {}
 	for id in AREAS:
-		var motivo := ""
-		if REQUISITOS.has(id) and not derrotados.has(REQUISITOS[id]):
-			motivo = "falta derrotar %s" % NOMES_DOS_CHEFES[REQUISITOS[id]]
-		elif REQUISITOS_MISSAO.has(id) and not missoes.concluidas.has(REQUISITOS_MISSAO[id]):
-			motivo = "falta a missão %s" % DadosMissoes.MISSOES[REQUISITOS_MISSAO[id]]["titulo"]
-		liberadas[id] = motivo == ""
-		if motivo != "":
-			motivos[id] = motivo
+		liberadas[id] = true
 	var missao := ""
 	var alvo := ""
 	if not missoes.ativas.is_empty():

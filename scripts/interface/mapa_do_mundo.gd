@@ -157,7 +157,7 @@ func _draw() -> void:
 			y += 20.0
 			draw_string(fonte, Vector2(x + 22, y), motivos[id], HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 14, Color(0.7, 0.62, 0.5))
 	y += 40.0
-	draw_multiline_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, cinza claro = serra de rocha, verde escuro = mata, quadrado dourado = povoado, barra vermelha = barreira fechada", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, 3, Color(0.75, 0.75, 0.75))
+	draw_multiline_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, verde escuro = mata, ponto vermelho = povoado. A ilha é aberta: dá para ir a pé a qualquer lugar. No mar fundo mora o tubarão.", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, 3, Color(0.75, 0.75, 0.75))
 	y += 70.0
 	if missao_texto != "":
 		draw_rect(Rect2(x, y - 14.0, 12, 12), COR_ACENTO, false, 2.0)

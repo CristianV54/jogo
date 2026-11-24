@@ -695,6 +695,18 @@ func _horizonte() -> void:   # a ilha fica no meio do oceano: para lá do mar de
 	chao.position = Vector3(lim.get_center().x, Costa.NIVEL_MAR - 7.0, lim.get_center().y)
 	chao.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(chao)
+	for id in MundoDados.REGIOES:   # de longe o chão das regiões some (só aparece de perto): um forro verde por baixo evita o "buraco azul"
+		var forro := MeshInstance3D.new()
+		forro.name = "ForroDe_" + id
+		var pm := PlaneMesh.new()
+		var meia: float = MundoDados.REGIOES[id]["meia"]
+		pm.size = Vector2(meia * 2.0, meia * 2.0)
+		var c := MundoDados.centro(id)
+		pm.material = _mat(Biomas.cor_do_chao(c.x, c.y, 0.5) * 0.55)   # mais escuro: o chão de verdade recebe sombra e parece mais fechado
+		forro.mesh = pm
+		forro.position = Vector3(c.x, -5.0, c.y)
+		forro.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(forro)
 
 
 func _mat(cor: Color) -> StandardMaterial3D:

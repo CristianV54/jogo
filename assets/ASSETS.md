@@ -317,3 +317,7 @@ Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não par
 - **Rios, grama, campos, casas:** ver commits do dia. Auditorias novas: `tools/auditoria_buracos.gd`, `tools/auditoria_logica.gd`.
 - **Limites conhecidos:** biomas ainda são faixas de cor ao longo do mundo (sem neve nem deserto de verdade); a costa só existe no mundo aberto, as regiões continuam retângulos aplanados; o castelo ainda tem a plataforma de 3 m (a rocha em volta dá a ideia de altura, mas não sobe de verdade).
 
+
+## Mapa novo: a ilha (24/11/2026, em construção)
+- **`PLACEHOLDER_Tubarao` (PENDÊNCIA, não é modelo final):** o tubarão do mar é só uma barbatana cinza (um prisma) criada em `scripts/criaturas/tubarao.gd`. **Falta o modelo do tubarão.** Candidato achado, ainda não baixado: *Fish Pack Animated* do Quaternius (CC0, mesmo autor dos personagens), https://quaternius.itch.io/lowpoly-animated-fish . Antes de entrar: bancada isolada e estilo conferido.
+- A ilha em si (costa, estradas, rios, biomas) é gerada por código a partir de `scripts/mundo/mundo_dados.gd`; não usa asset novo. Detalhes em `docs/mapa-novo/CONSTRUCAO_v1.md`.
