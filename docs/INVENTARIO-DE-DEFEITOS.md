@@ -63,7 +63,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | D10 | Torin correndo (Shift) desliza ~1,6x | medi | velocidade 7 m/s contra passo de ~4,4 m/s |
 | D11 | Cavalo: andar, correr, pular e morrer animam bem | foto (`movimento_cavalo`) | (não é defeito; serve de referência) |
 | D12 | **Aberto.** Depois do ajuste de 24/11 o andar calmo de todos os bichos casa com o passo. Correndo ainda deslizam: coelho ~8x, cão ~4x, cão de guerra ~3,4x, porco ~2,4x, javali ~2,2x, urso ~1,7x, Torin no Shift ~1,6x, Filhote de Asa ~14x | medi (`docs/ajustes/2026-11-24_movimentos/MEDIDAS.md`) | passada curta dos modelos de cão e porco; pede modelo e animação próprios (item 5) |
-| D13 | **Aberto.** `teste_solidos` falhou 2 vezes em 6 em "Montou o cavalo" depois das mudanças de 24/11 e passou nas outras 4; sem as mudanças passou 1 de 1 | teste | não investigada |
+| D13 | **Não reproduzido (24/11): depois das 2 falhas iniciais, passou 10 vezes seguidas rodando sozinho (6 com depuração: montou, corpo do cavalo sem colisão, nenhum NPC por perto). Causa das 2 falhas desconhecida; fica em observação.** Aberto. `teste_solidos` falhou 2 vezes em 6 em "Montou o cavalo" depois das mudanças de 24/11 e passou nas outras 4; sem as mudanças passou 1 de 1 | teste | não investigada |
 
 ### Quem está sem animação (anotado em 24/11 a pedido do Cristian)
 
