@@ -1,5 +1,8 @@
 # Relatório final da rodada de estabilização
 
+> **CORREÇÃO de 23/11/2026: a recomendação "MERGE CONDICIONAL" deste relatório está RETIRADA.** Depois dele, o usuário mostrou o lobo (de costas, grande demais, sem olhos) e o percurso real Refúgio→Castelo reprovou (trava em x=-160). O mundo também continua um corredor norte-sul, ao contrário do que o usuário pediu. Estado vigente: **NÃO MERGE**. Ver `docs/SESSAO-2026-11-23.md`.
+
+
 Branch `reconstrucao`. Recomendação: **MERGE CONDICIONAL**, ver o fim.
 
 ## Testes

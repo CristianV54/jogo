@@ -5,6 +5,10 @@ Título oficial: **Reino de Cinzas**. "Sangue e Escamas" é só o subtítulo e n
 Jogo de ação/RPG em 3ª pessoa, medieval, com dragões. Combate no centro, com evolução de armas e armaduras.
 Idioma de trabalho: português do Brasil. Explicar arquitetura em linguagem direta.
 
+## Comece por aqui (para quem abre este repositório pela primeira vez)
+
+Leia `README.md`, depois `docs/SESSAO-2026-11-23.md` (o que foi feito, os erros e o que falta; **estado atual: NÃO MERGE**) e `docs/MAPA-DO-TRABALHO.md` (índice de ferramentas, documentos e pendências). Fotos dos ajustes: `docs/ajustes/`.
+
 ## Fundação (aprovada)
 
 - **Motor:** Godot 4.7.2 (GDScript), instalado via Homebrew. Comando `godot` no terminal.
@@ -59,6 +63,12 @@ Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo: as regras que nunca podem se
 - Se for preciso um stand-in temporário, ele fica **visível e nomeado** como `PLACEHOLDER_...`, listado em `assets/ASSETS.md` como pendência, e nunca conta como tarefa concluída.
 - Modelar no Blender e pesquisar modelos no navegador é permitido. Baixar arquivo só com OK do usuário. Todo asset novo tem que passar no estilo "3D suave pintado" antes de entrar.
 
+### Animais e criaturas: bancada isolada (regra do usuário, pedida mais de 5 vezes)
+- Todo animal ou criatura nova ou alterada (lobo, cavalo, javali...) é aberta e testada SOZINHA numa cena de bancada: chão plano, sem mundo, sem NPCs, o Torin ao lado como régua. Só depois de aprovada ali ela entra no jogo.
+- Na bancada, fotografar de frente, de lado e de costas, parada e andando: textura e cor, tamanho contra o Torin, e se o modelo OLHA para onde anda (frente do modelo = direção da velocidade; nunca andar de costas).
+- Testar também correr, atacar e morrer, e abrir a janela para o usuário ver. Teste de lógica sozinho não vale como prova de aparência.
+- Defeito visual conhecido não vira "pendência visual": é bug e entra na lista antes de qualquer outra coisa.
+
 ### Verificação (nada é "pronto" sem prova)
 - Nunca marcar tarefa como concluída sem verificação real: rodar o jogo/cena, ler os **logs** e tirar **captura de tela direcionada** do que foi mudado.
 - Mostrar a saída ao usuário. "Parece pronto" não é pronto.
@@ -106,3 +116,4 @@ ReinoDeCinzas/
 - NPCs com rotinas de trabalho (ferreiro, lenhador, cozinheira, vigia, caçadora, líder): ver `assets/ASSETS.md`.
 - Campanha por marcos segundo a Bíblia expandida (ver `assets/ASSETS.md`, seção Campanha). Marcos 1 (missões), 2 (Refúgio como vila), 3 (Pomar Alto, C1-M2 a M4, Fagulha ferida), 4 (Bosque Velado e Mina, C2-M1 a M4) 5 (Acampamento da Ruptura e Fortaleza de Ferrogris, C3-M1 a M4) 6 (Cratera de Ignis, C4-M1 a M4) e 7 (Valdoria e o Castelo Imperial, C5-M1 a M4, com epílogo) feitos: a campanha principal está jogável do início ao fim. Auditoria do mundo feita em 22/11 (ver `assets/ASSETS.md`, seção Auditoria): rodar `tools/auditoria_mundo.gd`, `tools/auditoria_portais.gd` e `tools/teste_cadeia.gd` ao fim de cada marco; mapa do mundo na tecla M. Rios e vales escavados no terreno com pontes (ver `assets/ASSETS.md`, seção Vales e rios). Mundo contínuo sem portais (regiões ligadas por estradas, rios, pontes, povoados e fazendas), clima com dia e noite, tempestade e NPCs com horário (ver seção Mundo contínuo). Ao fim de cada marco rodar também `tools/auditoria_continua.gd` e `tools/teste_mundo.gd`. Mundo aberto (cristas de rocha com vão só nas barreiras, 21 povoados, NPCs que fogem de monstros): ver `assets/ASSETS.md`, seção Mundo aberto; rodar também `tools/auditoria_cercos.gd`, `tools/auditoria_buracos.gd`, `tools/auditoria_logica.gd` (construção sobre construção, coisa dentro de campo, casa flutuando, gente na parede, porta bloqueada) e `tools/teste_medo.gd`. Regra de layout (pesquisada): casas e quintal junto à estrada, campo atrás da casa com cerca no eixo do próprio campo e portão para o quintal, feno junto ao celeiro, bebedouro dentro do curral, espantalho no meio do campo. Pendências gerais: sons de verdade, ciclo do dia, salvar/checkpoints, evolução do Fagulha, modelos próprios para os chefes.
 - Próximo: dar uso a couro/lã/presa (forja da Brenn, vender), salvar o inventário, corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.
+- 22 e 23/11/2026 (estabilização e correções visuais): relatório e erros em `docs/SESSAO-2026-11-23.md`. Criados `tools/bancada.gd` (fotografa cada item num mundo plano), `scripts/criaturas/olhos.gd` (olhos de 11 espécies), `tools/percurso_real.gd` (agente que anda do Refúgio ao Castelo; **reprovado**, trava em x=-160). Lobo girado e reduzido. Abertos: textura e animação dos animais, mapa aberto (o usuário mandou uma referência ainda não localizada), árvores, drops, vilas, `teste_caca` instável. A recomendação de merge foi retirada.
