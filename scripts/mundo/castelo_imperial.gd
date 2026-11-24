@@ -10,6 +10,7 @@ signal chefe_morreu(id: String)
 const REF := preload("res://scripts/mundo/refugio_do_pinhal.gd")
 const PLAT := 3.0
 const SUL_Z := 106.0
+const BEIRA_SUL := SUL_Z + 2.0   # face sul da plataforma (a caixa dela passa 2 m da muralha): é ali que a escadaria tem de chegar
 const NORTE_Z := -124.0
 const LADO := 75.0
 const DUELO := Vector2(0.0, 0.0)
@@ -32,10 +33,10 @@ var _fase_vane := 0
 
 
 func altura_em(x: float, z: float) -> float:
-	if z < SUL_Z:
+	if z < BEIRA_SUL:
 		return PLAT
-	if z < SUL_Z + 18.0 and absf(x) < 12.0:   # a escadaria monumental sobe 3 m
-		return PLAT * (SUL_Z + 18.0 - z) / 18.0
+	if z < BEIRA_SUL + 18.0 and absf(x) < 12.0:   # a escadaria monumental sobe 3 m
+		return PLAT * (BEIRA_SUL + 18.0 - z) / 18.0
 	return 0.0
 
 
@@ -93,13 +94,15 @@ func _plataforma() -> void:
 	forma.size = Vector3(24.0, 0.6, sqrt(comp * comp + PLAT * PLAT) + 1.0)
 	cs.shape = forma
 	rampa.add_child(cs)
-	rampa.position = Vector3(0.0, PLAT / 2.0 - 0.3, SUL_Z + comp / 2.0)
+	# A rampa chega ao alto na FACE da plataforma. Antes chegava na linha da muralha, 2 m para dentro: na face faltavam 0,33 m,
+	# virava um degrau e não dava para entrar no Castelo a pé (os testes de marco teleportam, por isso não pegavam).
+	rampa.position = Vector3(0.0, PLAT / 2.0 - 0.3, BEIRA_SUL + comp / 2.0)
 	rampa.rotation.x = ang   # sobe para o norte (-Z)
 	add_child(rampa)
 	var degraus := VilaRefugio._mat(Color(0.55, 0.52, 0.48))
 	for i in 12:   # degraus da escadaria monumental (desenho; a colisão é a rampa)
 		var t := (i + 0.5) / 12.0
-		VilaRefugio._caixa(Vector3(0.0, PLAT * (1.0 - t) - 0.2, SUL_Z + comp * t), Vector3(24.0, 0.45, comp / 12.0 + 0.1), degraus)
+		VilaRefugio._caixa(Vector3(0.0, PLAT * (1.0 - t) - 0.2, BEIRA_SUL + comp * t), Vector3(24.0, 0.45, comp / 12.0 + 0.1), degraus)
 	_placa_em_poste(Vector2(16.0, SUL_Z + 20.0), "Escadaria Monumental do Castelo")
 
 
@@ -126,6 +129,8 @@ func _muralhas() -> void:
 		cone.position = Vector3(t.x, _y(t) + 20.0 + 4.5, t.y)
 		add_child(cone)
 	for x in range(-60, 61, 20):
+		if x == 0:
+			continue   # no eixo do portão não: o mastro ficava no meio da entrada e barrava quem vinha reto pela escadaria
 		_bandeira(Vector2(float(x), SUL_Z - 4.0), COR_DRAKKAR)
 
 

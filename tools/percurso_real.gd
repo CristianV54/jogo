@@ -244,7 +244,7 @@ func _r() -> void:
 	jogo.clima.congelado = true
 	jogo.clima.definir_hora(10.0)
 	var m: GerenciadorMissoes = jogo.missoes
-	for id in ["C1-M1", "C1-M2", "C1-M3", "C1-M4", "C2-M1", "C2-M2", "C2-M3", "C2-M4", "C3-M1", "C3-M2", "C3-M3", "C3-M4", "C4-M1", "C4-M2", "C4-M3", "C4-M4"]:
+	for id in ["C1-M1", "C1-M2", "C1-M3", "C1-M4", "C2-M1", "C2-M2", "C2-M3", "C2-M4", "C3-M1", "C3-M2", "C3-M3", "C3-M4", "C4-M1", "C4-M2", "C4-M3", "C4-M4", "C5-M1"]:   # C5-M1 abre o portão do Castelo
 		if not m.concluidas.has(id):
 			m.concluidas.append(id)
 	m.ativas.clear()
@@ -252,23 +252,35 @@ func _r() -> void:
 	jogo.liberar_fagulha()
 	for k in ["gorath", "kaelor", "ignis"]:
 		jogo.derrotados[k] = true
+	# portões que só abrem quando um chefe cai (o agente não luta com chefes): abertos como estariam no fim da campanha
+	jogo.mundo.regioes["fronteira_ferrogris"].portao_fundos.abrir()
+	jogo.mundo.regioes["castelo_imperial"].portao_salao.abrir()
 	var rota: Array = [
 		["Refúgio -> saída oeste (desvia do curral)", Vector2(-22, -2)], ["Portão oeste da palicada", Vector2(-48, 0)], ["Estrada do Pomar (início)", Vector2(-160, 0)], ["Estrada do Pomar (meio)", Vector2(-330, -20)], ["Pomar Alto (centro)", Vector2(-420, -125)],
 		["Pomar -> volta ao Refúgio", Vector2(-250, 15)], ["Portão oeste (volta)", Vector2(-48, 0)], ["Refúgio (centro) 1", Vector2(-10, 0)],
 		["Contorna a casa do Vane pelo oeste", Vector2(-9, -20)], ["Atrás da casa do Vane", Vector2(-9, -35)], ["Portão norte da palicada", Vector2(0, -43)], ["Refúgio -> Trilha do Bosque", Vector2(0, -160)], ["Bosque Velado (entrada)", Vector2(0, -390)], ["Bosque Velado e Mina (centro)", Vector2(0, -550)],
-		["Bosque -> volta ao Refúgio", Vector2(0, -160)], ["Refúgio (centro) 2", Vector2(20, 5)],
-		["Refúgio -> Campos Altos", Vector2(160, 0)], ["Campos Altos (meio)", Vector2(420, -40)], ["Ruptura (entrada)", Vector2(560, -195)], ["Acampamento da Ruptura (centro)", Vector2(560, -330)],
-		["Ruptura -> Caminho da Ruptura", Vector2(584, -465)], ["Ferrogris (entrada)", Vector2(584, -685)], ["Fortaleza de Ferrogris (centro)", Vector2(584, -840)],
+		["Bosque -> volta ao Refúgio", Vector2(0, -160)], ["Portão norte (volta)", Vector2(0, -43)], ["Atrás da casa do Vane (volta)", Vector2(-9, -35)], ["Refúgio (centro) 2", Vector2(-9, -4)], ["Portão leste da palicada", Vector2(44, -3)],
+		["Refúgio -> Campos Altos", Vector2(160, 0)], ["Barreira da Ruptura (antes do vão)", Vector2(316, 0)], ["Barreira da Ruptura (depois do vão)", Vector2(344, -2)], ["Campos Altos (meio)", Vector2(420, -40)], ["Ruptura (entrada)", Vector2(560, -195)], ["Acampamento da Ruptura (centro)", Vector2(560, -330)],
+		["Ruptura -> Caminho da Ruptura", Vector2(584, -465)], ["Ferrogris (entrada)", Vector2(584, -685)], ["Ferrogris: antes da Brecha", Vector2(579, -734)], ["Ferrogris: depois da Brecha", Vector2(579, -752)], ["Fortaleza de Ferrogris (centro)", Vector2(584, -840)],
 		["Ferrogris -> Estrada Queimada", Vector2(584, -995)], ["Cratera (entrada)", Vector2(584, -1205)], ["Cratera de Ignis (centro)", Vector2(584, -1360)],
-		["Cratera -> Estrada Imperial", Vector2(584, -1515)], ["Valdoria (entrada)", Vector2(584, -1725)], ["Valdoria (centro)", Vector2(584, -1880)],
-		["Valdoria -> Castelo Imperial (centro)", Vector2(584, -2300)],
+		["Cratera: contorna o centro das forjas", Vector2(592, -1380)], ["Cratera: depois das forjas", Vector2(592, -1402)], ["Cratera -> Estrada Imperial", Vector2(584, -1515)], ["Valdoria (entrada)", Vector2(584, -1725)], ["Valdoria (centro)", Vector2(584, -1880)],
+		["Valdoria: contorna a fonte", Vector2(593, -1880)], ["Valdoria: pé da escadaria", Vector2(584, -1960)], ["Escadaria de Valdoria (alto)", Vector2(584, -2012)], ["Viaduto (fim)", Vector2(584, -2160)],
+		["Portão do Castelo", Vector2(584, -2194)], ["Castelo Imperial (centro)", Vector2(584, -2300)],
 	]
 	var inicio_idx := 0
 	if OS.get_cmdline_user_args().has("retomar") and FileAccess.file_exists(CHECK):
 		inicio_idx = int(FileAccess.get_file_as_string(CHECK).strip_edges()) + 1
 		if inicio_idx > 0 and inicio_idx < rota.size():
 			var ant: Vector2 = rota[inicio_idx - 1][1]
-			jog.global_position = Vector3(ant.x, jogo.mundo.chao_em(ant.x, ant.y) + 0.5, ant.y)   # único teleporte: retomar do checkpoint
+			# único teleporte: retomar do checkpoint. A região de destino pode estar desligada (longe do Torin ela fica sem chão sólido):
+			# primeiro liga o que está em volta do ponto, espera a física enxergar o chão e só então pousa (como o Jogo.ir_para faz)
+			jog.set_physics_process(false)
+			jog.global_position = Vector3(ant.x, jogo.mundo.chao_em(ant.x, ant.y) + 0.5, ant.y)
+			jogo.mundo.atualizar_atividade()
+			await create_timer(1.0).timeout
+			jog.global_position = Vector3(ant.x, jogo.mundo.chao_em(ant.x, ant.y) + 0.5, ant.y)
+			jog.velocity = Vector3.ZERO
+			jog.set_physics_process(true)
 			await create_timer(5.0).timeout
 			trechos += "| (retomada do checkpoint %d) | teleporte de retomada | 0 s | 0 | %s | 0 |\n" % [inicio_idx - 1, _regiao()]
 	_progresso("começou")

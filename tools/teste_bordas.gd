@@ -14,6 +14,7 @@ func _r() -> void:
 	while jogo.area_nome != "refugio_do_pinhal" or jogo._trocando:
 		await create_timer(0.3).timeout
 	await create_timer(2.0).timeout
+	Engine.time_scale = 3.0   # só encurta a espera: a física continua em passos de 1/60 s
 	# entrar em cada região pelos 4 lados, andando 9 s (36 m) de 18 m fora para dentro, no meio do lado e a 1/4 e 3/4 dele
 	var total := 0
 	var presos := 0

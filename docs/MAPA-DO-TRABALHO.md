@@ -126,6 +126,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `docs/auditoria/ETAPA_7.md` |  |
 | `docs/auditoria/ETAPA_8.md` |  |
 | `docs/auditoria/ETAPA_9.md` |  |
+| `docs/auditoria/PERCURSO_REAL_2026-11-24.md` | Percurso real de 24/11: os 6 trechos do Refúgio ao Castelo, onde o agente parou e por quê |
 | `docs/auditoria/PERCURSO_REAL.md` | Percurso real (agente andando, sem teleporte entre regiões) |
 | `docs/auditoria/PERCURSO_REAL_PROGRESSO.md` | Percurso real: progresso (atualizado a cada 15 s) |
 | `docs/auditoria/PRECISAO_estab.md` | Varredura de alta precisão — estab |
