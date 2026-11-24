@@ -420,13 +420,15 @@ func _mover_montado(delta: float) -> void:
 	if dir.length() > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), giro * 0.6 * delta)
 	var animacao := "Idle"
+	var ritmo := 1.0
 	if m.voa and _voando:
 		animacao = "Fly"
 	elif not is_on_floor() and m.forca_pulo > 0.0:
 		animacao = "Jump"
 	elif dir.length() > 0.01:
-		animacao = "Run" if rapido else "Walk"
-	m.tocar(animacao)
+		animacao = "Run" if rapido else m.anim_andando
+		ritmo = m.ritmo_correndo if rapido else m.ritmo_andando
+	m.tocar(animacao, ritmo)
 	m.posicionar(global_position, rotation.y)
 	visual.global_position = m.assento_global() - Vector3(0.0, QUADRIL_SENTADO, 0.0)
 	if _reacao <= 0.0 and animacao_atual != "Sitting_Idle":

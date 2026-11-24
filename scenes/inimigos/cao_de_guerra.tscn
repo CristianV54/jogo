@@ -10,6 +10,7 @@ nome = "Cão de Guerra"
 vida_max = 55
 dano = 9
 velocidade = 5.6
+ritmo_correr = 3.0
 alcance_visao = 14.0
 alcance_ataque = 1.7
 intervalo_ataque = 1.3

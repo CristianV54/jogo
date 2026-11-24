@@ -21,6 +21,16 @@ extends Node3D
 @export var especie := ""           # chave de VariacaoDeCores
 @export var drops := {}               # {item: [mínimo, máximo]} largados ao morrer
 
+## Velocidade (m/s) que as animações de andar (WalkSlow) e de correr (Run) pedem, por modelo, em escala 1: é o quanto as patas
+## avançam de verdade. Medido em tools/bancada_movimento.gd; refazer a medida se a animação mudar.
+const PASSO := {"vaca": [0.7, 2.1], "ovelha": [0.6, 1.3], "cavalo": [0.8, 3.6], "porco": [0.2, 0.6], "cao": [0.14, 0.33]}
+const RITMO_MAXIMO_ANDANDO := 2.0   # o bicho calmo nunca anda mais rápido que 2x o passo dele (senão desliza)
+const RITMO_MAXIMO_CORRENDO := 3.0
+
+var _vel_andar := 1.0      # velocidade calma de verdade, já limitada pelo passo
+var _ritmo_andar := 1.0    # o quanto acelerar a animação de andar para as patas acompanharem o corpo
+var _ritmo_correr := 1.0
+
 var altura_em: Callable   # (x, z) -> altura do chão; se vazio, o animal fica em y = 0
 var vida := 0
 var morto := false
@@ -66,6 +76,17 @@ func _ready() -> void:
 		montaria.camera_altura = 2.3
 		montaria.camera_distancia = 6.5
 		add_child(montaria)
+	_vel_andar = velocidade
+	var passo: Array = PASSO.get(modelo.resource_path.get_file().get_basename(), [])
+	if not passo.is_empty():
+		var pede_andar := float(passo[0]) * escala
+		_vel_andar = minf(velocidade, pede_andar * RITMO_MAXIMO_ANDANDO)
+		_ritmo_andar = _vel_andar / pede_andar
+		_ritmo_correr = clampf(velocidade * 4.0 / (float(passo[1]) * escala), 1.0, RITMO_MAXIMO_CORRENDO)
+		if montaria:   # montado, o cavalo trota (Run mais lento) e galopa (Run acelerado): o Walk dele pede só 0,8 m/s
+			montaria.anim_andando = "Run"
+			montaria.ritmo_andando = clampf(montaria.velocidade_andando / (float(passo[1]) * escala), 0.5, RITMO_MAXIMO_CORRENDO)
+			montaria.ritmo_correndo = clampf(montaria.velocidade_correndo / (float(passo[1]) * escala), 0.5, RITMO_MAXIMO_CORRENDO)
 	_tocar(anim_parado)
 
 
@@ -150,7 +171,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			var direcao := ate.normalized()
 			if _caminho_livre(direcao):
-				position += direcao * velocidade * delta
+				position += direcao * _vel_andar * delta
 				rotation.y = lerp_angle(rotation.y, atan2(direcao.x, direcao.z), giro * delta)
 			else:   # algo no caminho: para e escolhe outro rumo depois
 				_andando = false
@@ -219,3 +240,4 @@ func _tem(nome_anim: String) -> bool:
 func _tocar(nome_anim: String) -> void:
 	if _anim and _anim.has_animation(nome_anim) and _anim.current_animation != nome_anim:
 		_anim.play(nome_anim, 0.3)
+		_anim.speed_scale = _ritmo_andar if nome_anim == anim_andar else (_ritmo_correr if nome_anim == "Run" else 1.0)

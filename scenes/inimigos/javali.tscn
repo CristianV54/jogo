@@ -10,6 +10,7 @@ nome = "Javali Couraçado"
 vida_max = 70
 dano = 9
 velocidade = 4.2
+ritmo_correr = 3.0
 escala_visual = 1.0
 raio_colisao = 0.55
 altura_colisao = 0.9

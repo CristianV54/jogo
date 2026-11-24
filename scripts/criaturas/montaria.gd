@@ -12,6 +12,9 @@ extends Node
 @export var velocidade_voo := 14.0
 @export var velocidade_voo_rapido := 24.0
 @export var velocidade_vertical := 8.0
+@export var anim_andando := "Walk"      # animação tocada ao andar montado (o cavalo usa Run, que é o trote dele)
+@export var ritmo_andando := 1.0        # acelera a animação para as patas acompanharem a velocidade
+@export var ritmo_correndo := 1.0
 @export var forca_pulo := 0.0           # > 0: a montaria pula com Espaço (cavalo)
 @export var camera_altura := 2.2
 @export var camera_distancia := 7.0
@@ -46,6 +49,9 @@ func posicionar(pos: Vector3, giro_do_corpo: float) -> void:
 	dono.rotation.y = giro_do_corpo + PI
 
 
-func tocar(animacao: String) -> void:
-	if _anim and _anim.has_animation(animacao) and _anim.current_animation != animacao:
+func tocar(animacao: String, ritmo := 1.0) -> void:
+	if _anim == null or not _anim.has_animation(animacao):
+		return
+	if _anim.current_animation != animacao:
 		_anim.play(animacao, 0.25)
+	_anim.speed_scale = ritmo

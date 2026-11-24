@@ -55,13 +55,15 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | D2 | **CORRIGIDO em 24/11** (respiração, cabeça e rabo). Lobo: parado não tem animação nenhuma (amplitude 0,00 m) | medi | animação vazia |
 | D3 | **CORRIGIDO em 24/11** (Idle, Walk e Run repetem, ligado em `lobo_visual.tscn`). Lobo: nenhuma animação está marcada para repetir (andar e correr tocam uma vez e param) | medi | `gerar_lobo.py` não marcou o loop |
 | D4 | **Lobo CORRIGIDO em 24/11** (corrida tocada 3,2x, velocidade 5,0 m/s; os outros bichos seguem abertos). Pé desliza em quase todos: o corpo anda muito mais rápido que as patas. Lobo ~10x, ovelha ~10x, porco ~13x, coelho ~13x, cão ~7x, javali ~13x, urso ~3x (números aproximados) | medi | velocidade do jogo escolhida a olho; andar copiado da vaca para outros bichos |
-| D5 | Cavalo montado galopa a 13 m/s com uma corrida que pede ~3,6 m/s | medi e li | idem |
-| D6 | Ovelha, porco, cão, coelho, javali e urso usam o andar da vaca copiado: passo curto e duro | foto (`movimento_ovelha`, `movimento_urso`) | animação transplantada |
+| D5 | **Melhorado em 24/11** (montado ele usa a corrida como trote e galope, no ritmo da velocidade; no galope ainda desliza ~1,5x). Cavalo montado galopa a 13 m/s com uma corrida que pede ~3,6 m/s | medi e li | idem |
+| D6 | **CORRIGIDO em 24/11** (`tools/criaturas/refazer_andar_emprestado.py`; fotos em `docs/ajustes/2026-11-24_movimentos/`): andavam agachados, de pernas dobradas ou finas e compridas. Ovelha, porco, cão, coelho, javali e urso usam o andar da vaca copiado: passo curto e duro | foto (`movimento_ovelha`, `movimento_urso`) | animação transplantada |
 | D7 | Sem animação de levar dano: lobo, javali, urso, cão de guerra, dragões | medi | não existe no modelo |
 | D8 | Dragões sem ataque nem morte (o ataque é a corrida; a morte é tombar e afundar) | medi | não existe no modelo |
 | D9 | Guardas e chefes andam com o pé deslizando ~3x (andar a 3,6 a 4,6 m/s com passo de 1,3 a 1,6 m/s) | medi | mesma regra do B3 |
 | D10 | Torin correndo (Shift) desliza ~1,6x | medi | velocidade 7 m/s contra passo de ~4,4 m/s |
 | D11 | Cavalo: andar, correr, pular e morrer animam bem | foto (`movimento_cavalo`) | (não é defeito; serve de referência) |
+| D12 | **Aberto.** Depois do ajuste de 24/11 o andar calmo de todos os bichos casa com o passo. Correndo ainda deslizam: coelho ~8x, cão ~4x, cão de guerra ~3,4x, porco ~2,4x, javali ~2,2x, urso ~1,7x, Torin no Shift ~1,6x, Filhote de Asa ~14x | medi (`docs/ajustes/2026-11-24_movimentos/MEDIDAS.md`) | passada curta dos modelos de cão e porco; pede modelo e animação próprios (item 5) |
+| D13 | **Aberto.** `teste_solidos` falhou 2 vezes em 6 em "Montou o cavalo" depois das mudanças de 24/11 e passou nas outras 4; sem as mudanças passou 1 de 1 | teste | não investigada |
 
 ## E. Gente e chefes
 

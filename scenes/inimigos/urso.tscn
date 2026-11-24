@@ -10,6 +10,7 @@ nome = "Urso-pardo"
 vida_max = 150
 dano = 14
 velocidade = 3.8
+ritmo_correr = 3.0
 alcance_visao = 11.0
 alcance_ataque = 2.2
 intervalo_ataque = 1.8

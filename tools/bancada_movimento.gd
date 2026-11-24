@@ -145,7 +145,7 @@ func _velocidades(no: Node3D) -> Dictionary:
 	if no is Inimigo:
 		return {"andar": (no as Inimigo).velocidade, "correr": (no as Inimigo).velocidade}
 	if no is AnimalVila:
-		return {"andar": (no as AnimalVila).velocidade, "correr": (no as AnimalVila).velocidade * 4.0}
+		return {"andar": (no as AnimalVila)._vel_andar, "correr": (no as AnimalVila).velocidade * 4.0}
 	if no is Fagulha:
 		return {}
 	return {"andar": 4.0, "correr": 7.0}
@@ -224,8 +224,15 @@ func _rodar() -> void:
 			var eh_andar: bool = papel == "andar" or String(an[0]) in ["Walk", "WalkSlow", "Jog_Fwd"]
 			var eh_correr: bool = papel == "correr" or String(an[0]) in ["Run", "Sprint"]
 			var ritmo := (no as Inimigo).ritmo_correr if (no is Inimigo and eh_correr) else 1.0   # o jogo toca a corrida acelerada
+			var usada := true   # o jogo usa esta animação para se deslocar? (o inimigo persegue só correndo; o bicho de vila anda só com anim_andar)
+			if no is Inimigo and eh_andar and (no as Inimigo).anim_correr != "":
+				usada = false
+			if no is AnimalVila:
+				var av := no as AnimalVila
+				usada = String(an[0]) == av.anim_andar or eh_correr
+				ritmo = av._ritmo_andar if String(an[0]) == av.anim_andar else (av._ritmo_correr if eh_correr else 1.0)
 			var pedida := 2.0 * passo * ritmo / dur if (eh_andar or eh_correr) else 0.0
-			var do_jogo := float(vels.get("andar" if eh_andar else "correr", 0.0)) if (eh_andar or eh_correr) else 0.0
+			var do_jogo := float(vels.get("andar" if eh_andar else "correr", 0.0)) if ((eh_andar or eh_correr) and usada) else 0.0
 			var obs: PackedStringArray = []
 			if amplitude < altura * 0.02:
 				obs.append("PARADA: quase não mexe")
