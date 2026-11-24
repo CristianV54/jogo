@@ -27,6 +27,7 @@ var _rng := RandomNumberGenerator.new()
 var _t_atividade := 0.0
 const RAIO_ATIVO := 230.0    # regiões e povoados mais longe que isto ficam parados e invisíveis (fogueiras, gente e bichos custam CPU)
 const RAIO_FAUNA := 200.0
+const RAIO_VISIVEL := 800.0  # até aqui as casas, muralhas e torres continuam à vista (paradas): cidade e vila aparecem de longe, não "brotam" na cara
 const RAIO_ANIMACAO := 60.0  # gente e bichos mais longe que isto não animam nem aparecem
 
 
@@ -217,10 +218,10 @@ func atualizar_atividade() -> void:
 		var r := MundoDados.retangulo(id)
 		var dx := maxf(maxf(r.position.x - p.x, p.x - r.end.x), 0.0)
 		var dz := maxf(maxf(r.position.y - p.y, p.y - r.end.y), 0.0)
-		_ligar(regioes[id], sqrt(dx * dx + dz * dz) < RAIO_ATIVO)
+		_ligar(regioes[id], sqrt(dx * dx + dz * dz))
 	for pid in povoados:
 		if povoados[pid].has("no"):
-			_ligar(povoados[pid]["no"], p.distance_to(povoados[pid]["centro"]) < RAIO_ATIVO)
+			_ligar(povoados[pid]["no"], p.distance_to(povoados[pid]["centro"]))
 	if fauna:
 		for c in fauna.get_children():
 			var n3 := c as Node3D
@@ -252,11 +253,13 @@ func _animacao(e: Node3D, ligada: bool) -> void:
 		(v as MeshInstance3D).visible = ligada
 
 
-func _ligar(no: Node3D, ligado: bool) -> void:
+## Perto (RAIO_ATIVO) o lugar vive; mais longe fica parado; muito longe (RAIO_VISIVEL) some.
+func _ligar(no: Node3D, distancia: float) -> void:
+	no.visible = distancia < RAIO_VISIVEL
+	var ligado := distancia < RAIO_ATIVO
 	var modo := Node.PROCESS_MODE_INHERIT if ligado else Node.PROCESS_MODE_DISABLED
 	if no.process_mode != modo:
 		no.process_mode = modo
-		no.visible = ligado
 		if ligado:   # a gente da região já acorda no horário certo (deitada à noite, de pé de dia)
 			for e in no.find_children("*", "Npc", true, false):
 				(e as Npc).acomodar_ao_horario()

@@ -32,15 +32,15 @@ func povoar() -> void:
 	_na_estrada("reino_sul", [["cavalo", 3], ["vaca", 3], ["cao", 2], ["coelho", 4]])
 	_na_estrada("beira_rio", [["cervo", 3], ["coelho", 4], ["cavalo", 2]])
 	# zonas largas da ilha (quadrantes em volta do reino): a mata e os campos têm vida longe das estradas
-	_na_zona(Rect2(-700, 350, 1400, 1000), [["cervo", 22], ["coelho", 30], ["lobo", 6], ["javali", 3]])                    # sul: pinhal do Refúgio
-	_na_zona(Rect2(-1400, 150, 700, 1100), [["cervo", 14], ["coelho", 18], ["lobo", 5], ["javali", 4]])                    # sudoeste: Pomar
-	_na_zona(Rect2(-1400, -1300, 1000, 1000), [["cervo", 24], ["coelho", 20], ["lobo", 20], ["javali", 10], ["urso", 6]])  # noroeste: Bosque e Névoa
-	_na_zona(Rect2(-1400, -300, 950, 450), [["cervo", 8], ["coelho", 16], ["vaca", 6], ["cavalo", 4]])                     # oeste: Campos Altos
-	_na_zona(Rect2(-400, -1400, 800, 800), [["cervo", 8], ["lobo", 10], ["urso", 5], ["corvo", 10]])                       # norte: serra
-	_na_zona(Rect2(400, -1300, 1000, 900), [["corvo", 24], ["cao_guerra", 6], ["guarda", 8]])                              # nordeste: terras queimadas
-	_na_zona(Rect2(450, -400, 950, 700), [["corvo", 10], ["cao_guerra", 3], ["guarda", 8], ["cervo", 6]])                  # leste: Ferrogris
-	_na_zona(Rect2(300, 300, 1100, 1100), [["cervo", 12], ["coelho", 14], ["lobo", 8], ["javali", 4]])                     # sudeste: Ruptura e foz
-	_na_zona(Rect2(-450, -150, 900, 500), [["cavalo", 5], ["vaca", 6], ["cao", 4], ["coelho", 10]])                        # campos do reino
+	_na_zona(Rect2(-1050, 525, 2100, 1500), [["cervo", 44], ["coelho", 60], ["lobo", 12], ["javali", 6]])                    # sul: pinhal do Refúgio
+	_na_zona(Rect2(-2100, 225, 1050, 1650), [["cervo", 28], ["coelho", 36], ["lobo", 10], ["javali", 8]])                    # sudoeste: Pomar
+	_na_zona(Rect2(-2100, -1950, 1500, 1500), [["cervo", 48], ["coelho", 40], ["lobo", 40], ["javali", 20], ["urso", 12]])  # noroeste: Bosque e Névoa
+	_na_zona(Rect2(-2100, -450, 1425, 675), [["cervo", 16], ["coelho", 32], ["vaca", 12], ["cavalo", 8]])                     # oeste: Campos Altos
+	_na_zona(Rect2(-600, -2100, 1200, 1200), [["cervo", 16], ["lobo", 20], ["urso", 10], ["corvo", 20]])                       # norte: serra
+	_na_zona(Rect2(600, -1950, 1500, 1350), [["corvo", 48], ["cao_guerra", 12], ["guarda", 16]])                              # nordeste: terras queimadas
+	_na_zona(Rect2(675, -600, 1425, 1050), [["corvo", 20], ["cao_guerra", 6], ["guarda", 16], ["cervo", 12]])                  # leste: Ferrogris
+	_na_zona(Rect2(450, 450, 1650, 1650), [["cervo", 24], ["coelho", 28], ["lobo", 16], ["javali", 8]])                     # sudeste: Ruptura e foz
+	_na_zona(Rect2(-675, -225, 1350, 750), [["cavalo", 10], ["vaca", 12], ["cao", 8], ["coelho", 20]])                        # campos do reino
 
 
 ## Espalha bichos num retângulo do mundo, fora das regiões, da água e (os hostis) das casas.
@@ -49,7 +49,7 @@ func _na_zona(zona: Rect2, lista: Array) -> void:
 	for item in lista:
 		var feitos := 0
 		var tentativas := 0
-		while feitos < int(item[1]) and tentativas < 60:
+		while feitos < int(item[1]) and tentativas < 120:
 			tentativas += 1
 			var p := Vector2(_rng.randf_range(zona.position.x, zona.end.x), _rng.randf_range(zona.position.y, zona.end.y))
 			if mundo._em_alguma_area(p) or mundo.terreno.na_agua(p.x, p.y, 3.0):

@@ -21,7 +21,7 @@ static func distancia(x: float, z: float) -> float:
 		_ruido.fractal_octaves = 3
 	# Ilha: a costa fica a um raio do centro que muda com o ângulo (baías e pontas) e com um ruído fino (recortes).
 	var ang := atan2(z, x)
-	var raio := MundoDados.RAIO_DA_ILHA + 70.0 * sin(ang * 3.0 + 0.6) + 45.0 * sin(ang * 5.0 + 2.1) + 25.0 * sin(ang * 9.0 + 4.0)
+	var raio := MundoDados.RAIO_DA_ILHA + 110.0 * sin(ang * 3.0 + 0.6) + 70.0 * sin(ang * 5.0 + 2.1) + 40.0 * sin(ang * 9.0 + 4.0)
 	var d := raio - Vector2(x, z).length() + 30.0 * _ruido.get_noise_2d(x, z)
 	var p := Vector2(x, z)
 	for q in protegidos:   # regiões e povoados nunca ficam debaixo d'água: há pelo menos 60 m de terra em volta deles

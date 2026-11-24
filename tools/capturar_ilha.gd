@@ -23,6 +23,23 @@ func _foto(nome: String, espera := 2.5) -> void:
 	print("CAPTURA ", nome)
 
 
+## Para as fotos de longe: liga a vista de TUDO (regiões, povoados, árvores), que no jogo só aparece até certa distância.
+func _mostrar_tudo(sim: bool) -> void:
+	var m: Mundo = jogo.mundo
+	m.set_process(not sim)
+	m.set_physics_process(not sim)
+	if not sim:
+		return
+	for id in m.regioes:
+		(m.regioes[id] as Node3D).visible = true
+	for pid in m.povoados:
+		if m.povoados[pid].has("no"):
+			(m.povoados[pid]["no"] as Node3D).visible = true
+	for g in m.find_children("*", "GeometryInstance3D", true, false):
+		if (g as GeometryInstance3D).visibility_range_end > 0.0 and not String(g.name).begins_with("Mar"):
+			(g as GeometryInstance3D).visibility_range_end = 0.0
+
+
 func _rodar() -> void:
 	DirAccess.make_dir_recursive_absolute("res://tools/capturas/ilha")
 	while jogo.area_nome != "refugio_do_pinhal" or jogo._trocando:
@@ -34,18 +51,19 @@ func _rodar() -> void:
 	await _foto("mapa_tecla_M", 1.5)
 	jogo._alternar_mapa()
 	jogo.clima._env.fog_enabled = false   # só para as fotos de longe: a névoa do jogo esconde tudo a 2 km
+	_mostrar_tudo(true)
 	cam = Camera3D.new()
 	cam.far = 9000.0
 	root.add_child(cam)
 	cam.current = true
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 3400.0
+	cam.size = 5200.0
 	cam.global_position = Vector3(0, 2500, 0)
 	cam.rotation_degrees = Vector3(-90, 0, 0)
 	await _foto("planta_de_cima", 4.0)
 	cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 	cam.fov = 60.0
-	for v in [["aerea_do_sul", Vector3(0, 900, 2300)], ["aerea_do_oeste", Vector3(-2300, 900, 0)], ["aerea_do_norte", Vector3(0, 900, -2300)], ["aerea_do_leste", Vector3(2300, 900, 0)]]:
+	for v in [["aerea_do_sul", Vector3(0, 1300, 3400)], ["aerea_do_oeste", Vector3(-3400, 1300, 0)], ["aerea_do_norte", Vector3(0, 1300, -3400)], ["aerea_do_leste", Vector3(3400, 1300, 0)]]:
 		cam.global_position = v[1]
 		cam.look_at(Vector3(0, 0, 0))
 		await _foto(v[0], 3.0)
@@ -55,19 +73,26 @@ func _rodar() -> void:
 	cam.current = false
 	cam.queue_free()
 	jogo.clima._env.fog_enabled = true
+	_mostrar_tudo(false)
+	for v in [["chao_valdoria", Vector2(0, 420), PI], ["chao_campos_altos", jogo.mundo.povoados["campos_altos"]["centro"] + Vector2(0, 110), PI], ["chao_estrada_do_reino", Vector2(-120, 900), PI], ["chao_feira_sul", jogo.mundo.povoados["feira_sul"]["centro"] + Vector2(0, 80), PI]]:
+		var q: Vector2 = v[1]
+		jogo.jogador.global_position = Vector3(q.x, jogo.mundo.chao_em(q.x, q.y) + 1.5, q.y)
+		jogo.jogador.velocity = Vector3.ZERO
+		jogo.camera.yaw = 0.0
+		await _foto(v[0], 4.0)
 	# praia do sul, perto da foz do Riacho do Pinhal: Torin na areia, olhando o mar
-	var z := 1300.0
-	while Costa.distancia(-150.0, z) > 6.0:
+	var z := 1900.0
+	while Costa.distancia(-225.0, z) > 6.0:
 		z += 2.0
-	jogo.jogador.global_position = Vector3(-150.0, jogo.mundo.chao_em(-150.0, z) + 1.0, z)
+	jogo.jogador.global_position = Vector3(-225.0, jogo.mundo.chao_em(-225.0, z) + 1.0, z)
 	jogo.jogador.velocity = Vector3.ZERO
 	jogo.camera.yaw = PI   # de costas para a ilha, olhando o mar
 	await _foto("praia_do_sul", 3.0)
 	# tubarão: Torin posto 45 m mar adentro
 	jogo.mundo.tubarao.aviso.connect(func(t: String) -> void: avisos.append(t))
-	while Costa.distancia(-150.0, z) > -40.0:
+	while Costa.distancia(-225.0, z) > -40.0:
 		z += 2.0
-	jogo.jogador.global_position = Vector3(-150.0, Costa.NIVEL_MAR, z)
+	jogo.jogador.global_position = Vector3(-225.0, Costa.NIVEL_MAR, z)
 	await create_timer(1.0).timeout
 	await _foto("tubarao_chegando", 0.5)
 	var t := 0.0
