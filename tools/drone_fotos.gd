@@ -48,6 +48,7 @@ func _rodar() -> void:
 		for k in 4:
 			var im := imgs[k]
 			im.resize(640, 360)
+			im.convert(Image.FORMAT_RGB8)   # o formato da captura muda com o renderizador (RGBA no OpenGL)
 			folha.blit_rect(im, Rect2i(0, 0, 640, 360), Vector2i((k % 2) * 640, (k / 2) * 360))
 		folha.save_png("res://tools/capturas/drone_%s_%s.png" % [etapa, id])
 		print("FOTO ", id)

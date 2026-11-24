@@ -46,6 +46,7 @@ func _r() -> void:
 			imgs.append(im)
 		var folha := Image.create(1280, 720, false, Image.FORMAT_RGB8)
 		for k in 4:
+			(imgs[k] as Image).convert(Image.FORMAT_RGB8)   # o formato da captura muda com o renderizador (RGBA no OpenGL)
 			folha.blit_rect(imgs[k], Rect2i(0, 0, 640, 360), Vector2i((k % 2) * 640, (k / 2) * 360))
 		folha.save_png("res://tools/capturas/povoado_%s_%s.png" % [etapa, id])
 		print("FOTO ", id)

@@ -62,5 +62,6 @@ func _rodar() -> void:
 func _salvar(imgs: Array[Image], n: int) -> void:
 	var folha := Image.create(1278, 480, false, Image.FORMAT_RGB8)
 	for k in imgs.size():
+		(imgs[k] as Image).convert(Image.FORMAT_RGB8)   # o formato da captura muda com o renderizador (RGBA no OpenGL)
 		folha.blit_rect(imgs[k], Rect2i(0, 0, 426, 240), Vector2i((k % 3) * 426, (k / 3) * 240))
 	folha.save_png("res://tools/capturas/rios_%s_%d.png" % [etapa, n])
