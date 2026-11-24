@@ -10,8 +10,8 @@ const PALETAS := {
 		"Black": [Color(0.12, 0.12, 0.13), Color(0.4, 0.22, 0.12), Color(0.32, 0.3, 0.3), Color(0.62, 0.32, 0.15), Color(0.5, 0.12, 0.08)],
 	},
 	"ovelha": {
-		"White": [Color(0.93, 0.92, 0.88), Color(0.9, 0.8, 0.62), Color(0.62, 0.62, 0.64), Color(0.38, 0.27, 0.19), Color(0.16, 0.16, 0.17)],
-		"Black": [Color(0.1, 0.1, 0.11), Color(0.3, 0.2, 0.13), Color(0.4, 0.4, 0.42)],
+		"White.001": [Color(0.93, 0.92, 0.88), Color(0.9, 0.8, 0.62), Color(0.62, 0.62, 0.64), Color(0.38, 0.27, 0.19), Color(0.16, 0.16, 0.17)],
+		"Black.001": [Color(0.1, 0.1, 0.11), Color(0.3, 0.2, 0.13), Color(0.4, 0.4, 0.42)],
 	},
 	"porco": {
 		"Material.003": [Color(0.92, 0.66, 0.66), Color(0.9, 0.78, 0.7), Color(0.65, 0.4, 0.3), Color(0.35, 0.25, 0.22), Color(0.82, 0.55, 0.5)],
@@ -60,6 +60,9 @@ const PALETAS := {
 	},
 }
 
+## Espécies cuja pelagem vem pintada por vértice no próprio modelo (não usam paleta).
+const PINTADAS_POR_VERTICE := ["lobo"]
+
 static var _pelo: ImageTexture
 
 
@@ -74,11 +77,12 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 			if base == null:
 				continue
 			var m := base.duplicate() as StandardMaterial3D
-			if malha.mesh.surface_get_format(i) & Mesh.ARRAY_FORMAT_COLOR != 0:   # pelagem pintada por vértice (o lobo): mantém
+			if especie in PINTADAS_POR_VERTICE:   # a pelagem já vem pintada no modelo: mantém
 				m.vertex_color_use_as_albedo = true
 				m.albedo_color = Color.WHITE
 				malha.set_surface_override_material(i, m)
 				continue
+			m.vertex_color_use_as_albedo = false   # os bichos de fazenda trazem cor de vértice toda branca: ligada, ela apagava a pelagem
 			var opcoes: Array = paleta.get(base.resource_name, [])
 			if opcoes.is_empty():
 				malha.set_surface_override_material(i, m)

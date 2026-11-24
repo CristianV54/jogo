@@ -29,9 +29,9 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 
 | # | Defeito | Como vi | Causa |
 |---|---|---|---|
-| C1 | Vaca, cavalo, ovelha, porco, cervo e javali saem **brancos puros**, sem pelagem. Cão, coelho, urso e cão de guerra saem coloridos | foto (`bancada_A1`, `A2`, `A4`, `A5`), também nas fotos do Mac | `variacao_de_cores.gd`: a regra feita para o lobo ("malha com cor por vértice mantém") pega também os bichos de fazenda, cujas malhas têm cor de vértice branca, e apaga a pelagem |
-| C2 | Olhos nas laterais e saltados para fora da cabeça (ovelha, cão de guerra, urso, lobo); de frente só aparece um, ou nenhum | foto (`bancada_A2`, `A5`, `A6`, `lobo_bancada`) | `olhos.gd` posiciona pelo osso, não pela superfície da cabeça |
-| C3 | Porco e javali sem olho visível; vaca com olho minúsculo | foto (`bancada_A2`, `A5`) | mesma tabela de olhos |
+| C1 | **CORRIGIDO em 24/11** (fotos em `docs/ajustes/2026-11-24_cor_e_olhos/`). Vaca, cavalo, ovelha, porco, cervo e javali saem **brancos puros**, sem pelagem. Cão, coelho, urso e cão de guerra saem coloridos | foto (`bancada_A1`, `A2`, `A4`, `A5`), também nas fotos do Mac | `variacao_de_cores.gd`: a regra feita para o lobo ("malha com cor por vértice mantém") pega também os bichos de fazenda, cujas malhas têm cor de vértice branca, e apaga a pelagem |
+| C2 | **CORRIGIDO em 24/11** (olho assentado na pele; mesmas fotos). Olhos nas laterais e saltados para fora da cabeça (ovelha, cão de guerra, urso, lobo); de frente só aparece um, ou nenhum | foto (`bancada_A2`, `A5`, `A6`, `lobo_bancada`) | `olhos.gd` posiciona pelo osso, não pela superfície da cabeça |
+| C3 | **CORRIGIDO em 24/11**. Porco e javali sem olho visível; vaca com olho minúsculo | foto (`bancada_A2`, `A5`) | mesma tabela de olhos |
 | C4 | Galinha sem olhos e sem nenhuma animação | foto e medi | modelo feito sem esqueleto |
 | C5 | Coelho é o cachorro pug com duas varetas na cabeça e rabo de porco | foto (`bancada_A3`) | falta modelo de coelho |
 | C6 | Urso é o pug marrom com orelhas de bola e rabo enrolado | foto (`bancada_A5`) | falta modelo de urso |

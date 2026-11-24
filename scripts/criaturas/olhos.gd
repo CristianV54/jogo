@@ -1,29 +1,32 @@
 class_name Olhos
 extends RefCounted
 ## Olhos para os bichos dos pacotes (que vêm sem olho). Dois olhos por animal, presos ao osso da cabeça por um BoneAttachment3D,
-## então acompanham a animação. A posição vem do osso da cabeça e do osso da ponta do focinho do próprio modelo:
-## Posição de cada olho = ponto do eixo da cabeça (t, entre a base da cabeça e a ponta do focinho) + uma distância (dist * L, L =
-## comprimento cabeça-ponta) numa direção que sobe `ang` graus acima da horizontal, para o lado. Os valores de cada espécie foram
-## calibrados olhando o close da cabeça na bancada (tools/bancada.gd); se um modelo mudar, refazer essa calibração com foto.
-## Cada olho = íris colorida + pupila preta + um brilho branco pequeno (é isso que dá "vida" ao olhar).
+## então acompanham a animação. Cada olho é ASSENTADO NA PELE: de fora da cabeça sai um raio em direção ao eixo dela e o olho
+## fica onde o raio toca a malha (calculada na pose de repouso, com os pesos dos ossos), meio afundado. Assim ele não flutua
+## nem salta para fora, seja qual for a largura da cabeça. A direção do raio vem de dois ângulos por espécie: quanto sobe
+## (elevação) e quanto vira para a frente (0 = de lado, 90 = de frente). Calibrar olhando o close da cabeça em tools/bancada.gd.
+## O cálculo é feito uma vez por espécie e modelo e guardado.
 
 const ESQUELETO_FAZENDA := ["Head", "Head_end"]
 const ESQUELETO_LOBO := ["Bone.003", "Bone.003_end"]
 
-# especie -> [ossos, t (0 = base da cabeça, 1 = ponta do focinho), ângulo acima da horizontal (graus), dist (fração de L), raio (fração de L), cor da íris, desvio do plano de simetria (unidades do esqueleto)]
+# especie -> [ossos, t (0 = base da cabeça, 1 = ponta do focinho), elevação (graus), frontal (graus), raio (fração do comprimento
+#             da cabeça), cor do olho, cor da pupila ou null (olho escuro inteiro, sem pupila separada)]
 const TABELA := {
-	"vaca": [ESQUELETO_FAZENDA, 0.33, 35, 0.3, 0.06, Color(0.2, 0.12, 0.06)],
-	"ovelha": [ESQUELETO_FAZENDA, 0.35, 35, 0.3, 0.075, Color(0.62, 0.46, 0.12)],
-	"porco": [ESQUELETO_FAZENDA, 0.25, 40, 0.3, 0.06, Color(0.12, 0.08, 0.05)],
-	"cavalo": [ESQUELETO_FAZENDA, 0.32, 35, 0.3, 0.06, Color(0.22, 0.12, 0.05)],
-	"cervo": [ESQUELETO_FAZENDA, 0.32, 35, 0.3, 0.075, Color(0.2, 0.1, 0.04)],
-	"cao": [ESQUELETO_FAZENDA, 0.5, 40, 0.7, 0.08, Color(0.3, 0.16, 0.06)],
-	"coelho": [ESQUELETO_FAZENDA, 0.5, 50, 0.7, 0.08, Color(0.32, 0.06, 0.05)],
-	"urso": [ESQUELETO_FAZENDA, 0.5, 40, 0.7, 0.08, Color(0.55, 0.3, 0.1)],
-	"cao_guerra": [ESQUELETO_FAZENDA, 0.5, 45, 0.7, 0.08, Color(0.85, 0.16, 0.08)],
-	"javali": [ESQUELETO_FAZENDA, 0.25, 40, 0.3, 0.06, Color(0.45, 0.13, 0.05)],
-	"lobo": [ESQUELETO_LOBO, 0.4, 28, 0.42, 0.085, Color(0.88, 0.62, 0.1), -0.02],   # os ossos do lobo ficam ~0,03 fora do meio da cabeça; -0,02 foi o melhor entre os dois olhos (ainda levemente assimétrico)
+	"vaca": [ESQUELETO_FAZENDA, 0.4, 25, 30, 0.07, Color(0.1, 0.06, 0.04), null],
+	"ovelha": [ESQUELETO_FAZENDA, 0.4, 25, 35, 0.07, Color(0.1, 0.07, 0.04), null],
+	"porco": [ESQUELETO_FAZENDA, 0.45, 12, 40, 0.06, Color(0.08, 0.05, 0.04), null],
+	"cavalo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.065, Color(0.1, 0.06, 0.03), null],
+	"cervo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.075, Color(0.09, 0.05, 0.03), null],
+	"cao": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.12, Color(0.12, 0.07, 0.04), null],
+	"coelho": [ESQUELETO_FAZENDA, 0.2, 35, 40, 0.13, Color(0.1, 0.05, 0.04), null],
+	"urso": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.08, 0.05, 0.03), null],
+	"cao_guerra": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.75, 0.12, 0.06), Color(0.03, 0.02, 0.02)],
+	"javali": [ESQUELETO_FAZENDA, 0.45, 12, 40, 0.06, Color(0.3, 0.07, 0.04), null],
+	"lobo": [ESQUELETO_LOBO, 0.4, 30, 50, 0.075, Color(0.88, 0.62, 0.1), Color(0.03, 0.02, 0.02)],
 }
+
+static var _guardados: Dictionary = {}   # "especie|malha" -> o que _calcular devolve
 
 
 static func aplicar(visual: Node3D, especie: String) -> void:
@@ -38,33 +41,131 @@ static func aplicar(visual: Node3D, especie: String) -> void:
 	var ie := esq.find_bone(ossos[1])
 	if ih < 0 or ie < 0:
 		return
+	var malhas: Array[MeshInstance3D] = []
+	for mi in esq.find_children("*", "MeshInstance3D", true, false):
+		if (mi as MeshInstance3D).mesh != null:
+			malhas.append(mi)
+	if malhas.is_empty():
+		return
+	var chave := especie + "|" + malhas[0].mesh.resource_path
+	if not _guardados.has(chave):
+		_guardados[chave] = _calcular(esq, malhas, ih, ie, cfg)
+	var dados: Array = _guardados[chave]
+	var raio: float = dados[1]
+	var anexo := BoneAttachment3D.new()
+	anexo.name = "Olhos"
+	anexo.bone_name = ossos[0]
+	esq.add_child(anexo)
+	for par in dados[0]:
+		var olhar: Vector3 = par[1]   # para onde a pupila aponta: para fora da pele, puxado para a frente
+		var cima: Vector3 = par[2]
+		var olho := Node3D.new()
+		olho.name = "Olho"
+		olho.position = par[0]
+		anexo.add_child(olho)
+		_bola(olho, Vector3.ZERO, raio, cfg[5], 0.3)
+		if cfg[6] != null:   # pupila: uma calota escura na frente da íris
+			_bola(olho, olhar * raio * 0.52, raio * 0.58, cfg[6], 0.2)
+		_bola(olho, olhar * raio * 0.82 + cima * raio * 0.3, raio * 0.2, Color(1, 1, 1), 0.1)   # brilho: dá vida ao olhar
+
+
+## Acha, na pose de repouso, onde cada olho assenta. Devolve [[[posição, olhar, cima] por olho], raio], no espaço do osso da cabeça.
+static func _calcular(esq: Skeleton3D, malhas: Array[MeshInstance3D], ih: int, ie: int, cfg: Array) -> Array:
 	var rep_h := esq.get_bone_global_rest(ih)
 	var rep_e := esq.get_bone_global_rest(ie)
 	var focinho := rep_e.origin - rep_h.origin
 	var comp := focinho.length()
 	var cima := (esq.global_transform.basis.orthonormalized().inverse() * Vector3.UP).normalized()   # "cima" do mundo, no espaço do esqueleto
-	var frente_h := (focinho - cima * focinho.dot(cima)).normalized()                                   # para onde a cabeça aponta, na horizontal
-	var lado := cima.cross(frente_h).normalized()
-	var anexo := BoneAttachment3D.new()
-	anexo.name = "Olhos"
-	anexo.bone_name = ossos[0]
-	esq.add_child(anexo)
-	var eixos := Node3D.new()   # eixos do esqueleto, de volta (o anexo gira com o osso)
-	eixos.transform = Transform3D(rep_h.basis.inverse(), Vector3.ZERO)
-	anexo.add_child(eixos)
+	var frente := (focinho - cima * focinho.dot(cima)).normalized()                                    # para onde a cabeça aponta, na horizontal
+	var lado := cima.cross(frente).normalized()
 	var raio: float = comp * float(cfg[4])
-	var eixo: Vector3 = rep_h.origin + focinho * float(cfg[1]) + lado * (float(cfg[6]) if cfg.size() > 6 else 0.0)   # ponto no eixo da cabeça
-	var ang := deg_to_rad(float(cfg[2]))
+	# triângulos da cabeça, no espaço do esqueleto
+	var familia := {ih: true}
+	for i in esq.get_bone_count():   # o osso da cabeça e os filhos (orelhas, focinho)
+		var p := esq.get_bone_parent(i)
+		while p >= 0:
+			if p == ih:
+				familia[i] = true
+				break
+			p = esq.get_bone_parent(p)
+	var tris := PackedVector3Array()
+	var soma_lado := 0.0
+	var n_lado := 0
+	for mi in malhas:
+		var pele := mi.skin
+		for s in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(s)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			if arr[Mesh.ARRAY_BONES] == null or arr[Mesh.ARRAY_WEIGHTS] == null:
+				continue
+			var bs: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+			var ws: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			var por := bs.size() / vs.size()
+			var pos := PackedVector3Array()
+			pos.resize(vs.size())
+			var da_cabeca := PackedByteArray()
+			da_cabeca.resize(vs.size())
+			var matrizes: Dictionary = {}   # índice do vínculo -> [matriz, osso]
+			for v in vs.size():
+				var q := Vector3.ZERO
+				var peso_cabeca := 0.0
+				var total := 0.0
+				for k in por:
+					var w := ws[v * por + k]
+					if w <= 0.0:
+						continue
+					var b := bs[v * por + k]
+					if not matrizes.has(b):
+						var osso := b
+						var vinculo := Transform3D.IDENTITY
+						if pele != null:
+							osso = pele.get_bind_bone(b)
+							if osso < 0:
+								osso = esq.find_bone(pele.get_bind_name(b))
+							vinculo = pele.get_bind_pose(b)
+						else:
+							vinculo = esq.get_bone_global_rest(b).affine_inverse()
+						matrizes[b] = [esq.get_bone_global_rest(osso) * vinculo if osso >= 0 else Transform3D.IDENTITY, osso]
+					q += (matrizes[b][0] as Transform3D) * vs[v] * w
+					total += w
+					if familia.has(matrizes[b][1]):
+						peso_cabeca += w
+				pos[v] = q / total if total > 0.0 else vs[v]
+				da_cabeca[v] = 1 if peso_cabeca > total * 0.5 else 0
+				if da_cabeca[v] == 1:
+					soma_lado += pos[v].dot(lado)
+					n_lado += 1
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var n_tri := (idx.size() if not idx.is_empty() else vs.size()) / 3
+			for t in n_tri:
+				var a := idx[t * 3] if not idx.is_empty() else t * 3
+				var b2 := idx[t * 3 + 1] if not idx.is_empty() else t * 3 + 1
+				var c := idx[t * 3 + 2] if not idx.is_empty() else t * 3 + 2
+				if da_cabeca[a] + da_cabeca[b2] + da_cabeca[c] >= 2:
+					tris.append(pos[a])
+					tris.append(pos[b2])
+					tris.append(pos[c])
+	# ponto do eixo da cabeça, posto no plano de simetria da malha (os ossos de alguns modelos ficam fora do meio)
+	var eixo: Vector3 = rep_h.origin + focinho * float(cfg[1])
+	if n_lado > 0:
+		eixo += lado * (soma_lado / n_lado - eixo.dot(lado))
+	var el := deg_to_rad(float(cfg[2]))
+	var fr := deg_to_rad(float(cfg[3]))
+	var para_osso := rep_h.affine_inverse()
+	var olhos: Array = []
 	for s in [-1.0, 1.0]:
-		var dir_s: Vector3 = (lado * s * cos(ang) + cima * sin(ang)).normalized()
-		var p: Vector3 = (eixo - rep_h.origin) + dir_s * comp * float(cfg[3])
-		var olho := Node3D.new()
-		olho.name = "Olho"
-		olho.position = p
-		eixos.add_child(olho)
-		_bola(olho, Vector3.ZERO, raio, cfg[5], 0.35)
-		_bola(olho, lado * s * raio * 0.55 + frente_h * raio * 0.15, raio * 0.6, Color(0.02, 0.02, 0.03), 0.2)
-		_bola(olho, lado * s * raio * 0.75 + cima * raio * 0.4 + frente_h * raio * 0.35, raio * 0.22, Color(1, 1, 1), 0.1)
+		var fora: Vector3 = (lado * s * cos(el) * cos(fr) + frente * cos(el) * sin(fr) + cima * sin(el)).normalized()
+		var origem: Vector3 = eixo + fora * comp * 4.0
+		var melhor := 1e9
+		var toque: Vector3 = eixo + fora * comp * 0.3   # reserva, se o raio não achar a pele
+		for t in tris.size() / 3:
+			var h: Variant = Geometry3D.ray_intersects_triangle(origem, -fora, tris[t * 3], tris[t * 3 + 1], tris[t * 3 + 2])
+			if h != null and origem.distance_to(h) < melhor:
+				melhor = origem.distance_to(h)
+				toque = h
+		var centro: Vector3 = toque - fora * raio * 0.45   # meio afundado na pele
+		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 0.7)).normalized(), (para_osso.basis * cima).normalized()])
+	return [olhos, raio]
 
 
 static func _bola(pai: Node3D, pos: Vector3, raio: float, cor: Color, aspereza: float) -> void:
