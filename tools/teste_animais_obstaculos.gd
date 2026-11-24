@@ -23,6 +23,9 @@ func _novo(arquivo: String, pos: Vector3) -> void:
 	a.raio_colisao = 0.8
 	a.position = Vector3(pos.x, area.altura_em(pos.x, pos.z), pos.z)
 	area.add_child(a)
+	if _dentro_de_casa(a):   # o ponto de teste caiu dentro de uma construção (o Depósito veio depois deste teste): não vale
+		a.free()
+		return
 	_animais.append(a)
 
 
@@ -55,7 +58,7 @@ func _rodar() -> void:
 			var a := no as AnimalVila
 			amostras += 1
 			var r := Vector2(a.global_position.x, a.global_position.z).length()
-			if r > RAIO_CERCA - 0.2 and not (a.global_position.z < 0.0 and absf(a.global_position.x) < 8.0):
+			if r > RAIO_CERCA - 0.2 and not (a.global_position.z < 0.0 and absf(a.global_position.x) < 8.0) and not absf(a.global_position.z) < 8.0:   # fora dos vãos dos portões norte, leste e oeste
 				violacoes += 1
 				print("VIOLACAO cerca: ", a.name, " r=", snapped(r, 0.1))
 			elif _dentro_de_casa(a):

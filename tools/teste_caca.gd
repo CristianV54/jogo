@@ -28,15 +28,25 @@ func _r() -> void:
 			vaca = a
 	for n in area.npcs:
 		n.visible = false   # só a vaca é vítima possível neste trecho do teste
-	var vida0 := vaca.vida
+	# o lobo ataca o bicho de fazenda MAIS PERTO dele, que pode ser a vaca ou a ovelha vizinha do mesmo curral: vale a vida de todos
+	var rebanho: Array[AnimalVila] = []
+	for a in area.find_children("*", "AnimalVila", false, false):
+		if not (a as AnimalVila).fugitivo and (a as AnimalVila).global_position.distance_to(vaca.global_position) < 14.0:
+			rebanho.append(a)
+	var vida0 := 0
+	for a in rebanho:
+		vida0 += a.vida
 	var lobo := (load("res://scenes/inimigos/lobo.tscn") as PackedScene).instantiate() as Inimigo
 	jogo.mundo.add_child(lobo)
 	lobo.global_position = vaca.global_position + Vector3(0.0, 0.3, -2.5)   # dentro do mesmo curral (o lobo não atravessa a cerca)
 	for i in 80:
 		await create_timer(0.1).timeout
-		if vaca.morto:
-			break
-	_m("o lobo ataca a vaca (ela perde vida ou morre)", vaca.vida < vida0 or vaca.morto, "vida %d -> %d, morta=%s" % [vida0, vaca.vida, str(vaca.morto)])
+	var vida1 := 0
+	var mortos := 0
+	for a in rebanho:
+		vida1 += a.vida
+		mortos += 1 if a.morto else 0
+	_m("o lobo ataca um bicho do curral (ele perde vida ou morre)", vida1 < vida0 or mortos > 0, "vida do rebanho %d -> %d, mortos=%d" % [vida0, vida1, mortos])
 	lobo.queue_free()
 	for n in area.npcs:
 		n.visible = true

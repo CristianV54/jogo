@@ -166,7 +166,9 @@ func _cacar(delta: float) -> void:
 		return
 	var ate := _vitima.global_position - global_position
 	ate.y = 0.0
-	if ate.length() > alcance_ataque * 0.9:
+	# o alcance conta a partir do corpo da vítima, não do centro: o corpo sólido de uma vaca parava o lobo a ~1,7 m do centro
+	# dela, bem no limite do alcance, e às vezes ele ficava encostado sem nunca morder
+	if ate.length() > alcance_ataque * 0.9 + float(_vitima.get("raio_colisao")):
 		var dir := ate.normalized()
 		velocity.x = dir.x * velocidade
 		velocity.z = dir.z * velocidade

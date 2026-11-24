@@ -11,7 +11,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 
 | # | Defeito | Como vi | Causa |
 |---|---|---|---|
-| A1 | Animais atravessam parede de casa e cerca: 46 violações em 1280 amostras (40 em casa, 6 em cerca) | teste `teste_animais_obstaculos` | não investigada |
+| A1 | **NÃO ERA DEFEITO DO JOGO (24/11).** As 46 violações vinham do teste desatualizado: uma vaca de teste nascia dentro do Depósito de Grãos e outra saía pelo portão oeste, ambos criados depois do teste. Teste corrigido: 0 violações em 3 rodadas de 1240 amostras. Animais atravessam parede de casa e cerca: 46 violações em 1280 amostras (40 em casa, 6 em cerca) | teste `teste_animais_obstaculos` | não investigada |
 | A2 | O Torin trava em x=-160 na entrada oeste do Refúgio, vindo do Pomar. O percurso real Refúgio→Castelo está reprovado | relatório da sessão anterior (não repeti) | não confirmada |
 | A3 | 158 peças grandes sem colisão (60 na Cratera, 19 em Valdoria, 16 em casas, 9 no Refúgio, resto em prédios) | medi (`auditar_colisao`) | falta separar o que é decoração fina do que é parede |
 | A4 | "Cair no fim do nada e morrer": as varreduras dizem 0 buracos, mas você viu acontecer. Falta achar o lugar | não reproduzi | desconhecida. Preciso que você diga a região, ou eu ando o mapa todo com o agente |
@@ -20,7 +20,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 
 | # | Defeito | Como vi | Causa |
 |---|---|---|---|
-| B1 | O lobo não ataca a vaca no curral (vida 40 → 40) | teste `teste_caca` | não investigada |
+| B1 | **CORRIGIDO em 24/11.** O lobo caçava, mas às vezes escolhia a ovelha vizinha (o teste só olhava a vaca) e às vezes ficava encostado na vaca no limite do alcance sem morder. O alcance da mordida agora conta a partir do corpo da vítima (`inimigo.gd`) e o teste vale qualquer bicho do curral: 5 de 5 rodadas passam. O lobo não ataca a vaca no curral (vida 40 → 40) | teste `teste_caca` | não investigada |
 | B2 | Lobo "ataca de costas": nesta versão a cabeça aponta para onde ele anda (0,94). O ataque em si ainda não foi filmado | medi (`diag_frente_lobo`) | pendente de filme do ataque |
 | B3 | **CORRIGIDO em 24/11** (persegue sempre com a animação de correr). Inimigo persegue a menos de 10 m com a animação de ANDAR na velocidade de CORRER | li (`inimigo.gd`, linha 108) | regra de escolha da animação |
 | B4 | NPC foge de inimigo: o teste passa, mas só cobre um caso (lobo solto perto de 3 civis) | teste `teste_medo` | cobertura fraca do teste |
@@ -64,6 +64,22 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | D11 | Cavalo: andar, correr, pular e morrer animam bem | foto (`movimento_cavalo`) | (não é defeito; serve de referência) |
 | D12 | **Aberto.** Depois do ajuste de 24/11 o andar calmo de todos os bichos casa com o passo. Correndo ainda deslizam: coelho ~8x, cão ~4x, cão de guerra ~3,4x, porco ~2,4x, javali ~2,2x, urso ~1,7x, Torin no Shift ~1,6x, Filhote de Asa ~14x | medi (`docs/ajustes/2026-11-24_movimentos/MEDIDAS.md`) | passada curta dos modelos de cão e porco; pede modelo e animação próprios (item 5) |
 | D13 | **Aberto.** `teste_solidos` falhou 2 vezes em 6 em "Montou o cavalo" depois das mudanças de 24/11 e passou nas outras 4; sem as mudanças passou 1 de 1 | teste | não investigada |
+
+### Quem está sem animação (anotado em 24/11 a pedido do Cristian)
+
+| Ser | O que falta |
+|---|---|
+| Galinha | Tudo: não tem esqueleto. Só bica (a cabeça gira) e tomba de lado ao morrer |
+| Lobo | Levar dano |
+| Javali | Levar dano |
+| Urso | Levar dano |
+| Cão de guerra | Levar dano |
+| Fagulha | Atacar (morder, fogo), levar dano, morrer, decolar e pousar |
+| Filhote de Asa | Atacar (usa a corrida), levar dano, morrer |
+| Ignis-Maw | Atacar (usa a corrida), levar dano, morrer (tomba e afunda) |
+| Vaca, cavalo, ovelha, porco, cão, cervo, coelho | Levar dano (só piscam em vermelho) e comer/pastar |
+| Corvo | Voar (some para longe sem bater asas) |
+| Gente e chefes | Só um golpe de espada; ofícios (martelar, cortar lenha, cozinhar) usam o golpe de espada; sem bloqueio, arco ou cavalgada própria |
 
 ## E. Gente e chefes
 
