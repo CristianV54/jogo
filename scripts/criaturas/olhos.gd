@@ -67,9 +67,9 @@ static func aplicar(visual: Node3D, especie: String) -> void:
 		olho.position = par[0]
 		anexo.add_child(olho)
 		_bola(olho, Vector3.ZERO, raio, cfg[5], 0.3)
-		if cfg[6] != null:   # pupila: uma calota escura na frente da íris
-			_bola(olho, olhar * raio * 0.52, raio * 0.58, cfg[6], 0.2)
-		_bola(olho, olhar * raio * 0.82 + cima * raio * 0.3, raio * 0.2, Color(1, 1, 1), 0.1)   # brilho: dá vida ao olhar
+		if cfg[6] != null:   # pupila: um disco escuro deitado sobre a íris (uma bola aqui ficava saltada para fora do olho)
+			_disco(olho, olhar * raio * 0.9, olhar, cima, raio * 0.5, 0.22, cfg[6], 0.2)
+		_disco(olho, (olhar + cima * 0.42).normalized() * raio * 0.99, olhar, cima, raio * 0.17, 0.4, Color(1, 1, 1), 0.1)   # brilho: dá vida ao olhar
 
 
 ## Acha, na pose de repouso, onde cada olho assenta. Devolve [[[posição, olhar, cima] por olho], raio], no espaço do osso da cabeça.
@@ -167,7 +167,7 @@ static func _calcular(esq: Skeleton3D, malhas: Array[MeshInstance3D], ih: int, i
 				melhor = origem.distance_to(h)
 				toque = h
 		var centro: Vector3 = toque - fora * raio * 0.45   # meio afundado na pele
-		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 0.7)).normalized(), (para_osso.basis * cima).normalized()])
+		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 2.2 + cima * 0.6)).normalized(), (para_osso.basis * cima).normalized()])
 	return [olhos, raio]
 
 
@@ -199,7 +199,8 @@ static func _sem_esqueleto(visual: Node3D) -> void:
 		olho.position = toque - fora * raio * 0.45
 		cab.add_child(olho)
 		_bola(olho, Vector3.ZERO, raio, Color(0.05, 0.03, 0.02), 0.25)
-		_bola(olho, (fora + Vector3(0, 0, 0.7)).normalized() * raio * 0.8 + Vector3.UP * raio * 0.3, raio * 0.25, Color(1, 1, 1), 0.1)
+		var olhar := (fora + Vector3(0, 0, 0.7)).normalized()
+		_disco(olho, (olhar + Vector3.UP * 0.42).normalized() * raio * 0.99, olhar, Vector3.UP, raio * 0.2, 0.4, Color(1, 1, 1), 0.1)
 
 
 ## Vértices de uma superfície indexada, três a três (um triângulo por trinca).
@@ -209,6 +210,17 @@ static func _soltos(arr: Array) -> PackedVector3Array:
 	for i in arr[Mesh.ARRAY_INDEX]:
 		saida.append(vs[i])
 	return saida
+
+
+## Disco: uma bola achatada na direção `para` (espessura = fração do raio), para pupila e brilho ficarem rentes ao olho.
+static func _disco(pai: Node3D, pos: Vector3, para: Vector3, cima: Vector3, raio: float, espessura: float, cor: Color, aspereza: float) -> void:
+	var z := para.normalized()
+	var x := cima.cross(z)
+	x = x.normalized() if x.length() > 0.01 else z.cross(Vector3.RIGHT).normalized()
+	var y := z.cross(x)
+	_bola(pai, pos, raio, cor, aspereza)
+	var mi := pai.get_child(pai.get_child_count() - 1) as MeshInstance3D
+	mi.transform = Transform3D(Basis(x, y, z) * Basis.from_scale(Vector3(1.0, 1.0, espessura)), pos)
 
 
 static func _bola(pai: Node3D, pos: Vector3, raio: float, cor: Color, aspereza: float) -> void:

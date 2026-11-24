@@ -74,6 +74,7 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 	elif paleta.is_empty():
 		return
 	var claridade := randf_range(0.84, 1.12)   # cada indivíduo um pouco mais claro ou escuro que o vizinho
+	var escolhidas: Dictionary = {}   # material -> cor: a mesma em todas as peças do bicho (cabeça e corpo da galinha combinam)
 	for mi in raiz.find_children("*", "MeshInstance3D", true, false):
 		var malha := mi as MeshInstance3D
 		for i in malha.mesh.get_surface_count():
@@ -91,7 +92,9 @@ static func aplicar(raiz: Node3D, especie: String) -> void:
 			if opcoes.is_empty():
 				malha.set_surface_override_material(i, m)
 				continue
-			var cor: Color = opcoes[randi() % opcoes.size()]
+			if not escolhidas.has(base.resource_name):
+				escolhidas[base.resource_name] = opcoes[randi() % opcoes.size()]
+			var cor: Color = escolhidas[base.resource_name]
 			m.albedo_color = Color(cor.r * claridade, cor.g * claridade, cor.b * claridade)
 			m.albedo_texture = _textura_de_pelo()
 			m.uv1_triplanar = true

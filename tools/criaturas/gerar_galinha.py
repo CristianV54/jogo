@@ -44,6 +44,8 @@ corpo = [
     peca(S, ASAS, (0.105, 0.0, 0.23), (0.03, 0.1, 0.07), segments=6, ring_count=4, radius=1),
     peca(S, ASAS, (-0.105, 0.0, 0.23), (0.03, 0.1, 0.07), segments=6, ring_count=4, radius=1),
 ]
+# pescoço: liga o peito à cabeça (sem ele a cabeça ficava solta no ar, 5 cm acima do corpo)
+corpo.append(peca(K, PENAS, (0, -0.115, 0.3), (0.05, 0.05, 0.15), (math.radians(35), 0, 0), vertices=7, radius1=1, radius2=0.75, depth=1))
 for x in (-0.04, 0.04):
     corpo.append(peca(C, PERNAS, (x, -0.01, 0.07), (0.012, 0.012, 0.07), vertices=5, radius=1, depth=1))
     corpo.append(peca(S, PERNAS, (x, -0.03, 0.01), (0.03, 0.04, 0.012), segments=5, ring_count=3, radius=1))

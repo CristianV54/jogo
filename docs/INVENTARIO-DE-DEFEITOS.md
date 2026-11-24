@@ -42,6 +42,9 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | C11 | Todos os bichos são de cor chapada, sem textura de pelo, crina, focinho ou casco pintados | foto | pacote low-poly sem textura |
 | C12 | Fagulha, Filhote de Asa e Ignis-Maw são o mesmo dragão em três cores e tamanhos | foto (`bancada_A6`) | um modelo só |
 
+| C13 | **CORRIGIDO em 24/11.** Galinha com a cabeça solta no ar, 5 cm acima do corpo (sem pescoço); cabeça e corpo de cores diferentes | apontado pelo Cristian; foto | modelo sem pescoço; cor sorteada por peça |
+| C14 | **CORRIGIDO em 24/11.** Pupila e brilho do lobo e do cão de guerra eram bolas saltadas para fora do olho, apontando para os lados | apontado pelo Cristian; foto ampliada | pupila feita com esfera |
+
 ## D. Animais e criaturas: movimento
 
 | # | Defeito | Como vi | Causa |
