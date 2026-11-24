@@ -44,6 +44,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 
 | C13 | **CORRIGIDO em 24/11.** Galinha com a cabeça solta no ar, 5 cm acima do corpo (sem pescoço); cabeça e corpo de cores diferentes | apontado pelo Cristian; foto | modelo sem pescoço; cor sorteada por peça |
 | C14 | **CORRIGIDO em 24/11.** Pupila e brilho do lobo e do cão de guerra eram bolas saltadas para fora do olho, apontando para os lados | apontado pelo Cristian; foto ampliada | pupila feita com esfera |
+| C15 | **CORRIGIDO em 24/11.** Olho do lobo baixo demais, na linha onde a testa encontra o focinho | apontado pelo Cristian; foto ampliada | posição calibrada baixa; agora fica no meio da face da testa (`olho_do_lobo_na_testa.jpg`) |
 
 ## D. Animais e criaturas: movimento
 

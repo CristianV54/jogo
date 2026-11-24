@@ -23,7 +23,7 @@ const TABELA := {
 	"urso": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.08, 0.05, 0.03), null],
 	"cao_guerra": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.75, 0.12, 0.06), Color(0.03, 0.02, 0.02)],
 	"javali": [ESQUELETO_FAZENDA, 0.45, 12, 40, 0.06, Color(0.3, 0.07, 0.04), null],
-	"lobo": [ESQUELETO_LOBO, 0.4, 30, 50, 0.075, Color(0.88, 0.62, 0.1), Color(0.03, 0.02, 0.02)],
+	"lobo": [ESQUELETO_LOBO, 0.25, 40, 60, 0.062, Color(0.88, 0.62, 0.1), Color(0.03, 0.02, 0.02)],
 }
 
 static var _guardados: Dictionary = {}   # "especie|malha" -> o que _calcular devolve
@@ -167,7 +167,7 @@ static func _calcular(esq: Skeleton3D, malhas: Array[MeshInstance3D], ih: int, i
 				melhor = origem.distance_to(h)
 				toque = h
 		var centro: Vector3 = toque - fora * raio * 0.45   # meio afundado na pele
-		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 2.2 + cima * 0.6)).normalized(), (para_osso.basis * cima).normalized()])
+		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 2.2 + cima * 0.2)).normalized(), (para_osso.basis * cima).normalized()])
 	return [olhos, raio]
 
 

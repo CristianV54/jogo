@@ -66,6 +66,7 @@ Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo: as regras que nunca podem se
 ### Animais e criaturas: bancada isolada (regra do usuário, pedida mais de 5 vezes)
 - Todo animal ou criatura nova ou alterada (lobo, cavalo, javali...) é aberta e testada SOZINHA numa cena de bancada: chão plano, sem mundo, sem NPCs, o Torin ao lado como régua. Só depois de aprovada ali ela entra no jogo.
 - Na bancada, fotografar de frente, de lado e de costas, parada e andando: textura e cor, tamanho contra o Torin, e se o modelo OLHA para onde anda (frente do modelo = direção da velocidade; nunca andar de costas).
+- Critério de anatomia, conferido em foto AMPLIADA da cabeça e das juntas (a folha geral não mostra): o olho fica na face da cabeça, acima da linha onde começa o focinho e abaixo das orelhas, com os dois olhos visíveis de frente e a pupila rente ao olho, olhando para a frente; cabeça, pescoço, rabo e patas ficam ligados ao corpo, sem vão.
 - Testar também correr, atacar e morrer, e abrir a janela para o usuário ver. Teste de lógica sozinho não vale como prova de aparência.
 - Defeito visual conhecido não vira "pendência visual": é bug e entra na lista antes de qualquer outra coisa.
 
