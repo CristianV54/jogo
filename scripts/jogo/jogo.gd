@@ -112,6 +112,7 @@ func _iniciar_mundo() -> void:
 	container.add_child(mundo)
 	await mundo.construir()
 	hud.mensagem("", 0.01)
+	mundo.tubarao.aviso.connect(func(texto: String) -> void: hud.mensagem(texto, 3.0))
 	for id in mundo.regioes:
 		var a: AreaBase = mundo.regioes[id]
 		if a.has_signal("chefe_vida"):

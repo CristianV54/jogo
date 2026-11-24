@@ -24,16 +24,23 @@ func povoar() -> void:
 	# estradas: o que vive em cada trecho
 	_na_estrada("pomar", [["cervo", 4], ["coelho", 6], ["ovelha", 4]])
 	_na_estrada("bosque", [["lobo", 3], ["javali", 2], ["cervo", 3], ["coelho", 4]])
+	_na_estrada("nevoa", [["lobo", 3], ["cervo", 2]])
 	_na_estrada("campos", [["cervo", 3], ["coelho", 5], ["vaca", 4], ["cavalo", 2], ["lobo", 1]])
-	_na_estrada("ruptura", [["lobo", 3], ["javali", 2], ["corvo", 4]])
+	_na_estrada("ruptura", [["lobo", 2], ["javali", 2], ["corvo", 4]])
 	_na_estrada("ferrogris", [["corvo", 8], ["cao_guerra", 2], ["guarda", 3]])
-	_na_estrada("imperial", [["cavalo", 3], ["vaca", 3], ["cao", 2], ["guarda", 3]])
-	# o mundo aberto: cada zona tem a sua fauna (lobos, javalis e ursos só longe das casas)
-	_na_zona(Rect2(-760, -380, 1090, 740), [["cervo", 22], ["coelho", 30], ["lobo", 6], ["javali", 3]])          # bacia do Refúgio
-	_na_zona(Rect2(-760, -2650, 1090, 2265), [["cervo", 28], ["coelho", 25], ["lobo", 20], ["javali", 10], ["urso", 6]])   # terras do Bosque
-	_na_zona(Rect2(330, -940, 550, 1300), [["cervo", 10], ["coelho", 10], ["lobo", 8]])                          # leste, rumo à Ruptura
-	_na_zona(Rect2(330, -1700, 550, 760), [["corvo", 24], ["cao_guerra", 6], ["guarda", 10]])                    # terras queimadas
-	_na_zona(Rect2(330, -2650, 550, 950), [["cavalo", 4], ["vaca", 4], ["cao", 4], ["guarda", 6]])               # terras do Império
+	_na_estrada("cratera", [["corvo", 6], ["cao_guerra", 2], ["guarda", 2]])
+	_na_estrada("reino_sul", [["cavalo", 3], ["vaca", 3], ["cao", 2], ["coelho", 4]])
+	_na_estrada("beira_rio", [["cervo", 3], ["coelho", 4], ["cavalo", 2]])
+	# zonas largas da ilha (quadrantes em volta do reino): a mata e os campos têm vida longe das estradas
+	_na_zona(Rect2(-700, 350, 1400, 1000), [["cervo", 22], ["coelho", 30], ["lobo", 6], ["javali", 3]])                    # sul: pinhal do Refúgio
+	_na_zona(Rect2(-1400, 150, 700, 1100), [["cervo", 14], ["coelho", 18], ["lobo", 5], ["javali", 4]])                    # sudoeste: Pomar
+	_na_zona(Rect2(-1400, -1300, 1000, 1000), [["cervo", 24], ["coelho", 20], ["lobo", 20], ["javali", 10], ["urso", 6]])  # noroeste: Bosque e Névoa
+	_na_zona(Rect2(-1400, -300, 950, 450), [["cervo", 8], ["coelho", 16], ["vaca", 6], ["cavalo", 4]])                     # oeste: Campos Altos
+	_na_zona(Rect2(-400, -1400, 800, 800), [["cervo", 8], ["lobo", 10], ["urso", 5], ["corvo", 10]])                       # norte: serra
+	_na_zona(Rect2(400, -1300, 1000, 900), [["corvo", 24], ["cao_guerra", 6], ["guarda", 8]])                              # nordeste: terras queimadas
+	_na_zona(Rect2(450, -400, 950, 700), [["corvo", 10], ["cao_guerra", 3], ["guarda", 8], ["cervo", 6]])                  # leste: Ferrogris
+	_na_zona(Rect2(300, 300, 1100, 1100), [["cervo", 12], ["coelho", 14], ["lobo", 8], ["javali", 4]])                     # sudeste: Ruptura e foz
+	_na_zona(Rect2(-450, -150, 900, 500), [["cavalo", 5], ["vaca", 6], ["cao", 4], ["coelho", 10]])                        # campos do reino
 
 
 ## Espalha bichos num retângulo do mundo, fora das regiões, da água e (os hostis) das casas.

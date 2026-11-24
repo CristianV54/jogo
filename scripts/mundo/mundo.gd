@@ -18,6 +18,7 @@ var condicoes: Dictionary = {}     # id -> Callable (o Jogo diz quando cada barr
 var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio, tipo, no)
 var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
+var tubarao: Tubarao
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
 var capim: CapimDoMundo
@@ -484,22 +485,25 @@ func _mar() -> void:
 				add_child(longe)
 			mz += lado
 		mx += lado
-	var n := 0
+	var n := 0   # parede invisível bem mar adentro: o raso é livre, e quem insiste encontra o tubarão antes da parede
 	var x := lim.position.x
 	while x <= lim.end.x:
 		var z := lim.position.y
 		while z <= lim.end.y:
 			var d := Costa.distancia(x, z)
-			if d > 3.0 and d < 9.5:
+			if d < -Costa.PAREDE + 4.0 and d > -Costa.PAREDE - 4.0:
 				var cs := CollisionShape3D.new()
 				var caixa := BoxShape3D.new()
-				caixa.size = Vector3(8.0, 14.0, 8.0)
+				caixa.size = Vector3(8.0, 30.0, 8.0)
 				cs.shape = caixa
-				cs.position = Vector3(x, terreno.altura_em(x, z) + 4.0, z)
+				cs.position = Vector3(x, Costa.NIVEL_MAR + 6.0, z)
 				_paredes.add_child(cs)
 				n += 1
 			z += 6.0
 		x += 6.0
+	tubarao = Tubarao.new()
+	tubarao.name = "Tubarao"
+	add_child(tubarao)
 	print("Mundo: costa com ", n, " blocos de parede")
 
 
@@ -680,58 +684,17 @@ func _floresta() -> void:
 
 
 ## Montanhas em volta do mundo inteiro e chão até onde a vista alcança.
-func _horizonte() -> void:
+func _horizonte() -> void:   # a ilha fica no meio do oceano: para lá do mar de ladrilhos, um fundo azul até o horizonte
 	var lim := MundoDados.LIMITES
 	var chao := MeshInstance3D.new()
-	chao.name = "ChaoDistante"
+	chao.name = "OceanoDistante"
 	var plano := BoxMesh.new()
-	plano.size = Vector3(9000.0, 0.2, 9000.0)
-	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.2, 0.28, 0.17)
-	m.roughness = 1.0
-	plano.material = m
+	plano.size = Vector3(12000.0, 0.2, 12000.0)
+	plano.material = _mat(Color(0.1, 0.24, 0.34))
 	chao.mesh = plano
-	chao.position = Vector3(lim.get_center().x, -14.0, lim.get_center().y)
+	chao.position = Vector3(lim.get_center().x, Costa.NIVEL_MAR - 7.0, lim.get_center().y)
 	chao.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(chao)
-	var serra := Node3D.new()
-	serra.name = "Montanhas"
-	add_child(serra)
-	var perimetro := lim.grow(260.0)
-	var passo := 120.0
-	var total := int((perimetro.size.x + perimetro.size.y) * 2.0 / passo)
-	for k in total:
-		var d := k * passo
-		var p := Vector2.ZERO
-		var w := perimetro.size.x
-		var h := perimetro.size.y
-		if d < w:
-			p = Vector2(perimetro.position.x + d, perimetro.position.y)
-		elif d < w + h:
-			p = Vector2(perimetro.end.x, perimetro.position.y + (d - w))
-		elif d < 2.0 * w + h:
-			p = Vector2(perimetro.end.x - (d - w - h), perimetro.end.y)
-		else:
-			p = Vector2(perimetro.position.x, perimetro.end.y - (d - 2.0 * w - h))
-		p += Vector2(_rng.randf_range(-40.0, 40.0), _rng.randf_range(-40.0, 40.0))
-		var alt := _rng.randf_range(140.0, 260.0)
-		var cone := CylinderMesh.new()
-		cone.top_radius = _rng.randf_range(0.0, 8.0)
-		cone.bottom_radius = _rng.randf_range(60.0, 110.0)
-		cone.height = alt
-		cone.radial_segments = _rng.randi_range(5, 7)
-		cone.rings = 1
-		var tom := _rng.randf_range(0.8, 1.15)
-		var cor := Color(0.34, 0.4, 0.38)
-		if p.y < -1100.0:
-			cor = Color(0.3, 0.16, 0.13) if p.y > -1700.0 else Color(0.4, 0.34, 0.27)
-		cone.material = _mat(Color(cor.r * tom, cor.g * tom, cor.b * tom))
-		var mi := MeshInstance3D.new()
-		mi.mesh = cone
-		mi.position = Vector3(p.x, alt / 2.0 - 14.0, p.y)
-		mi.rotation.y = _rng.randf() * TAU
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		serra.add_child(mi)
 
 
 func _mat(cor: Color) -> StandardMaterial3D:
