@@ -31,6 +31,13 @@ static func caixa_de(no: Node3D, encolher := 1.0) -> AABB:
 	for mi in no.find_children("*", "MeshInstance3D", true, false):
 		var t := Transform3D.IDENTITY
 		var p: Node = mi
+		# Malha com esqueleto: a caixa dela já vem no espaço da raiz do modelo (o esqueleto desfaz a escala do nó Armature).
+		# Aplicar a escala do Armature de novo encolhia a caixa: a do cão ficava com 40% do tamanho e a da galinha nova com 4%
+		# (o jogador atravessava). Então a conta começa na raiz do modelo, acima do Armature.
+		if (mi as MeshInstance3D).skin != null and mi.get_parent() is Skeleton3D and mi.get_parent().get_parent() != null:
+			p = mi.get_parent().get_parent().get_parent()
+			if p == null or not (p == no or no.is_ancestor_of(p)):
+				p = no
 		while p != no:
 			t = (p as Node3D).transform * t
 			p = p.get_parent()

@@ -34,8 +34,8 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | C1 | **CORRIGIDO em 24/11** (fotos em `docs/ajustes/2026-11-24_cor_e_olhos/`). Vaca, cavalo, ovelha, porco, cervo e javali saem **brancos puros**, sem pelagem. Cão, coelho, urso e cão de guerra saem coloridos | foto (`bancada_A1`, `A2`, `A4`, `A5`), também nas fotos do Mac | `variacao_de_cores.gd`: a regra feita para o lobo ("malha com cor por vértice mantém") pega também os bichos de fazenda, cujas malhas têm cor de vértice branca, e apaga a pelagem |
 | C2 | **CORRIGIDO em 24/11** (olho assentado na pele; mesmas fotos). Olhos nas laterais e saltados para fora da cabeça (ovelha, cão de guerra, urso, lobo); de frente só aparece um, ou nenhum | foto (`bancada_A2`, `A5`, `A6`, `lobo_bancada`) | `olhos.gd` posiciona pelo osso, não pela superfície da cabeça |
 | C3 | **CORRIGIDO em 24/11**. Porco e javali sem olho visível; vaca com olho minúsculo | foto (`bancada_A2`, `A5`) | mesma tabela de olhos |
-| C4 | **Olhos CORRIGIDOS em 24/11** (falta a animação). Galinha sem olhos e sem nenhuma animação | foto e medi | modelo feito sem esqueleto |
-| C5 | Coelho é o cachorro pug com duas varetas na cabeça e rabo de porco | foto (`bancada_A3`) | falta modelo de coelho |
+| C4 | **CORRIGIDO em 24/11: modelo novo de galinha (CC0), com esqueleto, olhos e animações de andar, comer e morrer.** Galinha sem olhos e sem nenhuma animação | foto e medi | modelo feito sem esqueleto |
+| C5 | **CORRIGIDO em 24/11: modelo novo de coelho (CC0), com correr, pular, sentar e morrer.** Coelho é o cachorro pug com duas varetas na cabeça e rabo de porco | foto (`bancada_A3`) | falta modelo de coelho |
 | C6 | Urso é o pug marrom com orelhas de bola e rabo enrolado | foto (`bancada_A5`) | falta modelo de urso |
 | C7 | Cão de guerra é o pug cinza de olho vermelho | foto (`bancada_A6`) | falta modelo de cão de guerra |
 | C8 | Cervo é o cavalo pequeno com dois palitos | foto (`bancada_A4`) | falta modelo de cervo |
@@ -48,6 +48,7 @@ Aviso sobre as fotos: foram tiradas num servidor sem placa de vídeo, com o rend
 | C14 | **CORRIGIDO em 24/11.** Pupila e brilho do lobo e do cão de guerra eram bolas saltadas para fora do olho, apontando para os lados | apontado pelo Cristian; foto ampliada | pupila feita com esfera |
 | C15 | **CORRIGIDO em 24/11.** Olho do lobo baixo demais, na linha onde a testa encontra o focinho | apontado pelo Cristian; foto ampliada | posição calibrada baixa; agora fica no meio da face da testa (`olho_do_lobo_na_testa.jpg`) |
 | C16 | **CORRIGIDO em 24/11.** Olho do porco e do javali baixo, na bochecha (no javali, junto da base da presa) | revisão ampliada dos 10 bichos (`docs/ajustes/2026-11-24_revisao_ampliada/`) | posição calibrada baixa; agora fica na face, acima do focinho e abaixo das orelhas |
+| C17 | **CORRIGIDO em 24/11.** A caixa de colisão dos bichos com esqueleto em escala era calculada pequena demais: a do cão tinha 40% do tamanho certo (e a da galinha nova teria 4%: o jogador atravessava) | teste `teste_solidos` | `solidos.gd` aplicava de novo a escala do nó Armature |
 
 ## D. Animais e criaturas: movimento
 

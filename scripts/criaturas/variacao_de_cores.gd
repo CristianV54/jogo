@@ -32,20 +32,12 @@ const PALETAS := {
 		"Beige": [Color(0.26, 0.17, 0.1), Color(0.18, 0.12, 0.08), Color(0.33, 0.23, 0.15)],
 		"Brown": [Color(0.1, 0.07, 0.05)],
 	},
-	"coelho": {
-		"Beige": [Color(0.55, 0.5, 0.42), Color(0.7, 0.65, 0.55), Color(0.42, 0.37, 0.3)],
-		"Brown": [Color(0.4, 0.34, 0.28)],
-	},
 	"corvo": {
 		"Penas": [Color(0.05, 0.05, 0.06)],
 		"Asas": [Color(0.03, 0.03, 0.04)],
 		"Crista": [Color(0.04, 0.04, 0.04)],
 		"Bico": [Color(0.18, 0.14, 0.1)],
 		"Pernas": [Color(0.1, 0.08, 0.06)],
-	},
-	"galinha": {
-		"Penas": [Color(0.92, 0.9, 0.84), Color(0.62, 0.35, 0.18), Color(0.16, 0.16, 0.17), Color(0.82, 0.66, 0.4), Color(0.45, 0.3, 0.2)],
-		"Asas": [Color(0.7, 0.6, 0.45), Color(0.4, 0.22, 0.1), Color(0.1, 0.1, 0.1), Color(0.6, 0.45, 0.28)],
 	},
 	"cao": {
 		"Beige": [Color(0.92, 0.82, 0.62), Color(0.12, 0.12, 0.13), Color(0.5, 0.3, 0.16), Color(0.93, 0.93, 0.92), Color(0.55, 0.55, 0.58)],
@@ -63,10 +55,29 @@ const TONS_POR_VERTICE := {
 	"lobo": [[64, Color(1.0, 1.0, 1.0)], [14, Color(1.05, 0.9, 0.74)], [11, Color(0.3, 0.3, 0.33)], [11, Color(2.2, 2.2, 2.25)]],
 }
 
+## Espécies com textura pintada no próprio modelo (galinha e coelho novos): o tom do indivíduo multiplica a textura.
+const TONS_SOBRE_TEXTURA := {
+	"galinha": [[50, Color(1.0, 1.0, 1.0)], [20, Color(1.5, 1.4, 1.2)], [15, Color(0.5, 0.45, 0.45)], [15, Color(1.7, 1.7, 1.75)]],
+	"coelho": [[55, Color(1.0, 1.0, 1.0)], [20, Color(0.75, 0.62, 0.5)], [15, Color(0.45, 0.42, 0.42)], [10, Color(1.4, 1.4, 1.42)]],
+}
+
 static var _pelo: ImageTexture
 
 
 static func aplicar(raiz: Node3D, especie: String) -> void:
+	if TONS_SOBRE_TEXTURA.has(especie):
+		var tom := _sortear_por_peso(TONS_SOBRE_TEXTURA[especie])
+		var clara := randf_range(0.9, 1.1)
+		for mi in raiz.find_children("*", "MeshInstance3D", true, false):
+			var malha_t := mi as MeshInstance3D
+			for i in malha_t.mesh.get_surface_count():
+				var base_t := malha_t.mesh.surface_get_material(i) as StandardMaterial3D
+				if base_t == null or base_t.albedo_texture == null:
+					continue   # olhos, crista e bico ficam como são
+				var mt := base_t.duplicate() as StandardMaterial3D
+				mt.albedo_color = Color(tom.r * clara, tom.g * clara, tom.b * clara)
+				malha_t.set_surface_override_material(i, mt)
+		return
 	var paleta: Dictionary = PALETAS.get(especie, {})
 	var tom_vertice := Color.WHITE
 	if TONS_POR_VERTICE.has(especie):

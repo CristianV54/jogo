@@ -129,7 +129,7 @@ func _criar(especie: String, p_original: Vector2) -> void:
 		"cervo":
 			_caca("cavalo", p, 0.62, "Cervo", "cervo", "chifres", 30, 1.4, {"carne": [2, 3], "couro": [1, 1]})
 		"coelho":
-			_caca("cao", p, 0.5, "Coelho", "coelho", "orelhas_longas", 6, 1.8, {"carne": [1, 1]})
+			_caca("coelho", p, 1.0, "Coelho", "coelho", "", 6, 1.8, {"carne": [1, 1]})
 		"ovelha":
 			_domestico("ovelha", p, "Ovelha", "ovelha", 1.0, {"carne": [1, 2], "la": [1, 2]})
 		"vaca":

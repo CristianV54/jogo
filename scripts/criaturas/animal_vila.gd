@@ -23,7 +23,8 @@ extends Node3D
 
 ## Velocidade (m/s) que as animações de andar (WalkSlow) e de correr (Run) pedem, por modelo, em escala 1: é o quanto as patas
 ## avançam de verdade. Medido em tools/bancada_movimento.gd; refazer a medida se a animação mudar.
-const PASSO := {"vaca": [0.7, 2.1], "ovelha": [0.6, 1.3], "cavalo": [0.8, 3.6], "porco": [0.2, 0.6], "cao": [0.14, 0.33]}
+const PASSO := {"vaca": [0.7, 2.1], "ovelha": [0.6, 1.3], "cavalo": [0.8, 3.6], "porco": [0.2, 0.6], "cao": [0.14, 0.33],
+	"galinha": [0.2, 0.2], "coelho": [1.3, 1.3]}   # a galinha só tem passo e o coelho só tem corrida: a mesma animação serve aos dois ritmos
 const RITMO_MAXIMO_ANDANDO := 2.0   # o bicho calmo nunca anda mais rápido que 2x o passo dele (senão desliza)
 const RITMO_MAXIMO_CORRENDO := 3.0
 
@@ -54,6 +55,8 @@ func _ready() -> void:
 	_visual.scale = Vector3.ONE * escala
 	add_child(_visual)
 	_anim = _visual.find_child("AnimationPlayer", true, false)
+	if _anim and not _anim.has_animation(anim_andar) and _anim.has_animation("Run"):
+		anim_andar = "Run"   # bicho que não tem passo, só corrida aos pulos (o coelho)
 	_cabeca = _visual.find_child("Cabeca", true, false) as Node3D
 	VariacaoDeCores.aplicar(_visual, especie)
 	Acessorios.aplicar(_visual, acessorio)
@@ -220,6 +223,7 @@ func receber_dano(quantidade: int, de: Node3D = null) -> void:
 		if montaria:
 			montaria.ativa = false
 		if _tem("Death"):
+			_anim.speed_scale = 1.0   # a morte toca no ritmo normal, não no da corrida em que o bicho estava
 			_anim.play("Death", 0.1)
 		else:   # sem animação de morte (galinha): tomba de lado
 			create_tween().tween_property(_visual, "rotation_degrees:z", 90.0, 0.35)
@@ -238,6 +242,11 @@ func _tem(nome_anim: String) -> bool:
 
 
 func _tocar(nome_anim: String) -> void:
-	if _anim and _anim.has_animation(nome_anim) and _anim.current_animation != nome_anim:
+	if _anim == null or not _anim.has_animation(nome_anim):
+		return
+	if _anim.current_animation != nome_anim:
 		_anim.play(nome_anim, 0.3)
-		_anim.speed_scale = _ritmo_andar if nome_anim == anim_andar else (_ritmo_correr if nome_anim == "Run" else 1.0)
+	if _fuga > 0.0:   # fugindo: ritmo de corrida, mesmo quando a animação é a mesma do passo (galinha, coelho)
+		_anim.speed_scale = _ritmo_correr
+	else:
+		_anim.speed_scale = _ritmo_andar if nome_anim == anim_andar else 1.0

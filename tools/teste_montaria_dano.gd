@@ -157,7 +157,7 @@ func _rodar() -> void:
 	await esperar(2.0)
 	var andou := jog.global_position.distance_to(p0)
 	marcar("Cavalo andou ~6 m/s", andou > 8.0 and andou < 14.0, "%.1f m em 2 s" % andou)
-	marcar("Cavalo toca Walk", cavalo._anim.current_animation == "Walk", cavalo._anim.current_animation)
+	marcar("Cavalo montado toca a animação de andar da montaria (o trote: Run mais lento)", cavalo._anim.current_animation == cavalo.montaria.anim_andando, cavalo._anim.current_animation)
 	await foto("cavalo_andando")
 	jog.correndo_forcado = true
 	var p1 := jog.global_position

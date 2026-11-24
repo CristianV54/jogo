@@ -72,7 +72,7 @@ bpy.context.scene.cursor.location = (0, -0.12, 0.32)
 bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
 
 bpy.ops.object.select_all(action="SELECT")
-destino = f"{RAIZ}/assets/models/criaturas/galinha/galinha.glb"
+destino = f"{RAIZ}/assets/models/criaturas/corvo/corvo.glb"   # hoje este modelo simples é só a base do corvo; a galinha do jogo vem de preparar_galinha_e_coelho.py
 os.makedirs(os.path.dirname(destino), exist_ok=True)
 bpy.ops.export_scene.gltf(filepath=destino, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
 print("EXPORTADO", destino, os.path.getsize(destino))

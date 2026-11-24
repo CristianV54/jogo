@@ -4,8 +4,8 @@ extends SceneTree
 ## animações em 4 quadros cada (vista de lado). Saída em tools/capturas/candidatos/folhas/<nome>.jpg.
 ##   godot --path . --resolution 1280x720 --script res://tools/bancada_candidatos.gd -- [filtro]
 const PASTA := "res://tools/capturas/candidatos"
-const LARG := 320
-const ALT := 240
+const LARG := 480
+const ALT := 360
 
 var vp: SubViewport
 var raiz: Node3D

@@ -1,7 +1,7 @@
 extends SceneTree
 # 10 indivíduos de cada espécie, para conferir a variação de cor e a textura de pelo.
 #   godot --path . --resolution 1700x900 --script res://tools/ver_pelagens.gd
-const ESPECIES := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali", "galinha"]
+const ESPECIES := ["vaca", "cavalo", "ovelha", "porco", "cao", "lobo", "javali", "galinha", "coelho"]
 
 
 func _init() -> void:
@@ -44,7 +44,7 @@ func _rodar() -> void:
 	cam.fov = 45
 	root.add_child(cam)
 	cam.current = true
-	cam.global_position = Vector3(0, 27, 19)
+	cam.global_position = Vector3(0, 29, 21)
 	cam.look_at(Vector3(0, 0, 1.5))
 	for i in 25:
 		await process_frame

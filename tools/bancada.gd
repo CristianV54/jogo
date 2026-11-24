@@ -98,7 +98,7 @@ func _listar() -> void:
 	var animais := {
 		"vaca": ["vaca", 1.0, "vaca", "", false], "ovelha": ["ovelha", 1.0, "ovelha", "", false], "cavalo": ["cavalo", 1.0, "cavalo", "", true],
 		"porco": ["porco", 1.0, "porco", "", false], "cao": ["cao", 1.0, "cao", "", false], "galinha": ["galinha", 1.0, "galinha", "", false],
-		"cervo": ["cavalo", 0.62, "cervo", "chifres", true], "coelho": ["cao", 0.5, "coelho", "orelhas_longas", true],
+		"cervo": ["cavalo", 0.62, "cervo", "chifres", true], "coelho": ["coelho", 1.0, "coelho", "", true],
 	}
 	for k in animais:
 		var d: Array = animais[k]

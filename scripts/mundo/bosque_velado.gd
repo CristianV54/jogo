@@ -574,7 +574,7 @@ func _animais() -> void:
 	for p in [Vector2(-36, 74), Vector2(40, 72), Vector2(-12, 78), Vector2(14, 66)]:
 		_caca("cavalo", p, 0.62, "Cervo", "cervo", "chifres", 30, 1.4, {"carne": [2, 3], "couro": [1, 1]})
 	for p in [Vector2(-5, 118), Vector2(10, 122), Vector2(-18, 96), Vector2(22, 100), Vector2(-24, 50), Vector2(26, 46)]:
-		_caca("cao", p, 0.5, "Coelho", "coelho", "orelhas_longas", 6, 1.8, {"carne": [1, 1]})
+		_caca("coelho", p, 1.0, "Coelho", "coelho", "", 6, 1.8, {"carne": [1, 1]})
 	for p in [Vector3(3.5, 2.7, 128.0), Vector3(15.0, 2.4, 105.0), Vector3(-13.0, 7.3, -22.0), Vector3(16.0, 7.3, -28.0)]:   # corvos pousados
 		var corvo := Corvo.new()
 		corvo.position = Vector3(p.x, altura_em(p.x, p.z) + p.y, p.z)

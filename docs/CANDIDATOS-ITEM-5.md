@@ -15,6 +15,10 @@ Nas fotos os modelos de arquivo `.blend` antigo saem brancos: a textura existe n
 | Cavaleiro (Quaternius, LowPoly Animated Knight) | CC0 | 42 ossos; 12 animações com espada | **Não serve para chefe.** É um boneco antigo, de cabeça grande e 956 triângulos, bem mais simples que os corpos que o jogo já usa |
 | Ultimate Animated Animal Pack (Quaternius) | CC0 | 12 animais: Alpaca, Bull, Cow, Deer, Donkey, Fox, Horse, Horse_White, Husky, ShibaInu, Stag, Wolf; mais de 12 animações cada | **Não consegui baixar:** a pasta do Google Drive do autor estourou a cota de downloads ("tente de novo em até 24 horas"). É o que resolveria cervo, cão de guerra e lobo |
 
+## Aprovados e já no jogo (24/11)
+
+Galinha e coelho do Snabisch: preparados por `tools/criaturas/preparar_galinha_e_coelho.py`, bancada em `docs/ajustes/2026-11-24_galinha_e_coelho/`, registro em `assets/ASSETS.md`.
+
 ## O que continua sem solução
 
 - **Urso com animação** em CC0: não achei. Caminhos: pôr esqueleto no urso branco (trabalho meu) ou comprar o kit pago de 10 dólares.

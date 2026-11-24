@@ -1,7 +1,7 @@
 class_name Corvo
 extends Node3D
 ## Corvo pousado num poste ou galho. Quando o jogador chega perto, grasna ("Crá!"), ALERTA os inimigos num raio de 45 m
-## (eles passam a enxergar o jogador de muito longe) e voa para longe. Usa o modelo da galinha pintado de preto.
+## (eles passam a enxergar o jogador de muito longe) e voa para longe. Usa o modelo simples de ave (o da antiga galinha, tools/criaturas/gerar_galinha.py) pintado de preto.
 
 const ALCANCE_ALERTA := 45.0
 
@@ -12,7 +12,7 @@ var _visual: Node3D
 
 
 func _ready() -> void:
-	_visual = (load("res://assets/models/criaturas/galinha/galinha.glb") as PackedScene).instantiate()
+	_visual = (load("res://assets/models/criaturas/corvo/corvo.glb") as PackedScene).instantiate()
 	_visual.scale = Vector3.ONE * 1.1
 	add_child(_visual)
 	VariacaoDeCores.aplicar(_visual, "corvo")

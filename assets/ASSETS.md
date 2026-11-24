@@ -75,6 +75,16 @@ Regra: só entra em `assets/models/` o que foi validado. Todo asset tem origem, 
 - **Filhote de Asa e Ignis-Maw:** o mesmo dragão rigado do Fagulha (origem e licença ainda por confirmar, ver Fagulha) com outras paletas de cor de vértice (`PALETA=verde` e `PALETA=corrompido` em `tools/fagulha/preparar_fagulha.py`). Escalas medidas: Filhote de Asa 1,8 m de envergadura; Ignis-Maw 24,4 m de envergadura, 4,9 m de altura (escala_visual 8). Têm Idle, Walk, Run e Fly de verdade; não têm animação de ataque nem de morte (o ataque é uma investida, a morte é tombar e afundar).
 - **Lobo-cinza e Javali Couraçado (versão 1, 21/11/2026; deixam de ser `PLACEHOLDER_`):** feitos sobre o cachorro (pug) e o porco do pacote *Farm Animals* (Quaternius, CC0) por `tools/criaturas/gerar_animais.py`. Têm Idle, Walk, WalkSlow, Run, Jump e Death (animação transplantada da vaca). O **lobo** ganhou focinho comprido, nariz escuro, orelhas pontudas e rabo, em cinza; o **javali** ganhou presas de marfim, crina de cerdas no dorso e corpo marrom escuro. As peças novas são presas aos ossos (Head, Torso, Hips), então acompanham a animação. Limite: o corpo do lobo ainda é atarracado como o do pug (parece um husky grande); um lobo magro e de pernas longas pede modelo novo.
 
+## criaturas/galinha e criaturas/coelho (modelos novos, 24/11/2026)
+
+- **Galinha** (`assets/models/criaturas/galinha/galinha.glb`): "Chicken (animated)", autor Čestmír Dammer (Snabisch), **CC0**, https://opengameart.org/content/chicken-animated. 40 ossos, textura pintada de 1024, olhos, crista e barbela no próprio modelo. Animações no jogo: `Idle` (49 s, com bicadas), `WalkSlow`, `Eating`, `Death`. 0,47 m de altura.
+- **Coelho** (`assets/models/criaturas/coelho/coelho.glb`): "Rabbit", Snabisch, **CC0**, https://opengameart.org/content/rabbit-0. 37 ossos, textura pintada de 1024, olhos e bigodes. Animações: `Idle` (sentado), `Run` (aos pulos, usada também para andar), `Jump`, `Death`. 0,39 m de comprimento.
+- **Como foram preparados:** `tools/criaturas/preparar_galinha_e_coelho.py` (Blender/bpy 5.3) a partir dos `.blend` originais (que não ficam no repositório): tira câmera, luzes e malhas que não são o bicho, religa a textura embutida em materiais novos, renomeia as animações, acerta o tamanho.
+- **No jogo:** tom sorteado por indivíduo sobre a textura (`variacao_de_cores.gd`, `TONS_SOBRE_TEXTURA`); ritmo do passo em `animal_vila.gd` (`PASSO`). O coelho deixou de ser o cão com orelhas coladas; a galinha deixou de ser o modelo feito por código.
+- **Estilo:** textura pintada mais detalhada que a dos bichos de cor chapada do pacote de fazenda. Ficam diferentes lado a lado; decisão do Cristian se o resto deve seguir este padrão.
+- **Corvo:** continua usando o modelo simples de ave feito por código, agora em `assets/models/criaturas/corvo/corvo.glb` (era o arquivo da galinha antiga; `tools/criaturas/gerar_galinha.py`).
+- **Bancada:** `docs/ajustes/2026-11-24_galinha_e_coelho/` (4 vistas, ao lado do Torin, movimento quadro a quadro).
+
 ## criaturas/ animais de vila e fazenda (vaca, cavalo, ovelha, porco, cão)
 
 - **Origem e licença:** *Farm Animals* do Quaternius (CC0, catálogo `pacotes_livres/CATALOGO.md` do SSD), FBX convertido por `tools/criaturas/gerar_animais.py` (Blender, só leitura do original). Estilo: low-poly de cores chapadas, o mesmo do kit de cenário.

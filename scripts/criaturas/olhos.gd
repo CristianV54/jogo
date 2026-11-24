@@ -19,7 +19,6 @@ const TABELA := {
 	"cavalo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.065, Color(0.1, 0.06, 0.03), null],
 	"cervo": [ESQUELETO_FAZENDA, 0.35, 25, 25, 0.075, Color(0.09, 0.05, 0.03), null],
 	"cao": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.12, Color(0.12, 0.07, 0.04), null],
-	"coelho": [ESQUELETO_FAZENDA, 0.2, 35, 40, 0.13, Color(0.1, 0.05, 0.04), null],
 	"urso": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.08, 0.05, 0.03), null],
 	"cao_guerra": [ESQUELETO_FAZENDA, 0.2, 35, 45, 0.1, Color(0.75, 0.12, 0.06), Color(0.03, 0.02, 0.02)],
 	"javali": [ESQUELETO_FAZENDA, 0.5, 20, 52, 0.06, Color(0.3, 0.07, 0.04), null],
@@ -30,9 +29,6 @@ static var _guardados: Dictionary = {}   # "especie|malha" -> o que _calcular de
 
 
 static func aplicar(visual: Node3D, especie: String) -> void:
-	if especie == "galinha":
-		_sem_esqueleto(visual)
-		return
 	if not TABELA.has(especie):
 		return
 	var esq := visual.find_child("Skeleton3D", true, false) as Skeleton3D
@@ -169,47 +165,6 @@ static func _calcular(esq: Skeleton3D, malhas: Array[MeshInstance3D], ih: int, i
 		var centro: Vector3 = toque - fora * raio * 0.45   # meio afundado na pele
 		olhos.append([para_osso * centro, (para_osso.basis * (fora + frente * 2.2 + cima * 0.2)).normalized(), (para_osso.basis * cima).normalized()])
 	return [olhos, raio]
-
-
-## Galinha: o modelo não tem esqueleto, a cabeça é o nó "Cabeca" (que bica). Os olhos são filhos dele e assentam na malha
-## do mesmo jeito (raio de fora para o meio da cabeça). O bico aponta para +Z.
-static func _sem_esqueleto(visual: Node3D) -> void:
-	var cab := visual.find_child("Cabeca", true, false) as MeshInstance3D
-	if cab == null or cab.mesh == null:
-		return
-	var caixa := cab.get_aabb()
-	var raio_cabeca := caixa.size.x * 0.5
-	var meio := Vector3(0.0, caixa.position.y + raio_cabeca, caixa.position.z + raio_cabeca)   # centro da bola da cabeça (a crista e o bico ficam fora)
-	var raio := raio_cabeca * 0.2
-	var tris := PackedVector3Array()
-	for s in cab.mesh.get_surface_count():
-		tris.append_array(cab.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] if cab.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX] == null else _soltos(cab.mesh.surface_get_arrays(s)))
-	for lado in [-1.0, 1.0]:
-		var fora := Vector3(lado * 0.82, 0.3, 0.5).normalized()
-		var origem := meio + fora * raio_cabeca * 6.0
-		var melhor := 1e9
-		var toque := meio + fora * raio_cabeca
-		for t in tris.size() / 3:
-			var h: Variant = Geometry3D.ray_intersects_triangle(origem, -fora, tris[t * 3], tris[t * 3 + 1], tris[t * 3 + 2])
-			if h != null and origem.distance_to(h) < melhor:
-				melhor = origem.distance_to(h)
-				toque = h
-		var olho := Node3D.new()
-		olho.name = "Olho"
-		olho.position = toque - fora * raio * 0.45
-		cab.add_child(olho)
-		_bola(olho, Vector3.ZERO, raio, Color(0.05, 0.03, 0.02), 0.25)
-		var olhar := (fora + Vector3(0, 0, 0.7)).normalized()
-		_disco(olho, (olhar + Vector3.UP * 0.42).normalized() * raio * 0.99, olhar, Vector3.UP, raio * 0.2, 0.4, Color(1, 1, 1), 0.1)
-
-
-## Vértices de uma superfície indexada, três a três (um triângulo por trinca).
-static func _soltos(arr: Array) -> PackedVector3Array:
-	var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-	var saida := PackedVector3Array()
-	for i in arr[Mesh.ARRAY_INDEX]:
-		saida.append(vs[i])
-	return saida
 
 
 ## Disco: uma bola achatada na direção `para` (espessura = fração do raio), para pupila e brilho ficarem rentes ao olho.
