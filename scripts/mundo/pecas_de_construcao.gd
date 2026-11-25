@@ -65,8 +65,13 @@ func _eh_pedra(_cor: Color) -> bool:
 	return false
 
 
+## A cor com que a peça é pintada de fato (o kit pode clarear ou tingir a pedra de uma construção inteira).
+func _cor_final(cor: Color) -> Color:
+	return cor
+
+
 func _peca(malha: String, cor: Color, t: Transform3D, luz := false) -> void:
-	var chave := "%s|%s|%s" % [malha, cor.to_html(), "luz" if luz else ("pedra" if _eh_pedra(cor) else "liso")]
+	var chave := "%s|%s|%s" % [malha, _cor_final(cor).to_html(), "luz" if luz else ("pedra" if _eh_pedra(cor) else "liso")]
 	if not _lotes.has(chave):
 		_lotes[chave] = []
 	_lotes[chave].append(t)

@@ -24,6 +24,7 @@ const COR_COROA := Color(0.6, 0.56, 0.49)
 const AZUL_DO_REI := Color(0.14, 0.2, 0.5)
 
 var _metros := 0.0
+var pedra_clara := 0.0   # 0 = pedra parda da muralha da cidade; 1 = pedra branca da cidadela
 
 
 # ---------------------------------------------------------------- peças
@@ -232,3 +233,7 @@ func _arco(g: Vector3, f3: Vector3, lado: Vector3, fundo: float) -> void:
 ## Monta os MultiMesh. Chamar uma vez, depois de pôr todas as peças.
 func _eh_pedra(cor: Color) -> bool:
 	return cor.is_equal_approx(COR_PAREDE) or cor.is_equal_approx(COR_SOCO) or cor.is_equal_approx(COR_COROA) or cor.is_equal_approx(COR_SOCO.lerp(COR_PAREDE, 0.5))
+
+
+func _cor_final(cor: Color) -> Color:
+	return cor.lerp(Color(0.95, 0.93, 0.89), pedra_clara * 0.8) if _eh_pedra(cor) else cor

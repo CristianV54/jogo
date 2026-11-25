@@ -163,6 +163,11 @@ func _pl(v: float) -> float:   # medida da planta de blocos, em metros
 func _muralha_do_topo() -> void:
 	var ca := MundoDados.PENHASCO_EIXOS.x * 0.93
 	var cb := MundoDados.PENHASCO_EIXOS.y * 0.93
+	var kit := PecasDaMuralha.new()   # lanços, escada e portão do kit da muralha, em pedra branca
+	kit.name = "MuralhaDoTopo"
+	kit.pedra_clara = 1.0
+	add_child(kit)
+	var meia := PecasDaMuralha.MEIA_CASA_DO_PORTAO + PecasDaMuralha.RAIO_TORRE_DO_PORTAO - 1.5
 	var passos := 110
 	for k in passos:
 		var a0 := TAU * k / passos
@@ -170,28 +175,21 @@ func _muralha_do_topo() -> void:
 		var p0 := Vector2(cos(a0) * ca, sin(a0) * cb)
 		var p1 := Vector2(cos(a1) * ca, sin(a1) * cb)
 		var meio := (p0 + p1) / 2.0
-		if meio.x < 0.0 and absf(meio.y) < 6.5:
-			continue   # o vão do portão
-		var giro := atan2((p1 - p0).x, (p1 - p0).y)
-		_bloco(Vector3(meio.x, _h + 6.0, meio.y), Vector3(2.8, 16.0, p0.distance_to(p1) + 0.3), giro)
-		if k % 2 == 0:
-			_bloco(Vector3(meio.x, _h + 14.6, meio.y), Vector3(3.0, 1.2, 1.8), giro, false)
+		if meio.x < 0.0 and absf(meio.y) < meia:
+			continue   # o portão
+		var t := (p1 - p0).normalized()
+		kit.lanco(Vector3(p0.x, _h, p0.y), Vector3(p1.x, _h, p1.y), Vector2(t.y, -t.x) if Vector2(t.y, -t.x).dot(meio) > 0.0 else Vector2(-t.y, t.x))
+	kit.portao(Vector3(-ca, _h, 0.0), Vector2(-1, 0))
+	var pe := Vector2(cos(deg_to_rad(132.0)) * ca, sin(deg_to_rad(132.0)) * cb)   # escada para o caminho de ronda, ao lado do portão
+	var te := Vector2(-sin(deg_to_rad(132.0)) * ca, cos(deg_to_rad(132.0)) * cb).normalized()
+	var fe := Vector2(te.y, -te.x) if Vector2(te.y, -te.x).dot(pe) > 0.0 else Vector2(-te.y, te.x)
+	kit.escada(Vector3(pe.x, _h, pe.y) - Vector3(fe.x, 0, fe.y) * (PecasDaMuralha.ESPESSURA / 2.0), te, fe)
+	kit.fechar()
+	torres += 2   # as duas torres do portão
 	var alturas := [24.0, 24.0, 32.0, 32.0, 42.0, 52.0]
 	for g in [0, 24, 48, 72, 96, 120, 144, 216, 240, 264, 288, 312, 336]:   # 180 graus é o portão
 		var a := deg_to_rad(float(g))
 		_torre(cos(a) * ca, sin(a) * cb, _h, _rng.randf_range(4.2, 5.2), alturas[_rng.randi() % alturas.size()] + _rng.randf_range(-2.0, 2.0), g % 48 == 24 and _rng.randf() < 0.4, true)
-	for s in [-1.0, 1.0]:   # portão oeste: duas torres, a verga por cima e o estandarte
-		_torre(-ca, s * 10.0, _h, 4.4, 30.0)
-	_bloco(Vector3(-ca, _h + 15.0, 0.0), Vector3(5.8, 9.0, 12.0), 0.0, false)
-	var pano := MeshInstance3D.new()
-	var malha := BoxMesh.new()
-	malha.size = Vector3(0.1, 6.6, 4.0)
-	var m := StandardMaterial3D.new()
-	m.albedo_color = AZUL_DO_REI
-	malha.material = m
-	pano.mesh = malha
-	pano.position = Vector3(-ca - 3.0, _h + 15.0, 0.0)
-	add_child(pano)
 
 
 ## Palácio, torreão, torre mais alta, alas e prédios do pátio.
@@ -304,6 +302,12 @@ func _mureta_da_rampa() -> void:
 		var q := Vector2(-cos(t - 0.02) * e.x * r, sin(t - 0.02) * e.y * r)
 		var y := MundoDados.altura_da_rampa(t)
 		_bloco(Vector3(p.x, y + 0.5, p.y), Vector3(0.9, 1.6, p.distance_to(q) + 0.2), atan2((q - p).x, (q - p).y))
+		# muro de arrimo do lado de dentro: esconde a emenda serrilhada entre o piso da rampa e a rocha
+		var ri := MundoDados.RAMPA_R0 - 0.012
+		var pi := Vector2(-cos(t) * e.x * ri, sin(t) * e.y * ri)
+		var qi := Vector2(-cos(t - 0.02) * e.x * ri, sin(t - 0.02) * e.y * ri)
+		var alto := minf(_h, y + 7.0) - (y - 2.0)
+		_sombras.append(Transform3D(Basis(Vector3.UP, atan2((qi - pi).x, (qi - pi).y)).scaled_local(Vector3(2.4, alto, pi.distance_to(qi) + 0.2)), Vector3(pi.x, y - 2.0 + alto / 2.0, pi.y)))
 		t -= 0.02
 
 
