@@ -167,6 +167,7 @@ const POVOADOS_LIVRES := [
 	{"id": "mercado_do_nascente", "nome": "Mercado do Nascente", "tipo": "mercado", "centro": Vector2(290, 78), "dir": Vector2(-0.259, 0.966), "lado": -1.0, "raio": 58.0, "liga": ""},
 	{"id": "quartel_da_guarda", "nome": "Quartel da Guarda", "tipo": "quartel", "centro": Vector2(212, -212), "dir": Vector2(0.707, 0.707), "lado": -1.0, "raio": 58.0, "liga": ""},
 	{"id": "estabulos_do_reino", "nome": "Estábulos do Reino", "tipo": "estabulo", "centro": Vector2(-78, 290), "dir": Vector2(-0.966, -0.259), "lado": -1.0, "raio": 58.0, "liga": ""},
+	{"id": "catedral_de_valdoria", "nome": "Catedral de Valdoria", "tipo": "catedral", "centro": Vector2(-172, -246), "dir": Vector2(0.819, -0.574), "lado": -1.0, "raio": 58.0, "liga": ""},
 	{"id": "guarita_sul", "nome": "Guarita do Portão Sul", "tipo": "guarita", "centro": Vector2(0, 448), "dir": Vector2(1, 0), "lado": -1.0, "raio": 9.0, "liga": ""},
 	{"id": "guarita_oeste", "nome": "Guarita do Portão Oeste", "tipo": "guarita", "centro": Vector2(-448, 0), "dir": Vector2(0, 1), "lado": -1.0, "raio": 9.0, "liga": ""},
 	{"id": "guarita_leste", "nome": "Guarita do Portão Leste", "tipo": "guarita", "centro": Vector2(448, 0), "dir": Vector2(0, 1), "lado": 1.0, "raio": 9.0, "liga": ""},

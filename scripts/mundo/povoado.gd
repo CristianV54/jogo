@@ -9,6 +9,7 @@ extends Node3D
 ##   "bairro": bairro do reino (dentro da muralha): uma rua com casas dos dois lados, poço, bancos e moradores;
 ##   "quartel": quartel da guarda com campo de treino (bonecos, alvos, soldados treinando, capitão);
 ##   "estabulo": estábulos do reino, com cavalos que dá para montar, feno, bebedouro e cavalariço;
+##   "catedral": a Catedral de Valdoria (nave, torre do sino, adro e sacristão);
 ##   "guarita": sentinelas de um portão da muralha, com braseiro;
 ##   "mercado": praça de mercado do reino: barracas em volta de uma fogueira, carroças, caixotes e mercadores.
 
@@ -58,6 +59,8 @@ func montar() -> void:
 			_estabulo()
 		"guarita":
 			_guarita()
+		"catedral":
+			_catedral()
 		_:
 			_posto_imperial()
 	if String(dados["tipo"]) != "guarita":   # a guarita não tem placa: fica em cima da estrada
@@ -428,6 +431,30 @@ func _estabulo() -> void:
 	_fogueira(_p(30.0, 30.0), 0.5)
 	_npc("Cavalariço", "Cavalariço", "dorn", _p(10.0, 32.0), PackedStringArray(["Cavalo do reino é manso. Chegue pelo lado, sem pressa, e monte."]),   # no pátio, longe do feno e da cerca (nascia encostado num sólido)
 		[{"fazer": "Interact", "seg": 6.0, "olhar": _p(8.0, 16.0)}, {"ir": _p(-10.0, 32.0), "vel": 1.1}, {"fazer": "Interact", "seg": 6.0, "olhar": _p(-22.0, 26.0)}, {"ir": _p(10.0, 32.0), "vel": 1.1}])
+
+
+## Catedral: a nave comprida de pedra clara com telhado de ardósia, a torre do sino na frente (a mais alta da cidade
+## depois do castelo), adro com bancos e um sacristão. É o prédio grande que se destaca no meio do casario.
+func _catedral() -> void:
+	var pedra := Pedra.material(Color(0.8, 0.78, 0.72))
+	var ardosia := VilaRefugio._mat(Color(0.3, 0.33, 0.45))
+	var giro := atan2(dir.x, dir.y)
+	var nave := _p(0.0, 34.0)
+	var y := _y(nave)
+	VilaRefugio._caixa(Vector3(nave.x, y + 9.0, nave.y), Vector3(34.0, 18.0, 16.0), pedra, true, giro)
+	VilaRefugio._telhado(Vector3(nave.x, y + 18.0 + 4.5, nave.y), Vector3(17.5, 9.0, 35.0), ardosia, giro + PI / 2.0)
+	var torre := _p(-22.0, 34.0)
+	VilaRefugio._caixa(Vector3(torre.x, y + 17.0, torre.y), Vector3(9.0, 34.0, 9.0), pedra, true, giro)
+	var ponta := VilaRefugio._cilindro(Vector3(torre.x, y + 34.0 + 7.0, torre.y), 0.1, 14.0, ardosia, false, 8)
+	(ponta.mesh as CylinderMesh).top_radius = 0.05
+	(ponta.mesh as CylinderMesh).bottom_radius = 6.2
+	var porta := _p(0.0, 25.7)
+	VilaRefugio._caixa(Vector3(porta.x, y + 2.6, porta.y), Vector3(4.0, 5.2, 0.5), VilaRefugio._mat(Color(0.3, 0.2, 0.12)), false, giro)
+	for u in [-8.0, 8.0]:
+		_movel("Bench", _p(u, 14.0), 90.0)
+		_fogueira(_p(u * 1.8, 20.0), 0.4)
+	_npc("Sacristão", "Sacristão da catedral", "oren", _p(4.0, 20.0), PackedStringArray(["O sino toca ao nascer e ao pôr do sol. Dá para ouvir até da feira do portão."]),
+		[{"esperar": 7.0, "anim": "Idle", "olhar": _p(0.0, 10.0)}, {"ir": _p(-8.0, 18.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": _p(0.0, 10.0)}, {"ir": _p(4.0, 20.0), "vel": 1.0}])
 
 
 ## Guarita de portão: duas sentinelas paradas, um braseiro e um banco. Fica do lado de dentro da muralha.

@@ -41,11 +41,15 @@ func montar() -> void:
 				continue
 			var andares := 3 if rng.randf() < (0.55 if r < 345.0 else 0.3) else 2
 			var alt := andares * 2.75 + rng.randf_range(0.0, 0.7)
+			var torre := rng.randf() < 0.035   # de vez em quando uma casa-torre de pedra, bem mais alta que as vizinhas
+			if torre:
+				alt = rng.randf_range(15.0, 21.0)
+				larg = minf(larg, 8.0)
 			var giro := -meio + PI / 2.0   # eixo X da casa ao longo da fileira; Z na direção do raio
 			var y := mundo.terreno.altura_em(p.x, p.y) - 0.3
 			var base := Basis(Vector3.UP, giro)
 			var setor := int(meio / TAU * SETORES) % SETORES
-			var estilo := "pedra" if rng.randf() < 0.28 else "enxaimel"
+			var estilo := "pedra" if torre or rng.randf() < 0.28 else "enxaimel"
 			var chave := "%d_%s" % [setor, estilo]
 			if not corpos.has(chave):
 				corpos[chave] = [[], []]

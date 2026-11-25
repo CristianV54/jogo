@@ -20,6 +20,7 @@ var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var tubarao: Tubarao
 var muralha: MuralhaDoReino
+var lavouras: Array = []   # campos em volta da muralha: [centro Vector2, meia-largura, meia-profundidade, giro, tipo 0 trigo / 1 horta / 2 terra arada]
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
 var capim: CapimDoMundo
@@ -101,7 +102,8 @@ func construir() -> void:
 	muralha.mundo = self
 	add_child(muralha)
 	muralha.montar()
-	etapa.call("pontes, mar e muralha do reino")
+	_lavouras()
+	etapa.call("pontes, mar, muralha e lavouras do reino")
 	_floresta()
 	_horizonte()
 	etapa.call("floresta e mapa")
@@ -629,6 +631,13 @@ func _floresta() -> void:
 			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
 			if ao_reino < 9.0:
 				continue   # dentro da muralha do reino (e encostado nela) não nasce mata: é cidade, casa colada em casa
+			var na_lavoura := false
+			for lav in lavouras:
+				if p.distance_to(lav[0]) < maxf(float(lav[1]), float(lav[2])) + 4.0:
+					na_lavoura = true
+					break
+			if na_lavoura:
+				continue
 			var no_povoado := false
 			for pid in povoados:
 				if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.05:
@@ -702,6 +711,63 @@ func _floresta() -> void:
 
 
 ## Montanhas em volta do mundo inteiro e chão até onde a vista alcança.
+## LAVOURAS DO REINO: fora da muralha, em volta da cidade, campos de trigo dourado, hortas e terra arada (é de onde a
+## cidade come). Cada campo é um talhão baixo com as leiras pintadas; não nasce em estrada, povoado, rio ou ladeira.
+func _lavouras() -> void:
+	var c: Vector2 = MundoDados.REINO["centro"]
+	var r: float = MundoDados.REINO["raio"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1212
+	var listas := [[], [], []]
+	for tentativa in 900:
+		if lavouras.size() >= 150:
+			break
+		var a := rng.randf() * TAU
+		var p := c + Vector2.from_angle(a) * rng.randf_range(r + 45.0, r + 420.0)
+		var ml := rng.randf_range(16.0, 30.0)
+		var mp := rng.randf_range(12.0, 22.0)
+		var bom := terreno.distancia_caminho(p.x, p.y) > maxf(ml, mp) + 8.0 and not terreno.na_agua(p.x, p.y, maxf(ml, mp) + 6.0)
+		for pid in povoados:
+			if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) + maxf(ml, mp) + 10.0:
+				bom = false
+		for lav in lavouras:
+			if p.distance_to(lav[0]) < maxf(float(lav[1]), float(lav[2])) + maxf(ml, mp) + 3.0:
+				bom = false
+		var h0 := terreno.altura_em(p.x, p.y)
+		for d in [Vector2(ml, 0), Vector2(-ml, 0), Vector2(0, mp), Vector2(0, -mp)]:
+			if absf(terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.2:
+				bom = false
+		if not bom:
+			continue
+		var tipo := 0 if rng.randf() < 0.55 else (1 if rng.randf() < 0.6 else 2)
+		var giro := a + PI / 2.0 + rng.randf_range(-0.25, 0.25)
+		lavouras.append([p, ml, mp, giro, tipo])
+		var alt: float = [1.0, 0.5, 0.25][tipo]
+		listas[tipo].append(Transform3D(Basis(Vector3.UP, giro).scaled_local(Vector3(ml * 2.0, alt + 1.4, mp * 2.0)), Vector3(p.x, h0 + alt / 2.0 - 0.7, p.y)))
+	var cores := [Color(0.86, 0.7, 0.3), Color(0.36, 0.52, 0.24), Color(0.38, 0.27, 0.17)]
+	for tipo in 3:
+		var caixa := BoxMesh.new()
+		var m := StandardMaterial3D.new()
+		m.albedo_color = cores[tipo]
+		m.albedo_texture = Fachadas.material("telhado").albedo_texture   # as mesmas fiadas servem de leiras
+		m.uv1_triplanar = true
+		m.uv1_scale = Vector3(6.0, 1.0, 6.0)
+		m.roughness = 1.0
+		caixa.material = m
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = caixa
+		mm.instance_count = (listas[tipo] as Array).size()
+		for i in mm.instance_count:
+			mm.set_instance_transform(i, listas[tipo][i])
+		var inst := MultiMeshInstance3D.new()
+		inst.name = ["Trigais", "Hortas", "TerraArada"][tipo]
+		inst.multimesh = mm
+		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(inst)
+	print("Mundo: ", lavouras.size(), " lavouras em volta do reino")
+
+
 func _horizonte() -> void:   # a ilha fica no meio do oceano: para lá do mar de ladrilhos, um fundo azul até o horizonte
 	var lim := MundoDados.LIMITES
 	var chao := MeshInstance3D.new()

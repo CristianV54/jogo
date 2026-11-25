@@ -64,8 +64,13 @@ func _rodar() -> void:
 	await _foto("10_pedra_da_muralha", 3.0)
 	_ver(Vector2(0, 285), Vector2(0, 120))        # a subida do castelo
 	await _foto("11_subida_do_castelo", 4.0)
-	_ver(Vector2(-330, 150), Vector2(0, 0))       # da cidade baixa: o rochedo e o castelo branco lá em cima
+	_ver(Vector2(-346, 200), Vector2(0, 0))       # da Rua do Anel: o castelo branco por cima dos telhados
 	await _foto("12_castelo_visto_da_cidade", 4.0)
+	var pcat: Vector2 = m.povoados["catedral_de_valdoria"]["centro"]
+	_ver(pcat - pcat.normalized() * 30.0, pcat + pcat.normalized() * 30.0)   # a Catedral
+	await _foto("12b_catedral", 4.0)
+	_ver(Vector2(120, 640), Vector2(260, 700))    # lavouras do lado de fora da muralha
+	await _foto("12c_lavouras", 4.0)
 	_ver(cc + Vector2(0, 122), cc + Vector2(0, 60))      # portão do castelo, no alto
 	await _foto("13_portao_do_castelo", 4.0)
 	_ver(cc + Vector2(0, -62), cc + Vector2(0, -100))   # Salão do Trono: o rei, o conselheiro e a guarda real

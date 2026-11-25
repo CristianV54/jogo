@@ -31,6 +31,8 @@ var _mat_obelisco: StandardMaterial3D
 var _vida_solon_antes := 0
 var _t_brasas := 8.0
 var _fase_vane := 0
+var _i_obelisco := 0   # o obelisco, os veios, a luz e os focos são os filhos de _i_obelisco até _f_obelisco (peças da história antiga)
+var _f_obelisco := 0
 
 
 func altura_em(x: float, z: float) -> float:
@@ -136,7 +138,7 @@ func _muralhas() -> void:
 	# que dão ao castelo a silhueta de castelo, vista de qualquer rua do reino por cima das muralhas.
 	var pedra_alta := Pedra.material(PEDRA_BRANCA)
 	for t in [Vector2(-34.0, -46.0), Vector2(34.0, -46.0), Vector2(-34.0, -122.0), Vector2(34.0, -122.0)]:
-		var alt := 36.0 if t.y < -100.0 else 30.0
+		var alt := 46.0 if t.y < -100.0 else 38.0
 		var yb := _y(t)
 		VilaRefugio._caixa(Vector3(t.x, yb + alt / 2.0, t.y), Vector3(9.0, alt, 9.0), pedra_alta, true)
 		VilaRefugio._caixa(Vector3(t.x, yb + alt + 0.5, t.y), Vector3(11.0, 1.0, 11.0), pedra_alta)   # cornija
@@ -306,6 +308,7 @@ func _salao() -> void:
 	VilaRefugio._caixa(Vector3(0, y + 1.6, TRONO.y - 2.0), Vector3(2.4, 1.6, 2.0), VilaRefugio._mat(Color(0.1, 0.1, 0.12)), true)   # trono
 	VilaRefugio._caixa(Vector3(0, y + 3.2, TRONO.y - 2.9), Vector3(2.4, 3.0, 0.4), VilaRefugio._mat(Color(0.1, 0.1, 0.12)))
 	# Grande Obelisco: atravessa o teto (aqui sem teto) atrás do trono, emitindo luz negra
+	_i_obelisco = get_child_count()
 	var corpo := MeshInstance3D.new()
 	var c := CylinderMesh.new()
 	c.top_radius = 0.7
@@ -357,6 +360,8 @@ func _salao() -> void:
 		elo.look_at_from_position((de + para) / 2.0, para, Vector3.UP)
 		f.corrente = elo
 
+	_f_obelisco = get_child_count()
+
 
 func _gente() -> void:
 	_npc("Garth", "Mestre de Armas", "res://scenes/personagens/dorn.tscn", Vector2(44.0, 72.0), PackedStringArray(["Treino a guarda real há vinte anos. Hoje ninguém mais quer lutar.", "O Vane chegou aqui pedindo emprego e eu o testei. Lutava como quem tem uma dor que não larga. Falei para o Imperador que era perigoso. Ele sorriu."]),
@@ -380,11 +385,13 @@ func _corte_do_rei() -> void:
 	for filho in get_children():   # todo soldado inimigo do castelo antigo sai: a guarda agora é do rei e não ataca
 		if filho is Inimigo:
 			filho.queue_free()
-	for f in focos:
-		if f.corrente:
-			f.corrente.queue_free()
-		f.queue_free()
+	var da_historia: Array[Node] = []
+	for i in range(_i_obelisco, _f_obelisco):   # o Grande Obelisco, os veios de luz, os focos e as correntes saem
+		da_historia.append(get_child(i))
+	for n in da_historia:
+		n.queue_free()
 	focos.clear()
+	_torre_de_menagem()
 	portao_salao.abrir()
 	_npc("Rei Aldren", "Rei de Valdoria", "res://scenes/personagens/solon.tscn", Vector2(0.0, -93.0), PackedStringArray(["Então você é o batedor do Pinhal de quem falam. Aproxime-se.", "Um reino se guarda com muralha, e se mantém com gente. Ande pelas ruas, veja como vive o meu povo.", "Há lobos nas estradas e coisa pior nas terras queimadas. Quem as limpa tem a gratidão da coroa."]),
 		[{"esperar": 8.0, "anim": "Idle", "olhar": Vector2(0.0, -60.0)}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": Vector2(6.0, -88.0)}])
@@ -395,6 +402,43 @@ func _corte_do_rei() -> void:
 			_npc("Guarda real", "Guarda do rei", "res://scenes/personagens/guarda_imperial.tscn", Vector2(lado * 7.0, -58.0 - k * 9.0), PackedStringArray(["A guarda real não conversa em serviço."]), [])
 	for p in [Vector2(-9.0, 100.0), Vector2(9.0, 100.0)]:   # sentinelas no portão do castelo, no alto da escadaria
 		_npc("Sentinela do castelo", "Sentinela", "res://scenes/personagens/guarda_imperial.tscn", p, PackedStringArray(["O rei recebe no Salão do Trono, ao fundo. Arma na bainha."]), [])
+
+
+## A TORRE DE MENAGEM: a torre mais alta do reino, atrás do trono, com quatro torrinhas nos cantos, telhado em ponta e a
+## bandeira do rei. Mais duas torres largas guardam o pátio. É o que se vê de qualquer rua da cidade.
+func _torre_de_menagem() -> void:
+	var pedra := Pedra.material(PEDRA_BRANCA)
+	var ardosia := VilaRefugio._mat(Color(0.2, 0.26, 0.5))
+	var torres := [[Vector2(0.0, -113.0), 13.0, 58.0], [Vector2(-52.0, -20.0), 14.0, 40.0], [Vector2(52.0, -20.0), 14.0, 40.0], [Vector2(-52.0, 60.0), 11.0, 30.0], [Vector2(52.0, 60.0), 11.0, 30.0]]
+	for t in torres:
+		var p: Vector2 = t[0]
+		var lado: float = t[1]
+		var alt: float = t[2]
+		var yb := _y(p)
+		VilaRefugio._caixa(Vector3(p.x, yb + alt / 2.0, p.y), Vector3(lado, alt, lado), pedra, true)
+		VilaRefugio._caixa(Vector3(p.x, yb + alt + 0.6, p.y), Vector3(lado + 2.4, 1.2, lado + 2.4), pedra)   # cornija
+		for dx in [-1.0, 1.0]:   # torrinhas dos cantos
+			for dz in [-1.0, 1.0]:
+				var q := Vector3(p.x + dx * lado / 2.0, yb + alt + 3.0, p.y + dz * lado / 2.0)
+				VilaRefugio._cilindro(q, 1.6, 7.0, pedra, false, 8)
+				_ponta(q + Vector3(0, 6.0, 0), 2.0, 5.0, ardosia)
+		_ponta(Vector3(p.x, yb + alt + 1.2 + lado * 0.6, p.y), lado * 0.62, lado * 1.2, ardosia)
+		var topo := yb + alt + 1.2 + lado * 1.2
+		VilaRefugio._caixa(Vector3(p.x, topo + 2.5, p.y), Vector3(0.25, 5.0, 0.25), VilaRefugio._mat(Color(0.2, 0.15, 0.1)))
+		VilaRefugio._caixa(Vector3(p.x + 1.9, topo + 4.0, p.y), Vector3(3.6, 2.2, 0.08), VilaRefugio._mat(COR_DRAKKAR))
+
+
+func _ponta(pos: Vector3, raio: float, altura: float, mat: Material) -> void:
+	var mi := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.05
+	cm.bottom_radius = raio
+	cm.height = altura
+	cm.radial_segments = 8
+	cm.material = mat
+	mi.mesh = cm
+	mi.position = pos
+	add_child(mi)
 
 
 # ---------------------------------------------------------------- duelo com Vane
