@@ -24,6 +24,7 @@ func montar() -> void:
 	_avenida()
 	_jardins()
 	_rochas_do_penhasco()
+	_alamedas()
 	_gente()
 	print("VidaDasRuas: fonte, ", lampioes, " lampiões e ", arvores, " árvores nos jardins, ", rochas, " rochas no paredão e ", npcs.size(), " pessoas circulando")
 
@@ -119,6 +120,41 @@ func _jardins() -> void:
 	inst.multimesh = mm
 	inst.material_override = FabricaNatureza.material()
 	add_child(inst)
+
+
+## Alamedas: fileiras de árvores dos dois lados das estradas que chegam aos três portões, nos últimos 320 m.
+func _alamedas() -> void:
+	var copas: Array[Transform3D] = []
+	for g in mundo.muralha.portoes:
+		var fora := g.normalized()
+		var lado := Vector2(-fora.y, fora.x)
+		var d := 26.0
+		while d < 320.0:
+			for s in [-1.0, 1.0]:
+				var q: Vector2 = g + fora * d + lado * s * 9.0
+				if mundo.terreno.distancia_caminho(q.x, q.y) < 5.0 or mundo.terreno.na_agua(q.x, q.y, 3.0):
+					continue
+				var perto_de_povoado := false
+				for pid in mundo.povoados:
+					if q.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]):
+						perto_de_povoado = true
+				if perto_de_povoado:
+					continue
+				copas.append(Transform3D(Basis(Vector3.UP, d).scaled_local(Vector3(1.1, 1.3, 1.1)), Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y)))
+				mundo.arvores.adicionar(q.x, q.y, 0.5)
+			d += 14.0
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = FabricaNatureza.folhosa()
+	mm.instance_count = copas.size()
+	for i in copas.size():
+		mm.set_instance_transform(i, copas[i])
+	var inst := MultiMeshInstance3D.new()
+	inst.name = "Alamedas"
+	inst.multimesh = mm
+	inst.material_override = FabricaNatureza.material()
+	add_child(inst)
+	arvores += copas.size()
 
 
 ## Relevo de rocha no paredão do penhasco: pedras grandes de tons diferentes cravadas na encosta (fora da rampa e do topo).

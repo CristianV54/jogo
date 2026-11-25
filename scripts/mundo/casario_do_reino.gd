@@ -21,6 +21,9 @@ var lotes: Array = []   # um por casa: {"p": Vector2, "larg": float, "prof": flo
 var quarteiroes := 0
 var janelas_acesas := 0
 var forjas := 0
+var floreiras := 0
+var arvores_de_quintal := 0
+var _copas: Array[Transform3D] = []
 var _reservas: Array[Rect2] = []
 var _pecas := {}        # "pedaço|malha|material" -> [transformações, cores]
 var _solidos: StaticBody3D
@@ -64,10 +67,30 @@ func montar() -> void:
 					x += larg
 			if usado:
 				quarteiroes += 1
+				var zq := z0 + frente_n + (z1 - frente_s - z0 - frente_n) / 2.0   # árvores no quintal do meio do quarteirão: copas verdes entre os telhados
+				var xq := x0 + _rng.randf_range(4.0, 9.0)
+				while xq < x1 - 4.0:
+					if _rng.randf() < 0.55 and _livre(xq - 1.0, zq - 1.0, xq + 1.0, zq + 1.0):
+						var esc := _rng.randf_range(0.55, 0.8)
+						_copas.append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled_local(Vector3(esc, esc * 1.25, esc)), Vector3(xq, mundo.terreno.altura_em(xq, zq), zq)))
+						arvores_de_quintal += 1
+					xq += _rng.randf_range(9.0, 16.0)
 			x0 = x1 + _rng.randf_range(4.8, 7.2)   # travessa
 		z0 = z1 + _rng.randf_range(5.4, 7.4)       # rua
 	for chave in _pecas:
 		_multimesh(String(chave))
+	var mmq := MultiMesh.new()
+	mmq.transform_format = MultiMesh.TRANSFORM_3D
+	mmq.mesh = FabricaNatureza.folhosa()
+	mmq.instance_count = _copas.size()
+	for i in _copas.size():
+		mmq.set_instance_transform(i, _copas[i])
+	var quintais := MultiMeshInstance3D.new()
+	quintais.name = "ArvoresDeQuintal"
+	quintais.multimesh = mmq
+	quintais.material_override = FabricaNatureza.material()
+	add_child(quintais)
+	print("CasarioDoReino: ", floreiras, " floreiras, ", arvores_de_quintal, " árvores de quintal")
 	print("CasarioDoReino: ", lotes.size(), " casas em ", quarteiroes, " quarteirões, ", janelas_acesas, " janelas acesas, ", forjas, " forjas")
 
 
@@ -125,6 +148,11 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 			if _rng.randf() < 0.16:
 				_peca(pedaco, "caixa", "luz", Vector3(p.x + s * 0.32 * larg, y + 0.56 * (PISO + 0.3), p.y + lado * (prof / 2.0 + 0.03)), Vector3(0.125 * larg, 0.3 * (PISO + 0.3), 0.06), 0.0, Color(1.0, 0.8, 0.42))
 				janelas_acesas += 1
+	if absf(p.x) < 26.0 and p.y > 120.0 and _rng.randf() < 0.8:   # casas da avenida do sul: loja no térreo, com toldo listrado sobre a porta
+		var para_a_avenida := -signf(p.x)
+		var cor_toldo: Color = [Color(0.75, 0.2, 0.18), Color(0.2, 0.4, 0.62), Color(0.85, 0.7, 0.3), Color(0.3, 0.55, 0.3)][_rng.randi() % 4]
+		for k in 4:
+			_peca(pedaco, "caixa", "liso", Vector3(p.x + para_a_avenida * (larg / 2.0 + 0.35 + k * 0.4), y + PISO + 0.1 - k * 0.14, p.y), Vector3(0.42, 0.08, prof * 0.7), 0.0, cor_toldo if k % 2 == 0 else Color(0.95, 0.93, 0.88))
 	var forja := pisos == 1 and _rng.randf() < 0.75   # casa térrea de ferreiro: boca de fornalha acesa e chaminé grossa
 	if forja:
 		_peca(pedaco, "caixa", "luz", Vector3(p.x, y + 1.0, p.y + prof / 2.0 + 0.04), Vector3(1.8, 1.3, 0.08), 0.0, Color(1.0, 0.45, 0.12))
@@ -141,6 +169,12 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 						var yj := topo + 0.22 + alt * (1.0 - (0.25 + 0.5 * float(andar % 2)))
 						_peca(pedaco, "caixa", "luz", Vector3(p.x + coluna * (larg + 0.4), yj, p.y + lado * ((prof + 0.4) / 2.0 + 0.03)), Vector3(0.1 * (larg + 0.4), alt / fiadas * 0.42, 0.06), 0.0, Color(1.0, 0.8, 0.42))
 						janelas_acesas += 1
+					elif (pisos - 1 == 1 or andar < 2) and _rng.randf() < 0.22:   # floreira debaixo da janela: caixote de madeira com flores
+						var yf: float = topo + 0.22 + alt * (1.0 - (0.25 + 0.5 * float(andar % 2))) - alt / 2.0 * 0.26
+						var zf: float = p.y + lado * ((prof + 0.4) / 2.0 + 0.18)
+						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf, zf), Vector3(0.13 * (larg + 0.4), 0.2, 0.3), 0.0, Color(0.36, 0.24, 0.14))
+						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf + 0.2, zf), Vector3(0.12 * (larg + 0.4), 0.22, 0.26), 0.0, [Color(0.85, 0.2, 0.25), Color(0.95, 0.75, 0.2), Color(0.8, 0.4, 0.75), Color(0.95, 0.95, 0.9)][_rng.randi() % 4])
+						floreiras += 1
 		topo += 0.22 + alt
 	_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + 0.11, p.y), Vector3(larg + 0.8, 0.22, prof + 0.8), 0.0, Color(0.3, 0.2, 0.13))
 	topo += 0.22

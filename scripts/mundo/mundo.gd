@@ -336,6 +336,8 @@ func _regiao_mais_perto(p: Vector2) -> String:
 
 ## O ar de quem anda entre regiões é o da região mais próxima.
 func estilo_em(p: Vector3) -> Dictionary:
+	if MundoDados.ate_a_muralha(p.x, p.z) < 120.0:   # Valdoria: ar limpo e dourado, para a cidadela se ver de qualquer rua
+		return {"neblina": Color(0.86, 0.8, 0.68), "densidade": 0.0009, "sol": Color(1.0, 0.93, 0.8), "energia": 1.25, "ambiente": 1.0, "topo": Color(0.3, 0.5, 0.82), "horizonte": Color(0.86, 0.8, 0.7)}
 	return estilos.get(_regiao_mais_perto(Vector2(p.x, p.z)), {})
 
 
@@ -348,6 +350,10 @@ func nome_do_lugar(p: Vector3) -> String:
 	for pid in povoados:
 		if v.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]):
 			return povoados[pid]["nome"]
+	if float(MundoDados.penhasco(p.x, p.z)[2]) <= 1.0:
+		return "Cidadela de Valdoria"
+	if MundoDados.ate_a_muralha(p.x, p.z) < 0.0:
+		return "Valdoria"
 	var info := info_estrada(v)
 	if not info.is_empty() and float(info["distancia"]) < 70.0:
 		return MundoDados.estrada(info["id"])["nome"]

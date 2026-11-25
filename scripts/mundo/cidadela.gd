@@ -24,6 +24,7 @@ var _corpo: StaticBody3D
 var _caixas: Array[Transform3D] = []
 var _cilindros: Array[Transform3D] = []
 var _pontas: Array[Transform3D] = []
+var _frestas: Array[Transform3D] = []
 var _predios: Array = [[], []]
 var _telhados: Array = [[], []]
 var _h := MundoDados.PENHASCO_ALTURA
@@ -54,6 +55,9 @@ func montar() -> void:
 	ardosia.albedo_color = ARDOSIA
 	ardosia.roughness = 0.9
 	_multimesh("Pontas", cone, ardosia, _pontas)
+	var escuro := StandardMaterial3D.new()
+	escuro.albedo_color = Color(0.1, 0.11, 0.16)
+	_multimesh("Frestas", BoxMesh.new(), escuro, _frestas)
 	_multimesh("Predios", BoxMesh.new(), Fachadas.material("pedra"), _predios[0], _predios[1])
 	_multimesh("Telhados", PrismMesh.new(), Fachadas.material("telhado"), _telhados[0], _telhados[1])
 	print("Cidadela: ", torres, " torres (a mais alta com o topo a ", snappedf(topo_mais_alto, 0.1), " m acima da cidade), ", predios, " prédios, ", npcs.size(), " pessoas")
@@ -109,6 +113,12 @@ func _torre(x: float, z: float, y0: float, raio: float, altura: float, ameias :=
 	cs.shape = forma
 	cs.position = Vector3(x, y0 + altura / 2.0, z)
 	_corpo.add_child(cs)
+	var andar := 5.0   # seteiras: frestas escuras subindo em volta do fuste, uma a cada 5 m, cada andar virado um pouco
+	while andar < altura - 2.0:
+		for k in 3:
+			var a := andar * 0.9 + TAU * k / 3.0
+			_frestas.append(Transform3D(Basis(Vector3.UP, -a + PI / 2.0).scaled_local(Vector3(0.5, 1.9, 0.3)), Vector3(x + cos(a) * (raio + 0.02), y0 + andar, z + sin(a) * (raio + 0.02))))
+		andar += 5.0
 	torres += 1
 	topo_mais_alto = maxf(topo_mais_alto, topo)
 	return topo
@@ -187,6 +197,16 @@ func _palacio_e_torres() -> void:
 	_torre(_pl(180), _pl(200), _h, _pl(60) / 2.0, 290 * ALTO)
 	_predio(_pl(-270), _pl(-190), _pl(120), _pl(70), _h, 90 * ALTO, 5.5)                                 # quartel
 	_predio(_pl(-260), _pl(200), _pl(120), _pl(70), _h, 84 * ALTO, 5.5)                                  # cavalariça
+	for s in [-1.0, 1.0]:   # estandartes do rei pendurados na fachada do palácio, virados para o pátio
+		var pano := MeshInstance3D.new()
+		var malha := BoxMesh.new()
+		malha.size = Vector3(0.1, 12.0, 3.2)
+		var mp := StandardMaterial3D.new()
+		mp.albedo_color = AZUL_DO_REI
+		malha.material = mp
+		pano.mesh = malha
+		pano.position = Vector3(_pl(40) - _pl(300) / 2.0 - 0.12, _h + 250 * ALTO - 8.0, _pl(-50) + s * 8.0)
+		add_child(pano)
 	var poco := Vector3(_pl(-300), _h, _pl(-70))
 	_cilindros.append(Transform3D(Basis.from_scale(Vector3(3.6, 1.4, 3.6)), poco + Vector3(0, 0.7, 0)))
 	_caixa_solida(poco + Vector3(0, 0.7, 0), Vector3(3.2, 1.4, 3.2))
