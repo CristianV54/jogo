@@ -19,10 +19,11 @@ func _rodar() -> void:
 	jogo.hud.mapa.marcar(Vector2(0, 320))   # destino: portão sul de Valdoria
 	await _foto("mapa_com_destino")
 	jogo.hud.mapa._aproximar(4.0, root.get_viewport().get_visible_rect().size / 2.0)
-	jogo.hud.mapa.centro = Vector2(-150, 700)
+	jogo.hud.mapa.centro = Vector2(-100, 700)
 	await _foto("mapa_zoom_4x_sul_do_reino")
 	jogo._alternar_mapa()
-	jogo.jogador.global_position = Vector3(-225, jogo.mundo.chao_em(-225, 1300) + 1.5, 1300)   # fora do Refúgio, na estrada do reino
+	var na_estrada: Vector2 = jogo.mundo.ponto_na_estrada("reino_sul", 150.0)[0]   # fora do Refúgio, na estrada do reino
+	jogo.jogador.global_position = Vector3(na_estrada.x, jogo.mundo.chao_em(na_estrada.x, na_estrada.y) + 1.5, na_estrada.y)
 	jogo.camera.yaw = 0.0
 	await _foto("destino_no_jogo", 4.0)
 	quit(0)
