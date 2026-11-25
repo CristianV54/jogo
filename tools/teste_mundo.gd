@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("8 regiões, 31 estradas, 114 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 31 and m.povoados.size() == 114 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("8 regiões, 31 estradas, 117 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 31 and m.povoados.size() == 117 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
@@ -33,6 +33,23 @@ func _rodar() -> void:
 	marcar("O reino tem muralha com 3 portões (sul, oeste, leste)", m.muralha.portoes.size() == 3, str(m.muralha.portoes))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
 	marcar("O reino tem casas de rua enchendo os vãos (100 ou mais)", casario.casas.size() >= 100, str(casario.casas.size()))
+	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
+	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
+	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado
+	var montaveis := 0
+	for a in estabulo.animais:
+		if a.montaria != null:
+			montaveis += 1
+	marcar("Estábulos do Reino: 4 cavalos que dá para montar", montaveis == 4, str(montaveis))
+	var mercado := m.povoados["mercado_do_poente"]["no"] as Povoado
+	jogo.jogador.coletar("couro", 1)
+	var carne_antes := int(jogo.jogador.inventario.get("carne", 0))
+	(mercado.trocas[1] as Gatilho).ao_usar.call(mercado.trocas[1])
+	marcar("Mercado: trocar 1 couro rende 3 carnes", int(jogo.jogador.inventario.get("carne", 0)) == carne_antes + 3 and int(jogo.jogador.inventario.get("couro", 0)) == 0, str(jogo.jogador.inventario))
+	var sentinelas := 0
+	for g in ["guarita_sul", "guarita_oeste", "guarita_leste"]:
+		sentinelas += (m.povoados[g]["no"] as Povoado).npcs.size()
+	marcar("Sentinelas nos 3 portões (2 em cada)", sentinelas == 6, str(sentinelas))
 	marcar("Todo povoado tem gente trabalhando", sem_gente.is_empty(), str(sem_gente))
 	var fazendeiros := get_nodes_in_group("npcs").filter(func(n): return n.papel == "Lavrador").size()
 	marcar("Fazendeiros nos campos (4 ou mais)", fazendeiros >= 4, str(fazendeiros))

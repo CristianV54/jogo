@@ -112,10 +112,7 @@ func _bandeira(pos: Vector3, giro: float) -> void:
 
 func _multimesh(nome: String, lista: Array[Transform3D]) -> void:
 	var caixa := BoxMesh.new()
-	var m := StandardMaterial3D.new()
-	m.albedo_color = COR_PEDRA
-	m.roughness = 0.95
-	caixa.material = m
+	caixa.material = Pedra.material(COR_PEDRA)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = caixa

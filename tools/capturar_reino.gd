@@ -27,6 +27,12 @@ func _por(q: Vector2, yaw: float) -> void:
 	jogo.camera.yaw = yaw
 
 
+## Põe o Torin em `p` com a câmera olhando para `alvo`.
+func _ver(p: Vector2, alvo: Vector2) -> void:
+	var d := alvo - p
+	_por(p, atan2(-d.x, -d.y))
+
+
 func _rodar() -> void:
 	DirAccess.make_dir_recursive_absolute("res://tools/capturas/reino")
 	while jogo.area_nome != "refugio_do_pinhal" or jogo._trocando:
@@ -54,6 +60,18 @@ func _rodar() -> void:
 	await _foto("6b_portao_oeste_por_fora", 4.0)
 	_por(Vector2(120, 395), -PI / 2.0)    # Rua do Anel, ao sul: fileiras de casas
 	await _foto("6c_rua_do_anel_sul", 4.0)
+	var rc: Vector2 = MundoDados.REINO["centro"]
+	for item in [["6d_quartel_campo_de_treino", "quartel_da_guarda", 1.0, 26.0], ["6e_estabulos_do_reino", "estabulos_do_reino", -1.0, 24.0], ["6f_guarita_do_portao_oeste", "guarita_oeste", -1.0, 22.0]]:
+		var cc: Vector2 = m.povoados[item[1]]["centro"]
+		var para_dentro := (rc - cc).normalized() * float(item[2])   # para onde o lugar se estende
+		_ver(cc - para_dentro * float(item[3]), cc + para_dentro * 20.0)
+		await _foto(item[0], 4.0)
+	_ver(Vector2(-60, 548), Vector2(-60, 562))   # colado na muralha: a textura da pedra
+	await _foto("6g_pedra_da_muralha_de_perto", 3.0)
+	_ver(Vector2(0, 330), Vector2(0, -300))      # da Rua do Anel, ao sul: as torres do castelo por cima de Valdoria
+	await _foto("6h_castelo_visto_da_rua", 4.0)
+	_ver(Vector2(0, -90), Vector2(0, -330))      # ao pé do castelo
+	await _foto("6i_castelo_de_perto", 4.0)
 	# vista aérea: liga a vista do reino inteiro (no jogo, o que está a mais de 800 m some)
 	_por(Vector2(0, 380), 0.0)
 	await create_timer(1.0).timeout

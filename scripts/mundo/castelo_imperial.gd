@@ -128,6 +128,26 @@ func _muralhas() -> void:
 		cone.mesh = cm
 		cone.position = Vector3(t.x, _y(t) + 20.0 + 4.5, t.y)
 		add_child(cone)
+	# Torres de menagem: quatro torres altas nos cantos do Salão do Trono, com telhado em ponta e bandeira no topo. São elas
+	# que dão ao castelo a silhueta de castelo, vista de qualquer rua do reino por cima das muralhas.
+	var pedra_alta := Pedra.material(Color(0.36, 0.34, 0.38))
+	for t in [Vector2(-34.0, -46.0), Vector2(34.0, -46.0), Vector2(-34.0, -122.0), Vector2(34.0, -122.0)]:
+		var alt := 36.0 if t.y < -100.0 else 30.0
+		var yb := _y(t)
+		VilaRefugio._caixa(Vector3(t.x, yb + alt / 2.0, t.y), Vector3(9.0, alt, 9.0), pedra_alta, true)
+		VilaRefugio._caixa(Vector3(t.x, yb + alt + 0.5, t.y), Vector3(11.0, 1.0, 11.0), pedra_alta)   # cornija
+		var ponta := MeshInstance3D.new()
+		var pm := CylinderMesh.new()
+		pm.top_radius = 0.1
+		pm.bottom_radius = 6.6
+		pm.height = 12.0
+		pm.radial_segments = 8
+		pm.material = ardosia
+		ponta.mesh = pm
+		ponta.position = Vector3(t.x, yb + alt + 7.0, t.y)
+		add_child(ponta)
+		VilaRefugio._caixa(Vector3(t.x, yb + alt + 15.5, t.y), Vector3(0.2, 5.0, 0.2), VilaRefugio._mat(Color(0.2, 0.15, 0.1)))   # mastro
+		VilaRefugio._caixa(Vector3(t.x + 1.5, yb + alt + 16.8, t.y), Vector3(2.8, 1.8, 0.08), VilaRefugio._mat(COR_DRAKKAR))   # bandeira
 	for x in range(-60, 61, 20):
 		if x == 0:
 			continue   # no eixo do portão não: o mastro ficava no meio da entrada e barrava quem vinha reto pela escadaria

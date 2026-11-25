@@ -7,6 +7,9 @@ extends Node3D
 ##   "posto": acampamento rebelde com tendas, fogueira e soldados do Vane;
 ##   "posto_imperial": estalagem da estrada imperial, carroças, mercador e guardas imperiais;
 ##   "bairro": bairro do reino (dentro da muralha): uma rua com casas dos dois lados, poço, bancos e moradores;
+##   "quartel": quartel da guarda com campo de treino (bonecos, alvos, soldados treinando, capitão);
+##   "estabulo": estábulos do reino, com cavalos que dá para montar, feno, bebedouro e cavalariço;
+##   "guarita": sentinelas de um portão da muralha, com braseiro;
 ##   "mercado": praça de mercado do reino: barracas em volta de uma fogueira, carroças, caixotes e mercadores.
 
 const REF := preload("res://scripts/mundo/refugio_do_pinhal.gd")
@@ -18,6 +21,8 @@ var dir := Vector2.RIGHT      # sentido da estrada
 var para_longe := Vector2.UP  # da estrada para dentro do povoado
 var npcs: Array[Npc] = []
 var animais: Array[AnimalVila] = []
+var trocas: Array[Gatilho] = []
+var bonecos: Array[BonecoDeTreino] = []
 var _solidos: StaticBody3D
 var _rng := RandomNumberGenerator.new()
 
@@ -47,9 +52,16 @@ func montar() -> void:
 			_bairro()
 		"mercado":
 			_mercado()
+		"quartel":
+			_quartel()
+		"estabulo":
+			_estabulo()
+		"guarita":
+			_guarita()
 		_:
 			_posto_imperial()
-	_placa(_p(-6.0, -float(dados["raio"]) * 0.45), String(dados["nome"]))
+	if String(dados["tipo"]) != "guarita":   # a guarita não tem placa: fica em cima da estrada
+		_placa(_p(-6.0, -float(dados["raio"]) * 0.45), String(dados["nome"]))
 
 
 # ---------------------------------------------------------------- ajudantes
@@ -336,6 +348,11 @@ func _mercado() -> void:
 		var q := _p(-26.0 + k * 52.0, 8.0)
 		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(2.2, 0.8, 3.6), VilaRefugio._mat(Color(0.4, 0.28, 0.16)), true, atan2(dir.x, dir.y))
 		VilaRefugio._caixa(Vector3(q.x, _y(q) + 1.6, q.y), Vector3(1.4, 0.9, 1.6), VilaRefugio._mat(Color(0.45, 0.35, 0.2)))
+	var ofertas := [["2 lãs por 2 carnes", "la", 2, "carne", 2], ["1 couro por 3 carnes", "couro", 1, "carne", 3], ["1 presa por 2 maçãs", "presa", 1, "maca", 2], ["2 maçãs por 1 carne", "maca", 2, "carne", 1]]
+	for k in 4:   # comércio de verdade: em quatro barracas dá para trocar o que se caça por comida (E para trocar)
+		var a := TAU * (k * 2) / 8.0
+		var o: Array = ofertas[k]
+		_troca(meio + Vector2(cos(a), sin(a)) * 9.2, "Trocar %s" % String(o[0]), o[1], o[2], o[3], o[4])
 	var falas := [["Mercador de panos", "Lã, linho e couro curtido. Pago bem por pele de lobo."], ["Mercadora de sal", "Sal, ervas e peixe seco. Sem sal a carne não dura a viagem."],
 		["Mercador de ferragens", "Prego, ferradura e lâmina cega. Afiar é com o ferreiro."], ["Mercadora de frutas", "Maçã do Pomar Alto, colhida ontem. Prove uma."]]
 	var modelos := ["soldado_rebelde", "tessa", "orin", "mira"]
@@ -344,6 +361,80 @@ func _mercado() -> void:
 		var q := meio + Vector2(cos(a), sin(a)) * 11.0
 		_npc(String(falas[k][0]), "Mercador", modelos[k], q, PackedStringArray([String(falas[k][1])]),
 			[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": meio}, {"esperar": 4.0, "anim": "Idle", "olhar": meio + Vector2(cos(a), sin(a)) * 15.0}])
+
+
+## Ponto de troca numa barraca: gasta o item de entrada do inventário do Torin e entrega o de saída.
+func _troca(p: Vector2, texto: String, entrada: String, qin: int, saida: String, qout: int) -> void:
+	var g := Gatilho.new()
+	g.texto = texto
+	g.raio = 1.4
+	g.uma_vez = false
+	g.position = Vector3(p.x, _y(p), p.y)
+	add_child(g)
+	g.ao_usar = func(este: Gatilho) -> void:
+		este.usado = false
+		var jog := get_tree().get_first_node_in_group("jogador") as Jogador
+		if jog == null or not jog.gastar_item(entrada, qin):
+			GerenciadorMissoes.instancia.aviso.emit("Falta material: precisa de %d %s." % [qin, Itens.nome(entrada)], 2.5)
+			return
+		jog.coletar(saida, qout)
+		GerenciadorMissoes.instancia.aviso.emit("Troca feita: %d %s por %d %s." % [qin, Itens.nome(entrada), qout, Itens.nome(saida)], 2.5)
+	trocas.append(g)
+
+
+## Soldado da guarda do reino: gente (não ataca o Torin), com o corpo do guarda imperial.
+func _soldado(nome_s: String, papel: String, p: Vector2, fala: String, rotina: Array) -> Npc:
+	return _npc(nome_s, papel, "guarda_imperial", p, PackedStringArray([fala]), rotina)
+
+
+## Quartel da guarda: o prédio, o campo de treino com seis bonecos e três alvos de palha, soldados treinando golpe,
+## o capitão olhando, braseiros e bandeiras.
+func _quartel() -> void:
+	_casa("Quartel", _p(0.0, 44.0), 5, 3, REF.ESTILO_PEDRA, "deposito")
+	_casa("Arsenal", _p(-30.0, 42.0), 3, 3, REF.ESTILO_PEDRA, "deposito")
+	for k in 6:   # bonecos de treino em duas filas
+		var q := _p(-15.0 + (k % 3) * 15.0, 8.0 + (k / 3) * 12.0)
+		var b := BonecoDeTreino.new()
+		b.position = Vector3(q.x, _y(q), q.y)
+		add_child(b)
+		bonecos.append(b)
+	for k in 3:   # alvos de palha para arco
+		var q := _p(26.0, 6.0 + k * 9.0)
+		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(0.2, 1.8, 0.2), VilaRefugio._mat(Color(0.3, 0.2, 0.11)), true)
+		var alvo := VilaRefugio._cilindro(Vector3(q.x, _y(q) + 1.7, q.y), 0.8, 0.25, VilaRefugio._mat(Color(0.86, 0.74, 0.4)), false, 14)
+		alvo.rotation = Vector3(0.0, atan2(dir.x, dir.y), PI / 2.0)
+		var miolo := VilaRefugio._cilindro(Vector3(q.x, _y(q) + 1.7, q.y), 0.3, 0.28, VilaRefugio._mat(Color(0.7, 0.14, 0.1)), false, 12)
+		miolo.rotation = alvo.rotation
+	for u in [-24.0, 24.0]:
+		_fogueira(_p(u, 28.0), 0.6)
+	for k in 3:   # soldados treinando, cada um no seu boneco
+		var q := _p(-15.0 + k * 15.0, 5.6)
+		_soldado("Soldado da guarda", "Soldado", q, ["Cem golpes antes do almoço. O capitão conta.", "O boneco não reclama. O capitão, sim.", "Dizem que lá fora tem lobo do tamanho de um potro."][k],
+			[{"fazer": "Sword_Attack", "seg": 8.0, "olhar": _p(-15.0 + k * 15.0, 8.0)}, {"esperar": 3.0, "anim": "Idle", "olhar": _p(-15.0 + k * 15.0, 8.0)}])
+	_soldado("Capitão da guarda", "Capitão", _p(0.0, 30.0), "Aqui se treina até o braço cair. Quer tentar? Os bonecos de trás estão livres.",
+		[{"esperar": 6.0, "anim": "Idle", "olhar": _p(0.0, 10.0)}, {"ir": _p(-18.0, 30.0), "vel": 1.1}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": _p(-15.0, 10.0)}, {"ir": _p(18.0, 30.0), "vel": 1.1}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(15.0, 10.0)}, {"ir": _p(0.0, 30.0), "vel": 1.1}])
+
+
+## Estábulos do reino: o galpão, um curral grande com quatro cavalos (dá para montar), feno, bebedouro e o cavalariço.
+func _estabulo() -> void:
+	_casa("Estabulo", _p(-22.0, 40.0), 5, 3, REF.ESTILO_MADEIRA, "deposito")
+	_casa("CasaDoCavalarico", _p(24.0, 42.0), 3, 2, REF.ESTILO_MADEIRA)
+	var cavalo := ["cavalo", "Cavalo do reino", "cavalo", 1.0, {"carne": [2, 3], "couro": [1, 1]}]
+	_curral(_p(0.0, 14.0), 30.0, 16.0, [cavalo, cavalo, cavalo, cavalo])
+	_feno(_p(-22.0, 26.0))
+	_feno(_p(22.0, 28.0))
+	_bebedouro(_p(8.0, 14.0))
+	_fogueira(_p(30.0, 30.0), 0.5)
+	_npc("Cavalariço", "Cavalariço", "dorn", _p(18.0, 26.0), PackedStringArray(["Cavalo do reino é manso. Chegue pelo lado, sem pressa, e monte."]),
+		[{"fazer": "Interact", "seg": 6.0, "olhar": _p(8.0, 16.0)}, {"ir": _p(-18.0, 27.0), "vel": 1.1}, {"fazer": "Interact", "seg": 6.0, "olhar": _p(-22.0, 26.0)}, {"ir": _p(18.0, 26.0), "vel": 1.1}])
+
+
+## Guarita de portão: duas sentinelas paradas, um braseiro e um banco. Fica do lado de dentro da muralha.
+func _guarita() -> void:
+	_fogueira(_p(9.0, 3.0), 0.6)      # tudo de um lado e do outro da estrada: o meio fica livre para passar
+	_movel("Bench", _p(11.0, 5.0), 90.0)
+	_soldado("Sentinela do portão", "Sentinela", _p(-6.0, 0.0), "Portão aberto do nascer ao pôr do sol. Arma na bainha dentro da muralha.", [])
+	_soldado("Sentinela do portão", "Sentinela", _p(6.0, 0.0), "Passe. E não mexa com os cavalos do reino sem falar com o cavalariço.", [])
 
 
 ## Pescador: cabana de madeira sobre palafitas, perto da água, com doca, barco, redes e caixas de peixe. A doca sai da
