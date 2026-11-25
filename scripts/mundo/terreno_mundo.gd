@@ -184,6 +184,12 @@ func _altura_crua(x: float, z: float) -> float:
 	if melhor < 7.0:
 		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo)) * smoothstep(-30.0, 160.0, eixo.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
+	for id in MundoDados.REGIOES:   # morro do Castelo: o chão sobe até a altura da região em 80 m (ladeira de pedra em volta, a cidade embaixo)
+		var alto := MundoDados.altura(id)
+		if alto > 0.0:
+			var rr := MundoDados.retangulo(id)
+			var fora := Vector2(maxf(maxf(rr.position.x - x, x - rr.end.x), 0.0), maxf(maxf(rr.position.y - z, z - rr.end.y), 0.0)).length()
+			h += alto * smoothstep(80.0, 0.0, fora)
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
 		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))

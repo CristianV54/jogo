@@ -59,6 +59,9 @@ func _ready() -> void:
 	_novo_spawn("Entrada", Vector3(0, 0, 138), Vector3(0, 0, 100))
 	_novo_spawn("Principal", Vector3(0, 0, 138), Vector3(0, 0, 100))
 	_portal(Vector3(0, 0, 146), "valdoria", "DoCastelo", 16.0)
+	if not Jogo.historia:
+		_corte_do_rei()
+		return
 	var m := GerenciadorMissoes.instancia
 	if m:
 		m.missao_concluida.connect(_ao_missao_concluida)
@@ -363,6 +366,34 @@ func _gente() -> void:
 		[{"esperar": 7.0, "anim": "Idle_Talking", "olhar": Vector2(0.0, 60.0)}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(0.0, 60.0)}])
 	_npc("Lis", "Criada do castelo", "res://scenes/personagens/cativa.tscn", Vector2(-20.0, 40.0), PackedStringArray(["Levo toalhas para a ala do Imperador. Ele não sai de lá."]),
 		[{"ir": Vector2(-20.0, 20.0), "vel": 1.4}, {"esperar": 3.0, "anim": "Interact", "olhar": Vector2(-20.0, 14.0)}, {"ir": Vector2(-20.0, 40.0), "vel": 1.4}, {"esperar": 3.0, "anim": "Idle", "olhar": Vector2(0.0, 40.0)}])
+
+
+# ---------------------------------------------------------------- a corte (jogo sem a história antiga)
+
+## Sem a história, o castelo é a casa do rei: nada de duelo, de focos de energia nem de carcereiro. O Salão do Trono fica
+## aberto, o rei recebe o Torin diante do trono, com o conselheiro ao lado e a guarda real perfilada no tapete.
+func _corte_do_rei() -> void:
+	set_process(false)
+	if vane and is_instance_valid(vane):
+		vane.queue_free()
+	var carcereiro := get_node_or_null("Carcereiro")
+	if carcereiro:
+		carcereiro.queue_free()
+	for f in focos:
+		if f.corrente:
+			f.corrente.queue_free()
+		f.queue_free()
+	focos.clear()
+	portao_salao.abrir()
+	_npc("Rei Aldren", "Rei de Valdoria", "res://scenes/personagens/solon.tscn", Vector2(0.0, -93.0), PackedStringArray(["Então você é o batedor do Pinhal de quem falam. Aproxime-se.", "Um reino se guarda com muralha, e se mantém com gente. Ande pelas ruas, veja como vive o meu povo.", "Há lobos nas estradas e coisa pior nas terras queimadas. Quem as limpa tem a gratidão da coroa."]),
+		[{"esperar": 8.0, "anim": "Idle", "olhar": Vector2(0.0, -60.0)}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": Vector2(6.0, -88.0)}])
+	_npc("Conselheiro Meren", "Conselheiro do rei", "res://scenes/personagens/oren.tscn", Vector2(7.0, -90.0), PackedStringArray(["Fale com respeito e em poucas palavras. Sua Majestade recebe muita gente.", "As contas do reino fecham com o comércio das feiras. Proteja as estradas e todos ganham."]),
+		[{"esperar": 7.0, "anim": "Idle_Talking", "olhar": Vector2(0.0, -93.0)}, {"esperar": 5.0, "anim": "Idle", "olhar": Vector2(0.0, -60.0)}])
+	for k in 4:   # guarda real perfilada dos dois lados do tapete
+		for lado in [-1.0, 1.0]:
+			_npc("Guarda real", "Guarda do rei", "res://scenes/personagens/guarda_imperial.tscn", Vector2(lado * 7.0, -58.0 - k * 9.0), PackedStringArray(["A guarda real não conversa em serviço."]), [])
+	for p in [Vector2(-9.0, 100.0), Vector2(9.0, 100.0)]:   # sentinelas no portão do castelo, no alto da escadaria
+		_npc("Sentinela do castelo", "Sentinela", "res://scenes/personagens/guarda_imperial.tscn", p, PackedStringArray(["O rei recebe no Salão do Trono, ao fundo. Arma na bainha."]), [])
 
 
 # ---------------------------------------------------------------- duelo com Vane

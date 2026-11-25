@@ -30,6 +30,7 @@ extends Node3D
 var externa: Callable
 var cor_externa: Callable
 var origem := Vector2.ZERO
+var origem_y := 0.0   # altura da área no mundo (o Castelo fica 24 m acima do reino): a altura de fora vem do mundo e é trazida para cá
 
 ## Cada caminho é um PackedVector2Array de pontos (x, z).
 var caminhos: Array = []
@@ -88,7 +89,7 @@ func _altura_base(x: float, z: float) -> float:
 	if externa.is_valid():
 		var w := _peso_da_borda(x, z)
 		if w > 0.0:
-			h = lerpf(h, externa.call(origem.x + x, origem.y + z), w)
+			h = lerpf(h, externa.call(origem.x + x, origem.y + z) - origem_y, w)
 	return h
 
 

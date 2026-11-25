@@ -59,6 +59,11 @@ var _t_chao := 0.0
 @onready var container: Node3D = $AreaAtual
 
 
+## A HISTÓRIA ANTIGA (missões, capítulos, duelo com o Vane, luta com o Solon) está DESLIGADA: o Cristian pediu para tirar a
+## história e as missões do jogo (25/11/2026) e vai escrever outra depois. O código dela continua aqui, parado; os testes
+## antigos da campanha ligam esta chave antes de abrir o jogo.
+static var historia := false
+
 var _tem_destino := false
 var _destino := Vector2.ZERO
 var _facho_destino: MeshInstance3D
@@ -133,7 +138,11 @@ func _iniciar_mundo() -> void:
 	fagulha.corpo.collision_layer = Solidos.CAMADA_SERES
 	fagulha.global_position = refugio.to_global(refugio.pos_fagulha_ferida())
 	ir_para("refugio_do_pinhal", "Principal")
-	missoes.iniciar("C1-M1")
+	if historia:
+		missoes.iniciar("C1-M1")
+	else:   # mundo aberto sem história: a Fagulha já é companheira, crescida e montável desde o começo
+		fagulha.definir_fase(3)
+		liberar_fagulha()
 
 
 ## O que abre cada barreira de história do mundo.
@@ -539,7 +548,8 @@ func interagir() -> void:
 		return
 	missoes.tentar_entrega(n.nome.to_lower())   # maçãs para a Mara etc.
 	if n.oferece_missao != "" and missoes.pode_iniciar(n.oferece_missao):
-		missoes.iniciar(n.oferece_missao)   # Elda passa a C2-M1, Sava a C2-M2
+		if historia:
+			missoes.iniciar(n.oferece_missao)   # Elda passa a C2-M1, Sava a C2-M2
 	_falas_atuais = missoes.dialogo_de(n.nome.to_lower())
 	if _falas_atuais.is_empty():
 		_falas_atuais = n.falas

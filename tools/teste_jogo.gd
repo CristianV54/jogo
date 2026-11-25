@@ -18,6 +18,7 @@ var fim_de_jogo_visto := false
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(PASTA)
+	Jogo.historia = true   # este teste é da campanha antiga, que no jogo está desligada
 	jogo = load("res://scenes/jogo.tscn").instantiate()
 	(jogo.get_node("Camera") as CameraTerceiraPessoa).capturar_mouse = false
 	root.add_child(jogo)

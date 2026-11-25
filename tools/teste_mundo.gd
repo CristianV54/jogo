@@ -31,8 +31,22 @@ func _rodar() -> void:
 		if pv.npcs.is_empty() and m.povoados[id]["tipo"] != "posto_imperial":
 			sem_gente.append(String(id))
 	marcar("O reino tem muralha com 4 portões (sul, oeste, leste, norte)", m.muralha.portoes.size() == 4, str(m.muralha.portoes))
+	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
+	var cc := MundoDados.centro("castelo_imperial")
+	marcar("O Castelo fica no alto do morro (24 m acima do reino)", m.chao_em(cc.x, cc.y) >= 24.0 and m.chao_em(0.0, 330.0) < 1.0, "%.1f m no castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 330.0)])
+	var rei := false
+	for n in get_nodes_in_group("npcs"):
+		if (n as Npc).nome == "Rei Aldren":
+			rei = true
+	marcar("O rei está no Salão do Trono (NPC Rei Aldren)", rei, "")
+	var bravos: Array = []
+	for e in get_nodes_in_group("inimigos"):
+		var e3 := e as Node3D
+		if Vector2(e3.global_position.x, e3.global_position.z).distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]):
+			bravos.append(String(e3.name))
+	marcar("Dentro da muralha não há inimigo (nem guarda hostil, nem lobo)", bravos.is_empty(), str(bravos.slice(0, 8)))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
-	marcar("O reino tem casas de rua enchendo os vãos (100 ou mais)", casario.casas.size() >= 100, str(casario.casas.size()))
+	marcar("O reino tem casas de rua e de fundo, hortas e quintais (600 casas ou mais, 100 hortas ou mais)", casario.casas.size() >= 600 and casario.hortas >= 100, "%d casas, %d hortas, %d árvores de quintal" % [casario.casas.size(), casario.hortas, casario.arvores_de_quintal])
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
 	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
 	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado

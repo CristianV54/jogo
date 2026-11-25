@@ -7,6 +7,7 @@ var m: GerenciadorMissoes
 
 
 func _init() -> void:
+	Jogo.historia = true   # este teste é da campanha antiga, que no jogo está desligada
 	jogo = load("res://scenes/jogo.tscn").instantiate()
 	(jogo.get_node("Camera") as CameraTerceiraPessoa).capturar_mouse = false
 	root.add_child(jogo)

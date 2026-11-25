@@ -14,7 +14,7 @@ const REGIOES := {
 	"fronteira_ferrogris": {"cena": "res://scenes/areas/fronteira_ferrogris.tscn", "centro": Vector2(2673, 36.5), "meia": 150.0, "nome": "Fortaleza de Ferrogris"},
 	"cratera_ignis": {"cena": "res://scenes/areas/cratera_ignis.tscn", "centro": Vector2(1798.2, -1314.4), "meia": 150.0, "nome": "Cratera de Ignis"},
 	"valdoria": {"cena": "res://scenes/areas/valdoria.tscn", "centro": Vector2(0, 150), "meia": 150.0, "nome": "Valdoria"},
-	"castelo_imperial": {"cena": "res://scenes/areas/castelo_imperial.tscn", "centro": Vector2(0, -270), "meia": 150.0, "nome": "Castelo Imperial"},   # 420 m ao norte de Valdoria: o viaduto liga as duas
+	"castelo_imperial": {"cena": "res://scenes/areas/castelo_imperial.tscn", "centro": Vector2(0, -270), "meia": 150.0, "nome": "Castelo de Valdoria", "altura": 24.0},   # 420 m ao norte de Valdoria: o viaduto liga as duas
 }
 
 ## Limites do chão do mundo (a ilha fica dentro; o resto é mar).
@@ -214,8 +214,8 @@ const POVOADOS_LIVRES := [
 	{"id": "guarita_leste", "nome": "Guarita do Portão Leste", "tipo": "guarita", "centro": Vector2(538, -60), "dir": Vector2(0, 1), "lado": 1.0, "raio": 9.0, "liga": ""},
 	{"id": "guarita_norte", "nome": "Guarita do Portão Norte", "tipo": "guarita", "centro": Vector2(0, -598), "dir": Vector2(1, 0), "lado": 1.0, "raio": 9.0, "liga": ""},
 	{"id": "feira_sul", "nome": "Feira do Portão Sul", "tipo": "mercado", "centro": Vector2(95, 590), "dir": Vector2(0, 1), "lado": -1.0, "raio": 50.0, "liga": "reino_sul"},
-	{"id": "feira_poente", "nome": "Feira do Poente", "tipo": "posto_imperial", "centro": Vector2(-660, -150), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "campos"},
-	{"id": "feira_nascente", "nome": "Feira do Nascente", "tipo": "posto_imperial", "centro": Vector2(660, -150), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "ferrogris"},
+	{"id": "feira_poente", "nome": "Feira do Poente", "tipo": "mercado", "centro": Vector2(-660, -150), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "campos"},
+	{"id": "feira_nascente", "nome": "Feira do Nascente", "tipo": "mercado", "centro": Vector2(660, -150), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "ferrogris"},
 	# --- povoados novos da ilha grande (NOMES PROVISÓRIOS, propostos e ainda não aprovados pelo Cristian) ---
 	{"id": "costa_brava", "nome": "Vila Costa Brava", "tipo": "vila", "centro": Vector2(-3078, 365.1), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
 	{"id": "ponta_do_vento", "nome": "Vila Ponta do Vento", "tipo": "vila", "centro": Vector2(-3159, -462.5), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
@@ -291,6 +291,11 @@ const POVOADOS_LIVRES := [
 	{"id": "cabana_do_pescador_da_baia", "nome": "Cabana do Pescador da Baía", "tipo": "pescador", "centro": Vector2(-1875, 2306), "dir": Vector2(1, 0), "lado": 1.0, "raio": 22.0, "liga": "costa_14"},
 	# <<< GERADO
 ]
+
+
+## Altura do chão da região acima do nível do reino (só o Castelo fica no alto de um morro).
+static func altura(id: String) -> float:
+	return float(REGIOES[id].get("altura", 0.0))
 
 
 static func centro(id: String) -> Vector2:

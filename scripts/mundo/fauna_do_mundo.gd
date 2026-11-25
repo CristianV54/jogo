@@ -61,8 +61,8 @@ func _na_zona(zona: Rect2, lista: Array) -> void:
 			for pid in mundo.povoados:
 				if p.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]) * 1.3:
 					longe = false
-			if item[0] in hostis and not longe:
-				continue
+			if item[0] in hostis and (not longe or p.distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]) + 60.0):
+				continue   # bicho bravo e soldado inimigo não nascem em povoado nem dentro (ou colado) da muralha do reino
 			if item[0] in ["lobo", "javali", "urso"] and MundoDados.retangulo("refugio_do_pinhal", 90.0).has_point(p):
 				continue   # perto do Refúgio é seguro
 			_criar(item[0], p)

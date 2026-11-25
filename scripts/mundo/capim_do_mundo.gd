@@ -122,7 +122,7 @@ func _construir(k: Vector2i) -> MultiMeshInstance3D:
 			continue
 		if p.distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]) and rng.randf() < 0.85:
 			continue   # dentro da muralha do reino o chão é de cidade: só um tufo aqui e ali
-		var y := ter.altura_em(q.x, q.y)
+		var y := mundo.chao_em(p.x, p.y)   # altura no MUNDO (o Castelo fica no alto: a altura de dentro da região não serve aqui)
 		var s := rng.randf_range(0.5, 1.1)   # moita de 15 a 55 cm: bem abaixo do joelho do Torin
 		var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.5), s))
 		t.append(Transform3D(base, Vector3(p.x, y - 0.02, p.y)))

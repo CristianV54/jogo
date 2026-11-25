@@ -39,6 +39,7 @@ static func preparar_terreno(t: Terreno, area: Node3D) -> void:
 	if not ativo:
 		return
 	t.origem = Vector2(area.position.x, area.position.z)
+	t.origem_y = area.position.y
 	t.externa = instancia.terreno.altura_em
 	t.cor_externa = instancia.terreno.cor_do_mundo
 
@@ -74,7 +75,7 @@ func construir() -> void:
 		var area := (load(MundoDados.REGIOES[id]["cena"]) as PackedScene).instantiate() as AreaBase
 		area.name = id
 		var c := MundoDados.centro(id)
-		area.position = Vector3(c.x, 0.0, c.y)
+		area.position = Vector3(c.x, MundoDados.altura(id), c.y)   # o Castelo fica no alto do morro; o resto, no nível do reino
 		add_child(area)
 		regioes[id] = area
 		_colher_estilo(id, area)
@@ -432,7 +433,7 @@ func _viaduto() -> void:
 	var vc := MundoDados.centro("valdoria")
 	var cc := MundoDados.centro("castelo_imperial")
 	var de := Vector3(vc.x, 6.7, vc.y - 132.0)
-	var ate := Vector3(cc.x, 0.0, cc.y + 140.0)
+	var ate := Vector3(cc.x, MundoDados.altura("castelo_imperial"), cc.y + 140.0)   # o viaduto sobe da cidade até a porta do castelo, no alto do morro
 	var ponte := PonteDeMadeira.new()
 	ponte.largura = 12.0
 	add_child(ponte)

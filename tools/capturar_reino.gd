@@ -76,8 +76,19 @@ func _rodar() -> void:
 	await _foto("6g_pedra_da_muralha_de_perto", 3.0)
 	_ver(Vector2(0, 330), Vector2(0, -300))      # da Rua do Anel, ao sul: as torres do castelo por cima de Valdoria
 	await _foto("6h_castelo_visto_da_rua", 4.0)
-	_ver(Vector2(0, -90), Vector2(0, -330))      # ao pé do castelo
+	_ver(Vector2(0, -90), Vector2(0, -330))      # no viaduto, subindo para o castelo
 	await _foto("6i_castelo_de_perto", 4.0)
+	_ver(Vector2(-250, -40), Vector2(-60, -260)) # da cidade baixa: o morro e o castelo lá em cima
+	await _foto("6j_castelo_no_alto_visto_de_baixo", 4.0)
+	var cc := MundoDados.centro("castelo_imperial")
+	_ver(cc + Vector2(0, -62), cc + Vector2(0, -100))   # Salão do Trono: o rei, o conselheiro e a guarda real
+	await _foto("6k_rei_no_salao_do_trono", 5.0)
+	_ver(cc + Vector2(0, 122), cc + Vector2(0, 60))      # portão do castelo, no alto da escadaria
+	await _foto("6l_portao_do_castelo", 4.0)
+	_ver(Vector2(150, 372), Vector2(230, 440))   # miolo de um quarteirão: casas de fundo, horta e quintal
+	await _foto("6m_miolo_do_quarteirao", 4.0)
+	_ver(Vector2(0, 318), Vector2(0, 200))       # entrada da cidade velha, agora sem a muralha interna
+	await _foto("6n_cidade_velha_sem_muralha", 4.0)
 	# vista aérea: liga a vista do reino inteiro (no jogo, o que está a mais de 800 m some)
 	_por(Vector2(0, 380), 0.0)
 	await create_timer(1.0).timeout
