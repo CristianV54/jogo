@@ -19,6 +19,8 @@ const TONS_DE_TELHADO := [Color(0.86, 0.36, 0.24), Color(0.74, 0.3, 0.2), Color(
 var mundo: Mundo
 var lotes: Array = []   # um por casa: {"p": Vector2, "larg": float, "prof": float, "giro": float, "alt": float}
 var quarteiroes := 0
+var janelas_acesas := 0
+var forjas := 0
 var _reservas: Array[Rect2] = []
 var _pecas := {}        # "pedaço|malha|material" -> [transformações, cores]
 var _solidos: StaticBody3D
@@ -66,7 +68,7 @@ func montar() -> void:
 		z0 = z1 + _rng.randf_range(5.4, 7.4)       # rua
 	for chave in _pecas:
 		_multimesh(String(chave))
-	print("CasarioDoReino: ", lotes.size(), " casas em ", quarteiroes, " quarteirões")
+	print("CasarioDoReino: ", lotes.size(), " casas em ", quarteiroes, " quarteirões, ", janelas_acesas, " janelas acesas, ", forjas, " forjas")
 
 
 ## Áreas onde não entra casa: a avenida do sul, as avenidas do oeste e do leste, a praça e as praças dos prédios públicos.
@@ -118,10 +120,27 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 	var cor_terreo: Color = Color(0.95, 0.93, 0.9) * _rng.randf_range(0.82, 1.0) if de_pedra else reboco
 	_peca(pedaco, "caixa", "terreo_pedra" if de_pedra else "terreo_reboco", Vector3(p.x, y + (PISO + 0.3) / 2.0, p.y), Vector3(larg, PISO + 0.3, prof), 0.0, cor_terreo)
 	var topo := y + PISO + 0.3
+	for s in [-1.0, 1.0]:   # janelas do térreo: uma de cada lado da porta, nas duas fachadas; algumas acesas
+		for lado in [-1.0, 1.0]:
+			if _rng.randf() < 0.16:
+				_peca(pedaco, "caixa", "luz", Vector3(p.x + s * 0.32 * larg, y + 0.56 * (PISO + 0.3), p.y + lado * (prof / 2.0 + 0.03)), Vector3(0.125 * larg, 0.3 * (PISO + 0.3), 0.06), 0.0, Color(1.0, 0.8, 0.42))
+				janelas_acesas += 1
+	var forja := pisos == 1 and _rng.randf() < 0.45   # casa térrea de ferreiro: boca de fornalha acesa e chaminé grossa
+	if forja:
+		_peca(pedaco, "caixa", "luz", Vector3(p.x, y + 1.0, p.y + prof / 2.0 + 0.04), Vector3(1.8, 1.3, 0.08), 0.0, Color(1.0, 0.45, 0.12))
+		forjas += 1
 	if pisos > 1:   # andares de cima em enxaimel, avançando sobre a rua, com uma viga marcando a divisa
 		var alt := (pisos - 1) * PISO
 		_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + 0.11, p.y), Vector3(larg + 0.7, 0.22, prof + 0.7), 0.0, Color(0.3, 0.2, 0.13))
 		_peca(pedaco, "caixa", "sobrado", Vector3(p.x, topo + 0.22 + alt / 2.0, p.y), Vector3(larg + 0.4, alt, prof + 0.4), 0.0, reboco)
+		for andar in pisos - 1:   # janelas dos andares de cima (a pintura do sobrado tem 2 fiadas de 3)
+			for coluna in [-0.336, 0.0, 0.332]:
+				for lado in [-1.0, 1.0]:
+					if (pisos - 1 == 1 or andar < 2) and _rng.randf() < 0.14:
+						var fiadas := 2.0
+						var yj := topo + 0.22 + alt * (1.0 - (0.25 + 0.5 * float(andar % 2)))
+						_peca(pedaco, "caixa", "luz", Vector3(p.x + coluna * (larg + 0.4), yj, p.y + lado * ((prof + 0.4) / 2.0 + 0.03)), Vector3(0.1 * (larg + 0.4), alt / fiadas * 0.42, 0.06), 0.0, Color(1.0, 0.8, 0.42))
+						janelas_acesas += 1
 		topo += 0.22 + alt
 	_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + 0.11, p.y), Vector3(larg + 0.8, 0.22, prof + 0.8), 0.0, Color(0.3, 0.2, 0.13))
 	topo += 0.22
@@ -133,7 +152,7 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 		_peca(pedaco, "prisma", "telhado", Vector3(p.x, topo + alt_t / 2.0, p.y), Vector3(prof + 1.0, alt_t, larg + 1.0), PI / 2.0, cor_telhado)
 	else:
 		_peca(pedaco, "prisma", "telhado", Vector3(p.x, topo + alt_t / 2.0, p.y), Vector3(larg + 1.0, alt_t, prof + 1.0), 0.0, cor_telhado)
-	_peca(pedaco, "caixa", "liso", Vector3(p.x + _rng.randf_range(-larg / 4.0, larg / 4.0), topo + (alt_t + 1.0) / 2.0, p.y + _rng.randf_range(-prof / 4.0, prof / 4.0)), Vector3(0.9, alt_t + 1.0, 0.9), 0.0, Color(0.34, 0.32, 0.31))   # chaminé
+	_peca(pedaco, "caixa", "liso", Vector3(p.x + _rng.randf_range(-larg / 4.0, larg / 4.0), topo + (alt_t + 1.0) / 2.0, p.y + _rng.randf_range(-prof / 4.0, prof / 4.0)), Vector3(1.5 if forja else 0.9, alt_t + (3.0 if forja else 1.0), 1.5 if forja else 0.9), 0.0, Color(0.34, 0.32, 0.31))   # chaminé (a da forja é grossa e alta)
 	var cs := CollisionShape3D.new()
 	var caixa := BoxShape3D.new()
 	caixa.size = Vector3(larg, topo - y + 3.0, prof)

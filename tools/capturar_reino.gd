@@ -77,6 +77,15 @@ func _rodar() -> void:
 	await _foto("13_porta_do_salao", 4.0)
 	_ver(Vector2(-6, 25.4), Vector2(20, 25.4))           # dentro do salão: o rei, o conselheiro e a guarda real
 	await _foto("14_rei_no_salao_do_trono", 5.0)
+	_ver(Vector2(-150, 34), Vector2(-260, 36))            # avenida do oeste, com gente indo e vindo
+	await _foto("14a_avenida_do_oeste_com_gente", 5.0)
+	jogo.clima.definir_hora(20.5)                        # à noite: janelas acesas, lampiões e vitrais
+	_ver(sul + Vector2(0, -30), Vector2(0, 0))
+	await _foto("14c_avenida_a_noite", 5.0)
+	var pcat: Vector2 = m.povoados["catedral_de_valdoria"]["centro"]
+	_ver(pcat + Vector2(-20, -52), pcat + Vector2(28, -4))
+	await _foto("14d_catedral_a_noite", 5.0)
+	jogo.clima.definir_hora(11.0)
 	var plav: Vector2 = m.povoados["lavoura_do_sul"]["centro"]
 	_ver(plav - plav.normalized() * 34.0, plav + plav.normalized() * 30.0)   # uma lavoura de verdade, fora da muralha
 	await _foto("14b_lavoura", 4.0)

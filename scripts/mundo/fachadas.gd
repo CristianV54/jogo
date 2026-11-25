@@ -23,6 +23,9 @@ static func material(qual: String) -> StandardMaterial3D:
 		m.uv1_scale = Vector3(4.0, 5.0, 4.0)
 	elif qual == "liso":   # vigas e chaminés: só a cor da peça
 		m.uv1_triplanar = false
+	elif qual == "luz":    # janela acesa, vitral e brasa: brilham por conta própria (não gastam luz de verdade)
+		m.uv1_triplanar = false
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	else:
 		m.albedo_texture = _terreo(qual == "terreo_pedra") if qual.begins_with("terreo") else _fachada(qual == "pedra", 2 if qual == "sobrado" else 3)
 		m.uv1_offset = Vector3(0.5, 0.5, 0.5)
