@@ -36,3 +36,21 @@ Mercado do Nascente, feiras do Portão Sul, do Poente e do Nascente; e os 51 pov
 ## Sobre a história
 O código das missões e dos chefes continua no projeto, desligado pela chave `Jogo.historia`. Os testes antigos da
 campanha ligam a chave para continuarem valendo. Apagar esse código de vez fica para quando a história nova existir.
+
+## Virada de 25/11 (tarde): a planta do Reino de Aethelgard
+O Cristian mandou uma pintura de referência e depois o pacote do reino que ele tinha feito em blocos. Valdoria foi refeita
+com a mesma composição e as mesmas proporções (ver o cabeçalho de `scripts/mundo/mundo_dados.gd`). Os blocos 1 a 14 acima
+descrevem a versão anterior (círculo com castelo ao norte, depois círculo com castelo no centro) e ficam como histórico.
+
+| Feito e conferido (teste do mundo passa, auditoria com 0 defeito, fotos em `reino_v4/`) |
+|---|
+| Penhasco de 64 m com rampa subível a pé e mureta |
+| Cidadela: 28 torres (topo a 164 m), palácio, torreão, capela, quartel, cavalariça, poço, árvores |
+| Salão do Trono oco com o Rei Aldren, o Conselheiro Meren e a guarda real; sentinelas no portão |
+| Muralha oval irregular com 3 portões, 33 torres redondas, guaritas |
+| 612 casas em 87 quarteirões: térreo, sobrado em enxaimel, vigas, telhado, chaminé |
+| Chão calçado de pedra; fonte, lampiões, barris, carroças; jardins ao pé do penhasco |
+| Praça do mercado, feiras nos portões, quartel com campo de treino, estábulos, catedral, 8 lavouras |
+
+Falta do reino de blocos: catedral gótica com vitrais, janelas acesas, forjas e capelas entre as casas, mais gente nas
+ruas, relevo de rocha no paredão. Falta medir os quadros por segundo no Mac e rever a suíte antiga para a ilha.
