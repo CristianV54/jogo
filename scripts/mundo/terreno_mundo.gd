@@ -215,7 +215,7 @@ func cor_do_mundo(x: float, z: float) -> Color:
 			var rocha: Color = [Color(0.42, 0.4, 0.38), Color(0.5, 0.47, 0.43), Color(0.36, 0.35, 0.34), Color(0.46, 0.42, 0.37)][camada % 4]
 			c = rocha * (0.9 + 0.2 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0))
 			if bool(pen[1]) or float(pen[2]) <= 1.0:
-				c = Color(0.74, 0.72, 0.67)
+				c = Color(0.5, 0.48, 0.44)
 	return c   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 

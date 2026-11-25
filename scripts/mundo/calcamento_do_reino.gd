@@ -24,7 +24,7 @@ func montar() -> void:
 			for k in cantos:
 				var q: Vector2 = c + Vector2((i + k.x) * passo, (j + k.y) * passo)
 				var rua := 1.0 - smoothstep(4.0, 7.5, mundo.terreno.distancia_caminho(q.x, q.y))
-				st.set_color(Color(0.62, 0.6, 0.56).lerp(Color(0.86, 0.84, 0.78), rua))
+				st.set_color(Color(0.36, 0.35, 0.33).lerp(Color(0.5, 0.48, 0.44), rua))   # pedra cinzenta (clara demais estourava de branco ao sol)
 				st.set_normal(Vector3.UP)
 				st.add_vertex(Vector3(q.x, mundo.terreno.altura_em(q.x, q.y) + 0.06, q.y))
 	st.generate_normals()
