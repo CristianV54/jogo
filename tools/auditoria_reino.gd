@@ -70,6 +70,33 @@ func _rodar() -> void:
 		for outra in casas:
 			if outra != casa and outra.get_instance_id() > casa.get_instance_id() and Vector2(outra.global_position.x, outra.global_position.z).distance_to(p) < 9.0:
 				_defeito("casa encavalada", p, "%s com %s" % [casa.name, outra.name])
+	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
+	var grade := {}   # células de 12 m -> índices, para achar vizinhos sem comparar todos com todos
+	for i in casario.lotes.size():
+		var l: Dictionary = casario.lotes[i]
+		var p: Vector2 = l["p"]
+		var cel := Vector2i(floori(p.x / 12.0), floori(p.y / 12.0))
+		for dx in [-1, 0, 1]:
+			for dz in [-1, 0, 1]:
+				for j in grade.get(cel + Vector2i(dx, dz), []):
+					var o: Dictionary = casario.lotes[j]
+					if (o["p"] as Vector2).distance_to(p) < minf(float(l["larg"]), float(o["larg"])) * 0.8 and absf(angle_difference(float(o["giro"]), float(l["giro"]))) < 0.3:
+						_defeito("casa encavalada (casario)", p, "a %.1f m da vizinha" % (o["p"] as Vector2).distance_to(p))
+		if not grade.has(cel):
+			grade[cel] = []
+		grade[cel].append(i)
+		if m.terreno.distancia_caminho(p.x, p.y) < float(l["larg"]) / 2.0 + 1.0:
+			_defeito("casa em cima de rua (casario)", p, "%.1f m do eixo" % m.terreno.distancia_caminho(p.x, p.y))
+		if p.distance_to(c) > r - 11.0:
+			_defeito("casa encostada na muralha (casario)", p, "")
+		var h0 := m.terreno.altura_em(p.x, p.y)
+		for d in [Vector2(4, 0), Vector2(-4, 0), Vector2(0, 4), Vector2(0, -4)]:
+			if absf(m.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.5:
+				_defeito("casa em ladeira (casario)", p, "")
+				break
+		for pid in m.povoados:
+			if p.distance_to(m.povoados[pid]["centro"]) < float(m.povoados[pid]["raio"]):
+				_defeito("casa dentro de praça (casario)", p, String(pid))
 	for g in m.muralha.portoes:
 		var toca := _toca_solido(Vector3(g.x, m.terreno.altura_em(g.x, g.y) + 1.6, g.y), 1.2)
 		if toca != "":
@@ -86,13 +113,13 @@ func _rodar() -> void:
 			if toca != "":
 				_defeito("ser dentro de parede", p, "%s toca %s" % [n3.name, toca])
 	var data := Time.get_date_string_from_system()
-	var texto := "# Auditoria do reino, %s\n\nConferidos: %d casas, %d portões, %d pessoas e bichos. Defeitos: **%d**.\n\n" % [data, casas.size(), m.muralha.portoes.size(), seres, defeitos]
+	var texto := "# Auditoria do reino, %s\n\nConferidos: %d casas do casario, %d casas de praça, %d portões, %d pessoas e bichos. Defeitos: **%d**.\n\n" % [data, casario.lotes.size(), casas.size(), m.muralha.portoes.size(), seres, defeitos]
 	if defeitos > 0:
 		texto += "| Defeito | Onde (x, z) | Detalhe |\n|---|---|---|\n" + "\n".join(linhas) + "\n"
 	var f := FileAccess.open("res://docs/auditoria/REINO_%s.md" % data, FileAccess.WRITE)
 	f.store_string(texto)
 	f.close()
-	print("AUDITORIA DO REINO: ", casas.size(), " casas, ", seres, " seres, DEFEITOS ", defeitos)
+	print("AUDITORIA DO REINO: ", casario.lotes.size(), " casas do casario, ", casas.size(), " casas de praça, ", seres, " seres, DEFEITOS ", defeitos)
 	for l in linhas.slice(0, 25):
 		print("  ", l)
 	quit(0)

@@ -41,73 +41,51 @@ func _rodar() -> void:
 	jogo.clima.congelado = true
 	jogo.clima.definir_hora(11.0)
 	jogo.clima.forcar_tempo(Clima.Tempo.LIMPO)
-	_por(Vector2(0, 560), 0.0)            # do lado de fora do portão sul, olhando a muralha
-	await _foto("1_portao_sul", 5.0)
-	_por(Vector2(0, 430), 0.0)            # logo depois do portão: Valdoria ao fundo
-	await _foto("2_dentro_do_portao", 4.0)
-	var b: Vector2 = m.povoados["bairro_dos_teceloes"]["centro"]
-	_por(b + (Vector2(0, -60) - b).normalized() * 75.0, atan2(-(b - Vector2(0, -60)).x, -(b - Vector2(0, -60)).y))
-	await _foto("3_bairro_dos_teceloes", 4.0)
-	var mc: Vector2 = m.povoados["mercado_do_poente"]["centro"]
-	_por(mc + Vector2(0, 62), 0.0)
-	await _foto("4_mercado_do_poente", 4.0)
-	var f: Vector2 = m.povoados["feira_sul"]["centro"]
-	_por(f + Vector2(-70, 20), -PI / 2.0)
-	await _foto("5_feira_do_portao_sul", 4.0)
-	_ver(Vector2(-205, -59), Vector2(-420, -60))   # Rua do Meio, olhando para o oeste: mercado, casas e o portão oeste ao fundo
-	await _foto("6_rua_do_meio", 4.0)
-	_por(Vector2(-640, -60), PI / 2.0 + PI)   # do lado de fora do portão oeste, olhando para dentro
-	await _foto("6b_portao_oeste_por_fora", 4.0)
-	_ver(Vector2(60, 349), Vector2(260, 290))    # Rua do Anel, ao sul: fileiras de casas dos dois lados
-	await _foto("6c_rua_do_anel_sul", 4.0)
-	var tr: Vector2 = m.ponto_na_estrada("travessa_03", 10.0)[0]
-	_ver(tr, m.ponto_na_estrada("travessa_03", 110.0)[0])   # uma travessa, da Rua do Anel para a muralha
-	await _foto("6c2_travessa", 4.0)
-
 	var rc: Vector2 = MundoDados.REINO["centro"]
-	for item in [["6d_quartel_campo_de_treino", "quartel_da_guarda", 1.0, 26.0], ["6e_estabulos_do_reino", "estabulos_do_reino", -1.0, 24.0], ["6f_guarita_do_portao_oeste", "guarita_oeste", -1.0, 22.0]]:
-		var cc: Vector2 = m.povoados[item[1]]["centro"]
-		var para_dentro := (rc - cc).normalized() * float(item[2])   # para onde o lugar se estende
-		_ver(cc - para_dentro * float(item[3]), cc + para_dentro * 20.0)
-		await _foto(item[0], 4.0)
-	_ver(Vector2(0, -535), Vector2(0, -640))     # portão norte, por dentro, com as sentinelas
-	await _foto("6f2_portao_norte_por_dentro", 4.0)
-	_ver(Vector2(-95, 478), Vector2(-99, 502))   # colado na muralha (por dentro, a sudoeste do portão sul): a textura da pedra
-	await _foto("6g_pedra_da_muralha_de_perto", 3.0)
-	_ver(Vector2(0, 330), Vector2(0, -300))      # da Rua do Anel, ao sul: as torres do castelo por cima de Valdoria
-	await _foto("6h_castelo_visto_da_rua", 4.0)
-	_ver(Vector2(0, -90), Vector2(0, -330))      # no viaduto, subindo para o castelo
-	await _foto("6i_castelo_de_perto", 4.0)
-	_ver(Vector2(-250, -40), Vector2(-60, -260)) # da cidade baixa: o morro e o castelo lá em cima
-	await _foto("6j_castelo_no_alto_visto_de_baixo", 4.0)
 	var cc := MundoDados.centro("castelo_imperial")
+	_ver(Vector2(0, 590), Vector2(0, 400))        # chegando pelo sul: muralha, portão e o castelo por cima
+	await _foto("01_chegando_pelo_portao_sul", 5.0)
+	_ver(Vector2(0, 446), Vector2(0, 250))        # avenida do portão sul, com o castelo no alto ao fundo
+	await _foto("02_avenida_do_portao_sul", 4.0)
+	_ver(Vector2(200, 346), Vector2(60, 396))     # Rua do Anel: casas dos dois lados
+	await _foto("03_rua_do_anel", 4.0)
+	_ver(Vector2(228, 228), Vector2(140, 290))    # uma viela entre duas fileiras de sobrados
+	await _foto("04_viela", 4.0)
+	_ver(Vector2(170, 198), Vector2(110, 240))    # Rua do Castelo, ao pé do rochedo
+	await _foto("05_rua_do_castelo", 4.0)
+	for item in [["06_praca_do_mercado", "mercado_central"], ["07_quartel_campo_de_treino", "quartel_da_guarda"], ["08_estabulos_do_reino", "estabulos_do_reino"]]:
+		var pc: Vector2 = m.povoados[item[1]]["centro"]
+		var para_fora := (pc - rc).normalized()   # as praças se abrem da Rua do Castelo para fora
+		_ver(pc - para_fora * 24.0, pc + para_fora * 30.0)
+		await _foto(item[0], 4.0)
+	_ver(Vector2(0, 415), Vector2(0, 480))        # portão sul por dentro, com as sentinelas
+	await _foto("09_portao_sul_por_dentro", 4.0)
+	_ver(Vector2(22, 452), Vector2(70, 466))      # colado na muralha: a pedra
+	await _foto("10_pedra_da_muralha", 3.0)
+	_ver(Vector2(0, 285), Vector2(0, 120))        # a subida do castelo
+	await _foto("11_subida_do_castelo", 4.0)
+	_ver(Vector2(-330, 150), Vector2(0, 0))       # da cidade baixa: o rochedo e o castelo branco lá em cima
+	await _foto("12_castelo_visto_da_cidade", 4.0)
+	_ver(cc + Vector2(0, 122), cc + Vector2(0, 60))      # portão do castelo, no alto
+	await _foto("13_portao_do_castelo", 4.0)
 	_ver(cc + Vector2(0, -62), cc + Vector2(0, -100))   # Salão do Trono: o rei, o conselheiro e a guarda real
-	await _foto("6k_rei_no_salao_do_trono", 5.0)
-	_ver(cc + Vector2(0, 122), cc + Vector2(0, 60))      # portão do castelo, no alto da escadaria
-	await _foto("6l_portao_do_castelo", 4.0)
-	_ver(Vector2(150, 372), Vector2(230, 440))   # miolo de um quarteirão: casas de fundo, horta e quintal
-	await _foto("6m_miolo_do_quarteirao", 4.0)
-	_ver(Vector2(0, 318), Vector2(0, 200))       # entrada da cidade velha, agora sem a muralha interna
-	await _foto("6n_cidade_velha_sem_muralha", 4.0)
-	# vista aérea: liga a vista do reino inteiro (no jogo, o que está a mais de 800 m some)
-	_por(Vector2(0, 380), 0.0)
+	await _foto("14_rei_no_salao_do_trono", 5.0)
+	# vistas aéreas: liga a vista do reino inteiro (no jogo, praça e castelo a mais de 800 m somem)
+	_por(Vector2(0, 430), 0.0)
 	await create_timer(1.0).timeout
 	m.set_process(false)
-	for id in ["valdoria", "castelo_imperial"]:
-		(m.regioes[id] as Node3D).visible = true
+	(m.regioes["castelo_imperial"] as Node3D).visible = true
 	for pid in m.povoados:
-		if (m.povoados[pid]["centro"] as Vector2).distance_to(MundoDados.REINO["centro"]) < 900.0:
+		if (m.povoados[pid]["centro"] as Vector2).distance_to(rc) < 900.0:
 			(m.povoados[pid]["no"] as Node3D).visible = true
 	jogo.clima._env.fog_enabled = false
 	var cam := Camera3D.new()
 	cam.far = 6000.0
-	cam.fov = 55.0
+	cam.fov = 50.0
 	root.add_child(cam)
 	cam.current = true
-	cam.global_position = Vector3(0, 620, 1150)
-	cam.look_at(Vector3(0, 0, -100))
-	await _foto("7_aerea_do_reino_vista_do_sul", 4.0)
-	cam.global_position = Vector3(-1000, 520, -60)
-	cam.look_at(Vector3(0, 0, -60))
-	await _foto("8_aerea_do_reino_vista_do_oeste", 4.0)
+	for v in [["15_aerea_como_a_referencia", Vector3(-420, 230, 900), Vector3(0, 30, 0)], ["16_aerea_do_sul", Vector3(0, 560, 950), Vector3(0, 0, 0)], ["17_aerea_de_cima", Vector3(0, 1150, 1), Vector3(0, 0, 0)]]:
+		cam.global_position = v[1]
+		cam.look_at(v[2])
+		await _foto(v[0], 4.0)
 	quit(0)

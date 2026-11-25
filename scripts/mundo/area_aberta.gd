@@ -164,9 +164,9 @@ func _muralha(de: Vector2, para: Vector2, altura := 7.0, cor := Color(0.32, 0.32
 
 
 ## Torre de vigia quadrada com plataforma no topo; devolve a posição 3D do piso do topo.
-func _torre_de_vigia(pos: Vector2, altura := 9.0) -> Vector3:
+func _torre_de_vigia(pos: Vector2, altura := 9.0, cor := Color(0.3, 0.3, 0.33)) -> Vector3:
 	var y := _y(pos)
-	var pedra := Pedra.material(Color(0.3, 0.3, 0.33))
+	var pedra := Pedra.material(cor)
 	VilaRefugio._caixa(Vector3(pos.x, y + altura / 2.0, pos.y), Vector3(5.0, altura, 5.0), pedra, true)
 	VilaRefugio._caixa(Vector3(pos.x, y + altura + 0.1, pos.y), Vector3(6.0, 0.4, 6.0), VilaRefugio._mat(Color(0.34, 0.23, 0.13)), true)
 	for dx in [-2.7, 2.7]:

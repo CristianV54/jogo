@@ -9,7 +9,7 @@ const ALTURA := 11.0
 const ESPESSURA := 2.6
 const VAO_DO_PORTAO := 8.0      # metros livres de cada lado do eixo da estrada
 const COR_PEDRA := Color(0.52, 0.48, 0.42)
-const COR_DRAKKAR := Color(0.65, 0.1, 0.08)
+const COR_DRAKKAR := Color(0.14, 0.2, 0.5)   # bandeiras do rei: azul
 
 var mundo: Mundo
 var portoes: Array[Vector2] = []   # onde ficou cada portão (para o mapa e para os testes)

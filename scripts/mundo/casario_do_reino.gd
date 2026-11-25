@@ -1,206 +1,104 @@
 class_name CasarioDoReino
 extends Node3D
-## As casas de rua do reino: fileiras de casas dos dois lados da Rua do Anel, da Rua do Meio e das estradas que entram
-## pelos portões, enchendo o espaço entre os bairros. Cada casa olha para a rua. Nenhuma nasce em cima de outra rua ou
-## trilha, dentro de bairro ou mercado, dentro de Valdoria ou do Castelo, nem colada na muralha.
-## Para não pesar, cada casa só é desenhada até 300 m (de longe quem aparece são a muralha, as torres e os bairros).
+## O CASARIO DE VALDORIA: a cidade apertada dentro da muralha, casa colada em casa, em fileiras que dão a volta no rochedo
+## do Castelo (referência do Cristian: cidade medieval murada, com o castelo branco no alto, no centro).
+## As casas ficam em fileiras duplas, fundo com fundo, com uma viela entre um par e o seguinte. Não há casa em cima de rua,
+## travessa, praça (mercado, quartel, estábulos), encosta do rochedo ou muralha.
+## Cada casa é um sobrado de 2 ou 3 andares: corpo com a fachada pintada (enxaimel ou pedra, com janelas e porta) e telhado
+## de duas águas (telha ou ardósia). São milhares, então são desenhadas em MultiMesh por setor da cidade (poucas chamadas
+## de desenho, e o motor esconde os setores fora da tela). A colisão é uma caixa por casa. Não se entra nelas: as casas
+## em que se entra são as das praças (ver Povoado).
 
-const REF := preload("res://scripts/mundo/refugio_do_pinhal.gd")
-const RUAS := ["anel_do_reino", "rua_do_meio_oeste", "rua_do_meio_leste", "reino_sul", "campos", "ferrogris"]   # mais todas as "travessa_NN"
-const PASSO := 18.0        # de uma casa à seguinte, ao longo da rua
-const RECUO := 13.0        # do eixo da rua até o meio da casa
-const VISIVEL_ATE := 300.0
-const PALETAS := [{"parede": Color(1.0, 0.9, 0.75), "telhado": Color(0.85, 0.5, 0.38)}, {"parede": Color(0.9, 0.86, 0.8), "telhado": Color(0.55, 0.5, 0.58)},
-	{"parede": Color(0.95, 0.8, 0.62), "telhado": Color(0.6, 0.38, 0.32)}, {"parede": Color(0.82, 0.84, 0.9), "telhado": Color(0.45, 0.5, 0.62)}, {"parede": Color(0.86, 0.74, 0.6), "telhado": Color(0.5, 0.32, 0.26)}]
+const FILEIRAS := [277.0, 287.0, 304.0, 314.0, 331.0, 341.0, 358.0, 368.0, 383.5, 414.0, 424.0, 441.0, 451.0]   # raio do meio de cada fileira
+const SETORES := 12
+const TONS_DE_PAREDE := [Color(1.0, 0.98, 0.92), Color(0.98, 0.9, 0.76), Color(0.9, 0.86, 0.8), Color(1.0, 0.86, 0.7), Color(0.86, 0.9, 0.84), Color(0.94, 0.8, 0.72)]
+const TONS_DE_TELHADO := [Color(0.86, 0.36, 0.24), Color(0.74, 0.3, 0.2), Color(0.9, 0.48, 0.28), Color(0.6, 0.26, 0.2), Color(0.42, 0.44, 0.56), Color(0.5, 0.36, 0.3)]
 
 var mundo: Mundo
-var casas: Array[Vector2] = []
-var hortas := 0
-var arvores_de_quintal := 0
-var pocos := 0
-var _moldes: Dictionary = {}   # "tamanho_estilo_paleta" -> casa montada (fora da cena), de onde saem as cópias
+var lotes: Array = []   # um por casa: {"p": Vector2, "larg": float, "prof": float, "giro": float, "alt": float}
 
 
 func montar() -> void:
 	name = "CasarioDoReino"
 	var c: Vector2 = MundoDados.REINO["centro"]
-	var r: float = MundoDados.REINO["raio"]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4711
-	var ruas: Array = RUAS.duplicate()
-	for id in mundo.estradas:
-		if String(id).begins_with("travessa_"):
-			ruas.append(id)
-	for id in ruas:
-		var comp := mundo.comprimento_da_estrada(id)
-		var s := PASSO / 2.0
-		while s < comp:
-			var par := mundo.ponto_na_estrada(id, s)
-			var eixo: Vector2 = par[0]
-			var dir: Vector2 = par[1]
-			for lado in [-1.0, 1.0]:
-				var p: Vector2 = eixo + Vector2(-dir.y, dir.x) * lado * RECUO
-				if _livre(p, c, r, id, eixo):
-					_casa(p, eixo - p, rng)
-			s += PASSO
-	var de_rua := casas.size()
-	_encher_os_quarteiroes(c, r, rng)
-	for chave in _moldes:
-		(_moldes[chave] as Node3D).free()
-	_moldes.clear()
-	print("CasarioDoReino: quarteirões com ", casas.size() - de_rua, " casas de fundo, ", hortas, " hortas, ", arvores_de_quintal, " árvores de quintal e ", pocos, " poços")
-	print("CasarioDoReino: ", casas.size(), " casas de rua")
-
-
-func _livre(p: Vector2, c: Vector2, r: float, rua: String, eixo: Vector2) -> bool:
-	if p.distance_to(c) > r - 26.0 or mundo._em_alguma_area(p):
-		return false
-	for id in MundoDados.REGIOES:
-		if MundoDados.retangulo(id, 22.0).has_point(p):
-			return false
-	for pid in mundo.povoados:
-		if p.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]) + 14.0:
-			return false
-	for outra in casas:
-		if outra.distance_to(p) < 17.0:
-			return false
-	for id in mundo.estradas:   # nem em cima de outra rua (cruzamentos), nem de trilha
-		if id != rua and _perto_da_linha(p, mundo.estradas[id], 12.0):
-			return false
-	for trilha in mundo.trilhas:
-		if _perto_da_linha(p, trilha, 10.0):
-			return false
-	if _em_ladeira(p):
-		return false
-	return eixo.distance_to(p) > RECUO - 1.0
-
-
-## Ladeira (o morro do Castelo): casa só em chão plano.
-func _em_ladeira(p: Vector2) -> bool:
-	var h0 := mundo.terreno.altura_em(p.x, p.y)
-	for d in [Vector2(4, 0), Vector2(-4, 0), Vector2(0, 4), Vector2(0, -4)]:
-		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.3:
-			return true
-	return false
-
-
-## O MIOLO DOS QUARTEIRÕES: entre uma rua e outra o reino não é pasto. Cada lote de 24 m ganha uma casa de fundo, uma horta
-## de canteiros, um quintal com árvores de fruta ou um poço. Só fica vazio o que é rua, bairro, mercado, ladeira ou muralha.
-func _encher_os_quarteiroes(c: Vector2, r: float, rng: RandomNumberGenerator) -> void:
-	var canteiros: Array[Transform3D] = []
-	var verdes: Array[Transform3D] = []
-	var copas: Array[Transform3D] = []
+	var corpos := {}     # "setor_estilo" -> [transformações, cores]
+	var telhados := {}   # setor -> [transformações, cores]
 	var solidos := StaticBody3D.new()
-	solidos.name = "SolidosDosQuintais"
+	solidos.name = "Solidos"
 	add_child(solidos)
-	VilaRefugio.preparar(self, mundo.terreno.altura_em, solidos)
-	var lote := 24.0
-	var gx := c.x - r
-	while gx < c.x + r:
-		var gz := c.y - r
-		while gz < c.y + r:
-			var p := Vector2(gx + rng.randf_range(4.0, lote - 4.0), gz + rng.randf_range(4.0, lote - 4.0))
-			gz += lote
-			if not _lote_livre(p, c, r):
+	for i in FILEIRAS.size():
+		var r: float = FILEIRAS[i]
+		var ang := rng.randf() * 0.05
+		while ang < TAU - 0.012:
+			var larg := rng.randf_range(7.4, 10.2)
+			var meio := ang + larg / r / 2.0
+			ang += (larg + 0.5) / r
+			var p := c + Vector2.from_angle(meio) * r
+			var prof := rng.randf_range(8.4, 9.6)
+			if not _livre(p, larg):
 				continue
-			var sorte := rng.randf()
-			var y := mundo.terreno.altura_em(p.x, p.y)
-			if sorte < 0.42:      # casa de fundo, virada para a rua mais próxima
-				_casa(p, _rumo_da_rua(p), rng, "vazio")
-			elif sorte < 0.66:    # horta: quatro canteiros de terra com verdura
-				var giro := rng.randf() * PI
-				for k in 4:
-					var q := p + Vector2(cos(giro), sin(giro)).orthogonal() * (k - 1.5) * 2.2
-					canteiros.append(Transform3D(Basis(Vector3.UP, -giro).scaled_local(Vector3(8.0, 0.3, 1.4)), Vector3(q.x, y + 0.12, q.y)))
-					for v in 5:
-						var w := q + Vector2(cos(giro), sin(giro)) * (v - 2.0) * 1.6
-						verdes.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled_local(Vector3(0.7, rng.randf_range(0.5, 0.9), 0.7)), Vector3(w.x, y + 0.45, w.y)))
-				hortas += 1
-			elif sorte < 0.9:     # quintal de árvores de fruta
-				for k in rng.randi_range(2, 4):
-					var q := p + Vector2(rng.randf_range(-7.0, 7.0), rng.randf_range(-7.0, 7.0))
-					var e := rng.randf_range(0.7, 1.0)
-					copas.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled_local(Vector3(e, e, e)), Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y)))
-					mundo.arvores.adicionar(q.x, q.y, 0.35 * e)
-					arvores_de_quintal += 1
-			elif sorte < 0.95:    # poço de quintal
-				VilaRefugio._poco(Vector3(p.x, 0.0, p.y))
-				pocos += 1
-		gx += lote
-	var caixa := BoxMesh.new()
-	caixa.material = VilaRefugio._mat(Color(0.3, 0.2, 0.12))
-	_espalhar("Canteiros", caixa, canteiros, 220.0)
-	var moita := FabricaNatureza.arbusto(3.0)
-	_espalhar("Verduras", moita, verdes, 160.0, FabricaNatureza.material())
-	_espalhar("ArvoresDeQuintal", FabricaNatureza.folhosa(), copas, 420.0, FabricaNatureza.material())
+			var andares := 3 if rng.randf() < (0.55 if r < 345.0 else 0.3) else 2
+			var alt := andares * 2.75 + rng.randf_range(0.0, 0.7)
+			var giro := -meio + PI / 2.0   # eixo X da casa ao longo da fileira; Z na direção do raio
+			var y := mundo.terreno.altura_em(p.x, p.y) - 0.3
+			var base := Basis(Vector3.UP, giro)
+			var setor := int(meio / TAU * SETORES) % SETORES
+			var estilo := "pedra" if rng.randf() < 0.28 else "enxaimel"
+			var chave := "%d_%s" % [setor, estilo]
+			if not corpos.has(chave):
+				corpos[chave] = [[], []]
+			corpos[chave][0].append(Transform3D(base.scaled_local(Vector3(larg, alt, prof)), Vector3(p.x, y + alt / 2.0, p.y)))
+			corpos[chave][1].append(TONS_DE_PAREDE[rng.randi() % TONS_DE_PAREDE.size()] if estilo == "enxaimel" else Color(0.92, 0.9, 0.86) * rng.randf_range(0.85, 1.0))
+			if not telhados.has(setor):
+				telhados[setor] = [[], []]
+			var alt_telhado := rng.randf_range(3.2, 4.6)
+			# o prisma tem a cumeeira no eixo Z dele: gira 90 graus para a cumeeira correr ao longo da fileira
+			telhados[setor][0].append(Transform3D((base * Basis(Vector3.UP, PI / 2.0)).scaled_local(Vector3(prof + 1.0, alt_telhado, larg + 0.5)), Vector3(p.x, y + alt + alt_telhado / 2.0, p.y)))
+			telhados[setor][1].append(TONS_DE_TELHADO[rng.randi() % TONS_DE_TELHADO.size()] * rng.randf_range(0.88, 1.0))
+			var cs := CollisionShape3D.new()
+			var caixa := BoxShape3D.new()
+			caixa.size = Vector3(larg, alt + 3.0, prof)
+			cs.shape = caixa
+			cs.position = Vector3(p.x, y + (alt + 3.0) / 2.0, p.y)
+			cs.rotation.y = giro
+			solidos.add_child(cs)
+			lotes.append({"p": p, "larg": larg, "prof": prof, "giro": giro, "alt": alt})
+	var caixa_m := BoxMesh.new()
+	var prisma := PrismMesh.new()
+	for chave in corpos:
+		_multimesh("Corpos_" + String(chave), caixa_m, Fachadas.material(String(chave).get_slice("_", 1)), corpos[chave][0], corpos[chave][1])
+	for setor in telhados:
+		_multimesh("Telhados_%d" % setor, prisma, Fachadas.material("telhado"), telhados[setor][0], telhados[setor][1])
+	print("CasarioDoReino: ", lotes.size(), " casas em ", FILEIRAS.size(), " fileiras")
 
 
-func _lote_livre(p: Vector2, c: Vector2, r: float) -> bool:
-	if p.distance_to(c) > r - 24.0 or mundo.terreno.distancia_caminho(p.x, p.y) < 11.0 or _em_ladeira(p):
+## O lote está livre? Fora de rua e travessa, de praça, da encosta do rochedo e da faixa da muralha.
+func _livre(p: Vector2, larg: float) -> bool:
+	if mundo.terreno.distancia_caminho(p.x, p.y) < larg / 2.0 + 3.6 or mundo._em_alguma_area(p):
 		return false
-	for id in MundoDados.REGIOES:
-		if MundoDados.retangulo(id, 26.0).has_point(p):
-			return false
 	for pid in mundo.povoados:
-		if p.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]) + 12.0:
+		if p.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]) + 5.0:
 			return false
-	for outra in casas:
-		if outra.distance_to(p) < 15.0:
+	var h0 := mundo.terreno.altura_em(p.x, p.y)
+	for d in [Vector2(5, 0), Vector2(-5, 0), Vector2(0, 5), Vector2(0, -5)]:
+		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.3:
 			return false
 	return true
 
 
-## Direção (não normalizada) do lote até a rua mais próxima: a casa de fundo vira a porta para lá.
-func _rumo_da_rua(p: Vector2) -> Vector2:
-	var melhor := Vector2(0, 1)
-	var dmin := 1e9
-	for id in mundo.estradas:
-		var pts: PackedVector2Array = mundo.estradas[id]
-		for i in range(0, pts.size(), 3):
-			var d := pts[i].distance_squared_to(p)
-			if d < dmin:
-				dmin = d
-				melhor = pts[i] - p
-	return melhor
-
-
-func _espalhar(nome: String, malha: Mesh, lista: Array[Transform3D], visivel_ate: float, mat: Material = null) -> void:
+func _multimesh(nome: String, malha: Mesh, mat: Material, transformacoes: Array, cores: Array) -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
 	mm.mesh = malha
-	mm.instance_count = lista.size()
-	for i in lista.size():
-		mm.set_instance_transform(i, lista[i])
+	mm.instance_count = transformacoes.size()
+	for i in transformacoes.size():
+		mm.set_instance_transform(i, transformacoes[i])
+		mm.set_instance_color(i, cores[i])
 	var inst := MultiMeshInstance3D.new()
 	inst.name = nome
 	inst.multimesh = mm
-	if mat:
-		inst.material_override = mat
-	inst.visibility_range_end = visivel_ate
+	inst.material_override = mat
 	add_child(inst)
-
-
-func _perto_da_linha(p: Vector2, pts: PackedVector2Array, folga: float) -> bool:
-	for i in range(0, pts.size(), 2):
-		if pts[i].distance_to(p) < folga:
-			return true
-	return false
-
-
-func _casa(p: Vector2, para_a_rua: Vector2, rng: RandomNumberGenerator, interior := "moradia") -> void:
-	var n := casas.size()
-	# Uma casa de cada jeito é montada uma vez e as outras são cópias dela (copiar é dezenas de vezes mais rápido que montar).
-	var chave := "%d_%d_%d_%s" % [n % 2, 0 if n % 3 != 0 else 1, rng.randi() % PALETAS.size(), interior]
-	if not _moldes.has(chave):
-		var partes := chave.split("_")
-		var molde := ConstrutorCasa.montar(3, 2 + int(partes[0]), REF.ESTILO_PEDRA if partes[1] == "0" else REF.ESTILO_MADEIRA, true, interior, PALETAS[int(partes[2])])
-		for g in molde.find_children("*", "GeometryInstance3D", true, false):
-			(g as GeometryInstance3D).visibility_range_end = VISIVEL_ATE
-			(g as GeometryInstance3D).visibility_range_end_margin = 20.0
-		_moldes[chave] = molde
-	var casa := (_moldes[chave] as Node3D).duplicate() as Node3D
-	casa.name = "CasaDeRua%d" % n
-	casa.position = Vector3(p.x, mundo.terreno.altura_em(p.x, p.y), p.y)
-	casa.rotation.y = atan2(para_a_rua.x, para_a_rua.y)   # a porta (+Z local) olha para a rua
-	add_child(casa)
-	casas.append(p)

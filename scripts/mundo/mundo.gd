@@ -124,8 +124,6 @@ func construir() -> void:
 	progresso.emit("Traçando os caminhos da gente...")
 	await get_tree().process_frame
 	NavegacaoLocal.assar(regioes["refugio_do_pinhal"], Vector3(0, 0, 0), Vector2(48, 48), false)
-	var vcen := MundoDados.centro("valdoria")
-	NavegacaoLocal.assar(regioes["valdoria"], Vector3(vcen.x, 0, vcen.y), Vector2(80, 105), false)
 	progresso.emit("Soltando os bichos...")
 	await get_tree().process_frame
 	await get_tree().physics_frame   # o motor só enxerga os corpos novos depois de um passo de física: sem isso a conferência de "há pedra aqui?" não vê nada
@@ -430,10 +428,10 @@ func _pontes() -> void:
 
 ## Viaduto de pedra do alto da escadaria de Valdoria até a entrada do Castelo (desce 6,7 m ao longo de ~140 m).
 func _viaduto() -> void:
-	var vc := MundoDados.centro("valdoria")
+	# A SUBIDA DO CASTELO: uma rampa larga de madeira e pedra que sai da Rua do Castelo, ao sul, e sobe o rochedo até a porta.
 	var cc := MundoDados.centro("castelo_imperial")
-	var de := Vector3(vc.x, 6.7, vc.y - 132.0)
-	var ate := Vector3(cc.x, MundoDados.altura("castelo_imperial"), cc.y + 140.0)   # o viaduto sobe da cidade até a porta do castelo, no alto do morro
+	var de := Vector3(cc.x, terreno.altura_em(cc.x, cc.y + 256.0) + 0.1, cc.y + 256.0)
+	var ate := Vector3(cc.x, MundoDados.altura("castelo_imperial"), cc.y + 140.0)
 	var ponte := PonteDeMadeira.new()
 	ponte.largura = 12.0
 	add_child(ponte)
@@ -625,13 +623,12 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
-			var v0 := MundoDados.centro("valdoria")
 			var v1 := MundoDados.centro("castelo_imperial")
-			if p.distance_to(Geometry2D.get_closest_point_to_segment(p, v0, v1)) < 16.0:
-				continue   # nada nasce no eixo do viaduto entre Valdoria e o Castelo (uma árvore brotava no meio do tabuleiro)
+			if absf(p.x - v1.x) < 16.0 and p.y > v1.y and p.y < v1.y + 270.0:
+				continue   # nada nasce no eixo da subida do castelo (uma árvore brotava no meio do tabuleiro)
 			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
-			if absf(ao_reino) < 9.0 or (ao_reino < 0.0 and _rng.randf() < 0.6):
-				continue   # nada nasce encostado na muralha do reino, e dentro dela a mata é rala (é cidade, com árvores de praça)
+			if ao_reino < 9.0:
+				continue   # dentro da muralha do reino (e encostado nela) não nasce mata: é cidade, casa colada em casa
 			var no_povoado := false
 			for pid in povoados:
 				if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.05:

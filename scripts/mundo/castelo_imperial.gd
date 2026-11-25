@@ -15,7 +15,8 @@ const NORTE_Z := -124.0
 const LADO := 75.0
 const DUELO := Vector2(0.0, 0.0)
 const TRONO := Vector2(0.0, -100.0)
-const COR_DRAKKAR := Color(0.65, 0.1, 0.08)
+const COR_DRAKKAR := Color(0.14, 0.2, 0.5)   # hoje é a cor do rei de Valdoria: azul (o vermelho de Drakkar era da história antiga)
+const PEDRA_BRANCA := Color(0.86, 0.84, 0.8)   # o castelo é de pedra clara, para se ver de toda a cidade
 
 var vane: Inimigo
 var solon: Inimigo
@@ -41,7 +42,7 @@ func altura_em(x: float, z: float) -> float:
 
 
 func _ready() -> void:
-	nome_area = "Castelo Imperial"
+	nome_area = "Castelo de Valdoria"
 	paleta_casas = {"parede": Color(0.95, 0.95, 1.0), "telhado": Color(0.45, 0.5, 0.7)}   # pedra clara real e telhado azul-ardósia
 	tam = 300.0
 	_rng.seed = 97
@@ -87,7 +88,7 @@ func _ambiente() -> void:
 
 
 func _plataforma() -> void:
-	var pedra := VilaRefugio._mat(Color(0.34, 0.32, 0.32))
+	var pedra := Pedra.material(Color(0.7, 0.68, 0.64))
 	VilaRefugio._caixa(Vector3(0.0, PLAT / 2.0, (SUL_Z + NORTE_Z) / 2.0), Vector3(LADO * 2.0 + 4.0, PLAT, SUL_Z - NORTE_Z + 4.0), pedra, true)
 	var comp := 18.0
 	var ang := atan2(PLAT, comp)
@@ -110,17 +111,17 @@ func _plataforma() -> void:
 
 
 func _muralhas() -> void:
-	var cor := Color(0.4, 0.38, 0.4)
+	var cor := PEDRA_BRANCA
 	_muralha(Vector2(-LADO, SUL_Z), Vector2(-14.0, SUL_Z), 9.0, cor)
 	_muralha(Vector2(14.0, SUL_Z), Vector2(LADO, SUL_Z), 9.0, cor)
 	_muralha(Vector2(-LADO, SUL_Z), Vector2(-LADO, NORTE_Z), 9.0, cor)
 	_muralha(Vector2(LADO, SUL_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
 	_muralha(Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
 	for t in [Vector2(-16.0, SUL_Z), Vector2(16.0, SUL_Z)]:   # torres do portão
-		_torre_de_vigia(t, 11.0)
+		_torre_de_vigia(t, 11.0, PEDRA_BRANCA)
 	var ardosia := VilaRefugio._mat(Color(0.28, 0.32, 0.5))
 	for t in [Vector2(-LADO, SUL_Z), Vector2(LADO, SUL_Z), Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z)]:   # torres dos cantos: altas, com telhado em ponta
-		_torre_de_vigia(t, 20.0)
+		_torre_de_vigia(t, 20.0, PEDRA_BRANCA)
 		var cone := MeshInstance3D.new()
 		var cm := CylinderMesh.new()
 		cm.top_radius = 0.1
@@ -133,7 +134,7 @@ func _muralhas() -> void:
 		add_child(cone)
 	# Torres de menagem: quatro torres altas nos cantos do Salão do Trono, com telhado em ponta e bandeira no topo. São elas
 	# que dão ao castelo a silhueta de castelo, vista de qualquer rua do reino por cima das muralhas.
-	var pedra_alta := Pedra.material(Color(0.36, 0.34, 0.38))
+	var pedra_alta := Pedra.material(PEDRA_BRANCA)
 	for t in [Vector2(-34.0, -46.0), Vector2(34.0, -46.0), Vector2(-34.0, -122.0), Vector2(34.0, -122.0)]:
 		var alt := 36.0 if t.y < -100.0 else 30.0
 		var yb := _y(t)
@@ -284,7 +285,7 @@ func _patio_do_duelo() -> void:
 # ---------------------------------------------------------------- salão do trono e Grande Obelisco
 
 func _salao() -> void:
-	var cor := Color(0.3, 0.28, 0.32)
+	var cor := PEDRA_BRANCA * 0.94
 	_muralha(Vector2(-30.0, -50.0), Vector2(-7.0, -50.0), 14.0, cor)
 	_muralha(Vector2(7.0, -50.0), Vector2(30.0, -50.0), 14.0, cor)
 	_muralha(Vector2(-30.0, -50.0), Vector2(-30.0, -118.0), 14.0, cor)

@@ -19,7 +19,6 @@ func povoar() -> void:
 	_em_regiao("pomar_alto", [["cervo", 5], ["coelho", 6], ["ovelha", 7]], 90.0)
 	_em_regiao("acampamento_ruptura", [["cervo", 3], ["coelho", 4], ["lobo", 2]], 80.0)
 	_em_regiao("cratera_ignis", [["corvo", 6]], 100.0)
-	_em_regiao("valdoria", [["cao", 4]], 55.0)
 	_em_regiao("fronteira_ferrogris", [["corvo", 3]], 100.0)
 	# estradas: o que vive em cada trecho
 	_na_estrada("pomar", [["cervo", 4], ["coelho", 6], ["ovelha", 4]])

@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("8 regiões, 52 estradas, 117 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 52 and m.povoados.size() == 117 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("7 regiões, 38 estradas, 104 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 7 and m.estradas.size() == 38 and m.povoados.size() == 104 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
@@ -33,7 +33,7 @@ func _rodar() -> void:
 	marcar("O reino tem muralha com 4 portões (sul, oeste, leste, norte)", m.muralha.portoes.size() == 4, str(m.muralha.portoes))
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	var cc := MundoDados.centro("castelo_imperial")
-	marcar("O Castelo fica no alto do morro (24 m acima do reino)", m.chao_em(cc.x, cc.y) >= 24.0 and m.chao_em(0.0, 330.0) < 1.0, "%.1f m no castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 330.0)])
+	marcar("O Castelo fica no alto do rochedo, no centro (30 m acima da cidade)", m.chao_em(cc.x, cc.y) >= 30.0 and m.chao_em(0.0, 400.0) < 1.0, "%.1f m no castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 400.0)])
 	var rei := false
 	for n in get_nodes_in_group("npcs"):
 		if (n as Npc).nome == "Rei Aldren":
@@ -46,7 +46,7 @@ func _rodar() -> void:
 			bravos.append(String(e3.name))
 	marcar("Dentro da muralha não há inimigo (nem guarda hostil, nem lobo)", bravos.is_empty(), str(bravos.slice(0, 8)))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
-	marcar("O reino tem casas de rua e de fundo, hortas e quintais (600 casas ou mais, 100 hortas ou mais)", casario.casas.size() >= 600 and casario.hortas >= 100, "%d casas, %d hortas, %d árvores de quintal" % [casario.casas.size(), casario.hortas, casario.arvores_de_quintal])
+	marcar("Casario apertado dentro da muralha (1.500 casas ou mais)", casario.lotes.size() >= 1500, str(casario.lotes.size()))
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
 	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
 	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado
