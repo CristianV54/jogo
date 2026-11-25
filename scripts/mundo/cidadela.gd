@@ -193,7 +193,7 @@ func _palacio_e_torres() -> void:
 	var copas: Array[Transform3D] = []
 	for q in [[-200, 110], [-370, 90], [-190, -110], [-350, -110]]:
 		copas.append(Transform3D(Basis.from_scale(Vector3(1.2, 1.2, 1.2)), Vector3(_pl(q[0]), _h, _pl(q[1]))))
-		mundo.arvores.adicionar(_pl(q[0]), _pl(q[1]), 0.5)
+		_caixa_solida(Vector3(_pl(q[0]), _h + 1.5, _pl(q[1])), Vector3(0.9, 3.0, 0.9))   # o tronco
 	_multimesh("ArvoresDoPatio", FabricaNatureza.folhosa(), FabricaNatureza.material(), copas)
 
 

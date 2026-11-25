@@ -440,7 +440,7 @@ func _estabulo() -> void:
 func _catedral() -> void:
 	var pedra := Pedra.material(Color(0.8, 0.78, 0.72))
 	var ardosia := VilaRefugio._mat(Color(0.3, 0.33, 0.45))
-	var giro := atan2(dir.x, dir.y)
+	var giro := atan2(-dir.y, dir.x)   # o comprimento da nave (eixo X da caixa) corre ao longo de `dir`
 	var nave := _p(0.0, 34.0)
 	var y := _y(nave)
 	VilaRefugio._caixa(Vector3(nave.x, y + 9.0, nave.y), Vector3(34.0, 18.0, 16.0), pedra, true, giro)

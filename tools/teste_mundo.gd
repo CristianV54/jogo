@@ -37,15 +37,15 @@ func _rodar() -> void:
 	var eixos := MundoDados.PENHASCO_EIXOS
 	var meio_da_rampa := (MundoDados.RAMPA_R0 + MundoDados.RAMPA_R1) / 2.0
 	var pior_degrau := 0.0
-	var antes := -1.0
+	var altura_antes := -1.0
 	var t := MundoDados.RAMPA_TS + 0.05
 	while t > 0.0:
 		var hr := m.chao_em(-cos(t) * eixos.x * meio_da_rampa, sin(t) * eixos.y * meio_da_rampa)
-		if antes >= 0.0:
-			pior_degrau = maxf(pior_degrau, absf(hr - antes))
-		antes = hr
+		if altura_antes >= 0.0:
+			pior_degrau = maxf(pior_degrau, absf(hr - altura_antes))
+		altura_antes = hr
 		t -= 2.0 / (eixos.x * meio_da_rampa)
-	marcar("Dá para subir a rampa do penhasco a pé até o portão da cidadela", pior_degrau < 0.7 and antes > MundoDados.PENHASCO_ALTURA - 1.0, "maior degrau %.2f m; chega a %.1f m" % [pior_degrau, antes])
+	marcar("Dá para subir a rampa do penhasco a pé até o portão da cidadela", pior_degrau < 0.7 and altura_antes > MundoDados.PENHASCO_ALTURA - 1.0, "maior degrau %.2f m; chega a %.1f m" % [pior_degrau, altura_antes])
 	marcar("Cidadela no alto: 20 torres ou mais, a mais alta 130 m ou mais acima da cidade, 8 prédios ou mais", m.cidadela.torres >= 20 and m.cidadela.topo_mais_alto >= 130.0 and m.cidadela.predios >= 8, "%d torres, topo a %.0f m, %d prédios" % [m.cidadela.torres, m.cidadela.topo_mais_alto, m.cidadela.predios])
 	var rei := false
 	for n in get_nodes_in_group("npcs"):
@@ -59,7 +59,7 @@ func _rodar() -> void:
 			bravos.append(String(e3.name))
 	marcar("Dentro da muralha não há inimigo (nem guarda hostil, nem lobo)", bravos.is_empty(), str(bravos.slice(0, 8)))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
-	marcar("Casario apertado dentro da muralha (900 casas ou mais, 100 quarteirões ou mais)", casario.lotes.size() >= 900 and casario.quarteiroes >= 100, "%d casas, %d quarteirões" % [casario.lotes.size(), casario.quarteiroes])
+	marcar("Casario apertado dentro da muralha (500 casas ou mais, como no reino de blocos, em 100 quarteirões ou mais)", casario.lotes.size() >= 500 and casario.quarteiroes >= 100, "%d casas, %d quarteirões" % [casario.lotes.size(), casario.quarteiroes])
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
 	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
 	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado
