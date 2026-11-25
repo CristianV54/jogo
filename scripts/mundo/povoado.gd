@@ -289,14 +289,7 @@ func _fogueira(p: Vector2, escala := 0.9) -> void:
 
 
 func _tenda(p: Vector2, cor: Color) -> void:
-	var y := _y(p)
-	VilaRefugio._telhado(Vector3(p.x, y + 1.2, p.y), Vector3(3.6, 2.4, 3.8), VilaRefugio._mat(cor), atan2(para_longe.x, para_longe.y))
-	var cs := CollisionShape3D.new()
-	var caixa := BoxShape3D.new()
-	caixa.size = Vector3(3.2, 2.2, 3.4)
-	cs.shape = caixa
-	cs.position = Vector3(p.x, y + 1.1, p.y)
-	_solidos.add_child(cs)
+	_kit().tenda(_chao(p), -para_longe, cor)
 
 
 func _movel(nome_m: String, p: Vector2, giro := 0.0) -> void:
@@ -736,6 +729,10 @@ func _cabana() -> void:
 
 
 func _posto() -> void:
+	_terreiro(_p(1.0, 12.0), 15.0)
+	_kit().cavalete_de_armas(_chao(_p(-14.0, 12.0)), dir)
+	_kit().carga(_chao(_p(15.5, 13.0)), para_longe, 3, _rng.randi() % 20)
+	_kit().carroca(_chao(_p(20.0, 3.0)), dir)
 	for k in 3:
 		_tenda(_p(-8.0 + k * 9.0, 8.0 + (k % 2) * 3.0), [Color(0.42, 0.22, 0.18), Color(0.34, 0.3, 0.2), Color(0.28, 0.26, 0.32)][k])
 	_fogueira(_p(0.0, 16.0), 1.0)
@@ -751,10 +748,13 @@ func _posto() -> void:
 func _posto_imperial() -> void:
 	_casa("Estalagem", _p(0.0, 6.0), 4, 4, REF.ESTILO_PEDRA)
 	_casa("Estabulo", _p(-24.0, 8.0), 3, 3, REF.ESTILO_MADEIRA, "deposito")
+	_terreiro(_p(4.0, 16.0), 22.0)
 	for k in 3:   # caravanas paradas
-		var q := _p(12.0 + k * 8.0, 20.0)
-		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(2.2, 0.8, 3.6), VilaRefugio._mat(Color(0.4, 0.28, 0.16)), true, atan2(dir.x, dir.y))
-		VilaRefugio._caixa(Vector3(q.x, _y(q) + 1.6, q.y), Vector3(1.4, 0.9, 1.6), VilaRefugio._mat(Color(0.45, 0.35, 0.2)))
+		_kit().carroca(_chao(_p(12.0 + k * 8.0, 20.0)), dir)
+	for u in [-12.0, 12.0]:
+		_kit().lampiao_de_poste(_chao(_p(u, -2.0)), para_longe)
+	_kit().cavalete_de_armas(_chao(_p(10.0, 2.0)), -para_longe)
+	_kit().carga(_chao(_p(-8.0, 1.0)), dir, 3, _rng.randi() % 20)
 	_curral(_p(-26.0, 26.0), 12.0, 9.0, [["cavalo", "Cavalo de carga", "cavalo", 1.0, {"carne": [2, 3], "couro": [1, 1]}], ["cavalo", "Cavalo de carga", "cavalo", 1.0, {"carne": [2, 3], "couro": [1, 1]}]])
 	_fogueira(_p(2.0, 18.0), 0.8)
 	_movel("Table_Large", _p(-2.0, 14.0))

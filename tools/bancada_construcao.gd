@@ -103,6 +103,8 @@ func _rodar() -> void:
 			await _catedral()
 		"quartel":
 			await _quartel()
+		"acampamento":
+			await _acampamento()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -286,3 +288,18 @@ func _quartel() -> void:
 	await _foto("01_pecas_do_quartel", Vector3(1, 2.6, 9.5), Vector3(1, 2.0, 0), Vector3(-0.6, 0, 1.2))
 	await _foto("02_cavalete_de_perto", Vector3(-1.2, 1.7, 3.6), Vector3(-3, 1.1, 0), Vector3(-5.2, 0, 0.8))
 	_conferir("Quartel: as três peças têm colisão", kit._corpo.get_child_count() == 3, "%d sólidos" % kit._corpo.get_child_count())
+
+
+## Peças de acampamento e de beira d'água: tenda, barco e varal de peixe.
+func _acampamento() -> void:
+	var kit := PecasDaRua.new()
+	root.add_child(kit)
+	kit.tenda(Vector3(-4, 0, 0), Vector2(0, 1), Color(0.42, 0.22, 0.18))
+	kit.barco(Vector3(1.5, 0, 0.5), Vector2(0.3, 1).normalized())
+	kit.varal_de_peixe(Vector3(6.5, 0, 0), Vector2(0, 1))
+	kit.fechar()
+	await physics_frame
+	await _foto("01_tenda_barco_varal", Vector3(1.5, 2.8, 11), Vector3(1.5, 1.0, 0), Vector3(-1.2, 0, 2.6))
+	await _foto("02_tenda_de_perto", Vector3(-1.5, 1.7, 5.5), Vector3(-4, 1.0, 0), Vector3(-6.6, 0, 2.2))
+	await _foto("03_barco_de_perto", Vector3(4.2, 2.0, 4.2), Vector3(1.5, 0.4, 0.5), Vector3(-0.4, 0, 1.6))
+	_conferir("Acampamento: as três peças têm colisão", kit._corpo.get_child_count() == 3, "%d sólidos" % kit._corpo.get_child_count())

@@ -268,22 +268,25 @@ func estandarte(p: Vector3, frente: Vector2) -> void:
 	_cilindro(p + Vector3(0, 6.6, 0), 0.12, 0.24, Color(0.85, 0.72, 0.3))
 
 
-## Barco de pesca a remo, em terra: casco de tábuas com proa em ponta, bancos e dois remos.
+## Barco de pesca a remo, em terra: fundo chato, costados, proa em ponta, popa reta, dois bancos e os remos guardados dentro.
 func barco(p: Vector3, frente: Vector2) -> void:
 	var giro := atan2(frente.x, frente.y)
 	var casco := MADEIRA.darkened(0.1)
-	_no_conjunto(p, giro, Vector3(0, 0.22, 0), Vector3(1.1, 0.1, 3.4), casco)
+	var b := Basis(Vector3.UP, giro)
+	_no_conjunto(p, giro, Vector3(0, 0.2, -0.1), Vector3(1.28, 0.1, 3.5), casco.darkened(0.15))   # fundo
+	_no_conjunto(p, giro, Vector3(0, 0.2, 1.95), Vector3(0.5, 0.1, 0.6), casco.darkened(0.15))    # fundo da proa (estreito: cabe dentro da ponta)
 	for sx in [-1.0, 1.0]:
-		var b := Basis(Vector3.UP, giro)
-		_peca("caixa", casco.lightened(0.1), Transform3D((b * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.08, 0.62, 3.4)), p + b * Vector3(sx * 0.66, 0.5, 0)))
-		_peca("caixa", MADEIRA.darkened(0.3), Transform3D((b * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.11, 0.08, 3.5)), p + b * Vector3(sx * 0.76, 0.8, 0)))
-		_peca("caixa", casco.lightened(0.1), Transform3D((b * Basis(Vector3.UP, -sx * 0.62) * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.08, 0.62, 1.3)), p + b * Vector3(sx * 0.36, 0.5, 2.2)))   # a proa fecha em ponta
-		_peca("caixa", MADEIRA.lightened(0.2), Transform3D((b * Basis(Vector3.UP, sx * 0.25) * Basis(Vector3.RIGHT, 0.1)).scaled_local(Vector3(0.06, 0.06, 2.6)), p + b * Vector3(sx * 1.25, 0.2, -0.2)))   # remo
-		_peca("caixa", MADEIRA.lightened(0.2), Transform3D((b * Basis(Vector3.UP, sx * 0.25)).scaled_local(Vector3(0.22, 0.04, 0.6)), p + b * Vector3(sx * 1.6, 0.1, -1.6)))
-	_no_conjunto(p, giro, Vector3(0, 0.5, -1.72), Vector3(1.3, 0.62, 0.08), casco.lightened(0.1))   # popa
-	for z in [-0.9, 0.5]:
-		_no_conjunto(p, giro, Vector3(0, 0.6, float(z)), Vector3(1.3, 0.06, 0.3), MADEIRA.lightened(0.15))
-	_solido(p + Vector3(0, 0.45, 0), Vector3(1.6, 0.9, 4.2), giro)
+		_no_conjunto(p, giro, Vector3(sx * 0.62, 0.5, -0.1), Vector3(0.08, 0.6, 3.5), casco.lightened(0.1))   # costado
+		_no_conjunto(p, giro, Vector3(sx * 0.64, 0.82, -0.1), Vector3(0.14, 0.07, 3.56), MADEIRA.darkened(0.3))   # borda
+		_peca("caixa", casco.lightened(0.1), Transform3D((b * Basis(Vector3.UP, -sx * 0.464)).scaled_local(Vector3(0.08, 0.6, 1.4)), p + b * Vector3(sx * 0.31, 0.5, 2.25)))   # a proa fecha em ponta
+		_peca("caixa", MADEIRA.darkened(0.3), Transform3D((b * Basis(Vector3.UP, -sx * 0.464)).scaled_local(Vector3(0.14, 0.07, 1.44)), p + b * Vector3(sx * 0.32, 0.82, 2.25)))
+		_no_conjunto(p, giro, Vector3(sx * 0.22, 0.7, -0.2), Vector3(0.06, 0.06, 2.6), MADEIRA.lightened(0.2))   # remo deitado nos bancos
+		_no_conjunto(p, giro, Vector3(sx * 0.22, 0.7, -1.3), Vector3(0.2, 0.04, 0.55), MADEIRA.lightened(0.2))   # pá do remo
+	_no_conjunto(p, giro, Vector3(0, 0.5, 2.92), Vector3(0.12, 0.7, 0.12), MADEIRA.darkened(0.3))   # roda de proa
+	_no_conjunto(p, giro, Vector3(0, 0.5, -1.86), Vector3(1.32, 0.6, 0.08), casco.lightened(0.1))   # popa
+	for z in [-0.9, 0.6]:
+		_no_conjunto(p, giro, Vector3(0, 0.62, float(z)), Vector3(1.2, 0.06, 0.3), MADEIRA.lightened(0.15))
+	_solido(p + Vector3(0, 0.45, 0) + b * Vector3(0, 0, 0.5), Vector3(1.5, 0.9, 5.0), giro)
 
 
 ## Varal de secar peixe: dois esteios, duas varas e peixes pendurados pela cauda.
@@ -295,6 +298,23 @@ func varal_de_peixe(p: Vector3, frente: Vector2) -> void:
 		_no_conjunto(p, giro, Vector3(0, float(h), 0), Vector3(3.0, 0.06, 0.06), MADEIRA)
 		for k in 6:
 			var x := -1.1 + k * 0.44
-			_no_conjunto(p, giro, Vector3(x, float(h) - 0.24, 0), Vector3(0.13, 0.4, 0.05), Color(0.62, 0.66, 0.7) if k % 2 == 0 else Color(0.72, 0.6, 0.48))
+			_no_conjunto(p, giro, Vector3(x, float(h) - 0.24, 0), Vector3(0.13, 0.4, 0.05), Color(0.46, 0.52, 0.58) if k % 2 == 0 else Color(0.58, 0.47, 0.36))
 			_no_conjunto(p, giro, Vector3(x, float(h) - 0.05, 0), Vector3(0.16, 0.1, 0.03), Color(0.45, 0.48, 0.52))
 	_solido(p + Vector3(0, 0.95, 0), Vector3(3.0, 1.9, 0.3), giro)
+
+
+## Tenda de acampamento em duas águas: lona, mastros, cumeeira, entrada aberta com as abas presas, estacas e esteira.
+func tenda(p: Vector3, frente: Vector2, cor: Color) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var pau := MADEIRA.darkened(0.25)
+	_no_conjunto(p, giro, Vector3(0, 1.1, 0), Vector3(3.2, 2.2, 3.6), cor, 0.0, "prisma")
+	_no_conjunto(p, giro, Vector3(0, 0.86, 1.81), Vector3(1.9, 1.7, 0.04), Color(0.08, 0.07, 0.07), 0.0, "prisma")   # a boca escura da entrada
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 1.25, 0.5, 1.84), Vector3(0.5, 0.9, 0.05), cor.lightened(0.12))   # abas da entrada, recolhidas para os lados
+		for sz in [-1.0, 1.0]:
+			_no_conjunto(p, giro, Vector3(sx * 1.95, 0.12, sz * 1.5), Vector3(0.07, 0.3, 0.07), pau, sz * 0.4)   # estacas
+	for sz in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(0, 1.2, sz * 1.84), Vector3(0.09, 2.4, 0.09), pau)
+	_no_conjunto(p, giro, Vector3(0, 2.26, 0), Vector3(0.09, 0.09, 4.1), pau)
+	_no_conjunto(p, giro, Vector3(0, 0.04, 2.6), Vector3(1.0, 0.06, 1.3), Color(0.45, 0.36, 0.26))   # esteira na porta
+	_solido(p + Vector3(0, 1.0, 0), Vector3(3.0, 2.0, 3.4), giro)
