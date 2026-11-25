@@ -115,6 +115,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 |---|---|
 | `docs/HISTORIA-E-MISSOES.md` | Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados |
 | `docs/INVENTARIO-DE-DEFEITOS.md` | Inventário de defeitos de 24/11/2026 (lista única, com foto ou medida de cada um; fotos em `docs/inventario/`) |
+| `docs/mapa-novo/construcao_v1/` e `construcao_v2/` | Fotos da ilha construída: v1 = ilha de 4,6 km; v2 = ilha de 7,45 x 5,6 km com o mapa (tecla M) em estilo antigo |
 | `docs/mapa-novo/PLANTA_v1.md` | Planta do mapa novo, versão 1: tamanho, lugares, temas e o que fica para depois |
 | `docs/LEIS-DO-JOGO.md` | Leis do jogo (Reino de Cinzas) |
 | `docs/MAPA-DO-TRABALHO.md` | Mapa do trabalho (gerado lendo os arquivos em 23/11/2026; atualizar quando criar algo novo) |

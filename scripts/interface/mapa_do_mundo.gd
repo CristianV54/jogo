@@ -31,6 +31,7 @@ var _arrastando := false
 var _arrastou := false
 var _nomes_postos: Array[Rect2] = []   # onde já há nome escrito neste quadro
 var _fonte_regiao: Font
+var _cor_do_mar := Color(0.5, 0.62, 0.64)
 var _fonte_vila: Font
 var _costa := PackedVector2Array()   # contorno da ilha, em metros do mundo
 
@@ -65,15 +66,15 @@ func _process(delta: float) -> void:
 func _escala() -> float:
 	var tela := get_viewport_rect().size
 	var lim := MundoDados.LIMITES.size
-	return minf(tela.x / lim.x, tela.y / lim.y) * zoom * 1.04
+	return minf(tela.x / lim.x, (tela.y - 46.0) / lim.y) * zoom * 1.0   # 46 = a faixa da escala, embaixo
 
 
 func mundo_para_tela(p: Vector2) -> Vector2:
-	return get_viewport_rect().size / 2.0 + (p - centro) * _escala()
+	return get_viewport_rect().size / 2.0 - Vector2(0, 23) + (p - centro) * _escala()
 
 
 func tela_para_mundo(q: Vector2) -> Vector2:
-	return centro + (q - get_viewport_rect().size / 2.0) / _escala()
+	return centro + (q - get_viewport_rect().size / 2.0 + Vector2(0, 23)) / _escala()
 
 
 func _aproximar(fator: float, em_torno: Vector2) -> void:
@@ -191,7 +192,6 @@ func _tracar_costa() -> void:
 func _draw() -> void:
 	var tela := get_viewport_rect().size
 	_nomes_postos.clear()
-	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.5, 0.62, 0.64))   # o mar cobre a tela toda
 	var mundo := Mundo.instancia
 	if mundo == null:
 		return
@@ -199,6 +199,9 @@ func _draw() -> void:
 		_fonte_regiao = _serifa(false, true)
 		_fonte_vila = _serifa(true, false)
 		_tracar_costa()
+		if mundo.mapa_floresta:
+			_cor_do_mar = mundo.mapa_floresta.get_image().get_pixel(1, 1)   # o mar aberto da pintura: o fundo da tela usa a mesma cor
+	draw_rect(Rect2(Vector2.ZERO, tela), _cor_do_mar)   # o mar cobre a tela toda
 	var lim := MundoDados.LIMITES
 	var esc := _escala()
 	if mundo.mapa_floresta:
