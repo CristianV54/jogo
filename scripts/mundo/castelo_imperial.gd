@@ -46,7 +46,7 @@ func altura_em(x: float, z: float) -> float:
 func _ready() -> void:
 	nome_area = "Castelo de Valdoria"
 	paleta_casas = {"parede": Color(0.95, 0.95, 1.0), "telhado": Color(0.45, 0.5, 0.7)}   # pedra clara real e telhado azul-ardósia
-	tam = 300.0
+	tam = 260.0   # o castelo ocupa quase toda a região: sem faixa de terreno sobrando em volta da muralha
 	_rng.seed = 97
 	_ambiente()
 	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.5, 0.48, 0.44), Color(0.44, 0.42, 0.4), 260.0)   # o alto do rochedo é pedra, não gramado
@@ -114,16 +114,16 @@ func _plataforma() -> void:
 
 func _muralhas() -> void:
 	var cor := PEDRA_BRANCA
-	_muralha(Vector2(-LADO, SUL_Z), Vector2(-14.0, SUL_Z), 9.0, cor)
-	_muralha(Vector2(14.0, SUL_Z), Vector2(LADO, SUL_Z), 9.0, cor)
-	_muralha(Vector2(-LADO, SUL_Z), Vector2(-LADO, NORTE_Z), 9.0, cor)
-	_muralha(Vector2(LADO, SUL_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
-	_muralha(Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z), 9.0, cor)
+	_muralha(Vector2(-LADO, SUL_Z), Vector2(-14.0, SUL_Z), 14.0, cor)
+	_muralha(Vector2(14.0, SUL_Z), Vector2(LADO, SUL_Z), 14.0, cor)
+	_muralha(Vector2(-LADO, SUL_Z), Vector2(-LADO, NORTE_Z), 14.0, cor)
+	_muralha(Vector2(LADO, SUL_Z), Vector2(LADO, NORTE_Z), 14.0, cor)
+	_muralha(Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z), 14.0, cor)
 	for t in [Vector2(-16.0, SUL_Z), Vector2(16.0, SUL_Z)]:   # torres do portão
-		_torre_de_vigia(t, 11.0, PEDRA_BRANCA)
+		_torre_de_vigia(t, 19.0, PEDRA_BRANCA)
 	var ardosia := VilaRefugio._mat(Color(0.28, 0.32, 0.5))
 	for t in [Vector2(-LADO, SUL_Z), Vector2(LADO, SUL_Z), Vector2(-LADO, NORTE_Z), Vector2(LADO, NORTE_Z)]:   # torres dos cantos: altas, com telhado em ponta
-		_torre_de_vigia(t, 20.0, PEDRA_BRANCA)
+		_torre_de_vigia(t, 26.0, PEDRA_BRANCA)
 		var cone := MeshInstance3D.new()
 		var cm := CylinderMesh.new()
 		cm.top_radius = 0.1
@@ -132,7 +132,7 @@ func _muralhas() -> void:
 		cm.radial_segments = 8
 		cm.material = ardosia
 		cone.mesh = cm
-		cone.position = Vector3(t.x, _y(t) + 20.0 + 4.5, t.y)
+		cone.position = Vector3(t.x, _y(t) + 26.0 + 4.5, t.y)
 		add_child(cone)
 	# Torres de menagem: quatro torres altas nos cantos do Salão do Trono, com telhado em ponta e bandeira no topo. São elas
 	# que dão ao castelo a silhueta de castelo, vista de qualquer rua do reino por cima das muralhas.
@@ -392,6 +392,7 @@ func _corte_do_rei() -> void:
 		n.queue_free()
 	focos.clear()
 	_torre_de_menagem()
+	_telhado_do_salao()
 	portao_salao.abrir()
 	_npc("Rei Aldren", "Rei de Valdoria", "res://scenes/personagens/solon.tscn", Vector2(0.0, -93.0), PackedStringArray(["Então você é o batedor do Pinhal de quem falam. Aproxime-se.", "Um reino se guarda com muralha, e se mantém com gente. Ande pelas ruas, veja como vive o meu povo.", "Há lobos nas estradas e coisa pior nas terras queimadas. Quem as limpa tem a gratidão da coroa."]),
 		[{"esperar": 8.0, "anim": "Idle", "olhar": Vector2(0.0, -60.0)}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": Vector2(6.0, -88.0)}])
@@ -426,6 +427,23 @@ func _torre_de_menagem() -> void:
 		var topo := yb + alt + 1.2 + lado * 1.2
 		VilaRefugio._caixa(Vector3(p.x, topo + 2.5, p.y), Vector3(0.25, 5.0, 0.25), VilaRefugio._mat(Color(0.2, 0.15, 0.1)))
 		VilaRefugio._caixa(Vector3(p.x + 1.9, topo + 4.0, p.y), Vector3(3.6, 2.2, 0.08), VilaRefugio._mat(COR_DRAKKAR))
+
+
+## O Salão do Trono ganha telhado: duas águas de ardósia azul apoiadas nas paredes (14 m), com o cume a 26 m. Lá dentro
+## fica um salão coberto, alto, com as colunas e o tapete; lampiões dão a luz.
+func _telhado_do_salao() -> void:
+	var ardosia := VilaRefugio._mat(Color(0.22, 0.28, 0.52))
+	ardosia.cull_mode = BaseMaterial3D.CULL_DISABLED   # visto de dentro o telhado também aparece (é o forro do salão)
+	var y := _y(Vector2(0.0, -84.0)) + 14.0
+	VilaRefugio._telhado(Vector3(0.0, y + 6.0, -84.0), Vector3(63.0, 12.0, 71.0), ardosia, 0.0)
+	for z in [-62.0, -84.0, -104.0]:
+		for lado in [-1.0, 1.0]:
+			var luz := OmniLight3D.new()
+			luz.light_color = Color(1.0, 0.82, 0.55)
+			luz.light_energy = 2.2
+			luz.omni_range = 26.0
+			luz.position = Vector3(lado * 16.0, y - 7.0, z)
+			add_child(luz)
 
 
 func _ponta(pos: Vector3, raio: float, altura: float, mat: Material) -> void:

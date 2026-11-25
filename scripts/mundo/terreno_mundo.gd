@@ -184,13 +184,10 @@ func _altura_crua(x: float, z: float) -> float:
 	if melhor < 7.0:
 		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo)) * smoothstep(-30.0, 160.0, eixo.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
-	for id in MundoDados.REGIOES:   # rochedo do Castelo: o chão sobe até a altura da região (encosta de pedra em volta, a cidade embaixo)
-		var alto := MundoDados.altura(id)
-		if alto > 0.0:
-			var rr := MundoDados.retangulo(id)
-			var fora := Vector2(maxf(maxf(rr.position.x - x, x - rr.end.x), 0.0), maxf(maxf(rr.position.y - z, z - rr.end.y), 0.0)).length()
-			var colina := MundoDados.colina_da_cidade(x, z)   # a cidade sobe devagar da muralha até o pé do rochedo
-			h += colina + (alto - colina) * smoothstep(55.0, 0.0, fora)   # e o rochedo sobe o resto, de uma vez
+	if absf(x) < 700.0 and absf(z) < 700.0:   # o reino: colina da cidade, rochedo redondo do Castelo e o corte da escadaria
+		h += MundoDados.relevo_do_reino(x, z)
+		if absf(x) < MundoDados.ESCADARIA_MEIA_LARGURA + 3.0 and z > MundoDados.ESCADARIA_Z_ALTO - 6.0 and z < MundoDados.ESCADARIA_Z_BAIXO + 4.0:
+			h = lerpf(h, minf(h, MundoDados.altura_da_escadaria(z) - 0.5), smoothstep(MundoDados.ESCADARIA_MEIA_LARGURA + 3.0, MundoDados.ESCADARIA_MEIA_LARGURA, absf(x)))
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
 		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))
@@ -213,11 +210,8 @@ func cor_do_mundo(x: float, z: float) -> Color:
 	var c := Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
 	var ao_reino := Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
 	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, ao_reino))
-	for id in MundoDados.REGIOES:   # a encosta do rochedo do Castelo é rocha nua
-		if MundoDados.altura(id) > 0.0:
-			var rr := MundoDados.retangulo(id)
-			var fora := Vector2(maxf(maxf(rr.position.x - x, x - rr.end.x), 0.0), maxf(maxf(rr.position.y - z, z - rr.end.y), 0.0)).length()
-			c = c.lerp(Color(0.46, 0.44, 0.42) * (0.85 + 0.3 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0)), smoothstep(62.0, 50.0, fora))
+	var do_centro := Vector2(x, z).distance_to(MundoDados.REINO["centro"])   # o paredão e o platô do rochedo são rocha nua
+	c = c.lerp(Color(0.46, 0.44, 0.42) * (0.85 + 0.3 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0)), smoothstep(MundoDados.RAIO_DO_PLATO + MundoDados.LARGURA_DO_PAREDAO + 4.0, MundoDados.RAIO_DO_PLATO + MundoDados.LARGURA_DO_PAREDAO - 8.0, do_centro))
 	return c   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 

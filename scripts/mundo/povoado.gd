@@ -61,6 +61,8 @@ func montar() -> void:
 			_guarita()
 		"catedral":
 			_catedral()
+		"lavoura":
+			_lavoura()
 		_:
 			_posto_imperial()
 	if String(dados["tipo"]) != "guarita":   # a guarita não tem placa: fica em cima da estrada
@@ -455,6 +457,17 @@ func _catedral() -> void:
 		_fogueira(_p(u * 1.8, 20.0), 0.4)
 	_npc("Sacristão", "Sacristão da catedral", "oren", _p(4.0, 20.0), PackedStringArray(["O sino toca ao nascer e ao pôr do sol. Dá para ouvir até da feira do portão."]),
 		[{"esperar": 7.0, "anim": "Idle", "olhar": _p(0.0, 10.0)}, {"ir": _p(-8.0, 18.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": _p(0.0, 10.0)}, {"ir": _p(4.0, 20.0), "vel": 1.0}])
+
+
+## Lavoura do reino (fora da muralha): três campos plantados de verdade, com cerca, leiras e espantalho, um palheiro e
+## gente lavrando. É de onde a cidade come.
+func _lavoura() -> void:
+	var campos := [_p(-26.0, 14.0), _p(4.0, 16.0), _p(-10.0, 38.0)]
+	for campo in campos:
+		_plantacao(campo, 24.0, 16.0)
+	_feno(_p(26.0, 36.0))
+	_lavrador("Lavrador do reino", "oren", campos[0], PackedStringArray(["Trigo para o pão da cidade. Quando o sino toca, a gente recolhe."]))
+	_lavrador("Lavradora do reino", "tessa", campos[1], PackedStringArray(["A terra aqui é boa. Ruim é o imposto do celeiro do rei."]))
 
 
 ## Guarita de portão: duas sentinelas paradas, um braseiro e um banco. Fica do lado de dentro da muralha.

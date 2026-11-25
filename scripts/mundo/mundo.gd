@@ -20,7 +20,7 @@ var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var tubarao: Tubarao
 var muralha: MuralhaDoReino
-var lavouras: Array = []   # campos em volta da muralha: [centro Vector2, meia-largura, meia-profundidade, giro, tipo 0 trigo / 1 horta / 2 terra arada]
+var cidadela: Cidadela
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
 var capim: CapimDoMundo
@@ -102,8 +102,7 @@ func construir() -> void:
 	muralha.mundo = self
 	add_child(muralha)
 	muralha.montar()
-	_lavouras()
-	etapa.call("pontes, mar, muralha e lavouras do reino")
+	etapa.call("pontes, mar e muralha do reino")
 	_floresta()
 	_horizonte()
 	etapa.call("floresta e mapa")
@@ -118,6 +117,10 @@ func construir() -> void:
 		povoados[id]["no"] = pv
 		var cp: Vector2 = povoados[id]["centro"]
 		NavegacaoLocal.assar(pv, Vector3(cp.x, terreno.altura_em(cp.x, cp.y), cp.y), Vector2(1, 1) * float(povoados[id]["raio"]) * 0.65, true)
+	var piso := CalcamentoDoReino.new()
+	piso.mundo = self
+	add_child(piso)
+	piso.montar()
 	var casario := CasarioDoReino.new()
 	casario.mundo = self
 	add_child(casario)
@@ -429,30 +432,11 @@ func _pontes() -> void:
 
 
 ## Viaduto de pedra do alto da escadaria de Valdoria até a entrada do Castelo (desce 6,7 m ao longo de ~140 m).
-func _viaduto() -> void:
-	# A SUBIDA DO CASTELO: uma rampa larga de madeira e pedra que sai da Rua do Castelo, ao sul, e sobe o rochedo até a porta.
-	var cc := MundoDados.centro("castelo_imperial")
-	var de := Vector3(cc.x, terreno.altura_em(cc.x, cc.y + 256.0) + 0.1, cc.y + 256.0)
-	var ate := Vector3(cc.x, MundoDados.altura("castelo_imperial"), cc.y + 140.0)
-	var ponte := PonteDeMadeira.new()
-	ponte.largura = 12.0
-	add_child(ponte)
-	ponte.ligar(de, ate)
-	var pedra := StandardMaterial3D.new()
-	pedra.albedo_color = Color(0.45, 0.42, 0.4)
-	for k in 9:   # pilares de pedra sob o viaduto
-		var t := float(k) / 8.0
-		var p := de.lerp(ate, t)
-		var h := maxf(p.y - terreno.altura_em(p.x, p.z), 0.0)
-		if h < 0.8:
-			continue
-		var mi := MeshInstance3D.new()
-		var b := BoxMesh.new()
-		b.size = Vector3(10.0, h, 3.0)
-		b.material = pedra
-		mi.mesh = b
-		mi.position = Vector3(p.x, p.y - h / 2.0 - 0.3, p.z)
-		add_child(mi)
+func _viaduto() -> void:   # a subida do castelo é da Cidadela (escadaria de pedra); aqui só ela é montada
+	cidadela = Cidadela.new()
+	cidadela.mundo = self
+	add_child(cidadela)
+	cidadela.montar()
 
 
 func _barreiras() -> void:
@@ -625,19 +609,9 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
-			var v1 := MundoDados.centro("castelo_imperial")
-			if absf(p.x - v1.x) < 16.0 and p.y > v1.y and p.y < v1.y + 270.0:
-				continue   # nada nasce no eixo da subida do castelo (uma árvore brotava no meio do tabuleiro)
 			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
 			if ao_reino < 9.0:
 				continue   # dentro da muralha do reino (e encostado nela) não nasce mata: é cidade, casa colada em casa
-			var na_lavoura := false
-			for lav in lavouras:
-				if p.distance_to(lav[0]) < maxf(float(lav[1]), float(lav[2])) + 4.0:
-					na_lavoura = true
-					break
-			if na_lavoura:
-				continue
 			var no_povoado := false
 			for pid in povoados:
 				if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.05:
@@ -711,63 +685,6 @@ func _floresta() -> void:
 
 
 ## Montanhas em volta do mundo inteiro e chão até onde a vista alcança.
-## LAVOURAS DO REINO: fora da muralha, em volta da cidade, campos de trigo dourado, hortas e terra arada (é de onde a
-## cidade come). Cada campo é um talhão baixo com as leiras pintadas; não nasce em estrada, povoado, rio ou ladeira.
-func _lavouras() -> void:
-	var c: Vector2 = MundoDados.REINO["centro"]
-	var r: float = MundoDados.REINO["raio"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1212
-	var listas := [[], [], []]
-	for tentativa in 900:
-		if lavouras.size() >= 150:
-			break
-		var a := rng.randf() * TAU
-		var p := c + Vector2.from_angle(a) * rng.randf_range(r + 70.0, r + 420.0)
-		var ml := rng.randf_range(16.0, 30.0)
-		var mp := rng.randf_range(12.0, 22.0)
-		var bom := terreno.distancia_caminho(p.x, p.y) > maxf(ml, mp) + 8.0 and not terreno.na_agua(p.x, p.y, maxf(ml, mp) + 6.0)
-		for pid in povoados:
-			if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) + maxf(ml, mp) + 10.0:
-				bom = false
-		for lav in lavouras:
-			if p.distance_to(lav[0]) < maxf(float(lav[1]), float(lav[2])) + maxf(ml, mp) + 3.0:
-				bom = false
-		var h0 := terreno.altura_em(p.x, p.y)
-		for d in [Vector2(ml, 0), Vector2(-ml, 0), Vector2(0, mp), Vector2(0, -mp)]:
-			if absf(terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.2:
-				bom = false
-		if not bom:
-			continue
-		var tipo := 0 if rng.randf() < 0.55 else (1 if rng.randf() < 0.6 else 2)
-		var giro := a + PI / 2.0 + rng.randf_range(-0.25, 0.25)
-		lavouras.append([p, ml, mp, giro, tipo])
-		var alt: float = [0.6, 0.4, 0.2][tipo]
-		listas[tipo].append(Transform3D(Basis(Vector3.UP, giro).scaled_local(Vector3(ml * 2.0, alt + 1.4, mp * 2.0)), Vector3(p.x, h0 + alt / 2.0 - 0.7, p.y)))
-	var cores := [Color(0.7, 0.58, 0.27), Color(0.3, 0.42, 0.2), Color(0.34, 0.25, 0.17)]   # trigo maduro, verdura, terra arada (tons apagados: amarelo vivo parecia tapete)
-	for tipo in 3:
-		var caixa := BoxMesh.new()
-		var m := StandardMaterial3D.new()
-		m.albedo_color = cores[tipo]
-		m.albedo_texture = Fachadas.material("telhado").albedo_texture   # as mesmas fiadas servem de leiras
-		m.uv1_triplanar = true
-		m.uv1_scale = Vector3(14.0, 1.0, 14.0)   # leiras finas
-		m.roughness = 1.0
-		caixa.material = m
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = caixa
-		mm.instance_count = (listas[tipo] as Array).size()
-		for i in mm.instance_count:
-			mm.set_instance_transform(i, listas[tipo][i])
-		var inst := MultiMeshInstance3D.new()
-		inst.name = ["Trigais", "Hortas", "TerraArada"][tipo]
-		inst.multimesh = mm
-		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(inst)
-	print("Mundo: ", lavouras.size(), " lavouras em volta do reino")
-
-
 func _horizonte() -> void:   # a ilha fica no meio do oceano: para lá do mar de ladrilhos, um fundo azul até o horizonte
 	var lim := MundoDados.LIMITES
 	var chao := MeshInstance3D.new()

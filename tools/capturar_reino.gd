@@ -62,14 +62,21 @@ func _rodar() -> void:
 	await _foto("09_portao_sul_por_dentro", 4.0)
 	_ver(Vector2(22, 452), Vector2(70, 466))      # colado na muralha: a pedra
 	await _foto("10_pedra_da_muralha", 3.0)
-	_ver(Vector2(0, 285), Vector2(0, 120))        # a subida do castelo
-	await _foto("11_subida_do_castelo", 4.0)
+	_ver(Vector2(0, 285), Vector2(0, 150))        # a escadaria de pedra que sobe o rochedo
+	await _foto("11_escadaria_do_castelo", 4.0)
+	_ver(Vector2(0, 215), Vector2(0, 150))        # no meio da escadaria: o portão da cidadela
+	await _foto("11b_portao_da_cidadela", 4.0)
+	_ver(Vector2(8, 176), Vector2(120, 110))      # dentro da cidadela: os prédios de pedra em volta do castelo
+	await _foto("11c_dentro_da_cidadela", 4.0)
+	_ver(Vector2(150, 30), Vector2(100, -80))     # rua de cima, entre os prédios da cidadela e a muralha do castelo
+	await _foto("11d_rua_do_alto", 4.0)
 	_ver(Vector2(-346, 200), Vector2(0, 0))       # da Rua do Anel: o castelo branco por cima dos telhados
 	await _foto("12_castelo_visto_da_cidade", 4.0)
 	var pcat: Vector2 = m.povoados["catedral_de_valdoria"]["centro"]
 	_ver(pcat - pcat.normalized() * 30.0, pcat + pcat.normalized() * 30.0)   # a Catedral
 	await _foto("12b_catedral", 4.0)
-	_ver(Vector2(120, 640), Vector2(260, 700))    # lavouras do lado de fora da muralha
+	var plav: Vector2 = m.povoados["lavoura_do_portao_sul"]["centro"]
+	_ver(plav - plav.normalized() * 34.0, plav + plav.normalized() * 30.0)   # uma lavoura de verdade, fora da muralha
 	await _foto("12c_lavouras", 4.0)
 	_ver(cc + Vector2(0, 122), cc + Vector2(0, 60))      # portão do castelo, no alto
 	await _foto("13_portao_do_castelo", 4.0)
@@ -96,6 +103,9 @@ func _rodar() -> void:
 	await _foto("15_como_a_referencia_por_do_sol", 5.0)
 	jogo.clima.definir_hora(11.0)
 	cam.fov = 50.0
+	cam.global_position = Vector3(-300, 170, 420)
+	cam.look_at(Vector3(0, 45, 0))
+	await _foto("15a_castelo_e_cidadela_de_perto", 4.0)
 	for v in [["15b_aerea_de_dia", Vector3(-420, 230, 900), Vector3(0, 30, 0)], ["16_aerea_do_sul", Vector3(0, 560, 950), Vector3(0, 0, 0)], ["17_aerea_de_cima", Vector3(0, 1150, 1), Vector3(0, 0, 0)]]:
 		cam.global_position = v[1]
 		cam.look_at(v[2])

@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("7 regiões, 38 estradas, 105 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 7 and m.estradas.size() == 38 and m.povoados.size() == 105 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("7 regiões, 38 estradas, 113 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 7 and m.estradas.size() == 38 and m.povoados.size() == 113 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
@@ -34,6 +34,7 @@ func _rodar() -> void:
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	var cc := MundoDados.centro("castelo_imperial")
 	marcar("O Castelo fica no alto do rochedo e a cidade sobe em colina até o pé dele", m.chao_em(cc.x, cc.y) >= 30.0 and m.chao_em(0.0, 400.0) < 4.0 and m.chao_em(0.0, 262.0) > 8.0, "%.1f m no castelo, %.1f m na Rua do Castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 262.0), m.chao_em(0.0, 400.0)])
+	marcar("Cidadela no alto do rochedo: muralha redonda, escadaria e prédios de pedra (60 ou mais)", m.cidadela.casas >= 60 and absf(m.chao_em(0.0, 190.0) - 30.0) < 1.0, "%d prédios; %.1f m no portão da cidadela" % [m.cidadela.casas, m.chao_em(0.0, 190.0)])
 	var rei := false
 	for n in get_nodes_in_group("npcs"):
 		if (n as Npc).nome == "Rei Aldren":

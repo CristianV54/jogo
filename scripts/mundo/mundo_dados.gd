@@ -13,7 +13,7 @@ const REGIOES := {
 	"acampamento_ruptura": {"cena": "res://scenes/areas/acampamento_ruptura.tscn", "centro": Vector2(972, 1825.5), "meia": 130.0, "nome": "Acampamento da Ruptura"},
 	"fronteira_ferrogris": {"cena": "res://scenes/areas/fronteira_ferrogris.tscn", "centro": Vector2(2673, 36.5), "meia": 150.0, "nome": "Fortaleza de Ferrogris"},
 	"cratera_ignis": {"cena": "res://scenes/areas/cratera_ignis.tscn", "centro": Vector2(1798.2, -1314.4), "meia": 150.0, "nome": "Cratera de Ignis"},
-	"castelo_imperial": {"cena": "res://scenes/areas/castelo_imperial.tscn", "centro": Vector2(0, 0), "meia": 150.0, "nome": "Castelo de Valdoria", "altura": 30.0},   # no centro do reino e da ilha, no alto do rochedo
+	"castelo_imperial": {"cena": "res://scenes/areas/castelo_imperial.tscn", "centro": Vector2(0, 0), "meia": 130.0, "nome": "Castelo de Valdoria", "altura": 30.0},   # no centro do reino e da ilha, no alto do rochedo
 }
 
 ## Limites do chão do mundo (a ilha fica dentro; o resto é mar).
@@ -168,6 +168,14 @@ const POVOADOS_LIVRES := [
 	{"id": "quartel_da_guarda", "nome": "Quartel da Guarda", "tipo": "quartel", "centro": Vector2(212, -212), "dir": Vector2(0.707, 0.707), "lado": -1.0, "raio": 58.0, "liga": ""},
 	{"id": "estabulos_do_reino", "nome": "Estábulos do Reino", "tipo": "estabulo", "centro": Vector2(-78, 290), "dir": Vector2(-0.966, -0.259), "lado": -1.0, "raio": 58.0, "liga": ""},
 	{"id": "catedral_de_valdoria", "nome": "Catedral de Valdoria", "tipo": "catedral", "centro": Vector2(-172, -246), "dir": Vector2(0.819, -0.574), "lado": -1.0, "raio": 58.0, "liga": ""},
+	{"id": "lavoura_do_portao_sul", "nome": "Lavoura do Portão Sul", "tipo": "lavoura", "centro": Vector2(521, 277), "dir": Vector2(-0.469, 0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_poente", "nome": "Lavoura do Poente", "tipo": "lavoura", "centro": Vector2(277, 521), "dir": Vector2(-0.883, 0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_nascente", "nome": "Lavoura do Nascente", "tipo": "lavoura", "centro": Vector2(-277, 521), "dir": Vector2(-0.883, -0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_norte", "nome": "Lavoura do Norte", "tipo": "lavoura", "centro": Vector2(-521, 277), "dir": Vector2(-0.469, -0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_das_sete_leiras", "nome": "Lavoura das Sete Leiras", "tipo": "lavoura", "centro": Vector2(-521, -277), "dir": Vector2(0.469, -0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_moleiro", "nome": "Lavoura do Moleiro", "tipo": "lavoura", "centro": Vector2(-277, -521), "dir": Vector2(0.883, -0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_da_colina", "nome": "Lavoura da Colina", "tipo": "lavoura", "centro": Vector2(277, -521), "dir": Vector2(0.883, 0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_ribeiro", "nome": "Lavoura do Ribeiro", "tipo": "lavoura", "centro": Vector2(521, -277), "dir": Vector2(0.469, 0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
 	{"id": "guarita_sul", "nome": "Guarita do Portão Sul", "tipo": "guarita", "centro": Vector2(0, 448), "dir": Vector2(1, 0), "lado": -1.0, "raio": 9.0, "liga": ""},
 	{"id": "guarita_oeste", "nome": "Guarita do Portão Oeste", "tipo": "guarita", "centro": Vector2(-448, 0), "dir": Vector2(0, 1), "lado": -1.0, "raio": 9.0, "liga": ""},
 	{"id": "guarita_leste", "nome": "Guarita do Portão Leste", "tipo": "guarita", "centro": Vector2(448, 0), "dir": Vector2(0, 1), "lado": 1.0, "raio": 9.0, "liga": ""},
@@ -252,9 +260,33 @@ const POVOADOS_LIVRES := [
 ]
 
 
-## A cidade de Valdoria fica numa colina: o chão sobe 14 m da muralha (raio 440) até o pé do rochedo do Castelo (raio 215).
+## O ROCHEDO DO CASTELO é redondo: um platô de 190 m de raio, 30 m acima do nível do reino, com paredão de rocha em volta
+## (45 m de largura). No alto ficam a cidadela (muralha redonda de 182 m de raio) e, dentro dela, o castelo.
+const RAIO_DO_PLATO := 190.0
+const LARGURA_DO_PAREDAO := 45.0
+const RAIO_DA_CIDADELA := 182.0
+## A ESCADARIA DO CASTELO sobe em linha reta pelo sul, da Rua do Castelo (z = 258) até o portão da cidadela (z = 186).
+const ESCADARIA_Z_BAIXO := 258.0
+const ESCADARIA_Z_ALTO := 186.0
+const ESCADARIA_MEIA_LARGURA := 9.0
+
+
+## A cidade de Valdoria fica numa colina: o chão sobe 14 m da muralha (raio 440) até o pé do rochedo do Castelo (raio 235).
 static func colina_da_cidade(x: float, z: float) -> float:
-	return 14.0 * smoothstep(440.0, 215.0, Vector2(x, z).distance_to(REINO["centro"]))
+	return 14.0 * smoothstep(440.0, RAIO_DO_PLATO + LARGURA_DO_PAREDAO, Vector2(x, z).distance_to(REINO["centro"]))
+
+
+## Altura do chão do reino no ponto: a colina da cidade e, por cima dela, o rochedo redondo do Castelo.
+static func relevo_do_reino(x: float, z: float) -> float:
+	var colina := colina_da_cidade(x, z)
+	var fora := maxf(Vector2(x, z).distance_to(REINO["centro"]) - RAIO_DO_PLATO, 0.0)
+	return colina + (altura("castelo_imperial") - colina) * smoothstep(LARGURA_DO_PAREDAO, 0.0, fora)
+
+
+## Altura do piso da escadaria do castelo em `z` (sobe do nível da Rua do Castelo até o platô).
+static func altura_da_escadaria(z: float) -> float:
+	var t := clampf((ESCADARIA_Z_BAIXO - z) / (ESCADARIA_Z_BAIXO - ESCADARIA_Z_ALTO), 0.0, 1.0)
+	return lerpf(colina_da_cidade(0.0, ESCADARIA_Z_BAIXO), altura("castelo_imperial"), t)
 
 
 ## Altura do chão da região acima do nível do reino (só o Castelo fica no alto de um morro).
