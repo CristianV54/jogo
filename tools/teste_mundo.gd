@@ -62,7 +62,7 @@ func _rodar() -> void:
 	marcar("Casario apertado dentro da muralha (500 casas ou mais, como no reino de blocos, em 80 quarteirões ou mais)", casario.lotes.size() >= 500 and casario.quarteiroes >= 80, "%d casas, %d quarteirões" % [casario.lotes.size(), casario.quarteiroes])
 	marcar("Casas com vida: 300 janelas acesas ou mais e 20 forjas ou mais", casario.janelas_acesas >= 300 and casario.forjas >= 20, "%d janelas acesas, %d forjas" % [casario.janelas_acesas, casario.forjas])
 	var vida := m.get_node("VidaDasRuas") as VidaDasRuas
-	marcar("Ruas com vida: 25 pessoas circulando ou mais, lampiões, jardins e rocha no penhasco", vida.npcs.size() >= 25 and vida.lampioes >= 4 and vida.arvores >= 100 and vida.rochas >= 200, "%d pessoas, %d lampiões, %d árvores, %d rochas" % [vida.npcs.size(), vida.lampioes, vida.arvores, vida.rochas])
+	marcar("Ruas com vida: 25 pessoas circulando ou mais, lampiões, jardins e rocha no penhasco", vida.npcs.size() >= 25 and vida.lampioes >= 12 and vida.arvores >= 100 and vida.rochas >= 200, "%d pessoas, %d lampiões, %d árvores, %d rochas" % [vida.npcs.size(), vida.lampioes, vida.arvores, vida.rochas])
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
 	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
 	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado

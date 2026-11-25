@@ -250,7 +250,7 @@ func _rede_de_seguranca(delta: float) -> void:
 	if jogador.is_on_floor() and _t_chao <= 0.0:
 		_t_chao = 0.5
 		_ultimo_chao_seguro = jogador.global_position
-	elif _ultimo_chao_seguro != Vector3.INF and jogador.global_position.y < _ultimo_chao_seguro.y - 25.0:
+	elif _ultimo_chao_seguro != Vector3.INF and jogador.global_position.y < mundo.chao_em(jogador.global_position.x, jogador.global_position.z) - 6.0:   # 6 m ABAIXO do chão daquele ponto: atravessou o mundo (pular do penhasco de Valdoria é queda de verdade, não erro)
 		jogador.global_position = _ultimo_chao_seguro + Vector3(0.0, 1.0, 0.0)
 		jogador.velocity = Vector3.ZERO
 		hud.mensagem("Você escorregou para fora do mapa e voltou ao último chão firme.", 3.0)

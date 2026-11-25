@@ -24,6 +24,7 @@ func _foto(nome: String, espera := 3.0) -> void:
 func _por(q: Vector2, yaw: float) -> void:
 	jogo.jogador.global_position = Vector3(q.x, jogo.mundo.chao_em(q.x, q.y) + 1.5, q.y)
 	jogo.jogador.velocity = Vector3.ZERO
+	jogo._ultimo_chao_seguro = Vector3.INF
 	jogo.camera.yaw = yaw
 
 

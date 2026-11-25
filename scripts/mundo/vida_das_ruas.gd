@@ -58,14 +58,23 @@ func _avenida() -> void:
 		for s in [-1.0, 1.0]:
 			var x: float = s * 7.4
 			var y := mundo.terreno.altura_em(x, z)
-			if n % 2 == 0:   # um lampião a cada 30 m
+			if true:   # um lampião a cada 15 m, dos dois lados
 				VilaRefugio._caixa(Vector3(x, y + 1.8, z), Vector3(0.22, 3.6, 0.22), ferro, true)
 				VilaRefugio._caixa(Vector3(x, y + 3.85, z), Vector3(0.55, 0.55, 0.55), vidro)
 				lampioes += 1
-			elif rng.randf() < 0.7:
-				ConstrutorCasa._movel(self, _solidos, ["Barrel", "Bag", "Barrel"][rng.randi() % 3], x, z + rng.randf_range(-3.0, 3.0), rng.randf() * 90.0, y)
+			if n % 2 == 1 and rng.randf() < 0.7:
+				ConstrutorCasa._movel(self, _solidos, ["Barrel", "Bag", "Barrel"][rng.randi() % 3], x, z + rng.randf_range(3.0, 6.0), rng.randf() * 90.0, y)
 		z += 15.0
 		n += 1
+	for av in [[-150.0, -262.0, MundoDados.PORTAO_OESTE_Z], [150.0, 276.0, MundoDados.PORTAO_LESTE_Z]]:   # avenidas dos portões oeste e leste
+		var passos := int(absf(float(av[1]) - float(av[0])) / 18.0)
+		for k in passos:
+			var x := lerpf(float(av[0]), float(av[1]), (k + 0.5) / passos)
+			var zz: float = float(av[2]) + (6.4 if k % 2 == 0 else -6.4)
+			var y := mundo.terreno.altura_em(x, zz)
+			VilaRefugio._caixa(Vector3(x, y + 1.8, zz), Vector3(0.22, 3.6, 0.22), ferro, true)
+			VilaRefugio._caixa(Vector3(x, y + 3.85, zz), Vector3(0.55, 0.55, 0.55), vidro)
+			lampioes += 1
 	for p in [Vector2(-4.0, 196.0), Vector2(3.8, 182.0)]:   # carroças paradas
 		var y := mundo.terreno.altura_em(p.x, p.y)
 		var madeira := VilaRefugio._mat(Color(0.4, 0.28, 0.16))
@@ -163,6 +172,10 @@ func _gente() -> void:
 	for k in 3:
 		trajetos.append([Vector2(-155.0 - k * 22.0, 33.0 + k * 1.5), Vector2(-255.0 + k * 12.0, 36.5 - k)])    # avenida do oeste
 		trajetos.append([Vector2(152.0 + k * 22.0, -47.0 + k * 1.5), Vector2(268.0 - k * 12.0, -43.5 - k)])    # avenida do leste
+	for k in 3:   # viela junto da muralha do sul e mais gente na praça
+		trajetos.append([Vector2(-60.0 + k * 50.0, 212.0 - absf(k - 1) * 4.0), Vector2(-90.0 + k * 50.0, 211.0 - absf(k - 1) * 4.0)])
+	trajetos.append([Vector2(-24.0, 170.0), Vector2(24.0, 133.0)])
+	trajetos.append([Vector2(6.0, 176.0), Vector2(-6.0, 131.0)])
 	var a := MundoDados.ANEL_EIXOS
 	for k in 9:   # rua em anel: trechos curtos, um depois do outro
 		var ang := TAU * (k + 0.3) / 9.0

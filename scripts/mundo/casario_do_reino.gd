@@ -125,7 +125,7 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 			if _rng.randf() < 0.16:
 				_peca(pedaco, "caixa", "luz", Vector3(p.x + s * 0.32 * larg, y + 0.56 * (PISO + 0.3), p.y + lado * (prof / 2.0 + 0.03)), Vector3(0.125 * larg, 0.3 * (PISO + 0.3), 0.06), 0.0, Color(1.0, 0.8, 0.42))
 				janelas_acesas += 1
-	var forja := pisos == 1 and _rng.randf() < 0.45   # casa térrea de ferreiro: boca de fornalha acesa e chaminé grossa
+	var forja := pisos == 1 and _rng.randf() < 0.75   # casa térrea de ferreiro: boca de fornalha acesa e chaminé grossa
 	if forja:
 		_peca(pedaco, "caixa", "luz", Vector3(p.x, y + 1.0, p.y + prof / 2.0 + 0.04), Vector3(1.8, 1.3, 0.08), 0.0, Color(1.0, 0.45, 0.12))
 		forjas += 1
