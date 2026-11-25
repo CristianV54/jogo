@@ -9,7 +9,7 @@ extends Node3D
 ## de desenho, e o motor esconde os setores fora da tela). A colisão é uma caixa por casa. Não se entra nelas: as casas
 ## em que se entra são as das praças (ver Povoado).
 
-const FILEIRAS := [277.0, 287.0, 304.0, 314.0, 331.0, 341.0, 358.0, 368.0, 383.5, 414.0, 424.0, 441.0, 451.0]   # raio do meio de cada fileira
+const FILEIRAS := [221.0, 231.0, 247.0, 277.0, 287.0, 304.0, 314.0, 331.0, 341.0, 358.0, 368.0, 383.5, 414.0, 424.0, 441.0, 451.0]   # raio do meio de cada fileira
 const SETORES := 12
 const TONS_DE_PAREDE := [Color(1.0, 0.98, 0.92), Color(0.98, 0.9, 0.76), Color(0.9, 0.86, 0.8), Color(1.0, 0.86, 0.7), Color(0.86, 0.9, 0.84), Color(0.94, 0.8, 0.72)]
 const TONS_DE_TELHADO := [Color(0.86, 0.36, 0.24), Color(0.74, 0.3, 0.2), Color(0.9, 0.48, 0.28), Color(0.6, 0.26, 0.2), Color(0.42, 0.44, 0.56), Color(0.5, 0.36, 0.3)]

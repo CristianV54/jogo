@@ -211,7 +211,13 @@ func distancia_caminho(x: float, z: float) -> float:
 func cor_do_mundo(x: float, z: float) -> Color:
 	var c := Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
 	var ao_reino := Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
-	return c.lerp(Color(0.42, 0.38, 0.31), 0.6 * smoothstep(8.0, -12.0, ao_reino))   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
+	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, ao_reino))
+	for id in MundoDados.REGIOES:   # a encosta do rochedo do Castelo é rocha nua
+		if MundoDados.altura(id) > 0.0:
+			var rr := MundoDados.retangulo(id)
+			var fora := Vector2(maxf(maxf(rr.position.x - x, x - rr.end.x), 0.0), maxf(maxf(rr.position.y - z, z - rr.end.y), 0.0)).length()
+			c = c.lerp(Color(0.46, 0.44, 0.42) * (0.85 + 0.3 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0)), smoothstep(62.0, 50.0, fora))
+	return c   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 
 func _cor_vertice(x: float, z: float, n: Vector3) -> Color:

@@ -47,7 +47,7 @@ func _ready() -> void:
 	tam = 300.0
 	_rng.seed = 97
 	_ambiente()
-	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.3, 0.45, 0.22), Color(0.26, 0.4, 0.2), 260.0)
+	_montar_terreno(61, 0.0, [], PackedVector2Array([Vector2(0, 155), Vector2(0, 150), Vector2(0, -100)]), Color(0.5, 0.48, 0.44), Color(0.44, 0.42, 0.4), 260.0)   # o alto do rochedo é pedra, não gramado
 	_horizonte(Color(0.38, 0.36, 0.4), 140.0, true)
 	_plataforma()
 	_muralhas()
@@ -377,9 +377,9 @@ func _corte_do_rei() -> void:
 	set_process(false)
 	if vane and is_instance_valid(vane):
 		vane.queue_free()
-	var carcereiro := get_node_or_null("Carcereiro")
-	if carcereiro:
-		carcereiro.queue_free()
+	for filho in get_children():   # todo soldado inimigo do castelo antigo sai: a guarda agora é do rei e não ataca
+		if filho is Inimigo:
+			filho.queue_free()
 	for f in focos:
 		if f.corrente:
 			f.corrente.queue_free()
