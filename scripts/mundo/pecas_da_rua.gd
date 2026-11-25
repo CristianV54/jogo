@@ -152,3 +152,67 @@ func vaso(p: Vector3, flor: Color) -> void:
 	for k in 5:
 		var a := TAU * k / 5.0
 		_caixa(p + Vector3(cos(a) * 0.17, 0.82 + 0.05 * (k % 2), sin(a) * 0.17), Vector3(0.1, 0.1, 0.1), a, flor, false)
+
+
+## Peça solta de um conjunto girado: `local` e `tam` no espaço do conjunto (Z = frente), `inclina` gira em torno do X dele.
+func _no_conjunto(p: Vector3, giro: float, local: Vector3, tam: Vector3, cor: Color, inclina := 0.0, malha := "caixa") -> void:
+	var b := Basis(Vector3.UP, giro)
+	_peca(malha, cor, Transform3D((b * Basis(Vector3.RIGHT, inclina)).scaled_local(tam), p + b * local))
+
+
+## Barraca de feira: quatro esteios, toldo listrado inclinado com sanefa, balcão com saia de pano e caixas de mercadoria.
+## `frente` aponta para o freguês. `mercadoria` são as cores do que está à venda (frutas, panos, queijos...).
+func barraca(p: Vector3, frente: Vector2, cor: Color, mercadoria: Array) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var creme := Color(0.93, 0.9, 0.82)
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 1.6, 1.25, 1.2), Vector3(0.12, 2.5, 0.12), MADEIRA.darkened(0.2))
+		_no_conjunto(p, giro, Vector3(sx * 1.6, 1.0, -1.2), Vector3(0.12, 2.0, 0.12), MADEIRA.darkened(0.2))
+		_no_conjunto(p, giro, Vector3(sx * 1.6, 2.22, 0.0), Vector3(0.08, 0.08, 2.5), MADEIRA.darkened(0.2), -0.2)
+	_no_conjunto(p, giro, Vector3(0, 2.45, 1.2), Vector3(3.3, 0.08, 0.08), MADEIRA.darkened(0.2))
+	for k in 7:   # toldo em sete faixas, uma na cor da barraca, outra creme
+		var x := (k - 3.0) * 0.5
+		var c := cor if k % 2 == 0 else creme
+		_no_conjunto(p, giro, Vector3(x, 2.33, 0.05), Vector3(0.5, 0.05, 3.0), c, -0.2)
+		_no_conjunto(p, giro, Vector3(x, 2.47 - (0.06 if k % 2 == 0 else 0.0), 1.54), Vector3(0.5, 0.34 + (0.12 if k % 2 == 0 else 0.0), 0.04), c)   # sanefa recortada
+	_no_conjunto(p, giro, Vector3(0, 1.05, -1.22), Vector3(3.2, 1.9, 0.05), cor.darkened(0.25))   # pano do fundo
+	_no_conjunto(p, giro, Vector3(0, 0.95, 0.85), Vector3(3.1, 0.1, 0.95), MADEIRA)                # balcão
+	_no_conjunto(p, giro, Vector3(0, 0.46, 1.3), Vector3(3.1, 0.9, 0.04), cor)                     # saia de pano
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 1.45, 0.45, 0.5), Vector3(0.1, 0.9, 0.1), MADEIRA.darkened(0.2))
+	for k in 3:   # caixas rasas inclinadas para o freguês, cheias de mercadoria
+		var x := (k - 1.0) * 0.98
+		var m: Color = mercadoria[k % mercadoria.size()]
+		_no_conjunto(p, giro, Vector3(x, 1.12, 0.85), Vector3(0.86, 0.16, 0.74), MADEIRA.lightened(0.15), 0.18)
+		for i in 3:
+			for j in 3:
+				_no_conjunto(p, giro, Vector3(x + (i - 1) * 0.24, 1.25 + 0.05 * (j - 1), 0.85 + (j - 1) * 0.2), Vector3(0.2, 0.16, 0.18), m.lightened(0.12 * ((i + j) % 2)), 0.18)
+	_solido(p + Basis(Vector3.UP, giro) * Vector3(0, 0.6, 0.85), Vector3(3.2, 1.2, 1.0), giro)
+	_solido(p + Basis(Vector3.UP, giro) * Vector3(0, 1.0, -1.22), Vector3(3.2, 2.0, 0.2), giro)
+
+
+## Carroça de carga parada: estrado com taipais de tábua, quatro rodas raiadas, varal e sacos em cima. `frente` é para onde aponta o varal.
+func carroca(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var escura := MADEIRA.darkened(0.3)
+	_no_conjunto(p, giro, Vector3(0, 0.85, 0), Vector3(1.7, 0.12, 3.4), MADEIRA)
+	for sx in [-1.0, 1.0]:   # taipais: duas tábuas com vão e montantes
+		for h in [1.05, 1.38]:
+			_no_conjunto(p, giro, Vector3(sx * 0.85, float(h), 0), Vector3(0.06, 0.24, 3.4), MADEIRA.lightened(0.1))
+		for k in 4:
+			_no_conjunto(p, giro, Vector3(sx * 0.9, 1.2, (k - 1.5) * 1.05), Vector3(0.07, 0.75, 0.09), escura)
+		for sz in [-1.0, 1.0]:   # roda: aro, cubo e raios em cruz
+			var centro := Vector3(sx * 1.02, 0.55, sz * 1.05)
+			var b := Basis(Vector3.UP, giro)
+			_peca("cilindro", escura, Transform3D((b * Basis(Vector3.BACK, PI / 2.0)).scaled_local(Vector3(1.1, 0.1, 1.1)), p + b * centro))
+			_peca("cilindro", FERRO, Transform3D((b * Basis(Vector3.BACK, PI / 2.0)).scaled_local(Vector3(0.26, 0.22, 0.26)), p + b * centro))
+			for r in 4:
+				_peca("caixa", MADEIRA.lightened(0.2), Transform3D((b * Basis(Vector3.RIGHT, r * PI / 4.0)).scaled_local(Vector3(0.12, 0.06, 1.0)), p + b * (centro + Vector3(sx * 0.02, 0, 0))))
+	for sz in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(0, 1.2, sz * 1.7), Vector3(1.7, 0.56, 0.06), MADEIRA.lightened(0.1))
+		_no_conjunto(p, giro, Vector3(0, 0.55, sz * 1.05), Vector3(1.9, 0.09, 0.09), FERRO)   # eixo
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 0.45, 0.62, 2.9), Vector3(0.08, 0.08, 2.6), escura, 0.2)   # varais apoiados no chão
+	for k in 4:   # carga: sacos e um barril
+		_no_conjunto(p, giro, Vector3(-0.38 + 0.76 * (k % 2), 1.14 + 0.05 * k, -1.0 + 0.62 * k), Vector3(0.62, 0.44, 0.56), Color(0.72, 0.64, 0.42).darkened(0.08 * (k % 3)), 0.1 * (k % 2))
+	_solido(p + Vector3(0, 0.8, 0), Vector3(1.9, 1.6, 3.5), giro)

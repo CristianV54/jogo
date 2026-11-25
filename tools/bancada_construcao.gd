@@ -97,6 +97,8 @@ func _rodar() -> void:
 			await _muralha()
 		"rua":
 			await _rua()
+		"feira":
+			await _feira()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -226,3 +228,20 @@ func _rua() -> void:
 			livre = false
 	_conferir("Rua: o meio fica livre de ponta a ponta (3 m de largura)", livre, "raios a 0,8 m de altura")
 	_conferir("Rua: banco e carga têm colisão (o Torin não atravessa)", kit._corpo.get_child_count() >= 4, "%d sólidos" % kit._corpo.get_child_count())
+
+
+
+## Feira: duas barracas e uma carroça, as peças da praça do mercado.
+func _feira() -> void:
+	var kit := PecasDaRua.new()
+	root.add_child(kit)
+	kit.barraca(Vector3(-3, 0, 0), Vector2(0, 1), Color(0.72, 0.2, 0.16), [Color(0.8, 0.2, 0.15), Color(0.9, 0.7, 0.2), Color(0.4, 0.6, 0.25)])
+	kit.barraca(Vector3(1.5, 0, 0), Vector2(0, 1), Color(0.25, 0.42, 0.62), [Color(0.85, 0.8, 0.6), Color(0.6, 0.3, 0.5), Color(0.3, 0.4, 0.65)])
+	kit.carroca(Vector3(7.5, 0, 0.5), Vector2(1, 0.4).normalized())
+	kit.fechar()
+	await physics_frame
+	await _foto("01_barracas_e_carroca", Vector3(2, 2.6, 10), Vector3(2, 1.2, 0), Vector3(-0.7, 0, 2.6))
+	await _foto("02_barraca_de_perto", Vector3(-1.0, 1.8, 4.2), Vector3(-3, 1.3, 0), Vector3(-5.4, 0, 1.6))
+	await _foto("03_carroca_de_perto", Vector3(10.5, 1.8, 5.0), Vector3(7.5, 0.9, 0.5), Vector3(5.6, 0, 2.6))
+	await _foto("04_por_tras", Vector3(3, 3.0, -9), Vector3(2, 1.0, 0), Vector3(-0.7, 0, -2.6))
+	_conferir("Feira: barracas e carroça têm colisão", kit._corpo.get_child_count() == 5, "%d sólidos" % kit._corpo.get_child_count())

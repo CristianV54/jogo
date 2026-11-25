@@ -71,16 +71,9 @@ func _avenida() -> void:
 			var y := mundo.terreno.altura_em(x, zz)
 			kit.lampiao_de_poste(Vector3(x, y, zz), Vector2(0, -1 if k % 2 == 0 else 1))
 			lampioes += 1
-	kit.fechar()
 	for p in [Vector2(-4.0, 196.0), Vector2(3.8, 182.0)]:   # carroças paradas
-		var y := mundo.terreno.altura_em(p.x, p.y)
-		var madeira := VilaRefugio._mat(Color(0.4, 0.28, 0.16))
-		VilaRefugio._caixa(Vector3(p.x, y + 0.9, p.y), Vector3(2.2, 0.8, 3.6), madeira, true)
-		VilaRefugio._caixa(Vector3(p.x, y + 1.6, p.y), Vector3(1.4, 0.9, 1.6), VilaRefugio._mat(Color(0.7, 0.62, 0.36)))
-		for sx in [-1.0, 1.0]:
-			for sz in [-1.0, 1.0]:
-				var roda := VilaRefugio._cilindro(Vector3(p.x + sx * 1.2, y + 0.5, p.y + sz * 1.1), 0.5, 0.18, VilaRefugio._mat(Color(0.26, 0.18, 0.1)), false, 10)
-				roda.rotation.z = PI / 2.0
+		kit.carroca(Vector3(p.x, mundo.terreno.altura_em(p.x, p.y), p.y), Vector2(0, -1))
+	kit.fechar()
 
 
 ## Arvoredo ao pé do penhasco, entre a rocha e a rua em anel (fora da avenida e do pé da rampa).

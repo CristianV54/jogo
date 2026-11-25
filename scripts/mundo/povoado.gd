@@ -342,10 +342,14 @@ func _bairro() -> void:
 func _mercado() -> void:
 	var cores := [Color(0.72, 0.2, 0.16), Color(0.85, 0.7, 0.3), Color(0.25, 0.42, 0.62), Color(0.3, 0.52, 0.3), Color(0.62, 0.36, 0.6), Color(0.85, 0.82, 0.74)]
 	var meio := _p(0.0, 22.0)
+	var kit := PecasDaRua.new()   # barracas e carroças do kit da rua (ver tools/bancada_construcao.gd -- feira)
+	kit.name = "Feira"
+	add_child(kit)
+	var mercadorias := [[Color(0.8, 0.2, 0.15), Color(0.9, 0.7, 0.2), Color(0.4, 0.6, 0.25)], [Color(0.85, 0.8, 0.6), Color(0.6, 0.3, 0.5), Color(0.3, 0.4, 0.65)], [Color(0.55, 0.5, 0.48), Color(0.35, 0.33, 0.32), Color(0.7, 0.55, 0.3)], [Color(0.9, 0.82, 0.5), Color(0.75, 0.45, 0.25), Color(0.9, 0.9, 0.85)]]
 	for k in 8:
 		var a := TAU * k / 8.0
 		var q := meio + Vector2(cos(a), sin(a)) * 15.0
-		_tenda(q, cores[k % cores.size()])
+		kit.barraca(Vector3(q.x, _y(q), q.y), -Vector2(cos(a), sin(a)), cores[k % cores.size()], mercadorias[k % mercadorias.size()])
 		_movel("Barrel" if k % 2 == 0 else "Bag", q + Vector2(cos(a + 0.5), sin(a + 0.5)) * 3.4)
 	if String(dados["id"]) != "mercado_central":   # na praça do mercado de Valdoria o meio é da fonte (ver VidaDasRuas)
 		_fogueira(meio, 0.8)
@@ -353,8 +357,8 @@ func _mercado() -> void:
 		_movel("Bench", meio + Vector2(4.0, 2.0), 90.0)
 	for k in 2:   # carroças de carga na beira da praça
 		var q := _p(-26.0 + k * 52.0, 8.0)
-		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(2.2, 0.8, 3.6), VilaRefugio._mat(Color(0.4, 0.28, 0.16)), true, atan2(dir.x, dir.y))
-		VilaRefugio._caixa(Vector3(q.x, _y(q) + 1.6, q.y), Vector3(1.4, 0.9, 1.6), VilaRefugio._mat(Color(0.45, 0.35, 0.2)))
+		kit.carroca(Vector3(q.x, _y(q), q.y), dir)
+	kit.fechar()
 	var ofertas := [["2 lãs por 2 carnes", "la", 2, "carne", 2], ["1 couro por 3 carnes", "couro", 1, "carne", 3], ["1 presa por 2 maçãs", "presa", 1, "maca", 2], ["2 maçãs por 1 carne", "maca", 2, "carne", 1]]
 	for k in 4:   # comércio de verdade: em quatro barracas dá para trocar o que se caça por comida (E para trocar)
 		var a := TAU * (k * 2) / 8.0
