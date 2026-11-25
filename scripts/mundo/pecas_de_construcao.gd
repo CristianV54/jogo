@@ -26,6 +26,13 @@ func fechar() -> void:
 			malha = cil
 		elif partes[0] == "prisma":
 			malha = PrismMesh.new()
+		elif partes[0] == "piramide":   # quatro faces e ponta: agulhas de torre e pináculos
+			var pir := CylinderMesh.new()
+			pir.height = 1.0
+			pir.top_radius = 0.0
+			pir.radial_segments = 4
+			pir.rings = 1
+			malha = pir
 		else:
 			malha = BoxMesh.new()
 		var cor := Color.html(partes[1])

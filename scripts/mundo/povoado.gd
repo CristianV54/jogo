@@ -444,40 +444,10 @@ func _estabulo() -> void:
 ## baixas com contrafortes, fileiras de vitrais coloridos que brilham, duas torres gêmeas na fachada com a rosácea e o
 ## portal entre elas, e a torre do cruzeiro com o pináculo mais alto da cidade baixa. Adro com bancos e o sacristão.
 func _catedral() -> void:
-	var pedra := Pedra.material(Color(0.78, 0.76, 0.7))
-	var ardosia := VilaRefugio._mat(Color(0.26, 0.3, 0.44))
-	var giro := atan2(-dir.y, dir.x)   # o comprimento (eixo X das caixas) corre ao longo de `dir`; a fachada fica do lado -dir
-	var y := _y(_p(0.0, 30.0))
-	var em := func(l: float, w: float, alto: float) -> Vector3:
-		var q := _p(l, 30.0 + w)
-		return Vector3(q.x, y + alto, q.y)
-	VilaRefugio._caixa(em.call(2.0, 0.0, 10.0), Vector3(40.0, 20.0, 13.0), pedra, true, giro)                      # nave
-	VilaRefugio._telhado(em.call(2.0, 0.0, 24.5), Vector3(14.2, 9.0, 41.0), ardosia, giro + PI / 2.0)
-	var cores_de_vitral := [Color(0.9, 0.25, 0.2), Color(0.25, 0.45, 0.95), Color(0.95, 0.75, 0.2), Color(0.3, 0.75, 0.4), Color(0.7, 0.3, 0.8)]
-	var n_vitral := 0
-	for s in [-1.0, 1.0]:
-		VilaRefugio._caixa(em.call(2.0, s * 10.0, 5.0), Vector3(38.0, 10.0, 7.0), pedra, true, giro)               # naves laterais
-		VilaRefugio._caixa(em.call(2.0, s * 10.2, 10.3), Vector3(38.4, 0.6, 7.6), ardosia, false, giro)
-		for k in 7:
-			var l := -15.0 + k * 5.6
-			VilaRefugio._caixa(em.call(l, s * 14.2, 6.5), Vector3(1.4, 13.0, 1.8), pedra, true, giro)               # contrafortes
-			VilaRefugio._caixa(em.call(l, s * 14.2, 13.6), Vector3(0.9, 1.6, 1.0), pedra, false, giro)
-			for vitral in [[s * 13.55, 4.6, 5.0], [s * 6.55, 15.2, 6.4]]:   # vitral da nave lateral e, mais alto, o da nave
-				var luz := VilaRefugio._caixa(em.call(l + 2.8, float(vitral[0]), float(vitral[1])), Vector3(1.5, float(vitral[2]), 0.12), _luz(cores_de_vitral[n_vitral % cores_de_vitral.size()]), false, giro)
-				luz.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				n_vitral += 1
-	for s in [-1.0, 1.0]:   # torres gêmeas da fachada
-		VilaRefugio._caixa(em.call(-21.0, s * 8.0, 17.0), Vector3(7.0, 34.0, 7.0), pedra, true, giro)
-		_agulha(em.call(-21.0, s * 8.0, 34.0 + 6.5), 4.6, 13.0, ardosia)
-		VilaRefugio._caixa(em.call(-24.56, s * 8.0, 24.0), Vector3(0.12, 6.0, 1.6), _luz(cores_de_vitral[1]), false, giro)
-	VilaRefugio._caixa(em.call(-19.0, 0.0, 10.0), Vector3(3.0, 20.0, 9.0), pedra, true, giro)                      # fachada entre as torres
-	VilaRefugio._caixa(em.call(-20.56, 0.0, 2.8), Vector3(0.14, 5.6, 4.2), VilaRefugio._mat(Color(0.3, 0.2, 0.12)), false, giro)   # portal
-	for k in 12:   # rosácea: doze pétalas de vidro em roda
-		var a := TAU * k / 12.0
-		var q := _p(-20.58, 30.0 + cos(a) * 2.2)
-		VilaRefugio._caixa(Vector3(q.x, y + 13.0 + sin(a) * 2.2, q.y), Vector3(0.12, 1.1, 1.1), _luz(cores_de_vitral[k % cores_de_vitral.size()]), false, giro)
-	VilaRefugio._caixa(em.call(8.0, 0.0, 22.0), Vector3(9.0, 44.0, 9.0), pedra, true, giro)                        # torre do cruzeiro
-	_agulha(em.call(8.0, 0.0, 44.0 + 9.0), 6.0, 18.0, ardosia)
+	var centro := _p(0.0, 30.0)
+	var cat := Catedral.new()   # a construção está em scripts/mundo/catedral.gd (conferida em tools/bancada_construcao.gd -- catedral)
+	add_child(cat)
+	cat.montar(Vector3(centro.x, _y(centro), centro.y), dir)
 	for l in [-30.0, -34.0]:
 		_movel("Bench", _p(l, 24.0), 0.0)
 		_movel("Bench", _p(l, 36.0), 0.0)

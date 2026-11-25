@@ -99,6 +99,8 @@ func _rodar() -> void:
 			await _rua()
 		"feira":
 			await _feira()
+		"catedral":
+			await _catedral()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -245,3 +247,26 @@ func _feira() -> void:
 	await _foto("03_carroca_de_perto", Vector3(10.5, 1.8, 5.0), Vector3(7.5, 0.9, 0.5), Vector3(5.6, 0, 2.6))
 	await _foto("04_por_tras", Vector3(3, 3.0, -9), Vector3(2, 1.0, 0), Vector3(-0.7, 0, -2.6))
 	_conferir("Feira: barracas e carroça têm colisão", kit._corpo.get_child_count() == 5, "%d sólidos" % kit._corpo.get_child_count())
+
+
+## Catedral inteira, com a fachada virada para +Z (o sol da bancada bate nela de lado).
+func _catedral() -> void:
+	var cat := Catedral.new()
+	root.add_child(cat)
+	cat.montar(Vector3.ZERO, Vector2(0, -1))   # a nave corre para -Z; a fachada olha para +Z
+	await physics_frame
+	await physics_frame
+	await _foto("01_fachada", Vector3(0, 9, 62), Vector3(0, 17, 24), Vector3(4.5, 0, 28))
+	await _foto("02_tres_quartos", Vector3(52, 22, 62), Vector3(0, 14, 0), Vector3(8, 0, 30))
+	await _foto("03_de_lado", Vector3(70, 14, -2), Vector3(0, 13, -2), Vector3(18, 0, 6))
+	await _foto("04_portal_de_perto", Vector3(3, 2.4, 36), Vector3(0, 4.5, 24), Vector3(-3.6, 0, 27))
+	await _foto("05_rosacea", Vector3(0, 12, 38), Vector3(0, 13.6, 20), Vector3(4.5, 0, 28))
+	await _foto("06_vitrais_e_contrafortes", Vector3(27, 4, 10), Vector3(13, 6, 4), Vector3(17.5, 0, 9))
+	await _foto("07_arcobotantes_do_alto", Vector3(30, 26, 14), Vector3(8, 12, 4), Vector3(17.5, 0, 9))
+	await _foto("08_abside_e_cruzeiro", Vector3(-34, 16, -58), Vector3(0, 16, -12), Vector3(-8, 0, -32))
+	await _foto("09_base_rente_ao_chao", Vector3(19, 0.8, 16), Vector3(14, 1.6, 6), Vector3(17, 0, 9))
+	print("MEDIDAS: ponta mais alta a ", snappedf(cat.topo, 0.1), " m (", snappedf(cat.topo / 1.8, 0.1), " Torins); ", cat.vitrais, " vitrais")
+	var q := PhysicsRayQueryParameters3D.create(Vector3(0, 1.0, 60), Vector3(0, 1.0, -60))
+	var r := root.get_world_3d().direct_space_state.intersect_ray(q)
+	_conferir("Catedral: a porta é fechada (o Torin não atravessa a fachada)", not r.is_empty() and absf(float(r["position"].z) - 20.5) < 3.0, str(r.get("position", "nada")))
+	_conferir("Catedral: mais de 20 vitrais e ponta acima de 60 m", cat.vitrais >= 20 and cat.topo >= 60.0, "%d vitrais, %.1f m" % [cat.vitrais, cat.topo])
