@@ -347,9 +347,10 @@ func _mercado() -> void:
 		var q := meio + Vector2(cos(a), sin(a)) * 15.0
 		_tenda(q, cores[k % cores.size()])
 		_movel("Barrel" if k % 2 == 0 else "Bag", q + Vector2(cos(a + 0.5), sin(a + 0.5)) * 3.4)
-	_fogueira(meio, 0.8)
-	_movel("Table_Large", meio + Vector2(4.0, 0.0))
-	_movel("Bench", meio + Vector2(4.0, 2.0), 90.0)
+	if String(dados["id"]) != "mercado_central":   # na praça do mercado de Valdoria o meio é da fonte (ver VidaDasRuas)
+		_fogueira(meio, 0.8)
+		_movel("Table_Large", meio + Vector2(4.0, 0.0))
+		_movel("Bench", meio + Vector2(4.0, 2.0), 90.0)
 	for k in 2:   # carroças de carga na beira da praça
 		var q := _p(-26.0 + k * 52.0, 8.0)
 		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(2.2, 0.8, 3.6), VilaRefugio._mat(Color(0.4, 0.28, 0.16)), true, atan2(dir.x, dir.y))

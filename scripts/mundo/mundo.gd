@@ -121,6 +121,10 @@ func construir() -> void:
 	piso.mundo = self
 	add_child(piso)
 	piso.montar()
+	var vida := VidaDasRuas.new()
+	vida.mundo = self
+	add_child(vida)
+	vida.montar()
 	var casario := CasarioDoReino.new()
 	casario.mundo = self
 	add_child(casario)
