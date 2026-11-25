@@ -267,10 +267,11 @@ func _draw() -> void:
 		var lado := Vector2(-f.y, f.x)
 		draw_colored_polygon(PackedVector2Array([q + f * 13.0, q - f * 7.0 + lado * 8.0, q - f * 7.0 - lado * 8.0]), COR_TINTA)
 		draw_colored_polygon(PackedVector2Array([q + f * 10.0, q - f * 5.0 + lado * 5.5, q - f * 5.0 - lado * 5.5]), Color(0.95, 0.9, 0.78))
-	# moldura: as bordas escurecem como papel velho, com um filete de tinta
-	for k in 6:
-		draw_rect(Rect2(Vector2(k * 6.0, k * 6.0), tela - Vector2(k * 12.0, k * 12.0)), Color(0.16, 0.1, 0.05, 0.11), false, 12.0)
-	draw_rect(Rect2(Vector2(14, 14), tela - Vector2(28, 28)), Color(COR_TINTA.r, COR_TINTA.g, COR_TINTA.b, 0.7), false, 1.5)
+	# moldura: filete duplo de tinta e uma faixa de papel embaixo para a escala e a ajuda
+	draw_rect(Rect2(Vector2(0, tela.y - 46), Vector2(tela.x, 46)), Color(0.87, 0.8, 0.63, 0.92))
+	draw_line(Vector2(0, tela.y - 46), Vector2(tela.x, tela.y - 46), COR_TINTA, 1.5)
+	draw_rect(Rect2(Vector2(8, 8), tela - Vector2(16, 16)), COR_TINTA, false, 3.0)
+	draw_rect(Rect2(Vector2(14, 14), tela - Vector2(28, 28)), Color(COR_TINTA.r, COR_TINTA.g, COR_TINTA.b, 0.6), false, 1.0)
 	# rosa dos ventos, escala e ajuda (discretas, nos cantos)
 	var n := Vector2(tela.x - 64, 78)
 	draw_arc(n, 22.0, 0.0, TAU, 40, COR_TINTA, 1.5, true)
@@ -279,12 +280,14 @@ func _draw() -> void:
 	draw_polyline(PackedVector2Array([n + Vector2(0, 30), n + Vector2(6, 0), n + Vector2(-6, 0), n + Vector2(0, 30)]), COR_TINTA, 1.2, true)
 	draw_string(_fonte_regiao, n + Vector2(-6, -36), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, COR_TINTA)
 	var metros := 1000.0 if zoom < 2.5 else (250.0 if zoom < 6.0 else 100.0)
-	var b := Vector2(40, tela.y - 52)
+	var b := Vector2(40, tela.y - 20)
 	draw_line(b, b + Vector2(metros * esc, 0), COR_TINTA, 3.0)
 	draw_line(b + Vector2(0, -5), b + Vector2(0, 5), COR_TINTA, 2.0)
 	draw_line(b + Vector2(metros * esc, -5), b + Vector2(metros * esc, 5), COR_TINTA, 2.0)
-	draw_string(_fonte_vila, b + Vector2(0, -10), ("%d km" % int(metros / 1000.0)) if metros >= 1000.0 else ("%d m" % int(metros)), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, COR_TINTA)
+	var rotulo := ("%d km" % int(metros / 1000.0)) if metros >= 1000.0 else ("%d m" % int(metros))
+	draw_string(_fonte_vila, b + Vector2(metros * esc + 10.0, 5.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, COR_TINTA)
 	var ajuda := "roda do mouse: zoom    arrastar: mover    clique: marcar destino    botão direito: tirar a marca    M: fechar"
 	if tem_destino and jog:
-		ajuda = "Destino marcado a %d m.    " % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino)) + ajuda
-	draw_string(_fonte_vila, Vector2(40, tela.y - 26), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TINTA)
+		ajuda = "Destino a %d m.    " % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino)) + ajuda
+	var larg_ajuda := _fonte_vila.get_string_size(ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	draw_string(_fonte_vila, Vector2(tela.x - larg_ajuda - 40.0, tela.y - 16), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TINTA)

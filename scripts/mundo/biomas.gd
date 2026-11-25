@@ -38,10 +38,18 @@ const SEMENTES := [
 ]
 
 
+static var _torce: FastNoiseLite
+
+
 static func em(x: float, z: float) -> String:
 	if Costa.distancia(x, z) < 45.0:
 		return "costa"
-	var p := Vector2(x, z)
+	if _torce == null:   # a divisa entre biomas não é uma linha reta: um ruído largo a entorta (línguas de mata entrando no campo)
+		_torce = FastNoiseLite.new()
+		_torce.seed = 512
+		_torce.frequency = 0.0022
+		_torce.fractal_octaves = 3
+	var p := Vector2(x + _torce.get_noise_2d(x, z) * 260.0, z + _torce.get_noise_2d(z + 900.0, x - 400.0) * 260.0)
 	var melhor := 1e18
 	var nome := "imperio"
 	for s in SEMENTES:

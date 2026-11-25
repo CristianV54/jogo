@@ -24,7 +24,7 @@ static func pintar(mata: PackedFloat32Array, gw: int, gh: int, celula: float) ->
 			var wx := lim.position.x + gx * celula
 			var wz := lim.position.y + gz * celula
 			var costa := Costa.distancia(wx, wz)
-			var mancha := grao.get_noise_2d(wx, wz) * 0.05   # o papel não é liso
+			var mancha := grao.get_noise_2d(wx, wz) * 0.05 * smoothstep(-300.0, -60.0, costa)   # o papel não é liso (no mar aberto a cor é uma só, igual ao fundo da tela)
 			var cor: Color
 			if costa < 0.0:   # mar: azul desbotado, mais claro junto à praia
 				cor = Color(0.68, 0.76, 0.72).lerp(Color(0.5, 0.62, 0.64), smoothstep(0.0, -260.0, costa))
