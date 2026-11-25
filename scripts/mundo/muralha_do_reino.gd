@@ -28,8 +28,14 @@ func montar() -> void:
 	for id in mundo.estradas:   # portões: onde cada estrada cruza o círculo
 		var pts: PackedVector2Array = mundo.estradas[id]
 		for i in pts.size() - 1:
-			if (pts[i].distance_to(c) - r) * (pts[i + 1].distance_to(c) - r) < 0.0:
-				portoes.append(c + (pts[i].lerp(pts[i + 1], 0.5) - c).normalized() * r)
+			if (pts[i].distance_to(c) - r) * (pts[i + 1].distance_to(c) - r) <= 0.0:   # <= : o ponto pode cair exatamente em cima do círculo
+				var g := c + (pts[i].lerp(pts[i + 1], 0.5) - c).normalized() * r
+				var novo := true
+				for outro in portoes:
+					if outro.distance_to(g) < 40.0:
+						novo = false
+				if novo:
+					portoes.append(g)
 	var passos := int(TAU * r / 5.0)
 	for k in passos:
 		var a0 := TAU * k / passos
