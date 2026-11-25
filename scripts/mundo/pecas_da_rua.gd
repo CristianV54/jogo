@@ -5,8 +5,8 @@ extends PecasDeConstrucao
 ## banco e vasos de flor. Quem usa (o casario, a vida das ruas, a bancada) só diz ONDE; como é feito está aqui.
 ## Critério de pronto: docs/construcoes/rua.md. Chame `fechar()` no fim.
 
-const LAJE := Color(0.5, 0.48, 0.44)
-const MEIO_FIO := Color(0.62, 0.6, 0.55)
+const LAJE := Color(0.42, 0.4, 0.37)
+const MEIO_FIO := Color(0.52, 0.5, 0.46)
 const SARJETA := Color(0.24, 0.23, 0.22)
 const FERRO := Color(0.13, 0.13, 0.14)
 const MADEIRA := Color(0.4, 0.28, 0.16)
