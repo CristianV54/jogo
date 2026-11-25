@@ -25,6 +25,7 @@ var animais: Array[AnimalVila] = []
 var trocas: Array[Gatilho] = []
 var bonecos: Array[BonecoDeTreino] = []
 var _solidos: StaticBody3D
+var _pecas: PecasDaRua   # peças do kit da rua usadas no largo deste povoado (criado só se o tipo usar)
 var _rng := RandomNumberGenerator.new()
 
 
@@ -65,11 +66,58 @@ func montar() -> void:
 			_lavoura()
 		_:
 			_posto_imperial()
+	if _pecas != null:
+		_pecas.fechar()
 	if String(dados["tipo"]) != "guarita":   # a guarita não tem placa: fica em cima da estrada
 		_placa(_p(-6.0, -float(dados["raio"]) * 0.45), String(dados["nome"]))
 
 
 # ---------------------------------------------------------------- ajudantes
+
+## O kit de peças da rua deste povoado (lampião, carroça, barraca...), criado na primeira vez que alguém pede.
+func _kit() -> PecasDaRua:
+	if _pecas == null:
+		_pecas = PecasDaRua.new()
+		_pecas.name = "Pecas"
+		add_child(_pecas)
+	return _pecas
+
+
+func _chao(p: Vector2) -> Vector3:
+	return Vector3(p.x, _y(p), p.y)
+
+
+## Terreiro: o chão pisado do largo do povoado (terra batida com pedras), uma mancha de borda irregular colada no terreno.
+func _terreiro(p: Vector2, raio: float, cor := Color(0.4, 0.34, 0.26)) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var aneis := 5
+	var gomos := 28
+	var ponto := func(i: int, k: int) -> Vector3:
+		var a := TAU * k / gomos
+		var r := raio * i / aneis * (1.0 + (0.1 * sin(a * 3.0 + raio) + 0.07 * sin(a * 7.0)) * float(i) / aneis)
+		var q := p + Vector2(cos(a), sin(a)) * r
+		return Vector3(q.x, _y(q) + 0.05, q.y)
+	for i in aneis:
+		for k in gomos:
+			for canto in [[i, k], [i + 1, k + 1], [i + 1, k], [i, k], [i, k + 1], [i + 1, k + 1]]:
+				st.set_normal(Vector3.UP)
+				st.add_vertex(ponto.call(int(canto[0]), int(canto[1])))
+	var mi := MeshInstance3D.new()
+	mi.name = "Terreiro"
+	mi.mesh = st.commit()
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = Pedra.calcamento()
+	m.albedo_color = cor
+	m.roughness = 1.0
+	m.uv1_triplanar = true
+	m.uv1_world_triplanar = true
+	m.uv1_scale = Vector3(0.22, 0.22, 0.22)
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
+
 
 ## Ponto do mundo: `u` ao longo da estrada, `v` para dentro do povoado (a partir do centro).
 func _p(u: float, v: float) -> Vector2:
@@ -266,6 +314,10 @@ func _lavrador(nome_n: String, cena: String, campo: Vector2, falas: PackedString
 # ---------------------------------------------------------------- tipos
 
 func _fazenda() -> void:
+	_terreiro(_p(0.0, 10.0), 17.0)
+	_kit().carroca(_chao(_p(30.0, -1.0)), dir)
+	_kit().carga(_chao(_p(13.0, -1.5)), dir, 3, _rng.randi() % 20)
+	_kit().lampiao_de_poste(_chao(_p(-9.0, -2.0)), para_longe)
 	_casa("CasaDaFazenda", _p(0.0, 4.0), 3, 3, REF.ESTILO_MADEIRA)
 	_casa("Celeiro", _p(-22.0, 10.0), 4, 4, REF.ESTILO_MADEIRA, "deposito")
 	var c1 := _p(0.0, 43.0)   # um campo grande atrás da casa, com o poço e o palheiro no quintal entre os dois
@@ -284,6 +336,14 @@ func _fazenda() -> void:
 
 
 func _vila() -> void:
+	_terreiro(_p(0.0, 16.0), 24.0)
+	for u in [-15.0, 15.0]:
+		_kit().lampiao_de_poste(_chao(_p(u, -2.0)), para_longe)
+	_kit().lampiao_de_poste(_chao(_p(3.0, 20.0)), -para_longe)
+	_kit().carroca(_chao(_p(-36.0, -1.0)), dir)
+	_kit().barraca(_chao(_p(36.0, 1.0)), -para_longe, [Color(0.72, 0.2, 0.16), Color(0.25, 0.42, 0.62), Color(0.3, 0.52, 0.3)][_rng.randi() % 3], [Color(0.8, 0.2, 0.15), Color(0.9, 0.7, 0.2), Color(0.4, 0.6, 0.25)])
+	_kit().carga(_chao(_p(31.0, 0.0)), dir, 2, _rng.randi() % 20)
+	_kit().estandarte(_chao(_p(0.0, -3.0)), -para_longe)
 	_casa("Taverna", _p(0.0, 6.0), 4, 4, REF.ESTILO_PEDRA, "moradia")
 	_casa("Casa1", _p(-24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
 	_casa("Casa2", _p(24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
@@ -527,6 +587,10 @@ func _guarita() -> void:
 ## Pescador: cabana de madeira sobre palafitas, perto da água, com doca, barco, redes e caixas de peixe. A doca sai da
 ## margem do rio mais perto (procurada na hora, na direção do rio) e avança sobre a água.
 func _pescador() -> void:
+	_terreiro(_p(0.0, 9.0), 9.0)
+	_kit().barco(_chao(_p(-9.0, 11.0)), dir)
+	_kit().varal_de_peixe(_chao(_p(8.0, 6.0)), para_longe)
+	_kit().carga(_chao(_p(-5.0, 1.0)), dir, 2, 3)
 	var casa := _casa("Cabana", _p(0.0, 5.0), 2, 2, REF.ESTILO_MADEIRA)
 	var madeira := VilaRefugio._mat(Color(0.34, 0.24, 0.14))
 	var c0 := Vector2(casa.position.x, casa.position.z)
@@ -655,6 +719,9 @@ func _doca(base: Vector2, para_agua: Vector2) -> void:
 
 
 func _cabana() -> void:
+	_terreiro(_p(0.0, 10.0), 9.0)
+	_kit().carga(_chao(_p(-7.0, 2.0)), dir, 2, _rng.randi() % 20)
+	_kit().lampiao_de_poste(_chao(_p(5.0, 0.0)), para_longe)
 	_casa("Cabana", _p(0.0, 5.0), 2, 2, REF.ESTILO_MADEIRA)
 	var lenha := VilaRefugio._mat(Color(0.32, 0.21, 0.11))
 	for k in 4:   # pilha de lenha

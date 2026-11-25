@@ -266,3 +266,35 @@ func estandarte(p: Vector3, frente: Vector2) -> void:
 	_no_conjunto(p, giro, Vector3(0, 4.7, 0.05), Vector3(0.3, 2.9, 0.03), Color(0.92, 0.9, 0.82))
 	_no_conjunto(p, giro, Vector3(0, 3.1, 0.02), Vector3(0.92, 0.92, 0.04), Color(0.14, 0.2, 0.5), 0.0, "caixa")
 	_cilindro(p + Vector3(0, 6.6, 0), 0.12, 0.24, Color(0.85, 0.72, 0.3))
+
+
+## Barco de pesca a remo, em terra: casco de tábuas com proa em ponta, bancos e dois remos.
+func barco(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var casco := MADEIRA.darkened(0.1)
+	_no_conjunto(p, giro, Vector3(0, 0.22, 0), Vector3(1.1, 0.1, 3.4), casco)
+	for sx in [-1.0, 1.0]:
+		var b := Basis(Vector3.UP, giro)
+		_peca("caixa", casco.lightened(0.1), Transform3D((b * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.08, 0.62, 3.4)), p + b * Vector3(sx * 0.66, 0.5, 0)))
+		_peca("caixa", MADEIRA.darkened(0.3), Transform3D((b * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.11, 0.08, 3.5)), p + b * Vector3(sx * 0.76, 0.8, 0)))
+		_peca("caixa", casco.lightened(0.1), Transform3D((b * Basis(Vector3.UP, -sx * 0.62) * Basis(Vector3.BACK, sx * 0.3)).scaled_local(Vector3(0.08, 0.62, 1.3)), p + b * Vector3(sx * 0.36, 0.5, 2.2)))   # a proa fecha em ponta
+		_peca("caixa", MADEIRA.lightened(0.2), Transform3D((b * Basis(Vector3.UP, sx * 0.25) * Basis(Vector3.RIGHT, 0.1)).scaled_local(Vector3(0.06, 0.06, 2.6)), p + b * Vector3(sx * 1.25, 0.2, -0.2)))   # remo
+		_peca("caixa", MADEIRA.lightened(0.2), Transform3D((b * Basis(Vector3.UP, sx * 0.25)).scaled_local(Vector3(0.22, 0.04, 0.6)), p + b * Vector3(sx * 1.6, 0.1, -1.6)))
+	_no_conjunto(p, giro, Vector3(0, 0.5, -1.72), Vector3(1.3, 0.62, 0.08), casco.lightened(0.1))   # popa
+	for z in [-0.9, 0.5]:
+		_no_conjunto(p, giro, Vector3(0, 0.6, float(z)), Vector3(1.3, 0.06, 0.3), MADEIRA.lightened(0.15))
+	_solido(p + Vector3(0, 0.45, 0), Vector3(1.6, 0.9, 4.2), giro)
+
+
+## Varal de secar peixe: dois esteios, duas varas e peixes pendurados pela cauda.
+func varal_de_peixe(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 1.4, 0.95, 0), Vector3(0.1, 1.9, 0.1), MADEIRA.darkened(0.2))
+	for h in [1.8, 1.25]:
+		_no_conjunto(p, giro, Vector3(0, float(h), 0), Vector3(3.0, 0.06, 0.06), MADEIRA)
+		for k in 6:
+			var x := -1.1 + k * 0.44
+			_no_conjunto(p, giro, Vector3(x, float(h) - 0.24, 0), Vector3(0.13, 0.4, 0.05), Color(0.62, 0.66, 0.7) if k % 2 == 0 else Color(0.72, 0.6, 0.48))
+			_no_conjunto(p, giro, Vector3(x, float(h) - 0.05, 0), Vector3(0.16, 0.1, 0.03), Color(0.45, 0.48, 0.52))
+	_solido(p + Vector3(0, 0.95, 0), Vector3(3.0, 1.9, 0.3), giro)
