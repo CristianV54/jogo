@@ -22,7 +22,7 @@ var tubarao: Tubarao
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
 var capim: CapimDoMundo
-var mapa_floresta: ImageTexture   # onde há mata, para o mapa (tecla M)
+var mapa_floresta: ImageTexture   # a imagem pintada do mapa (tecla M), ver PinturaDoMapa
 var _rng := RandomNumberGenerator.new()
 var _t_atividade := 0.0
 const RAIO_ATIVO := 230.0    # regiões e povoados mais longe que isto ficam parados e invisíveis (fogueiras, gente e bichos custam CPU)
@@ -63,7 +63,11 @@ func construir() -> void:
 	ativo = true
 	instancia = self
 	_rng.seed = 2026
+	var t0 := Time.get_ticks_msec()
+	var etapa := func(nome: String) -> void:   # tempo de cada etapa do carregamento, no log
+		print("Mundo: etapa ", nome, " em ", (Time.get_ticks_msec() - t0) / 1000.0, " s")
 	_planejar()
+	etapa.call("planejar")
 	for id in MundoDados.REGIOES:
 		progresso.emit("Erguendo %s..." % MundoDados.REGIOES[id]["nome"])
 		var area := (load(MundoDados.REGIOES[id]["cena"]) as PackedScene).instantiate() as AreaBase
@@ -76,8 +80,10 @@ func construir() -> void:
 		await get_tree().process_frame
 	progresso.emit("Moldando o chão entre as regiões...")
 	await get_tree().process_frame
+	etapa.call("regioes")
 	terreno.gerar()
 	add_child(terreno)
+	etapa.call("terreno")
 	_paredes = StaticBody3D.new()
 	_paredes.name = "CristasEBordas"
 	add_child(_paredes)
@@ -89,8 +95,10 @@ func construir() -> void:
 	_barreiras()
 	progresso.emit("Plantando florestas...")
 	await get_tree().process_frame
+	etapa.call("pontes e mar")
 	_floresta()
 	_horizonte()
+	etapa.call("floresta e mapa")
 	progresso.emit("Erguendo povoados e fazendas...")
 	await get_tree().process_frame
 	for id in povoados:
@@ -102,6 +110,7 @@ func construir() -> void:
 		povoados[id]["no"] = pv
 		var cp: Vector2 = povoados[id]["centro"]
 		NavegacaoLocal.assar(pv, Vector3(cp.x, terreno.altura_em(cp.x, cp.y), cp.y), Vector2(1, 1) * float(povoados[id]["raio"]) * 0.65, true)
+	etapa.call("povoados")
 	progresso.emit("Traçando os caminhos da gente...")
 	await get_tree().process_frame
 	NavegacaoLocal.assar(regioes["refugio_do_pinhal"], Vector3(0, 0, 0), Vector2(48, 48), false)
@@ -114,11 +123,14 @@ func construir() -> void:
 	fauna = FaunaDoMundo.new()
 	fauna.mundo = self
 	add_child(fauna)
+	etapa.call("navegacao")
 	fauna.povoar()
+	etapa.call("fauna")
 	capim = CapimDoMundo.new()
 	capim.mundo = self
 	add_child(capim)
 	capim.iniciar()
+	etapa.call("capim (fim)")
 	progresso.emit("Pronto.")
 
 
@@ -589,8 +601,8 @@ func _floresta() -> void:
 	var cores_pedra: Dictionary = {}   # mesma chave -> Array[Color]
 	var passo := 7.5
 	var lim := MundoDados.LIMITES
-	var gw := int(lim.size.x / 10.0) + 1   # grade do mapa (tecla M): um ponto a cada 10 m
-	var gh := int(lim.size.y / 10.0) + 1
+	var gw := int(lim.size.x / 20.0) + 1   # grade do mapa (tecla M): quantas árvores em cada quadrado de 20 m
+	var gh := int(lim.size.y / 20.0) + 1
 	var mata := PackedFloat32Array()
 	mata.resize(gw * gh)
 	var nx := int(lim.size.x / passo)
@@ -625,7 +637,7 @@ func _floresta() -> void:
 				(tiles[kk] as Array).append(t)
 				if tp != 3:
 					arvores.adicionar(x, z, (0.45 if tp == 0 else 0.4 if tp == 1 else 0.3) * s)
-				mata[int((z - lim.position.y) / 10.0) * gw + int((x - lim.position.x) / 10.0)] += 1.0
+				mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
 				contagem_bioma[bioma] = int(contagem_bioma.get(bioma, 0)) + 1
 			elif _rng.randf() <= float(Biomas.PEDRAS[bioma]):   # pedra solta (e com tronco/colisão se for grande)
 				var tam := _rng.randf_range(0.5, 1.6) * (1.6 if bioma == "cratera" or bioma == "ferrogris" else 1.0)
@@ -646,30 +658,7 @@ func _floresta() -> void:
 					var q := Vector2(x, z) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2))
 					var e := _rng.randf_range(0.8, 1.6)
 					(tiles[kk] as Array).append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, e, e)), Vector3(q.x, terreno.altura_em(q.x, q.y) - 0.02, q.y)))
-	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa pintado: cor do chão de cada bioma, mata mais escura, praia e mar
-	for gz in gh:
-		for gx in gw:
-			var wx := lim.position.x + gx * 10.0
-			var wz := lim.position.y + gz * 10.0
-			var costa := Costa.distancia(wx, wz)
-			if costa < 0.0:   # mar: claro no raso, escuro no fundo
-				img.set_pixel(gx, gz, Color(0.36, 0.62, 0.7).lerp(Color(0.13, 0.3, 0.44), smoothstep(-10.0, -140.0, costa)))
-				continue
-			if costa < 16.0:
-				img.set_pixel(gx, gz, Color(0.9, 0.83, 0.62))
-				continue
-			var chao := Biomas.cor_do_chao(wx, wz, 0.5)
-			chao = Color(chao.r * 1.75 + 0.1, chao.g * 1.6 + 0.1, chao.b * 1.5 + 0.06)   # o chão do mapa é mais claro que o do jogo, para a mata se destacar
-			var vizinhos := 0.0   # a mata conta com os pontos vizinhos, para virar mancha e não pontinho
-			for dz in [-1, 0, 1]:
-				for dx in [-1, 0, 1]:
-					vizinhos += mata[clampi(gz + dz, 0, gh - 1) * gw + clampi(gx + dx, 0, gw - 1)]
-			var copa := Color(chao.r * 0.38, chao.g * 0.5, chao.b * 0.36)
-			var cor := chao.lerp(copa, clampf(vizinhos / 5.0, 0.0, 1.0) * (0.75 + 0.25 * float(mata[gz * gw + gx] > 0.0)))
-			if terreno.distancia_rio(wx, wz) < 5.0:
-				cor = Color(0.3, 0.55, 0.72)
-			img.set_pixel(gx, gz, cor)
-	mapa_floresta = ImageTexture.create_from_image(img)
+	mapa_floresta = PinturaDoMapa.pintar(mata, gw, gh, 20.0)
 	var malhas := [FabricaNatureza.pinheiro(), FabricaNatureza.folhosa(), FabricaNatureza.morta(), FabricaNatureza.arbusto(2.0), FabricaNatureza.pedra(5.0), FabricaNatureza.cogumelo()]
 	var mat := FabricaNatureza.material()
 	var total := 0

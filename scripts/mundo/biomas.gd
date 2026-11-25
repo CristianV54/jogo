@@ -29,12 +29,12 @@ const TOM_PEDRA := {"pinhal": Color(1, 1, 1), "bosque": Color(0.85, 0.95, 0.85),
 
 ## Sementes dos biomas na ilha: [bioma, x, z]. Cada ponto do mundo pertence à semente mais próxima (ver docs/mapa-novo).
 const SEMENTES := [
-	["imperio", 0, 0], ["imperio", 450, 525], ["imperio", -450, 450],
-	["pinhal", -225, 1500], ["pinhal", -900, 1575], ["pinhal", 150, 1125], ["pinhal", -1275, 975],
-	["bosque", -960, -900], ["bosque", -1425, -1275], ["bosque", -1500, -525],
-	["ruptura", -1500, 0], ["ruptura", -900, 225], ["ruptura", 675, 1425], ["ruptura", 1200, 1200], ["ruptura", 900, 600], ["ruptura", 675, -525],
-	["ferrogris", 1650, 30], ["ferrogris", -180, -1650], ["ferrogris", 450, -1575], ["ferrogris", -525, -1350],
-	["cratera", 1110, -1080], ["cratera", 1500, -750],
+	["imperio", 0, 0], ["imperio", 729, 638], ["imperio", -729, 547],
+	["pinhal", -364, 1825], ["pinhal", -1458, 1916], ["pinhal", 243, 1369], ["pinhal", -2065, 1186],
+	["bosque", -1555, -1095], ["bosque", -2308, -1551], ["bosque", -2430, -638],
+	["ruptura", -2430, 0], ["ruptura", -1458, 273], ["ruptura", 1093, 1734], ["ruptura", 1944, 1460], ["ruptura", 1458, 730], ["ruptura", 1093, -638],
+	["ferrogris", 2673, 36], ["ferrogris", -291, -2008], ["ferrogris", 729, -1916], ["ferrogris", -850, -1642],
+	["cratera", 1798, -1314], ["cratera", 2430, -912],
 ]
 
 

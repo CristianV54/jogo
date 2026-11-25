@@ -1,6 +1,6 @@
 class_name TerrenoMundo
 extends Terreno
-## Chão do mundo contínuo: uma grade grande (passo de 8 m) entre as áreas, com colinas suaves longe delas, estradas de terra,
+## Chão do mundo contínuo: uma grade (passo de 4 m, em blocos de 256 m) entre as áreas, com colinas suaves longe delas, estradas de terra,
 ## rios escavados com água viva e a cor mudando de região em região. Onde há uma área o chão não é desenhado (a área
 ## tem o seu terreno, que na borda se mistura com este). Reaproveita os rios do `Terreno`.
 
@@ -33,27 +33,74 @@ func preparar() -> void:
 	_preparar_rios()
 
 
+## O chão é feito em BLOCOS de 256 m (o motor só desenha os que estão na tela), o mar fundo não ganha bloco, e o resultado
+## fica guardado em disco (user://): só a primeira vez depois de uma mudança no mapa é que o chão é calculado de novo.
+const LADO_DO_BLOCO := 64   # células por bloco (64 x 4 m = 256 m)
+const MAR_SEM_CHAO := -120.0   # distância da costa (mar adentro) a partir da qual não há chão: só o oceano
+
+
 func gerar() -> void:
-	var malha := _malha()
-	var mi := MeshInstance3D.new()
-	mi.name = "Superficie"
-	mi.mesh = malha
+	var blocos := _ler_cache()
+	if blocos.is_empty():
+		blocos = _blocos()
+		_gravar_cache(blocos)
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
-	mi.material_override = mat
-	add_child(mi)
 	corpo = StaticBody3D.new()
 	corpo.name = "Colisao"
-	var cs := CollisionShape3D.new()
-	cs.shape = malha.create_trimesh_shape()
-	corpo.add_child(cs)
 	add_child(corpo)
+	for b in blocos:
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = b[0]
+		arrays[Mesh.ARRAY_NORMAL] = b[1]
+		arrays[Mesh.ARRAY_COLOR] = b[2]
+		arrays[Mesh.ARRAY_INDEX] = b[3]
+		var malha := ArrayMesh.new()
+		malha.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		var mi := MeshInstance3D.new()
+		mi.name = "Superficie"
+		mi.mesh = malha
+		mi.material_override = mat
+		add_child(mi, true)
+		var cs := CollisionShape3D.new()
+		cs.shape = malha.create_trimesh_shape()
+		corpo.add_child(cs)
+	print("TerrenoMundo: ", blocos.size(), " blocos de chão")
 	for r in rios:
 		for trecho in _trechos_fora_das_areas(r["pontos"]):
 			var copia: Dictionary = r.duplicate()
 			copia["pontos"] = trecho
 			add_child(_agua(copia))
+
+
+## Nome do arquivo de cache: muda sempre que muda algo de que o chão depende (planta do mundo, regras de altura e de cor).
+func _arquivo_de_cache() -> String:
+	var texto := str(limites, passo, semente, retangulos, planos, estradas_mundo.size(), Costa.protegidos)
+	for arq in ["res://scripts/mundo/mundo_dados.gd", "res://scripts/mundo/terreno_mundo.gd", "res://scripts/mundo/terreno.gd", "res://scripts/mundo/costa.gd", "res://scripts/mundo/biomas.gd"]:
+		texto += FileAccess.get_file_as_string(arq)
+	return "user://chao_do_mundo_%s.bin" % texto.md5_text().left(12)
+
+
+func _ler_cache() -> Array:
+	var caminho := _arquivo_de_cache()
+	if not FileAccess.file_exists(caminho):
+		return []
+	var f := FileAccess.open_compressed(caminho, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+	if f == null:
+		return []
+	var dados: Variant = f.get_var()
+	return dados if dados is Array else []
+
+
+func _gravar_cache(blocos: Array) -> void:
+	for velho in DirAccess.get_files_at("user://"):   # um cache só: o do mapa atual
+		if velho.begins_with("chao_do_mundo_"):
+			DirAccess.remove_absolute("user://" + velho)
+	var f := FileAccess.open_compressed(_arquivo_de_cache(), FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
+	if f:
+		f.store_var(blocos)
 
 
 ## Uma ponta de rio encontra água se está perto de outro rio, da borda de uma região (onde o rio da região continua) ou do mar.
@@ -172,24 +219,58 @@ func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 	return c
 
 
-func _malha() -> ArrayMesh:
+## Calcula o chão: devolve um Array de blocos [vértices, normais, cores, índices].
+func _blocos() -> Array:
 	var nx := int(limites.size.x / passo)
 	var nz := int(limites.size.y / passo)
 	var lx := nx + 1
 	var lz := nz + 1
+	var fundo := Costa.NIVEL_MAR - 6.0
 	var alturas := PackedFloat32Array()
 	alturas.resize(lx * lz)
+	var costas := PackedFloat32Array()   # distância da costa em cada vértice (usada 3 vezes: calcula uma)
+	costas.resize(lx * lz)
 	for i in lx:
 		for j in lz:
-			alturas[i * lz + j] = altura_em(limites.position.x + i * passo, limites.position.y + j * passo)
+			var x := limites.position.x + i * passo
+			var z := limites.position.y + j * passo
+			var c := Costa.distancia(x, z)
+			costas[i * lz + j] = c
+			alturas[i * lz + j] = fundo if c < MAR_SEM_CHAO else altura_em(x, z)
+	var blocos: Array = []
+	var bi := 0
+	while bi < nx:
+		var bj := 0
+		while bj < nz:
+			var i_fim := mini(bi + LADO_DO_BLOCO, nx)
+			var j_fim := mini(bj + LADO_DO_BLOCO, nz)
+			var tem_terra := false
+			for i in range(bi, i_fim + 1, 8):
+				for j in range(bj, j_fim + 1, 8):
+					if costas[i * lz + j] > MAR_SEM_CHAO:
+						tem_terra = true
+			if tem_terra:
+				var b := _bloco(bi, bj, i_fim, j_fim, nx, nz, lz, alturas)
+				if not (b[3] as PackedInt32Array).is_empty():
+					blocos.append(b)
+			bj += LADO_DO_BLOCO
+		bi += LADO_DO_BLOCO
+	return blocos
+
+
+func _bloco(bi: int, bj: int, i_fim: int, j_fim: int, nx: int, nz: int, lz: int, alturas: PackedFloat32Array) -> Array:
+	var li := i_fim - bi + 1
+	var lj := j_fim - bj + 1
 	var vertices := PackedVector3Array()
 	var normais := PackedVector3Array()
 	var cores := PackedColorArray()
-	vertices.resize(lx * lz)
-	normais.resize(lx * lz)
-	cores.resize(lx * lz)
-	for i in lx:
-		for j in lz:
+	vertices.resize(li * lj)
+	normais.resize(li * lj)
+	cores.resize(li * lj)
+	for a in li:
+		for b in lj:
+			var i := bi + a
+			var j := bj + b
 			var x := limites.position.x + i * passo
 			var z := limites.position.y + j * passo
 			var i0 := maxi(i - 1, 0)
@@ -199,30 +280,22 @@ func _malha() -> ArrayMesh:
 			var dx := (alturas[i1 * lz + j] - alturas[i0 * lz + j]) / ((i1 - i0) * passo)
 			var dz := (alturas[i * lz + j1] - alturas[i * lz + j0]) / ((j1 - j0) * passo)
 			var normal := Vector3(-dx, 1.0, -dz).normalized()
-			var k := i * lz + j
+			var k := a * lj + b
 			# A parte da célula que cai DENTRO da área fica logo abaixo do chão dela. O vértice que cai exatamente na borda não desce:
 			# descendo, o chão do mundo chegava 0,2 m abaixo do chão da área e a beirada virava um degrau que travava o Torin
 			# (lados oeste e norte de cada região; a trava de x=-160 na entrada do Refúgio vinda do Pomar).
-			vertices[k] = Vector3(x, alturas[k] - (0.2 if _dentro_de_area(Vector2(x, z), -0.01) else 0.0), z)
+			vertices[k] = Vector3(x, alturas[i * lz + j] - (0.2 if _dentro_de_area(Vector2(x, z), -0.01) else 0.0), z)
 			normais[k] = normal
 			cores[k] = _cor_vertice(x, z, normal).srgb_to_linear()
 	var indices := PackedInt32Array()
-	for i in nx:
-		for j in nz:
-			var celula := Rect2(limites.position.x + i * passo, limites.position.y + j * passo, passo, passo)
+	for a in li - 1:
+		for b in lj - 1:
+			var celula := Rect2(limites.position.x + (bi + a) * passo, limites.position.y + (bj + b) * passo, passo, passo)
 			if _celula_dentro_de_area(celula):
 				continue   # o chão desta célula é o da área (só some a célula inteira: célula cortada ao meio abria uma fresta no chão)
-			var p00 := i * lz + j
-			var p10 := (i + 1) * lz + j
-			var p01 := i * lz + j + 1
-			var p11 := (i + 1) * lz + j + 1
+			var p00 := a * lj + b
+			var p10 := (a + 1) * lj + b
+			var p01 := a * lj + b + 1
+			var p11 := (a + 1) * lj + b + 1
 			indices.append_array([p00, p10, p01, p10, p11, p01])
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normais
-	arrays[Mesh.ARRAY_COLOR] = cores
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var malha := ArrayMesh.new()
-	malha.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return malha
+	return [vertices, normais, cores, indices]
