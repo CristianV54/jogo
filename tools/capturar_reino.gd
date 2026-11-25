@@ -54,8 +54,6 @@ func _rodar() -> void:
 	await _foto("02_avenida_do_portao_sul", 4.0)
 	_ver(Vector2(0, 178), Vector2(0, 120))               # praça do mercado, ao pé do penhasco
 	await _foto("03_praca_do_mercado", 4.0)
-	_ver(Vector2(-60, 126), Vector2(-150, 60))           # rua em anel, lado oeste: casas de um lado, jardins e rocha do outro
-	await _foto("04_rua_de_casas", 4.0)
 	_ver(Vector2(60, 108), Vector2(140, 20))             # rua em anel, com a rocha do penhasco de um lado e casas do outro
 	await _foto("05_rua_do_penhasco", 4.0)
 	for item in [["06_quartel_campo_de_treino", "quartel_da_guarda"], ["07_estabulos_do_reino", "estabulos_do_reino"], ["08_catedral", "catedral_de_valdoria"]]:
