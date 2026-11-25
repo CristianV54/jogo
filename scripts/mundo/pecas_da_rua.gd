@@ -216,3 +216,53 @@ func carroca(p: Vector3, frente: Vector2) -> void:
 	for k in 4:   # carga: sacos e um barril
 		_no_conjunto(p, giro, Vector3(-0.38 + 0.76 * (k % 2), 1.14 + 0.05 * k, -1.0 + 0.62 * k), Vector3(0.62, 0.44, 0.56), Color(0.72, 0.64, 0.42).darkened(0.08 * (k % 3)), 0.1 * (k % 2))
 	_solido(p + Vector3(0, 0.8, 0), Vector3(1.9, 1.6, 3.5), giro)
+
+
+## Cavalete de armas do quartel: duas travessas em cavalete com lanças em pé, espadas penduradas e dois escudos.
+func cavalete_de_armas(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var aco := Color(0.7, 0.72, 0.75)
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 1.2, 0.8, 0.22), Vector3(0.09, 1.7, 0.09), MADEIRA.darkened(0.2), 0.28)
+		_no_conjunto(p, giro, Vector3(sx * 1.2, 0.8, -0.22), Vector3(0.09, 1.7, 0.09), MADEIRA.darkened(0.2), -0.28)
+	for h in [0.55, 1.45]:
+		_no_conjunto(p, giro, Vector3(0, float(h), 0), Vector3(2.6, 0.09, 0.09), MADEIRA)
+	for k in 4:   # lanças
+		var x := -0.9 + k * 0.28
+		_no_conjunto(p, giro, Vector3(x, 1.25, 0.1), Vector3(0.045, 2.5, 0.045), MADEIRA.lightened(0.15), 0.07)
+		_no_conjunto(p, giro, Vector3(x, 2.55, 0.01), Vector3(0.09, 0.3, 0.03), aco, 0.07)
+	for k in 3:   # espadas de ponta para baixo
+		var x := 0.35 + k * 0.3
+		_no_conjunto(p, giro, Vector3(x, 0.95, 0.09), Vector3(0.07, 0.9, 0.02), aco)
+		_no_conjunto(p, giro, Vector3(x, 1.42, 0.09), Vector3(0.26, 0.05, 0.05), FERRO)
+		_no_conjunto(p, giro, Vector3(x, 1.54, 0.09), Vector3(0.05, 0.2, 0.05), MADEIRA.darkened(0.3))
+	for sx in [-1.0, 1.0]:   # escudos redondos encostados nos pés
+		var b := Basis(Vector3.UP, giro)
+		_peca("cilindro", Color(0.14, 0.2, 0.5), Transform3D((b * Basis(Vector3.RIGHT, PI / 2.0 - 0.3)).scaled_local(Vector3(0.8, 0.07, 0.8)), p + b * Vector3(sx * 0.75, 0.42, 0.42)))
+		_peca("cilindro", aco, Transform3D((b * Basis(Vector3.RIGHT, PI / 2.0 - 0.3)).scaled_local(Vector3(0.22, 0.12, 0.22)), p + b * Vector3(sx * 0.75, 0.43, 0.45)))
+	_solido(p + Vector3(0, 0.9, 0), Vector3(2.6, 1.8, 0.7), giro)
+
+
+## Alvo de arco: tripé de madeira e o disco de palha com três anéis pintados, virado para `frente`.
+func alvo_de_arco(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var b := Basis(Vector3.UP, giro)
+	for sx in [-1.0, 1.0]:
+		_no_conjunto(p, giro, Vector3(sx * 0.45, 0.85, 0.0), Vector3(0.08, 1.9, 0.08), MADEIRA.darkened(0.2), -0.12)
+	_no_conjunto(p, giro, Vector3(0, 0.8, -0.55), Vector3(0.08, 1.9, 0.08), MADEIRA.darkened(0.2), 0.5)
+	var discos := [[1.5, Color(0.86, 0.74, 0.4)], [1.05, Color(0.2, 0.3, 0.6)], [0.62, Color(0.92, 0.9, 0.84)], [0.26, Color(0.72, 0.15, 0.1)]]
+	for k in discos.size():
+		_peca("cilindro", discos[k][1], Transform3D((b * Basis(Vector3.RIGHT, PI / 2.0 - 0.12)).scaled_local(Vector3(float(discos[k][0]), 0.22 + k * 0.03, float(discos[k][0]))), p + b * Vector3(0, 1.3, 0.12)))
+	_solido(p + Vector3(0, 1.0, 0), Vector3(1.4, 2.0, 0.6), giro)
+
+
+## Estandarte do rei num mastro alto: base de pedra, mastro, travessa e pano azul com faixa clara e ponta dourada.
+func estandarte(p: Vector3, frente: Vector2) -> void:
+	var giro := atan2(frente.x, frente.y)
+	_caixa(p + Vector3(0, 0.3, 0), Vector3(0.7, 0.6, 0.7), 0.0, MEIO_FIO, true)
+	_cilindro(p + Vector3(0, 3.4, 0), 0.07, 6.2, MADEIRA.darkened(0.3))
+	_no_conjunto(p, giro, Vector3(0, 6.2, 0), Vector3(1.5, 0.07, 0.07), MADEIRA.darkened(0.3))
+	_no_conjunto(p, giro, Vector3(0, 4.7, 0.02), Vector3(1.3, 2.9, 0.04), Color(0.14, 0.2, 0.5))
+	_no_conjunto(p, giro, Vector3(0, 4.7, 0.05), Vector3(0.3, 2.9, 0.03), Color(0.92, 0.9, 0.82))
+	_no_conjunto(p, giro, Vector3(0, 3.1, 0.02), Vector3(0.92, 0.92, 0.04), Color(0.14, 0.2, 0.5), 0.0, "caixa")
+	_cilindro(p + Vector3(0, 6.6, 0), 0.12, 0.24, Color(0.85, 0.72, 0.3))

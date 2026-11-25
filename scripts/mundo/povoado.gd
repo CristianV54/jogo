@@ -409,13 +409,19 @@ func _quartel() -> void:
 		b.position = Vector3(q.x, _y(q), q.y)
 		add_child(b)
 		bonecos.append(b)
-	for k in 3:   # alvos de palha para arco
+	var kit := PecasDaRua.new()   # peças do campo de treino (ver tools/bancada_construcao.gd -- quartel)
+	kit.name = "CampoDeTreino"
+	add_child(kit)
+	for k in 3:   # alvos de arco
 		var q := _p(26.0, 6.0 + k * 9.0)
-		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(0.2, 1.8, 0.2), VilaRefugio._mat(Color(0.3, 0.2, 0.11)), true)
-		var alvo := VilaRefugio._cilindro(Vector3(q.x, _y(q) + 1.7, q.y), 0.8, 0.25, VilaRefugio._mat(Color(0.86, 0.74, 0.4)), false, 14)
-		alvo.rotation = Vector3(0.0, atan2(dir.x, dir.y), PI / 2.0)
-		var miolo := VilaRefugio._cilindro(Vector3(q.x, _y(q) + 1.7, q.y), 0.3, 0.28, VilaRefugio._mat(Color(0.7, 0.14, 0.1)), false, 12)
-		miolo.rotation = alvo.rotation
+		kit.alvo_de_arco(Vector3(q.x, _y(q), q.y), -dir)
+	for k in 4:   # cavaletes de armas diante do quartel e do arsenal
+		var q := _p(-36.0 + k * 12.0, 34.0)
+		kit.cavalete_de_armas(Vector3(q.x, _y(q), q.y), -para_longe)
+	for q2 in [_p(-34.0, 2.0), _p(34.0, 2.0), _p(-34.0, 30.0), _p(34.0, 30.0)]:   # estandartes do rei nos cantos do campo
+		kit.estandarte(Vector3(q2.x, _y(q2), q2.y), para_longe)
+	kit.carroca(Vector3(_p(-40.0, 16.0).x, _y(_p(-40.0, 16.0)), _p(-40.0, 16.0).y), dir)
+	kit.fechar()
 	for u in [-24.0, 24.0]:
 		_fogueira(_p(u, 28.0), 0.6)
 	for k in 3:   # soldados treinando, cada um no seu boneco
@@ -435,6 +441,14 @@ func _estabulo() -> void:
 	_feno(_p(-22.0, 26.0))
 	_feno(_p(22.0, 28.0))
 	_bebedouro(_p(8.0, 14.0))
+	var kit := PecasDaRua.new()
+	kit.name = "PatioDosEstabulos"
+	add_child(kit)
+	for q in [_p(-36.0, 30.0), _p(36.0, 30.0)]:
+		kit.estandarte(Vector3(q.x, _y(q), q.y), para_longe)
+	kit.carroca(Vector3(_p(34.0, 14.0).x, _y(_p(34.0, 14.0)), _p(34.0, 14.0).y), dir)
+	kit.carga(Vector3(_p(-30.0, 30.0).x, _y(_p(-30.0, 30.0)), _p(-30.0, 30.0).y), dir, 3, 5)
+	kit.fechar()
 	_fogueira(_p(30.0, 30.0), 0.5)
 	_npc("Cavalariço", "Cavalariço", "dorn", _p(10.0, 32.0), PackedStringArray(["Cavalo do reino é manso. Chegue pelo lado, sem pressa, e monte."]),   # no pátio, longe do feno e da cerca (nascia encostado num sólido)
 		[{"fazer": "Interact", "seg": 6.0, "olhar": _p(8.0, 16.0)}, {"ir": _p(-10.0, 32.0), "vel": 1.1}, {"fazer": "Interact", "seg": 6.0, "olhar": _p(-22.0, 26.0)}, {"ir": _p(10.0, 32.0), "vel": 1.1}])

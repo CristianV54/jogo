@@ -101,6 +101,8 @@ func _rodar() -> void:
 			await _feira()
 		"catedral":
 			await _catedral()
+		"quartel":
+			await _quartel()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -270,3 +272,17 @@ func _catedral() -> void:
 	var r := root.get_world_3d().direct_space_state.intersect_ray(q)
 	_conferir("Catedral: a porta é fechada (o Torin não atravessa a fachada)", not r.is_empty() and absf(float(r["position"].z) - 20.5) < 3.0, str(r.get("position", "nada")))
 	_conferir("Catedral: mais de 20 vitrais e ponta acima de 60 m", cat.vitrais >= 20 and cat.topo >= 60.0, "%d vitrais, %.1f m" % [cat.vitrais, cat.topo])
+
+
+## Peças do campo de treino: cavalete de armas, alvo de arco e estandarte do rei.
+func _quartel() -> void:
+	var kit := PecasDaRua.new()
+	root.add_child(kit)
+	kit.cavalete_de_armas(Vector3(-3, 0, 0), Vector2(0, 1))
+	kit.alvo_de_arco(Vector3(1.5, 0, 0), Vector2(0, 1))
+	kit.estandarte(Vector3(5, 0, 0), Vector2(0, 1))
+	kit.fechar()
+	await physics_frame
+	await _foto("01_pecas_do_quartel", Vector3(1, 2.6, 9.5), Vector3(1, 2.0, 0), Vector3(-0.6, 0, 1.2))
+	await _foto("02_cavalete_de_perto", Vector3(-1.2, 1.7, 3.6), Vector3(-3, 1.1, 0), Vector3(-5.2, 0, 0.8))
+	_conferir("Quartel: as três peças têm colisão", kit._corpo.get_child_count() == 3, "%d sólidos" % kit._corpo.get_child_count())
