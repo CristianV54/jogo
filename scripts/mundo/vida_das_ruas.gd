@@ -172,8 +172,8 @@ func _gente() -> void:
 	for k in 3:
 		trajetos.append([Vector2(-155.0 - k * 22.0, 33.0 + k * 1.5), Vector2(-255.0 + k * 12.0, 36.5 - k)])    # avenida do oeste
 		trajetos.append([Vector2(152.0 + k * 22.0, -47.0 + k * 1.5), Vector2(268.0 - k * 12.0, -43.5 - k)])    # avenida do leste
-	for k in 3:   # viela junto da muralha do sul e mais gente na praça
-		trajetos.append([Vector2(-60.0 + k * 50.0, 212.0 - absf(k - 1) * 4.0), Vector2(-90.0 + k * 50.0, 211.0 - absf(k - 1) * 4.0)])
+	for k in 3:   # mais gente na avenida do sul (a viela da muralha não serve: é estreita e os trajetos entravam em casa) e na praça
+		trajetos.append([Vector2(-5.5 + k * 5.5, 177.0 + k * 5.0), Vector2(-5.5 + k * 5.5, 219.0 - k * 6.0)])
 	trajetos.append([Vector2(-24.0, 170.0), Vector2(24.0, 133.0)])
 	trajetos.append([Vector2(6.0, 176.0), Vector2(-6.0, 131.0)])
 	var a := MundoDados.ANEL_EIXOS

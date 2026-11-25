@@ -328,3 +328,10 @@ Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não par
 - Soldados e sentinelas usam `scenes/personagens/guarda_imperial.tscn` como gente (Npc), não como inimigo. Cavalos do estábulo são o `cavalo.glb` já registrado, agora montável em qualquer povoado.
 - Alvos de palha do quartel: dois cilindros (palha e miolo vermelho) num poste; peça simples de cenário, não é modelo final de nada.
 - Plano e estado: `docs/mapa-novo/PLANO-REINO-100.md`. Auditoria: `tools/auditoria_reino.gd`.
+
+## Valdoria na planta do Reino de Aethelgard (25/11/2026)
+- Referência de composição: o pacote `reino-aethelgard` (Three.js, em blocos) feito antes pelo próprio usuário e uma pintura enviada por ele. Só composição e proporção; nenhum arquivo dele entrou no jogo.
+- Tudo gerado por código, sem asset baixado: `scripts/mundo/cidadela.gd`, `casario_do_reino.gd`, `muralha_do_reino.gd`, `calcamento_do_reino.gd`, `vida_das_ruas.gd`, tipos `catedral`, `quartel`, `estabulo`, `mercado`, `guarita`, `lavoura` em `povoado.gd`.
+- Pinturas desenhadas por código: `fachadas.gd` (térreo de pedra e rebocado, sobrado de enxaimel, telhas, luz de janela) e `pedra.gd` (cantaria e calçamento).
+- O rei usa o modelo `scenes/personagens/solon.tscn`; guardas e sentinelas, `guarda_imperial.tscn`; todos como gente (Npc), não como inimigo.
+- As seções mais antigas deste arquivo sobre "o reino de Valdoria" (círculo de 1,1 km, bairros, casas de rua) descrevem versões que não existem mais.

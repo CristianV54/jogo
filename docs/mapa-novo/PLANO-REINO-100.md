@@ -52,5 +52,13 @@ descrevem a versão anterior (círculo com castelo ao norte, depois círculo com
 | Chão calçado de pedra; fonte, lampiões, barris, carroças; jardins ao pé do penhasco |
 | Praça do mercado, feiras nos portões, quartel com campo de treino, estábulos, catedral, 8 lavouras |
 
-Falta do reino de blocos: catedral gótica com vitrais, janelas acesas, forjas e capelas entre as casas, mais gente nas
-ruas, relevo de rocha no paredão. Falta medir os quadros por segundo no Mac e rever a suíte antiga para a ilha.
+| Catedral gótica: nave, naves laterais com contrafortes, vitrais que brilham, torres gêmeas com rosácea, torre do cruzeiro |
+| 1.116 janelas acesas, 26 forjas com a fornalha acesa, 19 lampiões (avenidas sul, oeste e leste) |
+| 27 pessoas circulando pelas ruas, 545 rochas no paredão do penhasco |
+| Pular do penhasco não devolve mais o Torin ao alto (a rede de segurança só age abaixo do chão) |
+
+**Entrega de 25/11/2026:** teste do mundo passa inteiro, auditoria do reino com 0 defeito (641 casas, 110 pessoas e bichos),
+23 fotos em `docs/mapa-novo/reino_v4/`.
+
+Em aberto: desempenho no Mac (não medido), tempo de carga, tubarão ainda provisório, nos sobrados do casario não se
+entra, suíte antiga não revista para a ilha (os testes que passavam por Valdoria e pelo Castelo antigos deixaram de valer).
