@@ -60,6 +60,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `tools/teste_caca.gd` | O lobo ataca gente e bicho de fazenda de verdade: o NPC é mordido (se encolhe, reclama), foge para casa e volta ao trabalho quando o |
 | `tools/teste_bordas.gd` | A beirada de cada região não pode ser um degrau: o Torin entra andando nas 8 regiões pelos 4 lados (96 entradas) e não pode parar na linha da borda. |
 | `tools/capturar_ilha.gd` | Fotos da ILHA (mapa novo): planta de cima, vistas aéreas, praia, reino e o mapa da tecla M; também prova o tubarão (avisa e mata). |
+| `tools/mundo/encher_o_mundo.py` | Sorteia lugares para povoados novos e traça a Estrada da Costa, conferindo mar, rio, região e vizinhos; escreve em `mundo_dados.gd` (bloco GERADO). |
 | `tools/planta_do_mapa.py` | Desenha a PLANTA do mapa novo (ilha de 3 x 3 km, reino no centro) em docs/mapa-novo/, para aprovar antes de construir. |
 | `tools/teste_cadeia.gd` | Cadeia de missões do jogo inteiro: começa no zero, cumpre os objetivos de cada missão pelos eventos reais e confere que |
 | `tools/teste_camera_casa.gd` | A câmera de 3ª pessoa dentro da casa do Vane: 8 combinações de giro e inclinação, com captura e verificação numérica. |

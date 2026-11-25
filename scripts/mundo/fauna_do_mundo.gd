@@ -31,6 +31,9 @@ func povoar() -> void:
 	_na_estrada("cratera", [["corvo", 6], ["cao_guerra", 2], ["guarda", 2]])
 	_na_estrada("reino_sul", [["cavalo", 3], ["vaca", 3], ["cao", 2], ["coelho", 4]])
 	_na_estrada("beira_rio", [["cervo", 3], ["coelho", 4], ["cavalo", 2]])
+	for id in mundo.estradas:   # Estrada da Costa: gado solto, caça e um ou outro lobo em cada trecho
+		if String(id).begins_with("costa_"):
+			_na_estrada(id, [["cervo", 2], ["coelho", 3], ["vaca", 1], ["lobo", 1]])
 	# zonas largas da ilha (quadrantes em volta do reino): a mata e os campos têm vida longe das estradas
 	_na_zona(Rect2(-1701, 638, 3402, 1825), [["cervo", 70], ["coelho", 96], ["lobo", 19], ["javali", 9]])                    # sul: pinhal do Refúgio
 	_na_zona(Rect2(-3402, 273, 1701, 2008), [["cervo", 44], ["coelho", 57], ["lobo", 16], ["javali", 12]])                    # sudoeste: Pomar
