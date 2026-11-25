@@ -88,7 +88,7 @@ func _chao(p: Vector2) -> Vector3:
 
 
 ## Terreiro: o chão pisado do largo do povoado (terra batida com pedras), uma mancha de borda irregular colada no terreno.
-func _terreiro(p: Vector2, raio: float, cor := Color(0.4, 0.34, 0.26)) -> void:
+func _terreiro(p: Vector2, raio: float, cor := Color(0.62, 0.52, 0.4)) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var aneis := 5
@@ -343,7 +343,7 @@ func _vila() -> void:
 	_kit().carroca(_chao(_p(-36.0, -1.0)), dir)
 	_kit().barraca(_chao(_p(36.0, 1.0)), -para_longe, [Color(0.72, 0.2, 0.16), Color(0.25, 0.42, 0.62), Color(0.3, 0.52, 0.3)][_rng.randi() % 3], [Color(0.8, 0.2, 0.15), Color(0.9, 0.7, 0.2), Color(0.4, 0.6, 0.25)])
 	_kit().carga(_chao(_p(31.0, 0.0)), dir, 2, _rng.randi() % 20)
-	_kit().estandarte(_chao(_p(0.0, -3.0)), -para_longe)
+	_kit().estandarte(_chao(_p(-8.0, -3.0)), -para_longe)   # ao lado da porta da taverna, não na frente
 	_casa("Taverna", _p(0.0, 6.0), 4, 4, REF.ESTILO_PEDRA, "moradia")
 	_casa("Casa1", _p(-24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
 	_casa("Casa2", _p(24.0, 6.0), 3, 2, REF.ESTILO_PEDRA)
