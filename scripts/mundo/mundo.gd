@@ -624,6 +624,10 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
+			var v0 := MundoDados.centro("valdoria")
+			var v1 := MundoDados.centro("castelo_imperial")
+			if p.distance_to(Geometry2D.get_closest_point_to_segment(p, v0, v1)) < 16.0:
+				continue   # nada nasce no eixo do viaduto entre Valdoria e o Castelo (uma árvore brotava no meio do tabuleiro)
 			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
 			if absf(ao_reino) < 9.0 or (ao_reino < 0.0 and _rng.randf() < 0.6):
 				continue   # nada nasce encostado na muralha do reino, e dentro dela a mata é rala (é cidade, com árvores de praça)
