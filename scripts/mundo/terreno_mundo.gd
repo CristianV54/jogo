@@ -215,7 +215,11 @@ func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 		c = c.lerp(Color(0.84, 0.76, 0.56).lerp(Color(0.6, 0.52, 0.38), smoothstep(12.0, 2.0, costa)), smoothstep(24.0, 14.0, costa))
 	c = c.lerp(Color(0.42, 0.42, 0.4), smoothstep(0.2, 0.42, 1.0 - n.y))
 	c = c.lerp(Color(0.1, 0.24, 0.34), smoothstep(-Costa.LARGURA_RASO, -Costa.LARGURA_RASO - 25.0, costa))   # fundo do mar: azul escuro, igual ao oceano de longe
-	c = c.lerp(Color(0.45, 0.34, 0.22), 1.0 - smoothstep(1.6, 4.2, distancia_caminho(x, z)))
+	var dc := distancia_caminho(x, z)
+	if Vector2(x, z).distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]):
+		c = c.lerp(Color(0.56, 0.53, 0.47), 1.0 - smoothstep(3.2, 6.5, dc))   # rua de cidade: calçada de pedra clara, mais larga que estrada de terra
+	else:
+		c = c.lerp(Color(0.45, 0.34, 0.22), 1.0 - smoothstep(1.6, 4.2, dc))
 	var dr := distancia_rio(x, z)
 	if dr < 3.5:
 		c = c.lerp(Color(0.34, 0.29, 0.2), 1.0 - smoothstep(0.0, 3.5, dr))

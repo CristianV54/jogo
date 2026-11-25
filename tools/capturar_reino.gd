@@ -54,19 +54,23 @@ func _rodar() -> void:
 	var f: Vector2 = m.povoados["feira_sul"]["centro"]
 	_por(f + Vector2(-70, 20), -PI / 2.0)
 	await _foto("5_feira_do_portao_sul", 4.0)
-	_por(Vector2(-300, -58), -PI / 2.0)   # Rua do Meio, olhando para o oeste: casas dos dois lados e o portão oeste ao fundo
+	_ver(Vector2(-205, -59), Vector2(-420, -60))   # Rua do Meio, olhando para o oeste: mercado, casas e o portão oeste ao fundo
 	await _foto("6_rua_do_meio", 4.0)
 	_por(Vector2(-640, -60), PI / 2.0 + PI)   # do lado de fora do portão oeste, olhando para dentro
 	await _foto("6b_portao_oeste_por_fora", 4.0)
-	_por(Vector2(120, 395), -PI / 2.0)    # Rua do Anel, ao sul: fileiras de casas
+	_ver(Vector2(60, 349), Vector2(260, 290))    # Rua do Anel, ao sul: fileiras de casas dos dois lados
 	await _foto("6c_rua_do_anel_sul", 4.0)
+	var tr: Vector2 = m.ponto_na_estrada("travessa_03", 10.0)[0]
+	_ver(tr, m.ponto_na_estrada("travessa_03", 110.0)[0])   # uma travessa, da Rua do Anel para a muralha
+	await _foto("6c2_travessa", 4.0)
+
 	var rc: Vector2 = MundoDados.REINO["centro"]
 	for item in [["6d_quartel_campo_de_treino", "quartel_da_guarda", 1.0, 26.0], ["6e_estabulos_do_reino", "estabulos_do_reino", -1.0, 24.0], ["6f_guarita_do_portao_oeste", "guarita_oeste", -1.0, 22.0]]:
 		var cc: Vector2 = m.povoados[item[1]]["centro"]
 		var para_dentro := (rc - cc).normalized() * float(item[2])   # para onde o lugar se estende
 		_ver(cc - para_dentro * float(item[3]), cc + para_dentro * 20.0)
 		await _foto(item[0], 4.0)
-	_ver(Vector2(-60, 548), Vector2(-60, 562))   # colado na muralha: a textura da pedra
+	_ver(Vector2(-95, 478), Vector2(-99, 502))   # colado na muralha (por dentro, a sudoeste do portão sul): a textura da pedra
 	await _foto("6g_pedra_da_muralha_de_perto", 3.0)
 	_ver(Vector2(0, 330), Vector2(0, -300))      # da Rua do Anel, ao sul: as torres do castelo por cima de Valdoria
 	await _foto("6h_castelo_visto_da_rua", 4.0)

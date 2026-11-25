@@ -210,6 +210,7 @@ func _animal(modelo: String, nome_a: String, especie: String, p: Vector2, esc: f
 	a.raio_vagar = vagar
 	a.vida_max = vida
 	a.fugitivo = fugitivo
+	a.montavel = modelo == "cavalo"   # todo cavalo de vila, fazenda ou estábulo pode ser montado (E)
 	a.drops = drops
 	a.altura_em = mundo.terreno.altura_em
 	a.position = Vector3(p.x, _y(p), p.y)
