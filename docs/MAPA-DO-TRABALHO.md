@@ -18,7 +18,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `tools/auditoria_portais.gd` | Todo portal leva a uma área que existe, a um spawn que existe, e a área de destino tem portal de volta. |
 | `tools/bancada.gd` | BANCADA: mundo plano e vazio que fotografa cada item do jogo sozinho (frente, lado e costas; parado e andando quando tem animação), |
 | `tools/bancada_construcao.gd` | BANCADA DAS CONSTRUÇÕES: monta UMA peça (hoje a muralha) num chão plano com o Torin de régua, tira 13 fotos e roda 3 testes em ~12 s. Uso: `... --script res://tools/bancada_construcao.gd -- muralha`. Fotos em `docs/construcoes/muralha/`. |
-| `scripts/mundo/pecas_da_muralha.gd` | Kit da muralha (lanço, torre, escada, portão com arco). Aprovado só na bancada; `muralha_do_reino.gd` ainda NÃO usa. |
+| `scripts/mundo/pecas_da_muralha.gd` | Kit da muralha (lanço, torre, escada, portão com arco). Aprovado na bancada e usado por `muralha_do_reino.gd`. |
 | `tools/bancada_movimento.gd` | BANCADA DE MOVIMENTO: 6 quadros de cada animação de cada ser (vista de lado) e medidas de amplitude, passo e velocidade pedida contra a do jogo. |
 | `tools/criaturas/consertar_andar_do_lobo.py` | Blender: religa as pernas do lobo aos alvos de IK e grava a pose nos ossos (Walk, Run), cria o Idle e refaz a morte, direto no `lobo.glb`. |
 | `tools/criaturas/refazer_andar_emprestado.py` | Blender: refaz Walk, WalkSlow e Run da ovelha, porco, cão e javali a partir da vaca (cascos por IK na escala de cada bicho; no cão, giro reduzido). |

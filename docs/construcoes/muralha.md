@@ -16,3 +16,9 @@ Fotos em `docs/construcoes/muralha/`. A muralha só volta para Valdoria depois d
 | 9 | **Sem defeito de desenho:** nada piscando (faces coladas), nenhuma ameia solta no ar, nenhuma fresta entre lanços | fotos ampliadas das emendas |
 
 Ordem das peças depois da muralha (combinada com o Cristian): **rua**, depois **casa**. Depois: torre e palácio da cidadela, catedral, praça.
+
+## Resultado (25/11/2026)
+
+- Bancada (`tools/bancada_construcao.gd -- muralha`): 13 fotos em `docs/construcoes/muralha/` e 3 testes passando (caminho de ronda a 11,0 m; escada com maior degrau de 0,20 m; passagem do portão livre).
+- No mundo: `muralha_do_reino.gd` passou a usar o kit `PecasDaMuralha`. 27 torres de vigia, 8 escadas, 3 portões. `tools/teste_mundo.gd` TUDO PASSOU (inclui raio atravessando cada portão) e `tools/auditoria_reino.gd` com 0 defeito. Fotos `20_no_mundo_portao_sul.jpg` e `21_no_mundo_aerea.jpg`.
+- Falta o usuário ver e aprovar. Pontos fracos que eu mesmo vejo: o braseiro do portão é só um bloco laranja; o topo da muralha faz degrau onde o chão muda de altura; de perto, só olhei o portão sul dentro do mundo (oeste e leste só pelo teste e pela foto aérea).
