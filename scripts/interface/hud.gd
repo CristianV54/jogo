@@ -23,6 +23,7 @@ var _mensagem: Label
 var _inventario_label: Label
 var _painel: PainelInventario
 var _rastreador: Label
+var _destino_label: Label
 var _relogio: Label
 var _dialogo_pag: Label
 var _dialogo_prompt: Label
@@ -82,6 +83,10 @@ func _ready() -> void:
 	_area_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_area_label.modulate.a = 0.0
 
+	_destino_label = _rotulo("", Vector2(0, 20), 18)   # destino marcado no mapa: distância, no alto da tela
+	_destino_label.size = Vector2(1280, 30)
+	_destino_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_destino_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 	_dica_label = _rotulo("", Vector2(0, 600), 22)
 	_dica_label.size = Vector2(1280, 40)
 	_dica_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -213,6 +218,10 @@ func fechar_inventario() -> void:
 ## Rastreador da missão ativa (canto esquerdo, abaixo da vida).
 func definir_rastreador(texto: String) -> void:
 	_rastreador.text = texto
+
+
+func definir_destino(texto: String) -> void:
+	_destino_label.text = texto
 
 
 func dica(texto: String) -> void:

@@ -59,6 +59,11 @@ var _t_chao := 0.0
 @onready var container: Node3D = $AreaAtual
 
 
+var _tem_destino := false
+var _destino := Vector2.ZERO
+var _facho_destino: MeshInstance3D
+
+
 func _ready() -> void:
 	add_to_group("jogo")
 	var admin := Admin.new()   # teclas de teste e Drone de auditoria: não fazem parte do jogo normal
@@ -113,6 +118,7 @@ func _iniciar_mundo() -> void:
 	await mundo.construir()
 	hud.mensagem("", 0.01)
 	mundo.tubarao.aviso.connect(func(texto: String) -> void: hud.mensagem(texto, 3.0))
+	hud.mapa.destino_mudou.connect(_ao_mudar_destino)
 	for id in mundo.regioes:
 		var a: AreaBase = mundo.regioes[id]
 		if a.has_signal("chefe_vida"):
@@ -244,6 +250,7 @@ func _rede_de_seguranca(delta: float) -> void:
 func _process(delta: float) -> void:
 	if mundo and not _trocando:
 		_acompanhar_lugar(delta)
+		_acompanhar_destino()
 		_rede_de_seguranca(delta)
 	hud.definir_relogio("%s   %s" % [clima.hora_texto(), Clima.NOMES[clima.tempo]])
 	if area == null or _trocando:
@@ -415,7 +422,7 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 			interagir()
 
 
-## M abre/fecha o mapa do mundo (as regiões, o que está liberado e a região da missão ativa).
+## M abre/fecha o mapa do mundo (interativo: zoom, arrastar e marcar destino).
 func _alternar_mapa() -> void:
 	if hud.dialogo_aberto or jogador.morto or hud.inventario_aberto:
 		return
@@ -423,19 +430,55 @@ func _alternar_mapa() -> void:
 		hud.mapa.esconder()
 		hud.mapa_aberto = false
 		jogador.travado = false
+		if camera.capturar_mouse:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		return
-	var liberadas := {}   # mundo aberto: toda região pode ser visitada a pé desde o começo
-	var motivos := {}
-	for id in AREAS:
-		liberadas[id] = true
-	var missao := ""
 	var alvo := ""
 	if not missoes.ativas.is_empty():
-		missao = DadosMissoes.MISSOES[missoes.ativas[0]]["titulo"]
 		alvo = MapaDoMundo.REGIAO_DA_MISSAO.get(missoes.ativas[0], "")
-	hud.mapa.mostrar({"atual": area_nome, "alvo": alvo, "liberadas": liberadas, "motivos": motivos, "missao": missao})
+	hud.mapa.mostrar({"alvo": alvo})
 	hud.mapa_aberto = true
 	jogador.travado = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE   # o mapa é usado com o mouse (zoom, arrastar, marcar destino)
+
+
+## Destino marcado no mapa: um facho de luz no lugar (visível de longe) e a distância na tela até o Torin chegar.
+func _ao_mudar_destino(tem: bool, ponto: Vector2) -> void:
+	if _facho_destino:
+		_facho_destino.queue_free()
+		_facho_destino = null
+	_tem_destino = tem
+	_destino = ponto
+	if not tem:
+		hud.definir_destino("")
+		return
+	_facho_destino = MeshInstance3D.new()
+	_facho_destino.name = "FachoDoDestino"
+	var cil := CylinderMesh.new()
+	cil.top_radius = 1.2
+	cil.bottom_radius = 1.2
+	cil.height = 400.0
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.albedo_color = Color(1.0, 0.8, 0.25, 0.45)
+	m.disable_fog = true
+	cil.material = m
+	_facho_destino.mesh = cil
+	_facho_destino.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_facho_destino.position = Vector3(ponto.x, mundo.chao_em(ponto.x, ponto.y) + 200.0, ponto.y)
+	mundo.add_child(_facho_destino)
+
+
+func _acompanhar_destino() -> void:
+	if not _tem_destino:
+		return
+	var d := Vector2(jogador.global_position.x, jogador.global_position.z).distance_to(_destino)
+	if d < 12.0:
+		hud.mensagem("Você chegou ao destino marcado.", 2.5)
+		hud.mapa.desmarcar()
+		return
+	hud.definir_destino("Destino: %d m (siga o facho de luz)" % int(d))
 
 
 ## I abre/fecha o inventário: o jogador fica travado e o mouse volta a aparecer enquanto ele está aberto.

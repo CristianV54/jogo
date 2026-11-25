@@ -589,8 +589,8 @@ func _floresta() -> void:
 	var cores_pedra: Dictionary = {}   # mesma chave -> Array[Color]
 	var passo := 7.5
 	var lim := MundoDados.LIMITES
-	var gw := int(lim.size.x / 20.0) + 1
-	var gh := int(lim.size.y / 20.0) + 1
+	var gw := int(lim.size.x / 10.0) + 1   # grade do mapa (tecla M): um ponto a cada 10 m
+	var gh := int(lim.size.y / 10.0) + 1
 	var mata := PackedFloat32Array()
 	mata.resize(gw * gh)
 	var nx := int(lim.size.x / passo)
@@ -625,7 +625,7 @@ func _floresta() -> void:
 				(tiles[kk] as Array).append(t)
 				if tp != 3:
 					arvores.adicionar(x, z, (0.45 if tp == 0 else 0.4 if tp == 1 else 0.3) * s)
-				mata[int((z - lim.position.y) / 20.0) * gw + int((x - lim.position.x) / 20.0)] += 1.0
+				mata[int((z - lim.position.y) / 10.0) * gw + int((x - lim.position.x) / 10.0)] += 1.0
 				contagem_bioma[bioma] = int(contagem_bioma.get(bioma, 0)) + 1
 			elif _rng.randf() <= float(Biomas.PEDRAS[bioma]):   # pedra solta (e com tronco/colisão se for grande)
 				var tam := _rng.randf_range(0.5, 1.6) * (1.6 if bioma == "cratera" or bioma == "ferrogris" else 1.0)
@@ -646,17 +646,29 @@ func _floresta() -> void:
 					var q := Vector2(x, z) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2))
 					var e := _rng.randf_range(0.8, 1.6)
 					(tiles[kk] as Array).append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, e, e)), Vector3(q.x, terreno.altura_em(q.x, q.y) - 0.02, q.y)))
-	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa em pergaminho: a mata esverdeia o papel
+	var img := Image.create(gw, gh, false, Image.FORMAT_RGB8)   # mapa pintado: cor do chão de cada bioma, mata mais escura, praia e mar
 	for gz in gh:
 		for gx in gw:
-			var costa := Costa.distancia(lim.position.x + gx * 20.0, lim.position.y + gz * 20.0)
-			if costa < 0.0:
-				img.set_pixel(gx, gz, Color(0.45, 0.62, 0.66))
+			var wx := lim.position.x + gx * 10.0
+			var wz := lim.position.y + gz * 10.0
+			var costa := Costa.distancia(wx, wz)
+			if costa < 0.0:   # mar: claro no raso, escuro no fundo
+				img.set_pixel(gx, gz, Color(0.36, 0.62, 0.7).lerp(Color(0.13, 0.3, 0.44), smoothstep(-10.0, -140.0, costa)))
 				continue
-			if costa < 14.0:
-				img.set_pixel(gx, gz, Color(0.93, 0.87, 0.67))
+			if costa < 16.0:
+				img.set_pixel(gx, gz, Color(0.9, 0.83, 0.62))
 				continue
-			img.set_pixel(gx, gz, Color(0.85, 0.77, 0.58).lerp(Color(0.5, 0.58, 0.36), clampf(mata[gz * gw + gx] / 6.0, 0.0, 1.0)))
+			var chao := Biomas.cor_do_chao(wx, wz, 0.5)
+			chao = Color(chao.r * 1.75 + 0.1, chao.g * 1.6 + 0.1, chao.b * 1.5 + 0.06)   # o chão do mapa é mais claro que o do jogo, para a mata se destacar
+			var vizinhos := 0.0   # a mata conta com os pontos vizinhos, para virar mancha e não pontinho
+			for dz in [-1, 0, 1]:
+				for dx in [-1, 0, 1]:
+					vizinhos += mata[clampi(gz + dz, 0, gh - 1) * gw + clampi(gx + dx, 0, gw - 1)]
+			var copa := Color(chao.r * 0.38, chao.g * 0.5, chao.b * 0.36)
+			var cor := chao.lerp(copa, clampf(vizinhos / 5.0, 0.0, 1.0) * (0.75 + 0.25 * float(mata[gz * gw + gx] > 0.0)))
+			if terreno.distancia_rio(wx, wz) < 5.0:
+				cor = Color(0.3, 0.55, 0.72)
+			img.set_pixel(gx, gz, cor)
 	mapa_floresta = ImageTexture.create_from_image(img)
 	var malhas := [FabricaNatureza.pinheiro(), FabricaNatureza.folhosa(), FabricaNatureza.morta(), FabricaNatureza.arbusto(2.0), FabricaNatureza.pedra(5.0), FabricaNatureza.cogumelo()]
 	var mat := FabricaNatureza.material()

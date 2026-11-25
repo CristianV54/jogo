@@ -1,24 +1,13 @@
 class_name MapaDoMundo
 extends Control
-## Mapa do mundo (tecla M): as 8 regiões ligadas pelas estradas, com a posição do jogador, o que já está liberado, o que
-## ainda está trancado (e por quê) e a região da missão ativa. Desenhado por código, sem arte final.
+## Mapa do mundo (tecla M): a ilha inteira na tela, pintada (biomas, mata, praia, mar, rios). Interativo:
+##   roda do mouse (ou + e -) aproxima e afasta; arrastar com o botão esquerdo move o mapa;
+##   clique marca o destino (bandeira); clique na bandeira ou botão direito tira a marca.
+## Como num mapa de verdade, os nomes aparecem por importância: de longe só o reino, as cidades e as vilas grandes;
+## chegando perto aparecem fazendas, postos e cabanas. O Jogo ouve `destino_mudou` e guia o Torin até lá.
 
-const REGIOES := {
-	"pomar_alto": {"nome": "Pomar Alto", "pos": Vector2(0.10, 0.62)},
-	"refugio_do_pinhal": {"nome": "Refúgio do Pinhal", "pos": Vector2(0.28, 0.62)},
-	"bosque_velado": {"nome": "Bosque Velado\ne Mina", "pos": Vector2(0.28, 0.26)},
-	"acampamento_ruptura": {"nome": "Acampamento\nda Ruptura", "pos": Vector2(0.46, 0.66)},
-	"fronteira_ferrogris": {"nome": "Fortaleza de\nFerrogris", "pos": Vector2(0.62, 0.56)},
-	"cratera_ignis": {"nome": "Cratera de Ignis", "pos": Vector2(0.78, 0.40)},
-	"valdoria": {"nome": "Valdoria", "pos": Vector2(0.66, 0.2)},
-	"castelo_imperial": {"nome": "Castelo Imperial", "pos": Vector2(0.88, 0.14)},
-}
-## Estradas entre as regiões (os portais de cada área).
-const ESTRADAS := [
-	["pomar_alto", "refugio_do_pinhal"], ["refugio_do_pinhal", "bosque_velado"], ["refugio_do_pinhal", "acampamento_ruptura"],
-	["acampamento_ruptura", "fronteira_ferrogris"], ["fronteira_ferrogris", "cratera_ignis"], ["cratera_ignis", "valdoria"],
-	["valdoria", "castelo_imperial"],
-]
+signal destino_mudou(tem: bool, ponto: Vector2)
+
 ## Onde cada missão acontece (para o anel dourado do mapa).
 const REGIAO_DA_MISSAO := {
 	"C1-M1": "refugio_do_pinhal", "C1-M2": "pomar_alto", "C1-M3": "refugio_do_pinhal", "C1-M4": "refugio_do_pinhal",
@@ -27,37 +16,39 @@ const REGIAO_DA_MISSAO := {
 	"C4-M1": "cratera_ignis", "C4-M2": "cratera_ignis", "C4-M3": "cratera_ignis", "C4-M4": "cratera_ignis",
 	"C5-M1": "valdoria", "C5-M2": "castelo_imperial", "C5-M3": "castelo_imperial", "C5-M4": "castelo_imperial",
 }
-const COR_FUNDO := Color(0.07, 0.06, 0.05, 1.0)
-const COR_ESTRADA := Color(0.55, 0.45, 0.3)
 const COR_ACENTO := Color(0.95, 0.72, 0.2)
+const COR_TINTA := Color(0.16, 0.1, 0.06)
+const ZOOM_MAX := 8.0
+const ZOOM_NOMES_PEQUENOS := 3.0   # a partir deste zoom aparecem os nomes de fazendas, postos e cabanas
 
-var atual := ""
 var alvo := ""                 # região da missão ativa
-var liberadas: Dictionary = {}  # id -> true/false
-var motivos: Dictionary = {}    # id -> texto de por que está trancada
-var missao_texto := ""
+var tem_destino := false
+var destino := Vector2.ZERO    # ponto marcado, em metros do mundo
+var zoom := 1.0
+var centro := Vector2.ZERO     # ponto do mundo no meio da tela
 var _t := 0.0
+var _arrastando := false
+var _arrastou := false
 
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR   # a costa e a mata ficam suaves, sem quadradinhos
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	visible = false
 
 
 func mostrar(dados: Dictionary) -> void:
-	atual = dados.get("atual", "")
 	alvo = dados.get("alvo", "")
-	liberadas = dados.get("liberadas", {})
-	motivos = dados.get("motivos", {})
-	missao_texto = dados.get("missao", "")
+	zoom = 1.0
+	centro = MundoDados.LIMITES.get_center()
 	visible = true
 	queue_redraw()
 
 
 func esconder() -> void:
 	visible = false
+	_arrastando = false
 
 
 func _process(delta: float) -> void:
@@ -66,99 +57,162 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 
+## Pixels por metro com o zoom atual (zoom 1 = a ilha inteira cabe na tela).
+func _escala() -> float:
+	var tela := get_viewport_rect().size
+	return minf(tela.x, tela.y) / MundoDados.LIMITES.size.y * zoom * 1.08
+
+
+func mundo_para_tela(p: Vector2) -> Vector2:
+	return get_viewport_rect().size / 2.0 + (p - centro) * _escala()
+
+
+func tela_para_mundo(q: Vector2) -> Vector2:
+	return centro + (q - get_viewport_rect().size / 2.0) / _escala()
+
+
+func _aproximar(fator: float, em_torno: Vector2) -> void:
+	var antes := tela_para_mundo(em_torno)
+	zoom = clampf(zoom * fator, 1.0, ZOOM_MAX)
+	centro += antes - tela_para_mundo(em_torno)   # o ponto debaixo do mouse fica parado
+	_limitar()
+
+
+func _limitar() -> void:
+	var lim := MundoDados.LIMITES
+	centro = centro.clamp(lim.position, lim.end)
+	if zoom <= 1.0:
+		centro = lim.get_center()
+
+
+func marcar(ponto: Vector2) -> void:
+	tem_destino = true
+	destino = ponto
+	destino_mudou.emit(true, ponto)
+
+
+func desmarcar() -> void:
+	if tem_destino:
+		tem_destino = false
+		destino_mudou.emit(false, Vector2.ZERO)
+
+
+func _gui_input(evento: InputEvent) -> void:
+	if evento is InputEventMouseButton:
+		var e := evento as InputEventMouseButton
+		if e.pressed and e.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_aproximar(1.2, e.position)
+		elif e.pressed and e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_aproximar(1.0 / 1.2, e.position)
+		elif e.button_index == MOUSE_BUTTON_RIGHT and e.pressed:
+			desmarcar()
+		elif e.button_index == MOUSE_BUTTON_LEFT:
+			if e.pressed:
+				_arrastando = true
+				_arrastou = false
+			else:
+				_arrastando = false
+				if not _arrastou:   # clique sem arrastar: marca (ou, em cima da bandeira, desmarca)
+					if tem_destino and mundo_para_tela(destino).distance_to(e.position) < 16.0:
+						desmarcar()
+					elif Costa.distancia(tela_para_mundo(e.position).x, tela_para_mundo(e.position).y) > 0.0:
+						marcar(tela_para_mundo(e.position))
+	elif evento is InputEventMouseMotion and _arrastando:
+		var m := evento as InputEventMouseMotion
+		if m.relative.length() > 0.5:
+			_arrastou = true
+			centro -= m.relative / _escala()
+			_limitar()
+
+
+func _unhandled_key_input(evento: InputEvent) -> void:
+	if not visible or not evento.is_pressed():
+		return
+	var k := evento as InputEventKey
+	if k.physical_keycode == KEY_EQUAL or k.physical_keycode == KEY_KP_ADD:
+		_aproximar(1.3, get_viewport_rect().size / 2.0)
+	elif k.physical_keycode == KEY_MINUS or k.physical_keycode == KEY_KP_SUBTRACT:
+		_aproximar(1.0 / 1.3, get_viewport_rect().size / 2.0)
+
+
+func _nome(q: Vector2, texto: String, tamanho: int, cor := COR_TINTA) -> void:
+	var fonte := ThemeDB.fallback_font
+	var larg := fonte.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho).x
+	var pos := q + Vector2(-larg / 2.0, 0.0)
+	draw_string_outline(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 5, Color(0.96, 0.92, 0.8, 0.9))
+	draw_string(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
+
+
 func _draw() -> void:
 	var tela := get_viewport_rect().size
-	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.07, 0.05, 0.04, 1.0))   # cobre a tela toda (some vida, rastreador e dicas)
-	var fonte := ThemeDB.fallback_font
-	draw_string(fonte, Vector2(40, 52), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, COR_ACENTO)
-	draw_string(fonte, Vector2(tela.x - 160, 52), "M fecha", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.8, 0.8, 0.8))
+	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.13, 0.3, 0.44))   # o mar cobre a tela toda
 	var mundo := Mundo.instancia
 	if mundo == null:
 		return
 	var lim := MundoDados.LIMITES
-	var area := Rect2(40, 70, tela.x * 0.42, tela.y - 100)
-	var esc := minf(area.size.x / lim.size.x, area.size.y / lim.size.y)
-	var origem := area.position + (area.size - lim.size * esc) / 2.0
-	if mundo.mapa_floresta:   # a mata em verde escuro, as clareiras em verde claro
-		draw_texture_rect(mundo.mapa_floresta, Rect2(origem, lim.size * esc), false)
-	else:
-		draw_rect(Rect2(origem, lim.size * esc), Color(0.1, 0.13, 0.09))
-	draw_rect(Rect2(origem, lim.size * esc), Color(0.25, 0.17, 0.1), false, 3.0)   # moldura de tinta
-	var mundo_para_mapa := func(p: Vector2) -> Vector2: return origem + (p - lim.position) * esc
-	for c in MundoDados.CRISTAS:   # serras: fileira de montanhas de tinta, abertas só no vão das barreiras
-		var de: Vector2 = c["de"]
-		var para: Vector2 = c["para"]
-		var comp := de.distance_to(para)
-		var dir := (para - de) / comp
-		var t := 20.0
-		while t < comp:
-			var pt := de + dir * t
-			var perto_vao := false
-			for v in c["vaos"]:
-				if pt.distance_to(v) < 22.0:
-					perto_vao = true
-			if not perto_vao:
-				var q: Vector2 = mundo_para_mapa.call(pt)
-				var h := 9.0 + 4.0 * absf(sin(t * 0.37))
-				draw_colored_polygon(PackedVector2Array([q + Vector2(-8, 2), q + Vector2(0, -h), q + Vector2(8, 2)]), Color(0.66, 0.6, 0.52))
-				draw_polyline(PackedVector2Array([q + Vector2(-8, 2), q + Vector2(0, -h), q + Vector2(8, 2)]), Color(0.25, 0.17, 0.1), 1.2)
-				draw_line(q + Vector2(0, -h), q + Vector2(1.5, 2), Color(0.25, 0.17, 0.1, 0.5), 1.0)
-			t += 55.0
-	for r in mundo.terreno.rios:   # rios
-		var pts := PackedVector2Array()
-		for p in r["pontos"]:
-			pts.append(mundo_para_mapa.call(p))
-		draw_polyline(pts, Color(0.2, 0.45, 0.62), 3.0)
-	for id in mundo.estradas:      # estradas
+	var esc := _escala()
+	if mundo.mapa_floresta:
+		draw_texture_rect(mundo.mapa_floresta, Rect2(mundo_para_tela(lim.position), lim.size * esc), false)
+	for id in mundo.estradas:      # estradas principais: um traço fino de tinta, como em mapa antigo
 		var pts := PackedVector2Array()
 		for p in mundo.estradas[id]:
-			pts.append(mundo_para_mapa.call(p))
-		draw_polyline(pts, Color(0.36, 0.22, 0.1), 2.0)
-	for id in REGIOES:
-		var rect := MundoDados.retangulo(id)
-		var a: Vector2 = mundo_para_mapa.call(rect.position)
-		var b: Vector2 = mundo_para_mapa.call(rect.end)
-		var livre: bool = liberadas.get(id, false)
-		draw_rect(Rect2(a, b - a), Color(0.5, 0.62, 0.36, 0.55) if livre else Color(0.45, 0.38, 0.32, 0.6))
-		draw_rect(Rect2(a, b - a), Color(0.25, 0.17, 0.1), false, 1.5)
-		draw_multiline_string(fonte, a + Vector2(4.0, 13.0), String(REGIOES[id]["nome"]).replace("\n", " "), HORIZONTAL_ALIGNMENT_LEFT, b.x - a.x - 6.0, 11, 2, Color(0.15, 0.09, 0.05))
-		if id == alvo:   # a missão ativa fica nesta região
-			draw_rect(Rect2(a - Vector2(4, 4), b - a + Vector2(8, 8)), COR_ACENTO, false, 2.0 + sin(_t * 4.0))
-		if id == atual:
-			draw_rect(Rect2(a + Vector2(2, 2), b - a - Vector2(4, 4)), Color(1, 1, 1, 0.6), false, 1.0)
-	for pid in mundo.povoados:     # povoados e fazendas
-		var q: Vector2 = mundo_para_mapa.call(mundo.povoados[pid]["centro"])
-		draw_rect(Rect2(q - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.2, 0.12))
-		draw_string(fonte, q + Vector2(6.0, 4.0), String(mundo.povoados[pid].get("nome", "")), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.2, 0.12, 0.06))
-	for bid in mundo.barreiras:    # barreiras: vermelhas fechadas, verdes abertas
-		var bar: Barreira = mundo.barreiras[bid]
-		var q: Vector2 = mundo_para_mapa.call(Vector2(bar.global_position.x, bar.global_position.z))
-		draw_rect(Rect2(q - Vector2(5, 2), Vector2(10, 4)), Color(0.4, 0.85, 0.4) if bar.aberta else Color(0.9, 0.25, 0.2))
+			pts.append(mundo_para_tela(p))
+		draw_polyline(pts, Color(0.42, 0.28, 0.14, 0.75), clampf(1.2 * zoom, 1.5, 4.0), true)
+	if zoom >= ZOOM_NOMES_PEQUENOS:   # trilhas até as fazendas e cabanas: só de perto
+		for trilha in mundo.trilhas:
+			var pts := PackedVector2Array()
+			for p in trilha:
+				pts.append(mundo_para_tela(p))
+			draw_polyline(pts, Color(0.42, 0.28, 0.14, 0.5), 1.5, true)
+	for pid in mundo.povoados:
+		var pv: Dictionary = mundo.povoados[pid]
+		var q := mundo_para_tela(pv["centro"])
+		if String(pv.get("tipo", "")) == "vila":   # vila: casinha e nome sempre
+			draw_circle(q, 4.5, Color(0.96, 0.92, 0.8))
+			draw_circle(q, 3.0, Color(0.62, 0.2, 0.12))
+			_nome(q + Vector2(0, -8), String(pv.get("nome", "")), 13)
+		else:                                        # lugar pequeno: um ponto; o nome só de perto
+			draw_circle(q, 2.2, Color(0.3, 0.2, 0.12))
+			if zoom >= ZOOM_NOMES_PEQUENOS:
+				_nome(q + Vector2(0, -6), String(pv.get("nome", "")), 11, Color(0.3, 0.2, 0.12))
+	for id in MundoDados.REGIOES:   # cidades e lugares grandes: marca maior e nome em destaque
+		var q := mundo_para_tela(MundoDados.centro(id))
+		var capital: bool = id == "valdoria"
+		var r := 8.0 if capital else 6.0
+		draw_rect(Rect2(q - Vector2(r, r), Vector2(r, r) * 2.0), Color(0.96, 0.92, 0.8))
+		draw_rect(Rect2(q - Vector2(r - 2, r - 2), Vector2(r - 2, r - 2) * 2.0), Color(0.5, 0.12, 0.1) if capital else COR_TINTA)
+		if id == alvo:   # a missão ativa fica aqui
+			draw_arc(q, r + 7.0 + sin(_t * 4.0) * 2.0, 0.0, TAU, 32, COR_ACENTO, 2.5)
+		if id == "castelo_imperial" and zoom < 1.6:
+			continue   # de longe o castelo faz parte do reino: um nome só
+		var nome := "VALDORIA, o reino" if capital and zoom < 1.6 else String(MundoDados.REGIOES[id]["nome"])
+		_nome(q + Vector2(0, -r - 6), nome.to_upper() if capital else nome, 19 if capital else 15)
+	if tem_destino:   # bandeira do destino
+		var q := mundo_para_tela(destino)
+		draw_line(q, q + Vector2(0, -22), COR_TINTA, 2.5)
+		draw_colored_polygon(PackedVector2Array([q + Vector2(1, -22), q + Vector2(17, -17), q + Vector2(1, -11)]), Color(0.85, 0.15, 0.1))
+		draw_circle(q, 3.0, COR_TINTA)
 	var jog := get_tree().get_first_node_in_group("jogador") as Node3D
-	if jog:   # o Torin: seta branca apontando para onde ele olha
-		var q: Vector2 = mundo_para_mapa.call(Vector2(jog.global_position.x, jog.global_position.z))
+	if jog:   # o Torin: seta apontando para onde ele olha
+		var pj := Vector2(jog.global_position.x, jog.global_position.z)
+		var q := mundo_para_tela(pj)
+		if tem_destino:
+			draw_dashed_line(q, mundo_para_tela(destino), Color(0.85, 0.15, 0.1, 0.8), 2.0, 8.0)
 		var f := Vector2(-sin(jog.global_rotation.y), -cos(jog.global_rotation.y))
-		var r := Vector2(-f.y, f.x)
-		draw_colored_polygon(PackedVector2Array([q + f * 9.0, q - f * 5.0 + r * 5.0, q - f * 5.0 - r * 5.0]), Color(1, 1, 1))
-	draw_string(fonte, origem + Vector2(lim.size.x * esc / 2.0 - 4.0, 16.0), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.8, 0.8, 0.8))
-	# coluna da direita: regiões, lugares e a missão
-	var x := tela.x * 0.50
-	var y := 100.0
-	draw_string(fonte, Vector2(x, y), "Regiões", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, COR_ACENTO)
-	y += 10.0
-	for id in REGIOES:
-		y += 26.0
-		var livre: bool = liberadas.get(id, false)
-		draw_rect(Rect2(x, y - 14.0, 12, 12), Color(0.35, 0.65, 0.35) if livre else Color(0.35, 0.33, 0.32))
-		var txt: String = String(REGIOES[id]["nome"]).replace("\n", " ")
-		var cor_txt := Color(0.95, 0.92, 0.85) if livre else Color(0.6, 0.55, 0.5)
-		draw_string(fonte, Vector2(x + 22, y), txt + (" (você está aqui)" if id == atual else ""), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, cor_txt)
-		if motivos.has(id):
-			y += 20.0
-			draw_string(fonte, Vector2(x + 22, y), motivos[id], HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 14, Color(0.7, 0.62, 0.5))
-	y += 40.0
-	draw_multiline_string(fonte, Vector2(x, y), "Legenda: estrada marrom, rio azul, verde escuro = mata, ponto vermelho = povoado. A ilha é aberta: dá para ir a pé a qualquer lugar. No mar fundo mora o tubarão.", HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.46, 15, 3, Color(0.75, 0.75, 0.75))
-	y += 70.0
-	if missao_texto != "":
-		draw_rect(Rect2(x, y - 14.0, 12, 12), COR_ACENTO, false, 2.0)
-		draw_string(fonte, Vector2(x + 22, y), "Missão: " + missao_texto, HORIZONTAL_ALIGNMENT_LEFT, tela.x * 0.44, 18, COR_ACENTO)
+		var lado := Vector2(-f.y, f.x)
+		draw_colored_polygon(PackedVector2Array([q + f * 13.0, q - f * 7.0 + lado * 8.0, q - f * 7.0 - lado * 8.0]), COR_TINTA)
+		draw_colored_polygon(PackedVector2Array([q + f * 10.0, q - f * 5.0 + lado * 5.5, q - f * 5.0 - lado * 5.5]), Color(1, 1, 1))
+	# rosa dos ventos, escala e ajuda (discretas, nos cantos)
+	var fonte := ThemeDB.fallback_font
+	var n := Vector2(tela.x - 56, 64)
+	draw_colored_polygon(PackedVector2Array([n + Vector2(0, -26), n + Vector2(8, 0), n + Vector2(-8, 0)]), Color(1, 1, 1, 0.9))
+	draw_string(fonte, n + Vector2(-6, 22), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(1, 1, 1, 0.9))
+	var metros := 1000.0 if zoom < 2.5 else (250.0 if zoom < 6.0 else 100.0)
+	var b := Vector2(30, tela.y - 34)
+	draw_line(b, b + Vector2(metros * esc, 0), Color(1, 1, 1, 0.9), 3.0)
+	draw_string(fonte, b + Vector2(0, -8), ("%d km" % int(metros / 1000.0)) if metros >= 1000.0 else ("%d m" % int(metros)), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(1, 1, 1, 0.9))
+	var ajuda := "roda do mouse: zoom    arrastar: mover    clique: marcar destino    botão direito: tirar a marca    M: fechar"
+	if tem_destino and jog:
+		ajuda = "Destino marcado a %d m.    " % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino)) + ajuda
+	draw_string_outline(fonte, Vector2(30, tela.y - 10), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color(0, 0, 0, 0.6))
+	draw_string(fonte, Vector2(30, tela.y - 10), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.9))
