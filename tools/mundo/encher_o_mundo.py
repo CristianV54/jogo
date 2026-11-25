@@ -94,7 +94,8 @@ tudo_estradas = dict(estradas); tudo_estradas.update({i: p for i, _, p in novas_
 # ---- cada povoado novo sai por uma trilha até a estrada mais perto que não exija atravessar rio
 linhas = []
 for pid, nome, tipo, x, z in novos:
-    opcoes = sorted(tudo_estradas.items(), key=lambda kv: d_linha((x, z), kv[1]))
+    de_fora = {k: v for k, v in tudo_estradas.items() if not k.startswith(("travessa_", "rua_do_meio", "anel_do_reino"))}   # rua de dentro da muralha não serve: a trilha atravessaria a pedra
+    opcoes = sorted(de_fora.items(), key=lambda kv: d_linha((x, z), kv[1]))
     liga = ""
     for eid, pts in opcoes[:4]:
         perto = min(((pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k / 20, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k / 20) for i in range(len(pts) - 1) for k in range(21)), key=lambda q: math.hypot(q[0] - x, q[1] - z))

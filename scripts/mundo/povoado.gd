@@ -426,8 +426,8 @@ func _estabulo() -> void:
 	_feno(_p(22.0, 28.0))
 	_bebedouro(_p(8.0, 14.0))
 	_fogueira(_p(30.0, 30.0), 0.5)
-	_npc("Cavalariço", "Cavalariço", "dorn", _p(18.0, 26.0), PackedStringArray(["Cavalo do reino é manso. Chegue pelo lado, sem pressa, e monte."]),
-		[{"fazer": "Interact", "seg": 6.0, "olhar": _p(8.0, 16.0)}, {"ir": _p(-18.0, 27.0), "vel": 1.1}, {"fazer": "Interact", "seg": 6.0, "olhar": _p(-22.0, 26.0)}, {"ir": _p(18.0, 26.0), "vel": 1.1}])
+	_npc("Cavalariço", "Cavalariço", "dorn", _p(10.0, 32.0), PackedStringArray(["Cavalo do reino é manso. Chegue pelo lado, sem pressa, e monte."]),   # no pátio, longe do feno e da cerca (nascia encostado num sólido)
+		[{"fazer": "Interact", "seg": 6.0, "olhar": _p(8.0, 16.0)}, {"ir": _p(-10.0, 32.0), "vel": 1.1}, {"fazer": "Interact", "seg": 6.0, "olhar": _p(-22.0, 26.0)}, {"ir": _p(10.0, 32.0), "vel": 1.1}])
 
 
 ## Guarita de portão: duas sentinelas paradas, um braseiro e um banco. Fica do lado de dentro da muralha.

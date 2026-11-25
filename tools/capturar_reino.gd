@@ -70,6 +70,8 @@ func _rodar() -> void:
 		var para_dentro := (rc - cc).normalized() * float(item[2])   # para onde o lugar se estende
 		_ver(cc - para_dentro * float(item[3]), cc + para_dentro * 20.0)
 		await _foto(item[0], 4.0)
+	_ver(Vector2(0, -535), Vector2(0, -640))     # portão norte, por dentro, com as sentinelas
+	await _foto("6f2_portao_norte_por_dentro", 4.0)
 	_ver(Vector2(-95, 478), Vector2(-99, 502))   # colado na muralha (por dentro, a sudoeste do portão sul): a textura da pedra
 	await _foto("6g_pedra_da_muralha_de_perto", 3.0)
 	_ver(Vector2(0, 330), Vector2(0, -300))      # da Rua do Anel, ao sul: as torres do castelo por cima de Valdoria

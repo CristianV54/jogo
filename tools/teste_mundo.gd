@@ -24,13 +24,13 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("8 regiões, 51 estradas, 117 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 51 and m.povoados.size() == 117 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("8 regiões, 52 estradas, 117 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 52 and m.povoados.size() == 117 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
 		if pv.npcs.is_empty() and m.povoados[id]["tipo"] != "posto_imperial":
 			sem_gente.append(String(id))
-	marcar("O reino tem muralha com 3 portões (sul, oeste, leste)", m.muralha.portoes.size() == 3, str(m.muralha.portoes))
+	marcar("O reino tem muralha com 4 portões (sul, oeste, leste, norte)", m.muralha.portoes.size() == 4, str(m.muralha.portoes))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
 	marcar("O reino tem casas de rua enchendo os vãos (100 ou mais)", casario.casas.size() >= 100, str(casario.casas.size()))
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
@@ -47,9 +47,9 @@ func _rodar() -> void:
 	(mercado.trocas[1] as Gatilho).ao_usar.call(mercado.trocas[1])
 	marcar("Mercado: trocar 1 couro rende 3 carnes", int(jogo.jogador.inventario.get("carne", 0)) == carne_antes + 3 and int(jogo.jogador.inventario.get("couro", 0)) == 0, str(jogo.jogador.inventario))
 	var sentinelas := 0
-	for g in ["guarita_sul", "guarita_oeste", "guarita_leste"]:
+	for g in ["guarita_sul", "guarita_oeste", "guarita_leste", "guarita_norte"]:
 		sentinelas += (m.povoados[g]["no"] as Povoado).npcs.size()
-	marcar("Sentinelas nos 3 portões (2 em cada)", sentinelas == 6, str(sentinelas))
+	marcar("Sentinelas nos 4 portões (2 em cada)", sentinelas == 8, str(sentinelas))
 	marcar("Todo povoado tem gente trabalhando", sem_gente.is_empty(), str(sem_gente))
 	var fazendeiros := get_nodes_in_group("npcs").filter(func(n): return n.papel == "Lavrador").size()
 	marcar("Fazendeiros nos campos (4 ou mais)", fazendeiros >= 4, str(fazendeiros))
