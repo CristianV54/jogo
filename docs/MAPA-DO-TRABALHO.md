@@ -61,6 +61,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `tools/teste_bordas.gd` | A beirada de cada região não pode ser um degrau: o Torin entra andando nas 8 regiões pelos 4 lados (96 entradas) e não pode parar na linha da borda. |
 | `tools/capturar_ilha.gd` | Fotos da ILHA (mapa novo): planta de cima, vistas aéreas, praia, reino e o mapa da tecla M; também prova o tubarão (avisa e mata). |
 | `tools/mundo/encher_o_mundo.py` | Sorteia lugares para povoados novos e traça a Estrada da Costa, conferindo mar, rio, região e vizinhos; escreve em `mundo_dados.gd` (bloco GERADO). |
+| `tools/capturar_reino.gd` | Fotos do REINO (muralha, portão sul, bairro, mercado, feira, rua do anel e vistas aéreas), em tools/capturas/reino/. |
 | `tools/planta_do_mapa.py` | Desenha a PLANTA do mapa novo (ilha de 3 x 3 km, reino no centro) em docs/mapa-novo/, para aprovar antes de construir. |
 | `tools/teste_cadeia.gd` | Cadeia de missões do jogo inteiro: começa no zero, cumpre os objetivos de cada missão pelos eventos reais e confere que |
 | `tools/teste_camera_casa.gd` | A câmera de 3ª pessoa dentro da casa do Vane: 8 combinações de giro e inclinação, com captura e verificação numérica. |
@@ -117,6 +118,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `docs/HISTORIA-E-MISSOES.md` | Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados |
 | `docs/INVENTARIO-DE-DEFEITOS.md` | Inventário de defeitos de 24/11/2026 (lista única, com foto ou medida de cada um; fotos em `docs/inventario/`) |
 | `docs/mapa-novo/construcao_v1/` e `construcao_v2/` | Fotos da ilha construída: v1 = ilha de 4,6 km; v2 = ilha de 7,45 x 5,6 km com o mapa (tecla M) em estilo antigo |
+| `docs/mapa-novo/reino_v1/` | Fotos do reino grande, primeira versão (muralha, 3 portões, 17 bairros, mercados e feiras) |
 | `docs/mapa-novo/PLANTA_v1.md` | Planta do mapa novo, versão 1: tamanho, lugares, temas e o que fica para depois |
 | `docs/LEIS-DO-JOGO.md` | Leis do jogo (Reino de Cinzas) |
 | `docs/MAPA-DO-TRABALHO.md` | Mapa do trabalho (gerado lendo os arquivos em 23/11/2026; atualizar quando criar algo novo) |
