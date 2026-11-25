@@ -455,29 +455,6 @@ func _catedral() -> void:
 		[{"esperar": 7.0, "anim": "Idle", "olhar": _p(-40.0, 30.0)}, {"ir": _p(-34.0, 26.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": _p(-40.0, 30.0)}, {"ir": _p(-29.0, 30.0), "vel": 1.0}])
 
 
-## Vidro que brilha por conta própria (vitral, rosácea): não gasta luz de verdade.
-func _luz(cor: Color) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = cor
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	return m
-
-
-## Telhado em agulha (torre de igreja).
-func _agulha(pos: Vector3, raio: float, altura: float, mat: Material) -> void:
-	var mi := MeshInstance3D.new()
-	var cm := CylinderMesh.new()
-	cm.top_radius = 0.05
-	cm.bottom_radius = raio
-	cm.height = altura
-	cm.radial_segments = 4   # agulha de quatro faces
-	cm.material = mat
-	mi.mesh = cm
-	mi.position = pos
-	mi.rotation.y = atan2(-dir.y, dir.x) + PI / 4.0
-	add_child(mi)
-
-
 ## Lavoura do reino (fora da muralha): três campos plantados de verdade, com cerca, leiras e espantalho, um palheiro e
 ## gente lavrando. É de onde a cidade come.
 func _lavoura() -> void:

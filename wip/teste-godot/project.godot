@@ -1,8 +1,0 @@
-; Projeto de teste, só para importar o dragão e listar o que veio. Não é o jogo.
-config_version=5
-
-[application]
-config/name="teste-dragao"
-
-[rendering]
-renderer/rendering_method="gl_compatibility"

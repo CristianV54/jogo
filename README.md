@@ -8,7 +8,7 @@ Torin, um batedor sem título, descobre que o Império de Drakkar escraviza drag
 
 **Leia nesta ordem, antes de mexer em qualquer coisa:**
 1. `CLAUDE.md`: regras de trabalho, nomes aprovados e estado do projeto. É obrigatório.
-2. `docs/SESSAO-2026-11-23.md`: o que foi feito na última sessão, os erros cometidos e o que falta. **Estado atual: NÃO MERGE.**
+2. O fim da seção "Estado atual" do `CLAUDE.md` (o que vale hoje) e `docs/construcoes/` (as peças de Valdoria, com fotos e pontos fracos anotados). `docs/SESSAO-2026-11-23.md` é histórico.
 3. `docs/MAPA-DO-TRABALHO.md`: índice de cada ferramenta de `tools/`, cada documento de `docs/` e as pendências abertas.
 4. `docs/LEIS-DO-JOGO.md`: regras do mundo que nunca podem ser quebradas e o teste de cada uma.
 5. `assets/ASSETS.md`: origem e licença de cada modelo, mais o registro do que foi construído por marco.
@@ -38,14 +38,13 @@ Depois de criar um script com `class_name` novo, rode uma vez `godot --headless 
 
 | Pasta | O que tem |
 |---|---|
-| `scenes/` | `jogo.tscn` (cena principal), `areas/` (8 regiões), `inimigos/`, `personagens/`, `criaturas/`, `jogador/` |
+| `scenes/` | `jogo.tscn` (cena principal), `areas/` (regiões; `valdoria.tscn` e `castelo_imperial.tscn` não aparecem mais no mundo), `inimigos/`, `personagens/`, `criaturas/`, `jogador/` |
 | `scripts/` | um sistema por pasta: `jogador`, `camera`, `inimigos`, `personagens`, `criaturas`, `mundo`, `missoes`, `jogo`, `interface`, `importacao` |
 | `assets/` | modelos `.glb`/`.gltf` (CC0 na maioria), animações; `ASSETS.md` registra a origem de cada um |
 | `tools/` | testes, auditorias e ferramentas (cada arquivo começa com um comentário dizendo para que serve) |
 | `docs/` | leis do jogo, história, relatórios de auditoria, fotos dos ajustes |
-| `wip/` | laboratório fora do Godot (`.gdignore`); não apagar |
 
-O mundo é contínuo: 8 regiões (Refúgio do Pinhal, Pomar Alto, Bosque Velado, Acampamento da Ruptura, Fortaleza de Ferrogris, Cratera de Ignis, Valdoria, Castelo Imperial) ligadas por estradas, com 21 povoados. As posições estão em `scripts/mundo/mundo_dados.gd`.
+O mundo é uma ilha aberta de 7,45 x 5,6 km: 6 regiões antigas (Refúgio do Pinhal, Pomar Alto, Bosque Velado, Acampamento da Ruptura, Fortaleza de Ferrogris, Cratera de Ignis), o reino de Valdoria no centro (muralha, cidade, catedral, cidadela no penhasco) e 118 povoados ligados por estradas. A história e as missões estão desligadas (`Jogo.historia = false`). Na primeira vez que o jogo abre ele calcula o chão do mundo e guarda em cache: demora vários minutos; depois abre bem mais rápido.
 
 ## Ferramentas que importam
 
@@ -53,8 +52,9 @@ O mundo é contínuo: 8 regiões (Refúgio do Pinhal, Pomar Alto, Bosque Velado,
 |---|---|
 | Fotografar cada item num mundo plano (frente, lado, costas, parado e andando) | `godot --path . --resolution 1280x720 --script res://tools/bancada.gd -- depois lobo,vaca` |
 | Varredura do mundo sem o Torin (buraco, água, seres no chão) | `godot --headless --path . --script res://tools/drone_auditoria.gd -- nome_da_etapa` |
-| Agente que anda do Refúgio ao Castelo com teclas reais | `godot --path . --resolution 1280x720 --script res://tools/percurso_real.gd` |
-| Abrir o jogo com um lobo ao lado do Torin | `godot --path . --resolution 1280x720 --script res://tools/abrir_com_lobo.gd` |
+| Peça de construção sozinha, com o Torin de régua (muralha, rua, feira, catedral) | `godot --path . --resolution 1280x720 --script res://tools/bancada_construcao.gd -- muralha` |
+| Fotos de Valdoria dentro do jogo (com filtro opcional) | `godot --path . --resolution 1280x720 --script res://tools/capturar_reino.gd -- 02_ 08_` |
+| Auditoria do reino (casas, portões, gente) | `godot --headless --path . --script res://tools/auditoria_reino.gd` |
 | Testes sem janela | `godot --headless --path . --script res://tools/teste_mundo.gd` (e os outros `teste_*.gd`) |
 
 ## Estado em 24/11/2026 (resumo; o detalhe está em `docs/SESSAO-2026-11-23.md`)

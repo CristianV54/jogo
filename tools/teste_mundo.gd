@@ -1,6 +1,6 @@
 extends SceneTree
 # Mundo contínuo, sem janela: regiões, povoados com gente e animais, fauna coerente, e o horário dos NPCs (vão para casa à noite
-# e voltam de dia). A caminhada pelas estradas está em tools/auditoria_continua.gd.
+# e voltam de dia).
 #   godot --headless --path . --script res://tools/teste_mundo.gd
 var jogo: Jogo
 var checks := {}
