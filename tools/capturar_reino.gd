@@ -48,8 +48,12 @@ func _rodar() -> void:
 	var f: Vector2 = m.povoados["feira_sul"]["centro"]
 	_por(f + Vector2(-70, 20), -PI / 2.0)
 	await _foto("5_feira_do_portao_sul", 4.0)
-	_por(Vector2(-410, -60), PI)          # rua do anel, a oeste, olhando para o portão oeste... e a muralha
-	await _foto("6_rua_do_anel_oeste", 4.0)
+	_por(Vector2(-300, -58), -PI / 2.0)   # Rua do Meio, olhando para o oeste: casas dos dois lados e o portão oeste ao fundo
+	await _foto("6_rua_do_meio", 4.0)
+	_por(Vector2(-640, -60), PI / 2.0 + PI)   # do lado de fora do portão oeste, olhando para dentro
+	await _foto("6b_portao_oeste_por_fora", 4.0)
+	_por(Vector2(120, 395), -PI / 2.0)    # Rua do Anel, ao sul: fileiras de casas
+	await _foto("6c_rua_do_anel_sul", 4.0)
 	# vista aérea: liga a vista do reino inteiro (no jogo, o que está a mais de 800 m some)
 	_por(Vector2(0, 380), 0.0)
 	await create_timer(1.0).timeout

@@ -115,7 +115,11 @@ func construir() -> void:
 		povoados[id]["no"] = pv
 		var cp: Vector2 = povoados[id]["centro"]
 		NavegacaoLocal.assar(pv, Vector3(cp.x, terreno.altura_em(cp.x, cp.y), cp.y), Vector2(1, 1) * float(povoados[id]["raio"]) * 0.65, true)
-	etapa.call("povoados")
+	var casario := CasarioDoReino.new()
+	casario.mundo = self
+	add_child(casario)
+	casario.montar()
+	etapa.call("povoados e casario do reino")
 	progresso.emit("Traçando os caminhos da gente...")
 	await get_tree().process_frame
 	NavegacaoLocal.assar(regioes["refugio_do_pinhal"], Vector3(0, 0, 0), Vector2(48, 48), false)

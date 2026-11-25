@@ -168,6 +168,7 @@ func _distancia_a_area(p: Vector2) -> float:
 func _altura_crua(x: float, z: float) -> float:
 	var d := _distancia_a_area(Vector2(x, z))
 	var amp := smoothstep(30.0, 220.0, d)
+	amp *= smoothstep(-30.0, 160.0, Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))   # o reino fica numa planície: cidade não se ergue em ladeira
 	var colinas := (_ruido_mundo.get_noise_2d(x, z) * 0.5 + 0.5) * 10.0 + _ruido_fino.get_noise_2d(x * 0.6, z * 0.6) * 0.8
 	var h := colinas * amp
 	var melhor := 1e9   # as estradas ficam niveladas com o terreno em volta do eixo
@@ -181,7 +182,7 @@ func _altura_crua(x: float, z: float) -> float:
 			melhor = par[0]
 			eixo = par[1]
 	if melhor < 7.0:
-		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo))
+		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo)) * smoothstep(-30.0, 160.0, eixo.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
@@ -202,7 +203,9 @@ func distancia_caminho(x: float, z: float) -> float:
 
 ## Cor do chão do mundo: capim nos campos, cinza e seco rumo à fortaleza, vulcânico perto da cratera, ocre perto de Valdoria.
 func cor_do_mundo(x: float, z: float) -> Color:
-	return Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
+	var c := Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
+	var ao_reino := Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
+	return c.lerp(Color(0.42, 0.38, 0.31), 0.6 * smoothstep(8.0, -12.0, ao_reino))   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 
 func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
@@ -212,8 +215,6 @@ func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 		c = c.lerp(Color(0.84, 0.76, 0.56).lerp(Color(0.6, 0.52, 0.38), smoothstep(12.0, 2.0, costa)), smoothstep(24.0, 14.0, costa))
 	c = c.lerp(Color(0.42, 0.42, 0.4), smoothstep(0.2, 0.42, 1.0 - n.y))
 	c = c.lerp(Color(0.1, 0.24, 0.34), smoothstep(-Costa.LARGURA_RASO, -Costa.LARGURA_RASO - 25.0, costa))   # fundo do mar: azul escuro, igual ao oceano de longe
-	var ao_reino := Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
-	c = c.lerp(Color(0.42, 0.38, 0.31), 0.6 * smoothstep(8.0, -12.0, ao_reino))   # dentro da muralha o chão é de cidade: terra batida e pedra, não pasto
 	c = c.lerp(Color(0.45, 0.34, 0.22), 1.0 - smoothstep(1.6, 4.2, distancia_caminho(x, z)))
 	var dr := distancia_rio(x, z)
 	if dr < 3.5:
