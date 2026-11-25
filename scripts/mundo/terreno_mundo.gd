@@ -189,7 +189,8 @@ func _altura_crua(x: float, z: float) -> float:
 		if alto > 0.0:
 			var rr := MundoDados.retangulo(id)
 			var fora := Vector2(maxf(maxf(rr.position.x - x, x - rr.end.x), 0.0), maxf(maxf(rr.position.y - z, z - rr.end.y), 0.0)).length()
-			h += alto * smoothstep(55.0, 0.0, fora)   # rochedo: 30 m de subida em 55 m
+			var colina := MundoDados.colina_da_cidade(x, z)   # a cidade sobe devagar da muralha até o pé do rochedo
+			h += colina + (alto - colina) * smoothstep(55.0, 0.0, fora)   # e o rochedo sobe o resto, de uma vez
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
 		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))

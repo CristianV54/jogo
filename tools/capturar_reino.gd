@@ -89,7 +89,14 @@ func _rodar() -> void:
 	cam.fov = 50.0
 	root.add_child(cam)
 	cam.current = true
-	for v in [["15_aerea_como_a_referencia", Vector3(-420, 230, 900), Vector3(0, 30, 0)], ["16_aerea_do_sul", Vector3(0, 560, 950), Vector3(0, 0, 0)], ["17_aerea_de_cima", Vector3(0, 1150, 1), Vector3(0, 0, 0)]]:
+	jogo.clima.definir_hora(17.7)   # pôr do sol, como na referência do Cristian
+	cam.fov = 42.0
+	cam.global_position = Vector3(-330, 150, 800)
+	cam.look_at(Vector3(0, 40, 0))
+	await _foto("15_como_a_referencia_por_do_sol", 5.0)
+	jogo.clima.definir_hora(11.0)
+	cam.fov = 50.0
+	for v in [["15b_aerea_de_dia", Vector3(-420, 230, 900), Vector3(0, 30, 0)], ["16_aerea_do_sul", Vector3(0, 560, 950), Vector3(0, 0, 0)], ["17_aerea_de_cima", Vector3(0, 1150, 1), Vector3(0, 0, 0)]]:
 		cam.global_position = v[1]
 		cam.look_at(v[2])
 		await _foto(v[0], 4.0)

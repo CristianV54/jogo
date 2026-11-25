@@ -252,6 +252,11 @@ const POVOADOS_LIVRES := [
 ]
 
 
+## A cidade de Valdoria fica numa colina: o chão sobe 14 m da muralha (raio 440) até o pé do rochedo do Castelo (raio 215).
+static func colina_da_cidade(x: float, z: float) -> float:
+	return 14.0 * smoothstep(440.0, 215.0, Vector2(x, z).distance_to(REINO["centro"]))
+
+
 ## Altura do chão da região acima do nível do reino (só o Castelo fica no alto de um morro).
 static func altura(id: String) -> float:
 	return float(REGIOES[id].get("altura", 0.0))

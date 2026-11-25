@@ -1,12 +1,12 @@
 class_name MuralhaDoReino
 extends Node3D
 ## A muralha grande do reino: um círculo de pedra em volta de Valdoria, do Castelo e dos bairros (MundoDados.REINO).
-## Acompanha o relevo em lances curtos, tem uma torre a cada 15 graus e abre um PORTÃO (duas torres altas, arco e
+## Grossa (4,6 m), acompanha o relevo em lances curtos, tem uma torre redonda a cada 15 graus e abre um PORTÃO (duas torres altas, arco e
 ## bandeiras) em todo ponto onde uma estrada cruza o círculo. As pedras são desenhadas em dois MultiMesh (lances e
 ## torres): centenas de blocos custam duas chamadas de desenho. A colisão é um corpo só, com uma caixa por bloco.
 
-const ALTURA := 11.0
-const ESPESSURA := 2.6
+const ALTURA := 13.0
+const ESPESSURA := 4.6
 const VAO_DO_PORTAO := 8.0      # metros livres de cada lado do eixo da estrada
 const COR_PEDRA := Color(0.52, 0.48, 0.42)
 const COR_DRAKKAR := Color(0.14, 0.2, 0.5)   # bandeiras do rei: azul
@@ -61,27 +61,39 @@ func montar() -> void:
 			if p.distance_to(g) < 30.0:
 				livre = false
 		if livre:
-			_torre(p, ALTURA + 5.0, 8.0)
+			_torre(p, ALTURA + 6.0, 12.0)
 	for g in portoes:   # portão: duas torres altas, o arco por cima da estrada e bandeiras de Drakkar
 		var fora := (g - c).normalized()
 		var lado := Vector2(-fora.y, fora.x)
 		var y := mundo.terreno.altura_em(g.x, g.y)
 		for s in [-1.0, 1.0]:
-			_torre(g + lado * s * (VAO_DO_PORTAO + 4.5), ALTURA + 9.0, 9.0)
-			var b: Vector2 = g + lado * s * (VAO_DO_PORTAO + 4.5) + fora * 5.0
+			_torre(g + lado * s * (VAO_DO_PORTAO + 7.0), ALTURA + 11.0, 14.0)
+			var b: Vector2 = g + lado * s * (VAO_DO_PORTAO + 7.0) + fora * 7.6
 			_bandeira(Vector3(b.x, y + 9.0, b.y), atan2(fora.x, fora.y))
-		_bloco(_lances, Vector3(g.x, y + ALTURA + 1.0, g.y), Vector3(ESPESSURA + 1.4, 5.0, VAO_DO_PORTAO * 2.0 + 1.0), atan2(lado.x, lado.y), false)
-	_multimesh("Lances", _lances)
-	_multimesh("Torres", _torres)
+		_bloco(_lances, Vector3(g.x, y + ALTURA + 2.0, g.y), Vector3(ESPESSURA + 5.0, 8.0, VAO_DO_PORTAO * 2.0 + 1.0), atan2(lado.x, lado.y), false)   # casa do portão: um bloco fundo por cima da passagem
+	_multimesh("Lances", _lances, BoxMesh.new())
+	var cilindro := CylinderMesh.new()   # raio 0,5 e altura 1: a escala de cada torre dá o tamanho
+	cilindro.height = 1.0
+	cilindro.radial_segments = 14
+	_multimesh("Torres", _torres, cilindro)
 	print("MuralhaDoReino: ", _lances.size(), " blocos, ", _torres.size(), " torres, ", portoes.size(), " portões")
 
 
+## Torre redonda: o fuste, um coroamento mais largo no topo (o caminho de ronda) e as ameias em volta.
 func _torre(p: Vector2, altura: float, lado: float) -> void:
 	var y := mundo.terreno.altura_em(p.x, p.y) - 1.5
-	_bloco(_torres, Vector3(p.x, y + altura / 2.0, p.y), Vector3(lado, altura, lado), 0.0, true)
-	for dx in [-1.0, 1.0]:   # merlões nos quatro cantos
-		for dz in [-1.0, 1.0]:
-			_bloco(_torres, Vector3(p.x + dx * (lado / 2.0 - 0.7), y + altura + 0.8, p.y + dz * (lado / 2.0 - 0.7)), Vector3(1.4, 1.6, 1.4), 0.0, false)
+	_torres.append(Transform3D(Basis.from_scale(Vector3(lado, altura, lado)), Vector3(p.x, y + altura / 2.0, p.y)))
+	_torres.append(Transform3D(Basis.from_scale(Vector3(lado + 1.8, 1.6, lado + 1.8)), Vector3(p.x, y + altura + 0.8, p.y)))
+	for k in 8:
+		var a := TAU * k / 8.0
+		_bloco(_lances, Vector3(p.x + cos(a) * (lado / 2.0 + 0.4), y + altura + 2.3, p.y + sin(a) * (lado / 2.0 + 0.4)), Vector3(1.5, 1.5, 1.2), -a + PI / 2.0, false)
+	var cs := CollisionShape3D.new()
+	var cil := CylinderShape3D.new()
+	cil.radius = lado / 2.0
+	cil.height = altura
+	cs.shape = cil
+	cs.position = Vector3(p.x, y + altura / 2.0, p.y)
+	_corpo.add_child(cs)
 
 
 func _bloco(lista: Array[Transform3D], pos: Vector3, tam: Vector3, giro: float, colidir: bool) -> void:
@@ -110,8 +122,8 @@ func _bandeira(pos: Vector3, giro: float) -> void:
 	add_child(pano)
 
 
-func _multimesh(nome: String, lista: Array[Transform3D]) -> void:
-	var caixa := BoxMesh.new()
+func _multimesh(nome: String, lista: Array[Transform3D], malha: PrimitiveMesh) -> void:
+	var caixa := malha
 	caixa.material = Pedra.material(COR_PEDRA)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D

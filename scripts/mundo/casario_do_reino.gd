@@ -29,24 +29,30 @@ func montar() -> void:
 	solidos.name = "Solidos"
 	add_child(solidos)
 	for i in FILEIRAS.size():
-		var r: float = FILEIRAS[i]
+		var raio_base: float = FILEIRAS[i]
 		var ang := rng.randf() * 0.05
 		while ang < TAU - 0.012:
-			var larg := rng.randf_range(7.4, 10.2)
-			var meio := ang + larg / r / 2.0
-			ang += (larg + 0.5) / r
+			var larg := rng.randf_range(6.4, 11.0)
+			var meio := ang + larg / raio_base / 2.0
+			ang += (larg + rng.randf_range(0.2, 0.9)) / raio_base
+			var r := raio_base + _torto(raio_base, meio) + rng.randf_range(-0.7, 0.7)   # a fileira serpenteia e cada casa avança ou recua um pouco
 			var p := c + Vector2.from_angle(meio) * r
-			var prof := rng.randf_range(8.4, 9.6)
+			var prof := rng.randf_range(7.6, 9.4)
 			if not _livre(p, larg):
 				continue
-			var andares := 3 if rng.randf() < (0.55 if r < 345.0 else 0.3) else 2
-			var alt := andares * 2.75 + rng.randf_range(0.0, 0.7)
+			var sorte := rng.randf()
+			var andares := 4 if sorte < 0.14 else (3 if sorte < 0.55 else (2 if sorte < 0.92 else 1))
+			var alt := andares * 2.75 + rng.randf_range(0.0, 0.9)
 			var torre := rng.randf() < 0.035   # de vez em quando uma casa-torre de pedra, bem mais alta que as vizinhas
 			if torre:
 				alt = rng.randf_range(15.0, 21.0)
 				larg = minf(larg, 8.0)
-			var giro := -meio + PI / 2.0   # eixo X da casa ao longo da fileira; Z na direção do raio
-			var y := mundo.terreno.altura_em(p.x, p.y) - 0.3
+			var giro := -meio + PI / 2.0 + rng.randf_range(-0.1, 0.1)   # eixo X da casa ao longo da fileira; Z na direção do raio
+			var y := 1e9   # a casa assenta no ponto mais baixo do lote (a cidade é em ladeira) e desce um pouco abaixo do chão
+			for d in [Vector2(0, 0), Vector2(4, 4), Vector2(-4, 4), Vector2(4, -4), Vector2(-4, -4)]:
+				y = minf(y, mundo.terreno.altura_em(p.x + d.x, p.y + d.y))
+			y -= 0.4
+			alt += 1.2   # o que desceu e o desnível do lote
 			var base := Basis(Vector3.UP, giro)
 			var setor := int(meio / TAU * SETORES) % SETORES
 			var estilo := "pedra" if torre or rng.randf() < 0.28 else "enxaimel"
@@ -57,10 +63,12 @@ func montar() -> void:
 			corpos[chave][1].append(TONS_DE_PAREDE[rng.randi() % TONS_DE_PAREDE.size()] if estilo == "enxaimel" else Color(0.92, 0.9, 0.86) * rng.randf_range(0.85, 1.0))
 			if not telhados.has(setor):
 				telhados[setor] = [[], []]
-			var alt_telhado := rng.randf_range(3.2, 4.6)
-			# o prisma tem a cumeeira no eixo Z dele: gira 90 graus para a cumeeira correr ao longo da fileira
-			telhados[setor][0].append(Transform3D((base * Basis(Vector3.UP, PI / 2.0)).scaled_local(Vector3(prof + 1.0, alt_telhado, larg + 0.5)), Vector3(p.x, y + alt + alt_telhado / 2.0, p.y)))
-			telhados[setor][1].append(TONS_DE_TELHADO[rng.randi() % TONS_DE_TELHADO.size()] * rng.randf_range(0.88, 1.0))
+			var alt_telhado := rng.randf_range(2.8, 5.4)
+			# o prisma tem a cumeeira no eixo Z dele: gira 90 graus para a cumeeira correr ao longo da fileira (uma em cada cinco fica de empena para a rua)
+			var virar := 0.0 if rng.randf() < 0.2 else PI / 2.0
+			var tam_telhado := Vector3(prof + 1.0, alt_telhado, larg + 0.5) if virar > 0.0 else Vector3(larg + 0.5, alt_telhado, prof + 1.0)
+			telhados[setor][0].append(Transform3D((base * Basis(Vector3.UP, virar)).scaled_local(tam_telhado), Vector3(p.x, y + alt + alt_telhado / 2.0, p.y)))
+			telhados[setor][1].append(TONS_DE_TELHADO[rng.randi() % TONS_DE_TELHADO.size()] * rng.randf_range(0.82, 1.0))
 			var cs := CollisionShape3D.new()
 			var caixa := BoxShape3D.new()
 			caixa.size = Vector3(larg, alt + 3.0, prof)
@@ -87,9 +95,20 @@ func _livre(p: Vector2, larg: float) -> bool:
 			return false
 	var h0 := mundo.terreno.altura_em(p.x, p.y)
 	for d in [Vector2(5, 0), Vector2(-5, 0), Vector2(0, 5), Vector2(0, -5)]:
-		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.3:
+		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.1:   # ladeira da colina passa; paredão do rochedo, não
 			return false
 	return true
+
+
+## Quanto a fileira sai do círculo perfeito naquele ângulo: as ruas de cidade antiga são tortas. Some junto das duas ruas
+## em anel (que são círculos certos) para nenhuma casa cair em cima delas.
+func _torto(raio: float, ang: float) -> float:
+	var onda := sin(ang * 5.0 + 1.3) * 0.6 + sin(ang * 11.0 + 0.4) * 0.4
+	if raio > 262.0 and raio < 400.0:
+		return onda * 6.0 * sin(PI * (raio - 262.0) / 138.0)
+	if raio > 400.0:
+		return onda * 2.5 * sin(PI * (raio - 400.0) / 70.0)
+	return 0.0
 
 
 func _multimesh(nome: String, malha: Mesh, mat: Material, transformacoes: Array, cores: Array) -> void:
