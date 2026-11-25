@@ -54,6 +54,13 @@ func _rodar() -> void:
 	await _foto("02_avenida_do_portao_sul", 4.0)
 	_ver(Vector2(0, 178), Vector2(0, 120))               # praça do mercado, ao pé do penhasco
 	await _foto("03_praca_do_mercado", 4.0)
+	var casario_f := m.get_node("CasarioDoReino") as CasarioDoReino
+	var rua_z := 170.0
+	for rz in casario_f.ruas:   # a rua de casas mais perto de z = 190, ao sul da praça
+		if absf(rz - 190.0) < absf(rua_z - 190.0):
+			rua_z = rz
+	_ver(Vector2(-12, rua_z), Vector2(-160, rua_z))      # uma rua de casas, da avenida para oeste
+	await _foto("04_rua_de_casas", 4.0)
 	_ver(Vector2(60, 108), Vector2(140, 20))             # rua em anel, com a rocha do penhasco de um lado e casas do outro
 	await _foto("05_rua_do_penhasco", 4.0)
 	for item in [["06_quartel_campo_de_treino", "quartel_da_guarda"], ["07_estabulos_do_reino", "estabulos_do_reino"], ["08_catedral", "catedral_de_valdoria"]]:

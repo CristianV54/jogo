@@ -21,6 +21,7 @@ var lotes: Array = []   # um por casa: {"p": Vector2, "larg": float, "prof": flo
 var quarteiroes := 0
 var janelas_acesas := 0
 var forjas := 0
+var ruas: Array[float] = []   # z do meio de cada rua (as faixas vazias entre um par de fileiras e o seguinte)
 var floreiras := 0
 var arvores_de_quintal := 0
 var _copas: Array[Transform3D] = []
@@ -76,7 +77,9 @@ func montar() -> void:
 						arvores_de_quintal += 1
 					xq += _rng.randf_range(9.0, 16.0)
 			x0 = x1 + _rng.randf_range(4.8, 7.2)   # travessa
-		z0 = z1 + _rng.randf_range(5.4, 7.4)       # rua
+		var largura_da_rua := _rng.randf_range(5.4, 7.4)
+		ruas.append(z1 + largura_da_rua / 2.0)
+		z0 = z1 + largura_da_rua
 	for chave in _pecas:
 		_multimesh(String(chave))
 	var mmq := MultiMesh.new()

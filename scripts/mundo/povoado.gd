@@ -512,7 +512,43 @@ func _lavoura() -> void:
 		_plantacao(campo, 24.0, 16.0)
 	_feno(_p(26.0, 36.0))
 	_lavrador("Lavrador do reino", "oren", campos[0], PackedStringArray(["Trigo para o pão da cidade. Quando o sino toca, a gente recolhe."]))
+	if hash(String(dados["id"])) % 2 == 0:   # metade das lavouras tem moinho de vento
+		_moinho(_p(34.0, 16.0))
 	_lavrador("Lavradora do reino", "tessa", campos[1], PackedStringArray(["A terra aqui é boa. Ruim é o imposto do celeiro do rei."]))
+
+
+## Moinho de vento: torre de pedra mais larga embaixo, telhado em cone e quatro pás de madeira que giram.
+func _moinho(p: Vector2) -> void:
+	var y := _y(p)
+	var torre := VilaRefugio._cilindro(Vector3(p.x, y + 5.0, p.y), 3.2, 10.0, Pedra.material(Color(0.8, 0.77, 0.7)), true, 12)
+	(torre.mesh as CylinderMesh).top_radius = 2.3
+	var telhado := VilaRefugio._cilindro(Vector3(p.x, y + 11.6, p.y), 0.1, 3.2, VilaRefugio._mat(Color(0.5, 0.3, 0.22)), false, 12)
+	(telhado.mesh as CylinderMesh).top_radius = 0.05
+	(telhado.mesh as CylinderMesh).bottom_radius = 2.9
+	var pas := PasDoMoinho.new()
+	pas.name = "Pas"
+	pas.position = Vector3(p.x - para_longe.x * 2.8, y + 9.4, p.y - para_longe.y * 2.8)   # do lado da cidade
+	pas.rotation.y = atan2(-para_longe.x, -para_longe.y)
+	add_child(pas)
+	var madeira := VilaRefugio._mat(Color(0.42, 0.3, 0.18))
+	var pano := VilaRefugio._mat(Color(0.9, 0.86, 0.74))
+	for k in 4:
+		var braco := MeshInstance3D.new()
+		var b := BoxMesh.new()
+		b.size = Vector3(0.22, 7.0, 0.16)
+		b.material = madeira
+		braco.mesh = b
+		braco.rotation.z = PI / 2.0 * k
+		braco.position = Vector3(0, 3.5, 0).rotated(Vector3.BACK, PI / 2.0 * k)
+		pas.add_child(braco)
+		var vela := MeshInstance3D.new()
+		var v := BoxMesh.new()
+		v.size = Vector3(1.5, 4.6, 0.06)
+		v.material = pano
+		vela.mesh = v
+		vela.rotation.z = PI / 2.0 * k
+		vela.position = Vector3(0.85, 4.4, 0.05).rotated(Vector3.BACK, PI / 2.0 * k)
+		pas.add_child(vela)
 
 
 ## Guarita de portão: duas sentinelas paradas, um braseiro e um banco. Fica do lado de dentro da muralha.

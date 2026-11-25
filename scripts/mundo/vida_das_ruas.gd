@@ -122,27 +122,63 @@ func _jardins() -> void:
 	add_child(inst)
 
 
-## Alamedas: fileiras de árvores dos dois lados das estradas que chegam aos três portões, nos últimos 320 m.
+## Pontos ao longo da estrada que sai de um portão, do lado de fora da muralha: [posição, tangente] a cada `passo` metros.
+func _saida_do_portao(g: Vector2, comprimento: float, passo: float) -> Array:
+	for id in mundo.estradas:
+		var pts: PackedVector2Array = mundo.estradas[id]
+		var perto := -1
+		for i in pts.size():
+			if pts[i].distance_to(g) < 8.0:
+				perto = i
+				break
+		if perto < 0:
+			continue
+		var sentido := 1 if perto + 6 < pts.size() and MundoDados.ate_a_muralha(pts[perto + 6].x, pts[perto + 6].y) > 0.0 else -1
+		var saida: Array = []
+		var andado := 0.0
+		var proximo := 22.0
+		var i := perto
+		while i + sentido >= 0 and i + sentido < pts.size() and andado < comprimento:
+			var trecho := pts[i].distance_to(pts[i + sentido])
+			andado += trecho
+			if andado >= proximo:
+				saida.append([pts[i + sentido], (pts[i + sentido] - pts[i]).normalized()])
+				proximo += passo
+			i += sentido
+		return saida
+	return []
+
+
+## Alamedas e muretas: nas estradas que chegam aos três portões, nos últimos 320 m, árvores dos dois lados e uma mureta
+## baixa de pedra acompanhando a estrada (com vãos).
 func _alamedas() -> void:
 	var copas: Array[Transform3D] = []
+	var pedras: Array[Transform3D] = []
 	for g in mundo.muralha.portoes:
-		var fora := g.normalized()
-		var lado := Vector2(-fora.y, fora.x)
-		var d := 26.0
-		while d < 320.0:
+		for item in _saida_do_portao(g, 320.0, 14.0):
+			var q0: Vector2 = item[0]
+			var tg: Vector2 = item[1]
 			for s in [-1.0, 1.0]:
-				var q: Vector2 = g + fora * d + lado * s * 9.0
-				if mundo.terreno.distancia_caminho(q.x, q.y) < 5.0 or mundo.terreno.na_agua(q.x, q.y, 3.0):
-					continue
-				var perto_de_povoado := false
+				var q: Vector2 = q0 + Vector2(-tg.y, tg.x) * s * 9.5
+				var livre := mundo.terreno.distancia_caminho(q.x, q.y) > 6.0 and not mundo.terreno.na_agua(q.x, q.y, 3.0)
 				for pid in mundo.povoados:
 					if q.distance_to(mundo.povoados[pid]["centro"]) < float(mundo.povoados[pid]["raio"]):
-						perto_de_povoado = true
-				if perto_de_povoado:
+						livre = false
+				if livre:
+					copas.append(Transform3D(Basis(Vector3.UP, q.x).scaled_local(Vector3(1.1, 1.3, 1.1)), Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y)))
+					mundo.arvores.adicionar(q.x, q.y, 0.5)
+		var n := 0
+		for item in _saida_do_portao(g, 320.0, 3.4):
+			n += 1
+			if n % 9 >= 7:
+				continue   # vãos na mureta
+			var q0: Vector2 = item[0]
+			var tg: Vector2 = item[1]
+			for s in [-1.0, 1.0]:
+				var q: Vector2 = q0 + Vector2(-tg.y, tg.x) * s * 6.2
+				if mundo.terreno.distancia_caminho(q.x, q.y) < 4.5:
 					continue
-				copas.append(Transform3D(Basis(Vector3.UP, d).scaled_local(Vector3(1.1, 1.3, 1.1)), Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y)))
-				mundo.arvores.adicionar(q.x, q.y, 0.5)
-			d += 14.0
+				pedras.append(Transform3D(Basis(Vector3.UP, atan2(tg.x, tg.y)).scaled_local(Vector3(0.6, 1.0, 3.5)), Vector3(q.x, mundo.terreno.altura_em(q.x, q.y) + 0.3, q.y)))
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = FabricaNatureza.folhosa()
@@ -155,6 +191,18 @@ func _alamedas() -> void:
 	inst.material_override = FabricaNatureza.material()
 	add_child(inst)
 	arvores += copas.size()
+	var caixa := BoxMesh.new()
+	caixa.material = Pedra.material(Color(0.6, 0.57, 0.5))
+	var mp := MultiMesh.new()
+	mp.transform_format = MultiMesh.TRANSFORM_3D
+	mp.mesh = caixa
+	mp.instance_count = pedras.size()
+	for i in pedras.size():
+		mp.set_instance_transform(i, pedras[i])
+	var muretas := MultiMeshInstance3D.new()
+	muretas.name = "Muretas"
+	muretas.multimesh = mp
+	add_child(muretas)
 
 
 ## Relevo de rocha no paredão do penhasco: pedras grandes de tons diferentes cravadas na encosta (fora da rampa e do topo).

@@ -206,7 +206,12 @@ func distancia_caminho(x: float, z: float) -> float:
 ## Cor do chão do mundo: capim nos campos, cinza e seco rumo à fortaleza, vulcânico perto da cratera, ocre perto de Valdoria.
 func cor_do_mundo(x: float, z: float) -> Color:
 	var c := Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
-	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, MundoDados.ate_a_muralha(x, z)))
+	var fora_da_muralha := MundoDados.ate_a_muralha(x, z)
+	if fora_da_muralha > 0.0 and fora_da_muralha < 900.0:   # em volta de Valdoria o campo é de pasto e roça: manchas de verde claro e de capim seco
+		var mancha := _ruido_mundo.get_noise_2d(x * 2.6 + 300.0, z * 2.6 - 120.0)
+		c = c.lerp(Color(0.52, 0.55, 0.26), smoothstep(0.05, 0.4, mancha) * 0.7 * smoothstep(900.0, 500.0, fora_da_muralha))
+		c = c.lerp(Color(0.34, 0.5, 0.24), smoothstep(-0.05, -0.4, mancha) * 0.6 * smoothstep(900.0, 500.0, fora_da_muralha))
+	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, fora_da_muralha))
 	if absf(x) < 200.0 and absf(z) < 200.0:   # o penhasco: rocha em camadas de tons diferentes; a rampa e o platô, pedra clara
 		var pen := MundoDados.penhasco(x, z)
 		var hp: float = pen[0]

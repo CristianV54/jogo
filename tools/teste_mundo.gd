@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("6 regiões, 29 estradas, 110 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 29 and m.povoados.size() == 110 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
+	marcar("6 regiões, 30 estradas, 118 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 30 and m.povoados.size() == 118 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]

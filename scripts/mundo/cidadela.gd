@@ -25,6 +25,7 @@ var _caixas: Array[Transform3D] = []
 var _cilindros: Array[Transform3D] = []
 var _pontas: Array[Transform3D] = []
 var _frestas: Array[Transform3D] = []
+var _sombras: Array[Transform3D] = []   # peças de pedra mais escura (socos, degraus)
 var _predios: Array = [[], []]
 var _telhados: Array = [[], []]
 var _h := MundoDados.PENHASCO_ALTURA
@@ -58,6 +59,7 @@ func montar() -> void:
 	var escuro := StandardMaterial3D.new()
 	escuro.albedo_color = Color(0.1, 0.11, 0.16)
 	_multimesh("Frestas", BoxMesh.new(), escuro, _frestas)
+	_multimesh("PedraEscura", BoxMesh.new(), Pedra.material(Color(0.6, 0.58, 0.55)), _sombras)
 	_multimesh("Predios", BoxMesh.new(), Fachadas.material("pedra"), _predios[0], _predios[1])
 	_multimesh("Telhados", PrismMesh.new(), Fachadas.material("telhado"), _telhados[0], _telhados[1])
 	print("Cidadela: ", torres, " torres (a mais alta com o topo a ", snappedf(topo_mais_alto, 0.1), " m acima da cidade), ", predios, " prédios, ", npcs.size(), " pessoas")
@@ -113,6 +115,10 @@ func _torre(x: float, z: float, y0: float, raio: float, altura: float, ameias :=
 	cs.shape = forma
 	cs.position = Vector3(x, y0 + altura / 2.0, z)
 	_corpo.add_child(cs)
+	var anel := 12.0   # cintas de pedra em volta do fuste, a cada 12 m
+	while anel < altura - 3.0:
+		_cilindros.append(Transform3D(Basis.from_scale(Vector3(raio * 2.0 + 0.5, 0.5, raio * 2.0 + 0.5)), Vector3(x, y0 + anel, z)))
+		anel += 12.0
 	var andar := 5.0   # seteiras: frestas escuras subindo em volta do fuste, uma a cada 5 m, cada andar virado um pouco
 	while andar < altura - 2.0:
 		for k in 3:
@@ -129,6 +135,16 @@ func _predio(x: float, z: float, larg: float, prof: float, y0: float, altura: fl
 	_predios[0].append(Transform3D(Basis.from_scale(Vector3(larg, altura + 1.0, prof)), Vector3(x, y0 + altura / 2.0 - 0.5, z)))
 	_predios[1].append(Color(1.0, 0.98, 0.95) * _rng.randf_range(0.92, 1.0))
 	_caixa_solida(Vector3(x, y0 + altura / 2.0, z), Vector3(larg, altura, prof))
+	# arquitetura: soco de pedra mais escura na base, cintas a cada 6 m, cornija sob o telhado e pilastras nos cantos
+	_sombras.append(Transform3D(Basis.from_scale(Vector3(larg + 0.7, 1.4, prof + 0.7)), Vector3(x, y0 + 0.7, z)))
+	var cinta := 6.0
+	while cinta < altura - 2.0:
+		_bloco(Vector3(x, y0 + cinta, z), Vector3(larg + 0.36, 0.34, prof + 0.36), 0.0, false)
+		cinta += 6.0
+	_bloco(Vector3(x, y0 + altura - 0.35, z), Vector3(larg + 1.0, 0.7, prof + 1.0), 0.0, false)
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			_bloco(Vector3(x + sx * larg / 2.0, y0 + altura / 2.0, z + sz * prof / 2.0), Vector3(1.1, altura, 1.1), 0.0, false)
 	if telhado > 0.0:
 		var base := Basis(Vector3.UP, 0.0 if cumeeira_em_z else PI / 2.0)
 		var tam := Vector3(larg + 1.2, telhado, prof + 1.2) if cumeeira_em_z else Vector3(prof + 1.2, telhado, larg + 1.2)
@@ -207,6 +223,18 @@ func _palacio_e_torres() -> void:
 		pano.mesh = malha
 		pano.position = Vector3(_pl(40) - _pl(300) / 2.0 - 0.12, _h + 250 * ALTO - 8.0, _pl(-50) + s * 8.0)
 		add_child(pano)
+	# entrada do palácio, virada para o pátio (oeste): escadaria, pórtico de quatro colunas e sacada por cima
+	var px := _pl(40) - _pl(300) / 2.0
+	var pz := _pl(-50)
+	for k in 4:
+		_sombras.append(Transform3D(Basis.from_scale(Vector3(1.0, 0.3, 12.0 - k * 1.2)), Vector3(px - 4.2 + k * 1.0, _h + 0.15 + k * 0.3, pz)))
+	_caixa_solida(Vector3(px - 2.2, _h + 0.6, pz), Vector3(4.4, 1.2, 10.0))
+	for s in [-1.5, -0.5, 0.5, 1.5]:
+		_cilindros.append(Transform3D(Basis.from_scale(Vector3(0.9, 7.0, 0.9)), Vector3(px - 3.4, _h + 1.2 + 3.5, pz + s * 2.6)))
+	_bloco(Vector3(px - 2.0, _h + 8.6, pz), Vector3(4.6, 0.7, 10.6), 0.0, false)                           # laje da sacada
+	for s in [-1.0, 1.0]:
+		_bloco(Vector3(px - 2.0, _h + 9.5, pz + s * 5.1), Vector3(4.4, 1.1, 0.3), 0.0, false)              # guarda-corpo dos lados
+	_bloco(Vector3(px - 4.1, _h + 9.5, pz), Vector3(0.3, 1.1, 10.4), 0.0, false)                           # e da frente
 	var poco := Vector3(_pl(-300), _h, _pl(-70))
 	_cilindros.append(Transform3D(Basis.from_scale(Vector3(3.6, 1.4, 3.6)), poco + Vector3(0, 0.7, 0)))
 	_caixa_solida(poco + Vector3(0, 0.7, 0), Vector3(3.2, 1.4, 3.2))

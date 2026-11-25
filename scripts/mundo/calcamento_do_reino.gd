@@ -19,12 +19,14 @@ func montar() -> void:
 	for i in range(-n, n):
 		for j in range(-n, n):
 			var meio := c + Vector2((i + 0.5) * passo, (j + 0.5) * passo)
-			if MundoDados.ate_a_muralha(meio.x, meio.y) > -1.5 or float(MundoDados.penhasco(meio.x, meio.y)[0]) > 0.3:
-				continue   # só dentro da muralha, e não em cima da rocha do penhasco
+			var pen := MundoDados.penhasco(meio.x, meio.y)
+			var no_alto := float(pen[2]) <= 0.99 or bool(pen[1])   # o pátio da cidadela e o piso da rampa também são calçados
+			if MundoDados.ate_a_muralha(meio.x, meio.y) > -1.5 or (float(pen[0]) > 0.3 and not no_alto):
+				continue   # só dentro da muralha, e não em cima da rocha nua do penhasco
 			for k in cantos:
 				var q: Vector2 = c + Vector2((i + k.x) * passo, (j + k.y) * passo)
 				var rua := 1.0 - smoothstep(4.0, 7.5, mundo.terreno.distancia_caminho(q.x, q.y))
-				st.set_color(Color(0.26, 0.25, 0.24).lerp(Color(0.37, 0.36, 0.33), rua))   # pedra cinzenta (clara demais estourava de branco ao sol)
+				st.set_color(Color(0.46, 0.45, 0.42) if no_alto else Color(0.26, 0.25, 0.24).lerp(Color(0.37, 0.36, 0.33), rua))   # no alto a pedra é clara, como a cidadela   # pedra cinzenta (clara demais estourava de branco ao sol)
 				st.set_normal(Vector3.UP)
 				st.add_vertex(Vector3(q.x, mundo.terreno.altura_em(q.x, q.y) + 0.06, q.y))
 	st.generate_normals()
