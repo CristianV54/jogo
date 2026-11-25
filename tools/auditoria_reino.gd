@@ -65,7 +65,7 @@ func _rodar() -> void:
 			_defeito("casa enterrada ou flutuando", p, "%.2f m de diferença num canto (%s)" % [pior, casa.name])
 		if m.terreno.distancia_caminho(p.x, p.y) < 6.0:
 			_defeito("casa em cima de rua", p, "%.1f m do eixo (%s)" % [m.terreno.distancia_caminho(p.x, p.y), casa.name])
-		if absf(p.distance_to(c) - r) < 12.0:
+		if absf(MundoDados.ate_a_muralha(p.x, p.y)) < 8.0:
 			_defeito("casa encostada na muralha", p, String(casa.name))
 		for outra in casas:
 			if outra != casa and outra.get_instance_id() > casa.get_instance_id() and Vector2(outra.global_position.x, outra.global_position.z).distance_to(p) < 9.0:
@@ -80,23 +80,22 @@ func _rodar() -> void:
 			for dz in [-1, 0, 1]:
 				for j in grade.get(cel + Vector2i(dx, dz), []):
 					var o: Dictionary = casario.lotes[j]
-					if (o["p"] as Vector2).distance_to(p) < minf(float(l["larg"]), float(o["larg"])) * 0.8 and absf(angle_difference(float(o["giro"]), float(l["giro"]))) < 0.3:
+					if absf((o["p"] as Vector2).x - p.x) < (float(l["larg"]) + float(o["larg"])) / 2.0 - 0.1 and absf((o["p"] as Vector2).y - p.y) < (float(l["prof"]) + float(o["prof"])) / 2.0 - 0.1:
 						_defeito("casa encavalada (casario)", p, "a %.1f m da vizinha" % (o["p"] as Vector2).distance_to(p))
 		if not grade.has(cel):
 			grade[cel] = []
 		grade[cel].append(i)
 		if m.terreno.distancia_caminho(p.x, p.y) < float(l["larg"]) / 2.0 + 1.0:
 			_defeito("casa em cima de rua (casario)", p, "%.1f m do eixo" % m.terreno.distancia_caminho(p.x, p.y))
-		if p.distance_to(c) > r - 11.0:
+		if MundoDados.ate_a_muralha(p.x, p.y) > -8.0:
 			_defeito("casa encostada na muralha (casario)", p, "")
 		var h0 := m.terreno.altura_em(p.x, p.y)
 		for d in [Vector2(4, 0), Vector2(-4, 0), Vector2(0, 4), Vector2(0, -4)]:
-			if absf(m.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.0:   # a cidade é em colina (até ~0,3 m em 4 m); mais de 1 m é paredão do rochedo
+			if absf(m.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.5:
 				_defeito("casa em ladeira (casario)", p, "")
 				break
-		for pid in m.povoados:
-			if p.distance_to(m.povoados[pid]["centro"]) < float(m.povoados[pid]["raio"]):
-				_defeito("casa dentro de praça (casario)", p, String(pid))
+		if MundoDados.PRACA.has_point(p) or float(MundoDados.penhasco(p.x, p.y)[0]) > 0.3:
+			_defeito("casa na praça ou no penhasco (casario)", p, "")
 	for g in m.muralha.portoes:
 		var toca := _toca_solido(Vector3(g.x, m.terreno.altura_em(g.x, g.y) + 1.6, g.y), 1.2)
 		if toca != "":

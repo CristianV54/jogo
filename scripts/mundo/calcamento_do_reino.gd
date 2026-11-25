@@ -11,17 +11,16 @@ var mundo: Mundo
 func montar() -> void:
 	name = "CalcamentoDoReino"
 	var c: Vector2 = MundoDados.REINO["centro"]
-	var r: float = MundoDados.REINO["raio"] - 1.5   # até a face de dentro da muralha
 	var passo := 4.0
-	var n := int(ceil(r / passo))
+	var n := int(ceil(float(MundoDados.REINO["raio"]) / passo)) + 2
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var cantos := [Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]   # a mesma diagonal do terreno
 	for i in range(-n, n):
 		for j in range(-n, n):
 			var meio := c + Vector2((i + 0.5) * passo, (j + 0.5) * passo)
-			if meio.distance_to(c) > r or mundo._em_alguma_area(meio):
-				continue
+			if MundoDados.ate_a_muralha(meio.x, meio.y) > -1.5 or float(MundoDados.penhasco(meio.x, meio.y)[0]) > 0.3:
+				continue   # só dentro da muralha, e não em cima da rocha do penhasco
 			for k in cantos:
 				var q: Vector2 = c + Vector2((i + k.x) * passo, (j + k.y) * passo)
 				var rua := 1.0 - smoothstep(4.0, 7.5, mundo.terreno.distancia_caminho(q.x, q.y))

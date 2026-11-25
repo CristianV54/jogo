@@ -233,19 +233,20 @@ func _draw() -> void:
 		for trilha in mundo.trilhas:
 			for i in range(0, trilha.size() - 1):
 				draw_dashed_line(mundo_para_tela(trilha[i]), mundo_para_tela(trilha[i + 1]), Color(0.36, 0.24, 0.13, 0.6), 1.3, 5.0)
-	# a muralha do reino: um anel de tinta grossa, aberto nos portões
-	var rc: Vector2 = MundoDados.REINO["centro"]
-	var rr: float = MundoDados.REINO["raio"]
-	for k in 90:
-		var a0 := TAU * k / 90.0
-		var a1 := TAU * (k + 1) / 90.0
-		var m0 := rc + Vector2.from_angle((a0 + a1) / 2.0) * rr
+	# o reino de Valdoria: a muralha em tinta grossa (aberta nos portões), o penhasco e o nome
+	for k in 120:
+		var m0 := MundoDados.ponto_da_muralha(TAU * (k + 0.5) / 120.0)
 		var aberto := false
 		for g in mundo.muralha.portoes:
-			if m0.distance_to(g) < 30.0:
+			if m0.distance_to(g) < 16.0:
 				aberto = true
 		if not aberto:
-			draw_line(mundo_para_tela(rc + Vector2.from_angle(a0) * rr), mundo_para_tela(rc + Vector2.from_angle(a1) * rr), COR_TINTA, clampf(1.6 * zoom, 2.5, 6.0), true)
+			draw_line(mundo_para_tela(MundoDados.ponto_da_muralha(TAU * k / 120.0)), mundo_para_tela(MundoDados.ponto_da_muralha(TAU * (k + 1) / 120.0)), COR_TINTA, clampf(1.6 * zoom, 2.5, 6.0), true)
+	var rq := mundo_para_tela(Vector2.ZERO)
+	draw_circle(rq, clampf(60.0 * esc, 5.0, 60.0), Color(0.5, 0.47, 0.43))
+	draw_rect(Rect2(rq - Vector2(6, 6), Vector2(12, 12)), COR_TINTA)
+	draw_rect(Rect2(rq - Vector2(4, 4), Vector2(8, 8)), Color(0.62, 0.14, 0.1))
+	_nome(rq + Vector2(0, -clampf(60.0 * esc, 5.0, 60.0) - 8.0), "VALDORIA", 22, _fonte_regiao, COR_TINTA, 4.0)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])
@@ -259,13 +260,13 @@ func _draw() -> void:
 				_nome(q + Vector2(0, -6), String(pv.get("nome", "")), 12, _fonte_vila, Color(0.3, 0.2, 0.12))
 	for id in MundoDados.REGIOES:   # cidades e lugares grandes: marca maior e nome em maiúsculas espaçadas
 		var q := mundo_para_tela(MundoDados.centro(id))
-		var capital: bool = id == "castelo_imperial"   # o castelo é o coração de Valdoria: é ali que o mapa escreve o nome do reino
+		var capital := false   # a capital (Valdoria) não é região: é desenhada à parte, com a muralha
 		var r := 8.0 if capital else 5.5
 		draw_rect(Rect2(q - Vector2(r, r), Vector2(r, r) * 2.0), COR_TINTA)
 		draw_rect(Rect2(q - Vector2(r - 2, r - 2), Vector2(r - 2, r - 2) * 2.0), Color(0.62, 0.14, 0.1) if capital else Color(0.86, 0.78, 0.6))
 		if id == alvo:   # a missão ativa fica aqui
 			draw_arc(q, r + 7.0 + sin(_t * 4.0) * 2.0, 0.0, TAU, 32, COR_ACENTO, 2.5)
-		_nome(q + Vector2(0, -r - 7), "VALDORIA" if capital and zoom < 2.2 else String(MundoDados.REGIOES[id]["nome"]).to_upper(), 22 if capital else 15, _fonte_regiao, COR_TINTA, 4.0 if capital else 2.0)
+		_nome(q + Vector2(0, -r - 7), String(MundoDados.REGIOES[id]["nome"]).to_upper(), 22 if capital else 15, _fonte_regiao, COR_TINTA, 4.0 if capital else 2.0)
 	if tem_destino:   # bandeira do destino
 		var q := mundo_para_tela(destino)
 		draw_line(q, q + Vector2(0, -22), COR_TINTA, 2.5)

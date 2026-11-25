@@ -13,7 +13,6 @@ const REGIOES := {
 	"acampamento_ruptura": {"cena": "res://scenes/areas/acampamento_ruptura.tscn", "centro": Vector2(972, 1825.5), "meia": 130.0, "nome": "Acampamento da Ruptura"},
 	"fronteira_ferrogris": {"cena": "res://scenes/areas/fronteira_ferrogris.tscn", "centro": Vector2(2673, 36.5), "meia": 150.0, "nome": "Fortaleza de Ferrogris"},
 	"cratera_ignis": {"cena": "res://scenes/areas/cratera_ignis.tscn", "centro": Vector2(1798.2, -1314.4), "meia": 150.0, "nome": "Cratera de Ignis"},
-	"castelo_imperial": {"cena": "res://scenes/areas/castelo_imperial.tscn", "centro": Vector2(0, 0), "meia": 130.0, "nome": "Castelo de Valdoria", "altura": 30.0},   # no centro do reino e da ilha, no alto do rochedo
 }
 
 ## Limites do chão do mundo (a ilha fica dentro; o resto é mar).
@@ -24,41 +23,23 @@ const EIXOS_DA_ILHA := Vector2(3725.0, 2800.0)
 
 ## O REINO DE VALDORIA: o Castelo num rochedo no centro e, em volta dele, a cidade apertada dentro da muralha (ver
 ## MuralhaDoReino e CasarioDoReino). Onde uma estrada cruza o círculo da muralha abre-se um portão.
-const REINO := {"centro": Vector2(0.0, 0.0), "raio": 470.0}
+const REINO := {"centro": Vector2(0.0, 0.0), "raio": 300.0}   # círculo que envolve a cidade (para contas grossas; a muralha de verdade é oval, ver ate_a_muralha)
 
 ## Estradas: id, nome, pontos de controle (suavizados). Cada ponta casa com a entrada que a região já tem na borda dela
 ## (quase todas as regiões se entram pelo lado sul; o Refúgio tem portões a oeste, norte e leste).
 const ESTRADAS := [
 	{"id": "reino_sul", "nome": "Estrada do Reino", "a": "refugio_do_pinhal", "b": "valdoria", "meia": 24.0,
-		"pontos": [Vector2(-364.5, 1665.5), Vector2(-291.6, 1277.9), Vector2(-97.2, 949.3), Vector2(0, 730.2), Vector2(0, 470), Vector2(0, 262)]},
+		"pontos": [Vector2(-364.5, 1665.5), Vector2(-291.6, 1277.9), Vector2(-97.2, 949.3), Vector2(0, 730.2), Vector2(0, 227), Vector2(0, 173)]},
 	{"id": "norte", "nome": "Estrada do Norte", "a": "valdoria", "b": "", "meia": 22.0,   # sai pelo portão norte, atrás do Castelo, rumo à Vila Ocre
-		"pontos": [Vector2(0, -262), Vector2(0, -470), Vector2(60, -900), Vector2(250, -1250), Vector2(420, -1500), Vector2(560, -1640), Vector2(735, -1643)]},
-	{"id": "rua_do_castelo", "nome": "Rua do Castelo", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 16.0,   # dá a volta ao pé do rochedo
-		"pontos": [Vector2(0, 262), Vector2(-45, 258), Vector2(-90, 246), Vector2(-131, 227), Vector2(-168, 201), Vector2(-201, 168), Vector2(-227, 131), Vector2(-246, 90), Vector2(-258, 45), Vector2(-262, 0), Vector2(-258, -45), Vector2(-246, -90), Vector2(-227, -131), Vector2(-201, -168), Vector2(-168, -201), Vector2(-131, -227), Vector2(-90, -246), Vector2(-45, -258), Vector2(0, -262), Vector2(45, -258), Vector2(90, -246), Vector2(131, -227), Vector2(168, -201), Vector2(201, -168), Vector2(227, -131), Vector2(246, -90), Vector2(258, -45), Vector2(262, 0), Vector2(258, 45), Vector2(246, 90), Vector2(227, 131), Vector2(201, 168), Vector2(168, 201), Vector2(131, 227), Vector2(90, 246), Vector2(45, 258), Vector2(0, 262)]},
-	{"id": "anel_do_reino", "nome": "Rua do Anel", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 16.0,   # a volta de fora, perto da muralha
-		"pontos": [Vector2(0, 400), Vector2(-69, 394), Vector2(-137, 376), Vector2(-200, 346), Vector2(-257, 306), Vector2(-306, 257), Vector2(-346, 200), Vector2(-376, 137), Vector2(-394, 69), Vector2(-400, 0), Vector2(-394, -69), Vector2(-376, -137), Vector2(-346, -200), Vector2(-306, -257), Vector2(-257, -306), Vector2(-200, -346), Vector2(-137, -376), Vector2(-69, -394), Vector2(0, -400), Vector2(69, -394), Vector2(137, -376), Vector2(200, -346), Vector2(257, -306), Vector2(306, -257), Vector2(346, -200), Vector2(376, -137), Vector2(394, -69), Vector2(400, 0), Vector2(394, 69), Vector2(376, 137), Vector2(346, 200), Vector2(306, 257), Vector2(257, 306), Vector2(200, 346), Vector2(137, 376), Vector2(69, 394), Vector2(0, 400)]},
-	{"id": "travessa_01", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(227, 131), Vector2(291, 176), Vector2(386, 223)]},
-	{"id": "travessa_02", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(131, 227), Vector2(164, 298), Vector2(223, 386)]},
-	{"id": "travessa_03", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(-131, 227), Vector2(-176, 291), Vector2(-223, 386)]},
-	{"id": "travessa_04", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(-227, 131), Vector2(-298, 164), Vector2(-386, 223)]},
-	{"id": "travessa_05", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(-227, -131), Vector2(-291, -176), Vector2(-386, -223)]},
-	{"id": "travessa_06", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(-131, -227), Vector2(-164, -298), Vector2(-223, -386)]},
-	{"id": "travessa_07", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(131, -227), Vector2(176, -291), Vector2(223, -386)]},
-	{"id": "travessa_08", "nome": "Travessa", "a": "castelo_imperial", "b": "castelo_imperial", "meia": 12.0,
-		"pontos": [Vector2(227, -131), Vector2(298, -164), Vector2(386, -223)]},
+		"pontos": [Vector2(430, -40), Vector2(400, -220), Vector2(220, -420), Vector2(60, -900), Vector2(250, -1250), Vector2(420, -1500), Vector2(560, -1640), Vector2(735, -1643)]},
+	{"id": "rua_do_penhasco", "nome": "Rua do Penhasco", "a": "", "b": "", "meia": 14.0,   # dá a volta ao pé do penhasco
+		"pontos": [Vector2(0, 118), Vector2(-24, 116), Vector2(-48, 111), Vector2(-70, 102), Vector2(-90, 90), Vector2(-107, 76), Vector2(-121, 59), Vector2(-132, 40), Vector2(-138, 20), Vector2(-140, 0), Vector2(-138, -20), Vector2(-132, -40), Vector2(-121, -59), Vector2(-107, -76), Vector2(-90, -90), Vector2(-70, -102), Vector2(-48, -111), Vector2(-24, -116), Vector2(0, -118), Vector2(24, -116), Vector2(48, -111), Vector2(70, -102), Vector2(90, -90), Vector2(107, -76), Vector2(121, -59), Vector2(132, -40), Vector2(138, -20), Vector2(140, 0), Vector2(138, 20), Vector2(132, 40), Vector2(121, 59), Vector2(107, 76), Vector2(90, 90), Vector2(70, 102), Vector2(48, 111), Vector2(24, 116), Vector2(0, 118)]},
 	{"id": "pomar", "nome": "Estrada do Pomar", "a": "refugio_do_pinhal", "b": "pomar_alto", "meia": 22.0,
 		"pontos": [Vector2(-524.5, 1825.5), Vector2(-1093.5, 1843.8), Vector2(-1579.5, 1752.5), Vector2(-1944, 1643), Vector2(-2138.4, 1402.9)]},
 	{"id": "ruptura", "nome": "Caminho da Ruptura", "a": "refugio_do_pinhal", "b": "acampamento_ruptura", "meia": 20.0,
 		"pontos": [Vector2(-204.5, 1825.5), Vector2(291.6, 1916.8), Vector2(631.8, 2135.8), Vector2(972, 1960.5)]},
 	{"id": "campos", "nome": "Estrada dos Campos Altos", "a": "valdoria", "b": "", "meia": 24.0,
-		"pontos": [Vector2(-262, 0), Vector2(-470, 0), Vector2(-800, 200), Vector2(-1020.6, 365.1), Vector2(-1701, 109.5), Vector2(-2308.5, -36.5), Vector2(-2527.2, -91.3)]},
+		"pontos": [Vector2(-134, 35), Vector2(-276, 35), Vector2(-520, 70), Vector2(-800, 200), Vector2(-1020.6, 365.1), Vector2(-1701, 109.5), Vector2(-2308.5, -36.5), Vector2(-2527.2, -91.3)]},
 	{"id": "bosque", "nome": "Trilha do Bosque", "a": "valdoria", "b": "bosque_velado", "meia": 20.0,
 		"pontos": [Vector2(-1020.6, 365.1), Vector2(-1263.6, 0), Vector2(-1458, -456.4), Vector2(-1555.2, -935.3)]},
 	{"id": "nevoa", "nome": "Trilha da Névoa", "a": "bosque_velado", "b": "", "meia": 20.0,
@@ -66,7 +47,7 @@ const ESTRADAS := [
 	{"id": "pedras", "nome": "Estrada da Serra", "a": "valdoria", "b": "", "meia": 20.0,
 		"pontos": [Vector2(-1020.6, 365.1), Vector2(-1044.9, -109.5), Vector2(-1020.6, -730.2), Vector2(-729, -1460.4), Vector2(-437.4, -1989.8)]},
 	{"id": "ferrogris", "nome": "Estrada de Ferrogris", "a": "valdoria", "b": "fronteira_ferrogris", "meia": 24.0,
-		"pontos": [Vector2(262, 0), Vector2(470, 0), Vector2(820, 300), Vector2(1093.5, 547.7), Vector2(1822.5, 419.9), Vector2(2430, 383.4), Vector2(2673, 191.5)]},
+		"pontos": [Vector2(129, -45), Vector2(294, -45), Vector2(520, -10), Vector2(820, 300), Vector2(1093.5, 547.7), Vector2(1822.5, 419.9), Vector2(2430, 383.4), Vector2(2673, 191.5)]},
 	{"id": "cratera", "nome": "Estrada Queimada", "a": "valdoria", "b": "cratera_ignis", "meia": 20.0,
 		"pontos": [Vector2(1822.5, 419.9), Vector2(1871.1, -182.6), Vector2(1846.8, -730.2), Vector2(1798.2, -1159.4)]},
 	{"id": "beira_rio", "nome": "Estrada da Foz", "a": "valdoria", "b": "", "meia": 22.0,
@@ -162,27 +143,24 @@ const POVOADOS_LIVRES := [
 	{"id": "ocre", "nome": "Vila Ocre", "tipo": "vila", "centro": Vector2(801.9, -1643), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": "pedras"},
 	{"id": "cinzas", "nome": "Fazenda das Cinzas", "tipo": "fazenda", "centro": Vector2(2527.2, -766.7), "dir": Vector2(0, -1), "lado": 1.0, "raio": 55.0, "liga": "cratera"},
 	# --- o reino: bairros e mercados dentro da muralha, feiras do lado de fora de cada portão (NOMES PROVISÓRIOS, a aprovar) ---
-	{"id": "mercado_central", "nome": "Praça do Mercado", "tipo": "mercado", "centro": Vector2(78, 290), "dir": Vector2(-0.966, 0.259), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "mercado_do_poente", "nome": "Mercado do Poente", "tipo": "mercado", "centro": Vector2(-290, 78), "dir": Vector2(-0.259, -0.966), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "mercado_do_nascente", "nome": "Mercado do Nascente", "tipo": "mercado", "centro": Vector2(290, 78), "dir": Vector2(-0.259, 0.966), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "quartel_da_guarda", "nome": "Quartel da Guarda", "tipo": "quartel", "centro": Vector2(212, -212), "dir": Vector2(0.707, 0.707), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "estabulos_do_reino", "nome": "Estábulos do Reino", "tipo": "estabulo", "centro": Vector2(-78, 290), "dir": Vector2(-0.966, -0.259), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "catedral_de_valdoria", "nome": "Catedral de Valdoria", "tipo": "catedral", "centro": Vector2(-172, -246), "dir": Vector2(0.819, -0.574), "lado": -1.0, "raio": 58.0, "liga": ""},
-	{"id": "lavoura_do_portao_sul", "nome": "Lavoura do Portão Sul", "tipo": "lavoura", "centro": Vector2(521, 277), "dir": Vector2(-0.469, 0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_do_poente", "nome": "Lavoura do Poente", "tipo": "lavoura", "centro": Vector2(277, 521), "dir": Vector2(-0.883, 0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_do_nascente", "nome": "Lavoura do Nascente", "tipo": "lavoura", "centro": Vector2(-277, 521), "dir": Vector2(-0.883, -0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_do_norte", "nome": "Lavoura do Norte", "tipo": "lavoura", "centro": Vector2(-521, 277), "dir": Vector2(-0.469, -0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_das_sete_leiras", "nome": "Lavoura das Sete Leiras", "tipo": "lavoura", "centro": Vector2(-521, -277), "dir": Vector2(0.469, -0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_do_moleiro", "nome": "Lavoura do Moleiro", "tipo": "lavoura", "centro": Vector2(-277, -521), "dir": Vector2(0.883, -0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_da_colina", "nome": "Lavoura da Colina", "tipo": "lavoura", "centro": Vector2(277, -521), "dir": Vector2(0.883, 0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "lavoura_do_ribeiro", "nome": "Lavoura do Ribeiro", "tipo": "lavoura", "centro": Vector2(521, -277), "dir": Vector2(0.469, 0.883), "lado": -1.0, "raio": 52.0, "liga": ""},
-	{"id": "guarita_sul", "nome": "Guarita do Portão Sul", "tipo": "guarita", "centro": Vector2(0, 448), "dir": Vector2(1, 0), "lado": -1.0, "raio": 9.0, "liga": ""},
-	{"id": "guarita_oeste", "nome": "Guarita do Portão Oeste", "tipo": "guarita", "centro": Vector2(-448, 0), "dir": Vector2(0, 1), "lado": -1.0, "raio": 9.0, "liga": ""},
-	{"id": "guarita_leste", "nome": "Guarita do Portão Leste", "tipo": "guarita", "centro": Vector2(448, 0), "dir": Vector2(0, 1), "lado": 1.0, "raio": 9.0, "liga": ""},
-	{"id": "guarita_norte", "nome": "Guarita do Portão Norte", "tipo": "guarita", "centro": Vector2(0, -448), "dir": Vector2(1, 0), "lado": 1.0, "raio": 9.0, "liga": ""},
-	{"id": "feira_sul", "nome": "Feira do Portão Sul", "tipo": "mercado", "centro": Vector2(90, 560), "dir": Vector2(0, 1), "lado": -1.0, "raio": 50.0, "liga": "reino_sul"},
-	{"id": "feira_poente", "nome": "Feira do Poente", "tipo": "mercado", "centro": Vector2(-565, -85), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "campos"},
-	{"id": "feira_nascente", "nome": "Feira do Nascente", "tipo": "mercado", "centro": Vector2(565, -85), "dir": Vector2(1, 0), "lado": -1.0, "raio": 50.0, "liga": "ferrogris"},
+	{"id": "mercado_central", "nome": "Praça do Mercado", "tipo": "mercado", "centro": Vector2(0, 129), "dir": Vector2(1, 0), "lado": 1.0, "raio": 30.0, "liga": ""},
+	{"id": "quartel_da_guarda", "nome": "Quartel da Guarda", "tipo": "quartel", "centro": Vector2(-180, -125), "dir": Vector2(1, 0), "lado": 1.0, "raio": 46.0, "liga": ""},
+	{"id": "estabulos_do_reino", "nome": "Estábulos do Reino", "tipo": "estabulo", "centro": Vector2(-212, 52), "dir": Vector2(1, 0), "lado": 1.0, "raio": 44.0, "liga": ""},
+	{"id": "catedral_de_valdoria", "nome": "Catedral de Valdoria", "tipo": "catedral", "centro": Vector2(150, 40), "dir": Vector2(0, 1), "lado": -1.0, "raio": 44.0, "liga": ""},
+	{"id": "guarita_sul", "nome": "Guarita do Portão Sul", "tipo": "guarita", "centro": Vector2(0, 211), "dir": Vector2(1, 0), "lado": -1.0, "raio": 9.0, "liga": ""},
+	{"id": "guarita_oeste", "nome": "Guarita do Portão Oeste", "tipo": "guarita", "centro": Vector2(-260, 35), "dir": Vector2(0, 1), "lado": -1.0, "raio": 9.0, "liga": ""},
+	{"id": "guarita_leste", "nome": "Guarita do Portão Leste", "tipo": "guarita", "centro": Vector2(278, -45), "dir": Vector2(0, 1), "lado": 1.0, "raio": 9.0, "liga": ""},
+	{"id": "feira_sul", "nome": "Feira do Portão Sul", "tipo": "mercado", "centro": Vector2(70, 297), "dir": Vector2(0, 1), "lado": -1.0, "raio": 40.0, "liga": "reino_sul"},
+	{"id": "feira_poente", "nome": "Feira do Poente", "tipo": "mercado", "centro": Vector2(-366, 120), "dir": Vector2(1, 0), "lado": 1.0, "raio": 40.0, "liga": "campos"},
+	{"id": "feira_nascente", "nome": "Feira do Nascente", "tipo": "mercado", "centro": Vector2(374, -130), "dir": Vector2(1, 0), "lado": -1.0, "raio": 40.0, "liga": "ferrogris"},
+	{"id": "lavoura_do_sul", "nome": "Lavoura do Sul", "tipo": "lavoura", "centro": Vector2(204, 327), "dir": Vector2(-0.883, 0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_poente", "nome": "Lavoura do Poente", "tipo": "lavoura", "centro": Vector2(-204, 327), "dir": Vector2(-0.883, -0.469), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_nascente", "nome": "Lavoura do Nascente", "tipo": "lavoura", "centro": Vector2(-394, 156), "dir": Vector2(-0.423, -0.906), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_norte", "nome": "Lavoura do Norte", "tipo": "lavoura", "centro": Vector2(-394, -156), "dir": Vector2(0.423, -0.906), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_das_sete_leiras", "nome": "Lavoura das Sete Leiras", "tipo": "lavoura", "centro": Vector2(-218, -320), "dir": Vector2(0.866, -0.500), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_moleiro", "nome": "Lavoura do Moleiro", "tipo": "lavoura", "centro": Vector2(0, -370), "dir": Vector2(1.000, -0.000), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_da_colina", "nome": "Lavoura da Colina", "tipo": "lavoura", "centro": Vector2(218, -320), "dir": Vector2(0.866, 0.500), "lado": -1.0, "raio": 52.0, "liga": ""},
+	{"id": "lavoura_do_ribeiro", "nome": "Lavoura do Ribeiro", "tipo": "lavoura", "centro": Vector2(377, -185), "dir": Vector2(0.500, 0.866), "lado": -1.0, "raio": 52.0, "liga": ""},
 	# --- povoados novos da ilha grande (NOMES PROVISÓRIOS, propostos e ainda não aprovados pelo Cristian) ---
 	{"id": "costa_brava", "nome": "Vila Costa Brava", "tipo": "vila", "centro": Vector2(-3078, 365.1), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
 	{"id": "ponta_do_vento", "nome": "Vila Ponta do Vento", "tipo": "vila", "centro": Vector2(-3159, -462.5), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
@@ -207,7 +185,7 @@ const POVOADOS_LIVRES := [
 	# >>> GERADO por tools/mundo/encher_o_mundo.py (NOMES PROVISÓRIOS, a aprovar): não editar à mão
 	{"id": "vila_riacho_fundo", "nome": "Vila Riacho Fundo", "tipo": "vila", "centro": Vector2(-2900, 1774), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "costa_13"},
 	{"id": "vila_carvalhal", "nome": "Vila Carvalhal", "tipo": "vila", "centro": Vector2(-579, -567), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
-	{"id": "vila_monte_claro", "nome": "Vila Monte Claro", "tipo": "vila", "centro": Vector2(911, -168), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "cratera"},
+	{"id": "vila_monte_claro", "nome": "Vila Monte Claro", "tipo": "vila", "centro": Vector2(911, -168), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": ""},
 	{"id": "vila_serra_baixa", "nome": "Vila Serra Baixa", "tipo": "vila", "centro": Vector2(-1787, -81), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "campos"},
 	{"id": "vila_lagoa_seca", "nome": "Vila Lagoa Seca", "tipo": "vila", "centro": Vector2(3352, -45), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "costa_08"},
 	{"id": "vila_pedra_lisa", "nome": "Vila Pedra Lisa", "tipo": "vila", "centro": Vector2(1643, -2045), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "costa_07"},
@@ -260,33 +238,88 @@ const POVOADOS_LIVRES := [
 ]
 
 
-## O ROCHEDO DO CASTELO é redondo: um platô de 190 m de raio, 30 m acima do nível do reino, com paredão de rocha em volta
-## (45 m de largura). No alto ficam a cidadela (muralha redonda de 182 m de raio) e, dentro dela, o castelo.
-const RAIO_DO_PLATO := 190.0
-const LARGURA_DO_PAREDAO := 45.0
-const RAIO_DA_CIDADELA := 182.0
-## A ESCADARIA DO CASTELO sobe em linha reta pelo sul, da Rua do Castelo (z = 258) até o portão da cidadela (z = 186).
-const ESCADARIA_Z_BAIXO := 258.0
-const ESCADARIA_Z_ALTO := 186.0
-const ESCADARIA_MEIA_LARGURA := 9.0
+## ------------------------------------------------------------------------------------------------------------------
+## A PLANTA DE VALDORIA segue o Reino de Aethelgard que o Cristian tinha feito em blocos (mesma composição e mesmas
+## proporções, uma unidade de lá = 10 cm daqui): penhasco de rocha no centro com a cidadela branca em cima; rampa que
+## sobe do leste, passa pela face sul e chega ao portão da cidadela, a oeste; rua em anel no pé do penhasco; avenida do
+## portão sul até a praça do mercado; cidade densa em faixas; muralha de contorno irregular com três portões (os do
+## oeste e do leste não ficam frente a frente). Origem no centro do penhasco; sul = z positivo.
+const MURALHA_EIXOS := Vector2(290.0, 240.0)   # meia largura e meia profundidade da muralha, antes da ondulação
+const PENHASCO_EIXOS := Vector2(66.0, 55.0)    # o topo do penhasco (platô da cidadela)
+const PENHASCO_ALTURA := 64.0
+const PENHASCO_BASE := 1.7                     # o pé do penhasco fica, em média, a 1,7 vezes o topo
+const RAMPA_R0 := 1.08                         # faixa da rampa, em múltiplos do topo
+const RAMPA_R1 := 1.34
+const RAMPA_TS := 3.054326                     # 175 graus: o pé da rampa, a leste
+const RAMPA_TE := 0.174533                     # 10 graus: o alto da rampa, a oeste
+const RAMPA_TFIM := -0.314159                  # -18 graus: fim do patamar diante do portão da cidadela
+const ANEL_EIXOS := Vector2(140.0, 118.0)      # penhasco + rua em anel: dali para dentro não há casa
+const PORTAO_OESTE_Z := 35.0
+const PORTAO_LESTE_Z := -45.0
+const PRACA := Rect2(-27.0, 129.0, 54.0, 44.0) # praça do mercado, onde a avenida do sul encontra a rua em anel
+
+static var _ruido_do_penhasco: FastNoiseLite
 
 
-## A cidade de Valdoria fica numa colina: o chão sobe 14 m da muralha (raio 440) até o pé do rochedo do Castelo (raio 235).
-static func colina_da_cidade(x: float, z: float) -> float:
-	return 14.0 * smoothstep(440.0, RAIO_DO_PLATO + LARGURA_DO_PAREDAO, Vector2(x, z).distance_to(REINO["centro"]))
+## Distância até a muralha do reino: NEGATIVA dentro da cidade, positiva fora.
+static func ate_a_muralha(x: float, z: float) -> float:
+	var e := MURALHA_EIXOS
+	var a := atan2(z / e.y, x / e.x)
+	var raio_aqui := 1.0 / Vector2(cos(a) / e.x, sin(a) / e.y).length()
+	return (Vector2(x / e.x, z / e.y).length() - 1.0) * raio_aqui - (12.0 * sin(3.0 * a + 0.7) + 8.0 * sin(5.0 * a + 2.0))
 
 
-## Altura do chão do reino no ponto: a colina da cidade e, por cima dela, o rochedo redondo do Castelo.
-static func relevo_do_reino(x: float, z: float) -> float:
-	var colina := colina_da_cidade(x, z)
-	var fora := maxf(Vector2(x, z).distance_to(REINO["centro"]) - RAIO_DO_PLATO, 0.0)
-	return colina + (altura("castelo_imperial") - colina) * smoothstep(LARGURA_DO_PAREDAO, 0.0, fora)
+## Ponto da muralha na direção `a` (ângulo no oval): onde a distância até a muralha é zero.
+static func ponto_da_muralha(a: float) -> Vector2:
+	var dentro := 0.6
+	var fora := 1.4
+	for passo in 30:
+		var m := (dentro + fora) / 2.0
+		if ate_a_muralha(m * cos(a) * MURALHA_EIXOS.x, m * sin(a) * MURALHA_EIXOS.y) < 0.0:
+			dentro = m
+		else:
+			fora = m
+	return Vector2(dentro * cos(a) * MURALHA_EIXOS.x, dentro * sin(a) * MURALHA_EIXOS.y)
 
 
-## Altura do piso da escadaria do castelo em `z` (sobe do nível da Rua do Castelo até o platô).
-static func altura_da_escadaria(z: float) -> float:
-	var t := clampf((ESCADARIA_Z_BAIXO - z) / (ESCADARIA_Z_BAIXO - ESCADARIA_Z_ALTO), 0.0, 1.0)
-	return lerpf(colina_da_cidade(0.0, ESCADARIA_Z_BAIXO), altura("castelo_imperial"), t)
+## Ângulo no penhasco: 0 a oeste, 90 graus ao sul, 180 a leste (o sentido em que a rampa desce).
+static func angulo_no_penhasco(x: float, z: float) -> float:
+	return atan2(z / PENHASCO_EIXOS.y, -x / PENHASCO_EIXOS.x)
+
+
+## Altura do piso da rampa no ângulo `t`: 0 no pé (leste), a altura do penhasco no alto (oeste).
+static func altura_da_rampa(t: float) -> float:
+	return PENHASCO_ALTURA * clampf((RAMPA_TS - t) / (RAMPA_TS - RAMPA_TE), 0.0, 1.0)
+
+
+## O penhasco: devolve [altura do chão acima da cidade, é piso da rampa?, raio em múltiplos do topo].
+static func penhasco(x: float, z: float) -> Array:
+	if _ruido_do_penhasco == null:
+		_ruido_do_penhasco = FastNoiseLite.new()
+		_ruido_do_penhasco.seed = 22
+		_ruido_do_penhasco.frequency = 0.045
+	var r := Vector2(x / PENHASCO_EIXOS.x, z / PENHASCO_EIXOS.y).length()
+	if r > PENHASCO_BASE + 0.4:
+		return [0.0, false, r]
+	var t := angulo_no_penhasco(x, z)
+	var ru := _ruido_do_penhasco.get_noise_2d(x, z) * 0.5 + 0.5
+	var base := PENHASCO_BASE + 0.5 * (_ruido_do_penhasco.get_noise_2d(x * 0.5 + 90.0, z * 0.5 + 40.0) * 0.5)   # pé irregular
+	var h := PENHASCO_ALTURA
+	if r > 1.0:
+		h = 0.0 if r >= base else PENHASCO_ALTURA * pow((base - r) / (base - 1.0), 0.62) * (0.7 + 0.5 * ru)
+	h = minf(PENHASCO_ALTURA, roundf(h / 2.0) * 2.0)   # a rocha sobe em bancadas de 2 m
+	var via := false
+	if t <= RAMPA_TS and t >= RAMPA_TFIM:
+		if r >= RAMPA_R0:
+			var hr := altura_da_rampa(t)
+			if r <= RAMPA_R1:
+				h = hr
+				via = true
+			else:
+				h = minf(h, hr)
+		elif r > 1.0 and t <= deg_to_rad(14.0):
+			h = PENHASCO_ALTURA   # patamar diante do portão da cidadela
+	return [h, via, r]
 
 
 ## Altura do chão da região acima do nível do reino (só o Castelo fica no alto de um morro).

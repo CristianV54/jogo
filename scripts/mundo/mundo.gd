@@ -609,8 +609,7 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
-			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
-			if ao_reino < 9.0:
+			if MundoDados.ate_a_muralha(x, z) < 12.0:
 				continue   # dentro da muralha do reino (e encostado nela) não nasce mata: é cidade, casa colada em casa
 			var no_povoado := false
 			for pid in povoados:

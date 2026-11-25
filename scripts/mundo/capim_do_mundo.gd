@@ -120,7 +120,7 @@ func _construir(k: Vector2i) -> MultiMeshInstance3D:
 		var q: Vector2 = par[1]
 		if ter.distancia_caminho(q.x, q.y) < 2.4 or ter.na_agua(q.x, q.y, 1.6) or Costa.distancia(p.x, p.y) < 7.0:
 			continue
-		if p.distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]):
+		if MundoDados.ate_a_muralha(p.x, p.y) < 1.0:
 			continue   # dentro da muralha do reino o chão é calçado de pedra: não cresce capim
 		var y := mundo.chao_em(p.x, p.y)   # altura no MUNDO (o Castelo fica no alto: a altura de dentro da região não serve aqui)
 		var s := rng.randf_range(0.5, 1.1)   # moita de 15 a 55 cm: bem abaixo do joelho do Torin

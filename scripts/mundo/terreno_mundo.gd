@@ -168,7 +168,7 @@ func _distancia_a_area(p: Vector2) -> float:
 func _altura_crua(x: float, z: float) -> float:
 	var d := _distancia_a_area(Vector2(x, z))
 	var amp := smoothstep(30.0, 220.0, d)
-	amp *= smoothstep(-30.0, 160.0, Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))   # o reino fica numa planície: cidade não se ergue em ladeira
+	amp *= smoothstep(-30.0, 160.0, MundoDados.ate_a_muralha(x, z))   # o reino fica numa planície: cidade não se ergue em ladeira
 	var colinas := (_ruido_mundo.get_noise_2d(x, z) * 0.5 + 0.5) * 10.0 + _ruido_fino.get_noise_2d(x * 0.6, z * 0.6) * 0.8
 	var h := colinas * amp
 	var melhor := 1e9   # as estradas ficam niveladas com o terreno em volta do eixo
@@ -182,12 +182,10 @@ func _altura_crua(x: float, z: float) -> float:
 			melhor = par[0]
 			eixo = par[1]
 	if melhor < 7.0:
-		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo)) * smoothstep(-30.0, 160.0, eixo.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"]))
+		var h_eixo := (_ruido_mundo.get_noise_2d(eixo.x, eixo.y) * 0.5 + 0.5) * 10.0 * smoothstep(30.0, 220.0, _distancia_a_area(eixo)) * smoothstep(-30.0, 160.0, MundoDados.ate_a_muralha(eixo.x, eixo.y))
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
-	if absf(x) < 700.0 and absf(z) < 700.0:   # o reino: colina da cidade, rochedo redondo do Castelo e o corte da escadaria
-		h += MundoDados.relevo_do_reino(x, z)
-		if absf(x) < MundoDados.ESCADARIA_MEIA_LARGURA + 3.0 and z > MundoDados.ESCADARIA_Z_ALTO - 6.0 and z < MundoDados.ESCADARIA_Z_BAIXO + 4.0:
-			h = lerpf(h, minf(h, MundoDados.altura_da_escadaria(z) - 0.5), smoothstep(MundoDados.ESCADARIA_MEIA_LARGURA + 3.0, MundoDados.ESCADARIA_MEIA_LARGURA, absf(x)))
+	if absf(x) < 200.0 and absf(z) < 200.0:   # o penhasco de Valdoria, com a rampa escavada em volta dele
+		h += float(MundoDados.penhasco(x, z)[0])
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
 		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))
@@ -208,10 +206,16 @@ func distancia_caminho(x: float, z: float) -> float:
 ## Cor do chão do mundo: capim nos campos, cinza e seco rumo à fortaleza, vulcânico perto da cratera, ocre perto de Valdoria.
 func cor_do_mundo(x: float, z: float) -> Color:
 	var c := Biomas.cor_do_chao(x, z, _ruido_fino.get_noise_2d(x * 1.7, z * 1.7) * 0.5 + 0.5)
-	var ao_reino := Vector2(x, z).distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
-	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, ao_reino))
-	var do_centro := Vector2(x, z).distance_to(MundoDados.REINO["centro"])   # o paredão e o platô do rochedo são rocha nua
-	c = c.lerp(Color(0.46, 0.44, 0.42) * (0.85 + 0.3 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0)), smoothstep(MundoDados.RAIO_DO_PLATO + MundoDados.LARGURA_DO_PAREDAO + 4.0, MundoDados.RAIO_DO_PLATO + MundoDados.LARGURA_DO_PAREDAO - 8.0, do_centro))
+	c = c.lerp(Color(0.5, 0.47, 0.41), 0.85 * smoothstep(8.0, -12.0, MundoDados.ate_a_muralha(x, z)))
+	if absf(x) < 200.0 and absf(z) < 200.0:   # o penhasco: rocha em camadas de tons diferentes; a rampa e o platô, pedra clara
+		var pen := MundoDados.penhasco(x, z)
+		var hp: float = pen[0]
+		if hp > 0.5:
+			var camada := int(hp / 6.0)
+			var rocha: Color = [Color(0.42, 0.4, 0.38), Color(0.5, 0.47, 0.43), Color(0.36, 0.35, 0.34), Color(0.46, 0.42, 0.37)][camada % 4]
+			c = rocha * (0.9 + 0.2 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0))
+			if bool(pen[1]) or float(pen[2]) <= 1.0:
+				c = Color(0.74, 0.72, 0.67)
 	return c   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 
@@ -223,7 +227,7 @@ func _cor_vertice(x: float, z: float, n: Vector3) -> Color:
 	c = c.lerp(Color(0.42, 0.42, 0.4), smoothstep(0.2, 0.42, 1.0 - n.y))
 	c = c.lerp(Color(0.1, 0.24, 0.34), smoothstep(-Costa.LARGURA_RASO, -Costa.LARGURA_RASO - 25.0, costa))   # fundo do mar: azul escuro, igual ao oceano de longe
 	var dc := distancia_caminho(x, z)
-	if Vector2(x, z).distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]):
+	if MundoDados.ate_a_muralha(x, z) < 0.0:
 		c = c.lerp(Color(0.56, 0.53, 0.47), 1.0 - smoothstep(3.2, 6.5, dc))   # rua de cidade: calçada de pedra clara, mais larga que estrada de terra
 	else:
 		c = c.lerp(Color(0.45, 0.34, 0.22), 1.0 - smoothstep(1.6, 4.2, dc))

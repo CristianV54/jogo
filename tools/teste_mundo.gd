@@ -24,17 +24,29 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("7 regiões, 38 estradas, 113 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 7 and m.estradas.size() == 38 and m.povoados.size() == 113 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("6 regiões, 29 estradas, 110 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 29 and m.povoados.size() == 110 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
 		if pv.npcs.is_empty() and m.povoados[id]["tipo"] != "posto_imperial":
 			sem_gente.append(String(id))
-	marcar("O reino tem muralha com 4 portões (sul, oeste, leste, norte)", m.muralha.portoes.size() == 4, str(m.muralha.portoes))
+	marcar("Valdoria tem muralha com 3 portões (sul, oeste e leste)", m.muralha.portoes.size() == 3, str(m.muralha.portoes))
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
-	var cc := MundoDados.centro("castelo_imperial")
-	marcar("O Castelo fica no alto do rochedo e a cidade sobe em colina até o pé dele", m.chao_em(cc.x, cc.y) >= 30.0 and m.chao_em(0.0, 400.0) < 4.0 and m.chao_em(0.0, 262.0) > 8.0, "%.1f m no castelo, %.1f m na Rua do Castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 262.0), m.chao_em(0.0, 400.0)])
-	marcar("Cidadela no alto do rochedo: muralha redonda, escadaria e prédios de pedra (60 ou mais)", m.cidadela.casas >= 60 and absf(m.chao_em(0.0, 190.0) - 30.0) < 1.0, "%d prédios; %.1f m no portão da cidadela" % [m.cidadela.casas, m.chao_em(0.0, 190.0)])
+	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
+	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m
+	var eixos := MundoDados.PENHASCO_EIXOS
+	var meio_da_rampa := (MundoDados.RAMPA_R0 + MundoDados.RAMPA_R1) / 2.0
+	var pior_degrau := 0.0
+	var antes := -1.0
+	var t := MundoDados.RAMPA_TS + 0.05
+	while t > 0.0:
+		var hr := m.chao_em(-cos(t) * eixos.x * meio_da_rampa, sin(t) * eixos.y * meio_da_rampa)
+		if antes >= 0.0:
+			pior_degrau = maxf(pior_degrau, absf(hr - antes))
+		antes = hr
+		t -= 2.0 / (eixos.x * meio_da_rampa)
+	marcar("Dá para subir a rampa do penhasco a pé até o portão da cidadela", pior_degrau < 0.7 and antes > MundoDados.PENHASCO_ALTURA - 1.0, "maior degrau %.2f m; chega a %.1f m" % [pior_degrau, antes])
+	marcar("Cidadela no alto: 20 torres ou mais, a mais alta 130 m ou mais acima da cidade, 8 prédios ou mais", m.cidadela.torres >= 20 and m.cidadela.topo_mais_alto >= 130.0 and m.cidadela.predios >= 8, "%d torres, topo a %.0f m, %d prédios" % [m.cidadela.torres, m.cidadela.topo_mais_alto, m.cidadela.predios])
 	var rei := false
 	for n in get_nodes_in_group("npcs"):
 		if (n as Npc).nome == "Rei Aldren":
@@ -43,11 +55,11 @@ func _rodar() -> void:
 	var bravos: Array = []
 	for e in get_nodes_in_group("inimigos"):
 		var e3 := e as Node3D
-		if Vector2(e3.global_position.x, e3.global_position.z).distance_to(MundoDados.REINO["centro"]) < float(MundoDados.REINO["raio"]):
+		if MundoDados.ate_a_muralha(e3.global_position.x, e3.global_position.z) < 0.0:
 			bravos.append(String(e3.name))
 	marcar("Dentro da muralha não há inimigo (nem guarda hostil, nem lobo)", bravos.is_empty(), str(bravos.slice(0, 8)))
 	var casario := m.get_node("CasarioDoReino") as CasarioDoReino
-	marcar("Casario apertado dentro da muralha (1.500 casas ou mais)", casario.lotes.size() >= 1500, str(casario.lotes.size()))
+	marcar("Casario apertado dentro da muralha (900 casas ou mais, 100 quarteirões ou mais)", casario.lotes.size() >= 900 and casario.quarteiroes >= 100, "%d casas, %d quarteirões" % [casario.lotes.size(), casario.quarteiroes])
 	var quartel := m.povoados["quartel_da_guarda"]["no"] as Povoado
 	marcar("Quartel: 6 bonecos de treino e 4 soldados que são gente (não inimigos)", quartel.bonecos.size() == 6 and quartel.npcs.size() == 4, "%d bonecos, %d soldados" % [quartel.bonecos.size(), quartel.npcs.size()])
 	var estabulo := m.povoados["estabulos_do_reino"]["no"] as Povoado
@@ -56,15 +68,15 @@ func _rodar() -> void:
 		if a.montaria != null:
 			montaveis += 1
 	marcar("Estábulos do Reino: 4 cavalos que dá para montar", montaveis == 4, str(montaveis))
-	var mercado := m.povoados["mercado_do_poente"]["no"] as Povoado
+	var mercado := m.povoados["mercado_central"]["no"] as Povoado
 	jogo.jogador.coletar("couro", 1)
 	var carne_antes := int(jogo.jogador.inventario.get("carne", 0))
 	(mercado.trocas[1] as Gatilho).ao_usar.call(mercado.trocas[1])
 	marcar("Mercado: trocar 1 couro rende 3 carnes", int(jogo.jogador.inventario.get("carne", 0)) == carne_antes + 3 and int(jogo.jogador.inventario.get("couro", 0)) == 0, str(jogo.jogador.inventario))
 	var sentinelas := 0
-	for g in ["guarita_sul", "guarita_oeste", "guarita_leste", "guarita_norte"]:
+	for g in ["guarita_sul", "guarita_oeste", "guarita_leste"]:
 		sentinelas += (m.povoados[g]["no"] as Povoado).npcs.size()
-	marcar("Sentinelas nos 4 portões (2 em cada)", sentinelas == 8, str(sentinelas))
+	marcar("Sentinelas nos 3 portões (2 em cada)", sentinelas == 6, str(sentinelas))
 	marcar("Todo povoado tem gente trabalhando", sem_gente.is_empty(), str(sem_gente))
 	var fazendeiros := get_nodes_in_group("npcs").filter(func(n): return n.papel == "Lavrador").size()
 	marcar("Fazendeiros nos campos (4 ou mais)", fazendeiros >= 4, str(fazendeiros))
