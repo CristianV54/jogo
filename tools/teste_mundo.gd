@@ -31,6 +31,16 @@ func _rodar() -> void:
 		if pv.npcs.is_empty() and m.povoados[id]["tipo"] != "posto_imperial":
 			sem_gente.append(String(id))
 	marcar("Valdoria tem muralha com 3 portões (sul, oeste e leste)", m.muralha.portoes.size() == 3, str(m.muralha.portoes))
+	var espaco := m.get_world_3d().direct_space_state
+	var fechados: Array[String] = []
+	for g in m.muralha.portoes:   # um raio a 2 m do chão atravessa cada portão de fora para dentro sem bater em nada
+		var n: Vector2 = g.normalized()
+		var yg: float = m.chao_em(g.x, g.y) + 2.0
+		var q := PhysicsRayQueryParameters3D.create(Vector3(g.x + n.x * 12.0, yg, g.y + n.y * 12.0), Vector3(g.x - n.x * 12.0, yg, g.y - n.y * 12.0))
+		var bate := espaco.intersect_ray(q)
+		if not bate.is_empty() and not (bate["collider"] is CharacterBody3D):
+			fechados.append("%s em %s" % [bate["collider"].name, g])
+	marcar("Muralha do kit novo: 24 torres ou mais, 6 escadas ou mais e os 3 portões com a passagem livre", m.muralha.torres >= 24 and m.muralha.escadas >= 6 and fechados.is_empty(), "%d torres, %d escadas, fechados: %s" % [m.muralha.torres, m.muralha.escadas, fechados])
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m
