@@ -47,12 +47,9 @@ func _fonte(p: Vector2) -> void:
 func _avenida() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 61
-	var ferro := VilaRefugio._mat(Color(0.16, 0.15, 0.15))
-	var vidro := StandardMaterial3D.new()
-	vidro.albedo_color = Color(1.0, 0.82, 0.45)
-	vidro.emission_enabled = true
-	vidro.emission = Color(1.0, 0.75, 0.35)
-	vidro.emission_energy_multiplier = 1.6
+	var kit := PecasDaRua.new()
+	kit.name = "Lampioes"
+	add_child(kit)
 	var z := MundoDados.PRACA.end.y + 6.0
 	var n := 0
 	while z < 212.0:
@@ -60,8 +57,7 @@ func _avenida() -> void:
 			var x: float = s * 7.4
 			var y := mundo.terreno.altura_em(x, z)
 			if true:   # um lampião a cada 15 m, dos dois lados
-				VilaRefugio._caixa(Vector3(x, y + 1.8, z), Vector3(0.22, 3.6, 0.22), ferro, true)
-				VilaRefugio._caixa(Vector3(x, y + 3.85, z), Vector3(0.55, 0.55, 0.55), vidro)
+				kit.lampiao_de_poste(Vector3(x, y, z), Vector2(-s, 0))
 				lampioes += 1
 			if n % 2 == 1 and rng.randf() < 0.7:
 				ConstrutorCasa._movel(self, _solidos, ["Barrel", "Bag", "Barrel"][rng.randi() % 3], x, z + rng.randf_range(3.0, 6.0), rng.randf() * 90.0, y)
@@ -73,9 +69,9 @@ func _avenida() -> void:
 			var x := lerpf(float(av[0]), float(av[1]), (k + 0.5) / passos)
 			var zz: float = float(av[2]) + (6.4 if k % 2 == 0 else -6.4)
 			var y := mundo.terreno.altura_em(x, zz)
-			VilaRefugio._caixa(Vector3(x, y + 1.8, zz), Vector3(0.22, 3.6, 0.22), ferro, true)
-			VilaRefugio._caixa(Vector3(x, y + 3.85, zz), Vector3(0.55, 0.55, 0.55), vidro)
+			kit.lampiao_de_poste(Vector3(x, y, zz), Vector2(0, -1 if k % 2 == 0 else 1))
 			lampioes += 1
+	kit.fechar()
 	for p in [Vector2(-4.0, 196.0), Vector2(3.8, 182.0)]:   # carroças paradas
 		var y := mundo.terreno.altura_em(p.x, p.y)
 		var madeira := VilaRefugio._mat(Color(0.4, 0.28, 0.16))

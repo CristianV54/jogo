@@ -95,6 +95,8 @@ func _rodar() -> void:
 	match peca:
 		"muralha":
 			await _muralha()
+		"rua":
+			await _rua()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -158,3 +160,69 @@ func _muralha() -> void:
 		if px == 0.0 and not root.get_world_3d().direct_space_state.intersect_ray(q).is_empty():
 			livre = false
 	_conferir("Portão: passagem livre para carroça e cavaleiro", livre, "raios a 0,3 m e a 3,9 m de altura")
+
+
+## Rua: 36 m de rua de 6,4 m entre duas fileiras de térreos (só a parede, para os lampiões terem onde pendurar), com
+## calçada dos dois lados, sarjeta, degraus, lampiões de parede e um de poste, placas, carga, banco e vasos.
+func _rua() -> void:
+	var piso := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(60, 30)
+	var mp := StandardMaterial3D.new()
+	mp.albedo_texture = Pedra.calcamento()
+	mp.albedo_color = Color(0.34, 0.33, 0.3)
+	mp.uv1_triplanar = true
+	mp.uv1_world_triplanar = true
+	mp.uv1_scale = Vector3(0.3, 0.3, 0.3)
+	pm.material = mp
+	piso.mesh = pm
+	piso.position.y = 0.02
+	root.add_child(piso)
+	var kit := PecasDaRua.new()
+	root.add_child(kit)
+	var meia := 3.2
+	for s in [-1.0, 1.0]:
+		var fora := Vector2(0, -s)
+		for k in 4:
+			var cx := -13.5 + k * 9.0
+			var casa := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.material = Fachadas.material("terreo_pedra" if (k + int(s)) % 2 == 0 else "terreo_reboco")
+			casa.mesh = bm
+			casa.position = Vector3(cx, 1.525 - 0.3, s * (meia + 4.0))
+			casa.scale = Vector3(8.6, 3.05, 8.0)   # caixa de 1 m esticada, como no casario: a pintura cabe uma vez em cada face
+			root.add_child(casa)
+			var zf: float = s * meia
+			kit.calcada(Vector3(cx - 4.5, 0, zf), Vector3(cx + 4.5, 0, zf), fora, 1.3)
+			kit.degrau(Vector3(cx, 0, zf), fora, 8.6 * 0.17)
+			if k % 2 == 0:
+				kit.lampiao_de_parede(Vector3(cx + 8.6 * 0.165, 0, zf), fora)
+			if k == 1:
+				kit.placa(Vector3(cx - 8.6 * 0.165, 0, zf), fora, Color(0.2, 0.4, 0.62) if s > 0 else Color(0.7, 0.2, 0.18))
+			if k == 3:
+				kit.carga(Vector3(cx + 2.4, 0, zf - s * 0.55), Vector2(1, 0), 3, 4 + int(s))
+			if k == 0:
+				kit.banco(Vector3(cx - 8.6 * 0.32, 0, zf), fora)
+			kit.vaso(Vector3(cx + 8.6 * 0.32, 0, zf - s * 0.35), [Color(0.85, 0.2, 0.25), Color(0.95, 0.75, 0.2), Color(0.8, 0.4, 0.75)][k % 3])
+	kit.sarjeta(Vector3(-18, 0, 0), Vector3(18, 0, 0))
+	kit.lampiao_de_poste(Vector3(20.5, 0, 2.6), Vector2(0, -1))
+	kit.fechar()
+	await physics_frame
+	await physics_frame
+	await _foto("01_ao_longo_da_rua", Vector3(-22, 2.2, 0.6), Vector3(0, 1.6, 0), Vector3(-12, 0, -1.0))
+	await _foto("02_do_alto", Vector3(-16, 11, -1), Vector3(2, 0, 0), Vector3(-6, 0, 1.2))
+	await _foto("03_lampiao_de_parede_e_degrau", Vector3(-10.5, 1.9, -0.6), Vector3(-12.6, 1.7, 3.2), Vector3(-14.2, 0, 2.4))
+	await _foto("04_placa_de_loja", Vector3(-1.5, 1.8, 0.2), Vector3(-6.0, 2.2, 3.2), Vector3(-3.6, 0, 2.3))
+	await _foto("05_carga_barris_e_caixotes", Vector3(13.0, 1.5, 0.3), Vector3(16.6, 0.6, 2.7), Vector3(14.6, 0, 2.3))
+	await _foto("06_banco_e_vaso", Vector3(-13.5, 1.6, -0.2), Vector3(-15.5, 0.6, 3.0), Vector3(-17.6, 0, 2.5))
+	await _foto("07_calcada_e_sarjeta_rente", Vector3(-3.0, 0.5, -0.8), Vector3(4.0, 0.1, 1.6), Vector3(1.0, 0, 2.6))
+	await _foto("08_lampiao_de_poste", Vector3(17.0, 2.2, -1.5), Vector3(20.5, 2.2, 2.6), Vector3(19.4, 0, 2.2))
+	await _foto("09_planta_de_cima", Vector3(0, 30, 0.01), Vector3(0, 0, 0), Vector3(0, 0, 1.2))
+	var livre := true
+	for pz in [-1.5, 0.0, 1.5]:   # o meio da rua tem de ficar livre de ponta a ponta
+		var q := PhysicsRayQueryParameters3D.create(Vector3(-17.5, 0.8, pz), Vector3(17.5, 0.8, pz))
+		q.exclude = [torin.get_rid()] if torin is CollisionObject3D else []
+		if not root.get_world_3d().direct_space_state.intersect_ray(q).is_empty():
+			livre = false
+	_conferir("Rua: o meio fica livre de ponta a ponta (3 m de largura)", livre, "raios a 0,8 m de altura")
+	_conferir("Rua: banco e carga têm colisão (o Torin não atravessa)", kit._corpo.get_child_count() >= 4, "%d sólidos" % kit._corpo.get_child_count())

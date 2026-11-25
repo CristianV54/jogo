@@ -1,5 +1,5 @@
 class_name PecasDaMuralha
-extends Node3D
+extends PecasDeConstrucao
 ## AS PEÇAS DA MURALHA de Valdoria: lanço, torre de vigia, escada de acesso e portão. Quem as usa (a muralha do reino, a
 ## bancada de construção) só diz ONDE fica cada peça; como ela é feita está aqui. Critério de pronto: docs/construcoes/muralha.md.
 ##
@@ -23,15 +23,7 @@ const COR_SOCO := Color(0.4, 0.37, 0.33)
 const COR_COROA := Color(0.6, 0.56, 0.49)
 const AZUL_DO_REI := Color(0.14, 0.2, 0.5)
 
-var _corpo: StaticBody3D
-var _lotes := {}   # "malha|cor" -> Array[Transform3D]
 var _metros := 0.0
-
-
-func _init() -> void:
-	_corpo = StaticBody3D.new()
-	_corpo.name = "Solidos"
-	add_child(_corpo)
 
 
 # ---------------------------------------------------------------- peças
@@ -238,69 +230,5 @@ func _arco(g: Vector3, f3: Vector3, lado: Vector3, fundo: float) -> void:
 # ---------------------------------------------------------------- acabamento
 
 ## Monta os MultiMesh. Chamar uma vez, depois de pôr todas as peças.
-func fechar() -> void:
-	for chave in _lotes:
-		var partes: PackedStringArray = String(chave).split("|")
-		var malha: PrimitiveMesh
-		if partes[0] == "cilindro":
-			var cil := CylinderMesh.new()
-			cil.height = 1.0
-			cil.radial_segments = 32
-			malha = cil
-		else:
-			malha = BoxMesh.new()
-		var cor := Color.html(partes[1])
-		if partes[2] == "luz":
-			var m := StandardMaterial3D.new()
-			m.albedo_color = cor
-			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			malha.material = m
-		elif partes[2] == "liso":
-			var m := StandardMaterial3D.new()
-			m.albedo_color = cor
-			m.roughness = 0.9
-			malha.material = m
-		else:
-			malha.material = Pedra.material(cor)
-		var lista: Array = _lotes[chave]
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = malha
-		mm.instance_count = lista.size()
-		for i in lista.size():
-			mm.set_instance_transform(i, lista[i])
-		var inst := MultiMeshInstance3D.new()
-		inst.name = String(chave).replace("|", "_")
-		inst.multimesh = mm
-		add_child(inst)
-
-
 func _eh_pedra(cor: Color) -> bool:
 	return cor.is_equal_approx(COR_PAREDE) or cor.is_equal_approx(COR_SOCO) or cor.is_equal_approx(COR_COROA) or cor.is_equal_approx(COR_SOCO.lerp(COR_PAREDE, 0.5))
-
-
-func _peca(malha: String, cor: Color, t: Transform3D, luz := false) -> void:
-	var chave := "%s|%s|%s" % [malha, cor.to_html(), "luz" if luz else ("pedra" if _eh_pedra(cor) else "liso")]
-	if not _lotes.has(chave):
-		_lotes[chave] = []
-	_lotes[chave].append(t)
-
-
-func _caixa(pos: Vector3, tam: Vector3, giro: float, cor: Color, colidir: bool, luz := false) -> void:
-	_peca("caixa", cor, Transform3D(Basis(Vector3.UP, giro).scaled_local(tam), pos), luz)
-	if colidir:
-		_solido(pos, tam, giro)
-
-
-func _cilindro(pos: Vector3, raio: float, altura: float, cor: Color) -> void:
-	_peca("cilindro", cor, Transform3D(Basis.from_scale(Vector3(raio * 2.0, altura, raio * 2.0)), pos))
-
-
-func _solido(pos: Vector3, tam: Vector3, giro: float) -> void:
-	var cs := CollisionShape3D.new()
-	var caixa := BoxShape3D.new()
-	caixa.size = tam
-	cs.shape = caixa
-	cs.position = pos
-	cs.rotation.y = giro
-	_corpo.add_child(cs)

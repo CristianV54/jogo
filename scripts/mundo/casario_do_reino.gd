@@ -29,6 +29,10 @@ var _reservas: Array[Rect2] = []
 var _pecas := {}        # "pedaço|malha|material" -> [transformações, cores]
 var _solidos: StaticBody3D
 var _rng := RandomNumberGenerator.new()
+var _rua: PecasDaRua            # calçadas, lampiões e o resto do que fica entre a rua e a fachada
+var _rng_rua := RandomNumberGenerator.new()   # sorteio à parte: enfeitar a rua não muda onde ficam as casas
+var lampioes_de_parede := 0
+var placas := 0
 
 
 func montar() -> void:
@@ -38,6 +42,10 @@ func montar() -> void:
 	_solidos.name = "Solidos"
 	add_child(_solidos)
 	_reservar()
+	_rua = PecasDaRua.new()
+	_rua.name = "Rua"
+	add_child(_rua)
+	_rng_rua.seed = 23
 	var e := MundoDados.MURALHA_EIXOS
 	var z0 := -e.y - 30.0
 	while z0 < e.y + 30.0:
@@ -45,9 +53,11 @@ func montar() -> void:
 		var frente_s := _rng.randf_range(8.4, 10.6)
 		var z1 := z0 + frente_n + frente_s + _rng.randf_range(2.0, 5.0)   # as duas fileiras e o quintal no meio
 		var x0 := -e.x - 30.0 + _rng.randf_range(0.0, 20.0)
+		var sarjetas: Array = []
 		while x0 < e.x + 30.0:
 			var x1 := x0 + _rng.randf_range(38.0, 66.0)
 			var usado := false
+			var frentes_do_sul: Array = []   # [x do meio, largura] das casas que dão para a rua de baixo (para a sarjeta)
 			for fileira in [[z0, frente_n], [z1 - frente_s, frente_s]]:
 				var x := x0
 				while x < x1 - 6.0:
@@ -63,7 +73,10 @@ func montar() -> void:
 						var cz := (hz0 + hz1) / 2.0
 						var d_centro := Vector2(cx, cz - 40.0).length()
 						var opcoes: Array = [2, 3, 3, 3, 4] if d_centro < 150.0 else ([2, 2, 3, 3] if d_centro < 215.0 else [1, 2, 2, 2, 3])
-						_casa(Vector2(cx, cz), larg - 0.5, hz1 - hz0, int(opcoes[_rng.randi() % opcoes.size()]))
+						_casa(Vector2(cx, cz), larg - 0.5, hz1 - hz0, int(opcoes[_rng.randi() % opcoes.size()]), -1.0 if de_cima else 1.0)
+						_frente(cx, hz0 if de_cima else hz1, larg, -1.0 if de_cima else 1.0, recuo)
+						if not de_cima:
+							frentes_do_sul.append([cx, larg])
 						usado = true
 					x += larg
 			if usado:
@@ -76,10 +89,19 @@ func montar() -> void:
 						_copas.append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled_local(Vector3(esc, esc * 1.25, esc)), Vector3(xq, mundo.terreno.altura_em(xq, zq), zq)))
 						arvores_de_quintal += 1
 					xq += _rng.randf_range(9.0, 16.0)
+			sarjetas.append([frentes_do_sul, z1])
 			x0 = x1 + _rng.randf_range(4.8, 7.2)   # travessa
 		var largura_da_rua := _rng.randf_range(5.4, 7.4)
+		for par in sarjetas:   # a sarjeta corre no meio da rua de baixo, diante de cada casa
+			for f in par[0]:
+				var zs: float = float(par[1]) + largura_da_rua / 2.0
+				var xa: float = float(f[0]) - float(f[1]) / 2.0
+				var xb: float = float(f[0]) + float(f[1]) / 2.0
+				if _livre(xa, zs - 0.5, xb, zs + 0.5):
+					_rua.sarjeta(Vector3(xa, mundo.terreno.altura_em(xa, zs), zs), Vector3(xb, mundo.terreno.altura_em(xb, zs), zs))
 		ruas.append(z1 + largura_da_rua / 2.0)
 		z0 = z1 + largura_da_rua
+	_rua.fechar()
 	for chave in _pecas:
 		_multimesh(String(chave))
 	var mmq := MultiMesh.new()
@@ -93,8 +115,32 @@ func montar() -> void:
 	quintais.multimesh = mmq
 	quintais.material_override = FabricaNatureza.material()
 	add_child(quintais)
+	print("CasarioDoReino: ", lampioes_de_parede, " lampiões de parede, ", placas, " placas de loja")
 	print("CasarioDoReino: ", floreiras, " floreiras, ", arvores_de_quintal, " árvores de quintal")
 	print("CasarioDoReino: ", lotes.size(), " casas em ", quarteiroes, " quarteirões, ", janelas_acesas, " janelas acesas, ", forjas, " forjas")
+
+
+## O que fica entre a rua e a fachada de uma casa: calçada, degrau da porta e, por sorteio, lampião de parede, placa de
+## loja, carga, banco e vasos. `zf` é o z da fachada, `s` o lado para onde ela olha (-1 norte, +1 sul).
+func _frente(cx: float, zf: float, larg: float, s: float, recuo: float) -> void:
+	var fora := Vector2(0, s)
+	var y := mundo.terreno.altura_em(cx, zf + s)
+	var l := larg - 0.5
+	_rua.calcada(Vector3(cx - larg / 2.0, y, zf), Vector3(cx + larg / 2.0, y, zf), fora, 1.3 + recuo)
+	_rua.degrau(Vector3(cx, y, zf), fora, l * 0.17)
+	if _rng_rua.randf() < 0.36:
+		_rua.lampiao_de_parede(Vector3(cx + l * 0.165, y, zf), fora)
+		lampioes_de_parede += 1
+	if _rng_rua.randf() < 0.2:
+		_rua.placa(Vector3(cx - l * 0.165, y, zf), fora, [Color(0.2, 0.4, 0.62), Color(0.7, 0.2, 0.18), Color(0.25, 0.5, 0.3), Color(0.8, 0.62, 0.2)][_rng_rua.randi() % 4])
+		placas += 1
+	var sorte := _rng_rua.randf()
+	if sorte < 0.22:
+		_rua.carga(Vector3(cx + l * 0.3, y, zf + s * 0.5), Vector2(1, 0), 1 + _rng_rua.randi() % 3, _rng_rua.randi() % 20)
+	elif sorte < 0.32:
+		_rua.banco(Vector3(cx + l * 0.32, y, zf), fora)
+	if _rng_rua.randf() < 0.4:
+		_rua.vaso(Vector3(cx - l * 0.32, y, zf + s * 0.35), [Color(0.85, 0.2, 0.25), Color(0.95, 0.75, 0.2), Color(0.8, 0.4, 0.75), Color(0.95, 0.95, 0.9)][_rng_rua.randi() % 4])
 
 
 ## Áreas onde não entra casa: a avenida do sul, as avenidas do oeste e do leste, a praça e as praças dos prédios públicos.
@@ -138,7 +184,21 @@ func _livre(x0: float, z0: float, x1: float, z1: float) -> bool:
 	return true
 
 
-func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
+const MADEIRA_ESCURA := Color(0.3, 0.2, 0.13)
+const TONS_DE_VENEZIANA := [Color(0.24, 0.4, 0.3), Color(0.22, 0.34, 0.5), Color(0.5, 0.2, 0.16), Color(0.42, 0.3, 0.18), Color(0.3, 0.42, 0.44)]
+
+
+## Janela em relevo na fachada: peitoril, verga e duas venezianas abertas. `c` é o centro do vão, na face da parede.
+func _janela(pedaco: String, c: Vector3, larg_vao: float, alt_vao: float, frente: float, veneziana: Color, de_pedra: bool) -> void:
+	var moldura: Color = Color(0.8, 0.78, 0.72) if de_pedra else MADEIRA_ESCURA
+	_peca(pedaco, "caixa", "liso", c + Vector3(0, -alt_vao / 2.0 - 0.05, frente * 0.09), Vector3(larg_vao + 0.3, 0.1, 0.2), 0.0, moldura)
+	_peca(pedaco, "caixa", "liso", c + Vector3(0, alt_vao / 2.0 + 0.05, frente * 0.05), Vector3(larg_vao + 0.2, 0.12, 0.1), 0.0, moldura)
+	for lado in [-1.0, 1.0]:
+		_peca(pedaco, "caixa", "liso", c + Vector3(lado * (larg_vao / 2.0 + larg_vao * 0.26), 0, frente * 0.04), Vector3(larg_vao * 0.48, alt_vao, 0.06), 0.0, veneziana)
+		_peca(pedaco, "caixa", "liso", c + Vector3(lado * (larg_vao / 2.0 + larg_vao * 0.26), 0, frente * 0.075), Vector3(larg_vao * 0.36, 0.06, 0.02), 0.0, veneziana.darkened(0.35))
+
+
+func _casa(p: Vector2, larg: float, prof: float, pisos: int, frente: float) -> void:
 	var y := mundo.terreno.altura_em(p.x, p.y) - 0.3
 	var reboco: Color = TONS_DE_REBOCO[_rng.randi() % TONS_DE_REBOCO.size()]
 	var pedaco := "%d_%d" % [floori(p.x / PEDACO), floori(p.y / PEDACO)]
@@ -146,6 +206,22 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 	var cor_terreo: Color = Color(0.95, 0.93, 0.9) * _rng.randf_range(0.82, 1.0) if de_pedra else reboco
 	_peca(pedaco, "caixa", "terreo_pedra" if de_pedra else "terreo_reboco", Vector3(p.x, y + (PISO + 0.3) / 2.0, p.y), Vector3(larg, PISO + 0.3, prof), 0.0, cor_terreo)
 	var topo := y + PISO + 0.3
+	var veneziana: Color = TONS_DE_VENEZIANA[_rng_rua.randi() % TONS_DE_VENEZIANA.size()]
+	var zf := p.y + frente * prof / 2.0
+	var at := PISO + 0.3
+	for lado_j in [-1.0, 1.0]:
+		_janela(pedaco, Vector3(p.x + lado_j * 0.32 * larg, y + 0.56 * at, zf), 0.125 * larg, 0.3 * at, frente, veneziana, de_pedra)
+	var porta_l := 0.14 * larg   # a porta: folha de tábuas, ombreiras e verga em relevo, aldrava
+	_peca(pedaco, "caixa", "liso", Vector3(p.x, y + 1.1, zf + frente * 0.03), Vector3(porta_l, 2.2, 0.08), 0.0, Color(0.42, 0.28, 0.16) * _rng_rua.randf_range(0.75, 1.1))
+	for k in 3:
+		_peca(pedaco, "caixa", "liso", Vector3(p.x + (k - 1) * porta_l / 3.0, y + 1.1, zf + frente * 0.075), Vector3(0.025, 2.2, 0.02), 0.0, Color(0.2, 0.13, 0.08))
+	for yb in [0.75, 1.75]:
+		_peca(pedaco, "caixa", "liso", Vector3(p.x, y + yb, zf + frente * 0.08), Vector3(porta_l, 0.09, 0.03), 0.0, Color(0.14, 0.14, 0.15))
+	_peca(pedaco, "caixa", "liso", Vector3(p.x + porta_l * 0.32, y + 1.3, zf + frente * 0.1), Vector3(0.09, 0.09, 0.05), 0.0, Color(0.75, 0.65, 0.3))
+	var cor_ombreira: Color = Color(0.8, 0.78, 0.72) if de_pedra else MADEIRA_ESCURA
+	for lado_p in [-1.0, 1.0]:
+		_peca(pedaco, "caixa", "liso", Vector3(p.x + lado_p * (porta_l / 2.0 + 0.09), y + 1.15, zf + frente * 0.07), Vector3(0.18, 2.3, 0.16), 0.0, cor_ombreira)
+	_peca(pedaco, "caixa", "liso", Vector3(p.x, y + 2.3, zf + frente * 0.09), Vector3(porta_l + 0.5, 0.2, 0.2), 0.0, cor_ombreira)
 	for s in [-1.0, 1.0]:   # janelas do térreo: uma de cada lado da porta, nas duas fachadas; algumas acesas
 		for lado in [-1.0, 1.0]:
 			if _rng.randf() < 0.16:
@@ -164,6 +240,12 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 		var alt := (pisos - 1) * PISO
 		_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + 0.11, p.y), Vector3(larg + 0.7, 0.22, prof + 0.7), 0.0, Color(0.3, 0.2, 0.13))
 		_peca(pedaco, "caixa", "sobrado", Vector3(p.x, topo + 0.22 + alt / 2.0, p.y), Vector3(larg + 0.4, alt, prof + 0.4), 0.0, reboco)
+		var nc := int(larg / 1.1)
+		for k in nc:   # pontas de viga que seguram o andar saliente
+			_peca(pedaco, "caixa", "liso", Vector3(p.x + (k + 0.5 - nc / 2.0) * (larg / nc), topo - 0.12, zf + frente * 0.12), Vector3(0.16, 0.24, 0.5), 0.0, MADEIRA_ESCURA)
+		for fiada in 2:   # as seis janelas do sobrado, em relevo na fachada da rua
+			for coluna_j in [-0.336, 0.0, 0.332]:
+				_janela(pedaco, Vector3(p.x + coluna_j * (larg + 0.4), topo + 0.22 + alt * (0.75 - 0.5 * fiada), p.y + frente * (prof + 0.4) / 2.0), 0.1 * (larg + 0.4), alt * 0.2, frente, veneziana, false)
 		for andar in pisos - 1:   # janelas dos andares de cima (a pintura do sobrado tem 2 fiadas de 3)
 			for coluna in [-0.336, 0.0, 0.332]:
 				for lado in [-1.0, 1.0]:
@@ -174,9 +256,9 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 						janelas_acesas += 1
 					elif (pisos - 1 == 1 or andar < 2) and _rng.randf() < 0.22:   # floreira debaixo da janela: caixote de madeira com flores
 						var yf: float = topo + 0.22 + alt * (1.0 - (0.25 + 0.5 * float(andar % 2))) - alt / 2.0 * 0.26
-						var zf: float = p.y + lado * ((prof + 0.4) / 2.0 + 0.18)
-						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf, zf), Vector3(0.13 * (larg + 0.4), 0.2, 0.3), 0.0, Color(0.36, 0.24, 0.14))
-						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf + 0.2, zf), Vector3(0.12 * (larg + 0.4), 0.22, 0.26), 0.0, [Color(0.85, 0.2, 0.25), Color(0.95, 0.75, 0.2), Color(0.8, 0.4, 0.75), Color(0.95, 0.95, 0.9)][_rng.randi() % 4])
+						var zfl: float = p.y + lado * ((prof + 0.4) / 2.0 + 0.18)
+						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf, zfl), Vector3(0.13 * (larg + 0.4), 0.2, 0.3), 0.0, Color(0.36, 0.24, 0.14))
+						_peca(pedaco, "caixa", "liso", Vector3(p.x + coluna * (larg + 0.4), yf + 0.2, zfl), Vector3(0.12 * (larg + 0.4), 0.22, 0.26), 0.0, [Color(0.85, 0.2, 0.25), Color(0.95, 0.75, 0.2), Color(0.8, 0.4, 0.75), Color(0.95, 0.95, 0.9)][_rng.randi() % 4])
 						floreiras += 1
 		topo += 0.22 + alt
 	_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + 0.11, p.y), Vector3(larg + 0.8, 0.22, prof + 0.8), 0.0, Color(0.3, 0.2, 0.13))
@@ -189,7 +271,24 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int) -> void:
 		_peca(pedaco, "prisma", "telhado", Vector3(p.x, topo + alt_t / 2.0, p.y), Vector3(prof + 1.0, alt_t, larg + 1.0), PI / 2.0, cor_telhado)
 	else:
 		_peca(pedaco, "prisma", "telhado", Vector3(p.x, topo + alt_t / 2.0, p.y), Vector3(larg + 1.0, alt_t, prof + 1.0), 0.0, cor_telhado)
-	_peca(pedaco, "caixa", "liso", Vector3(p.x + _rng.randf_range(-larg / 4.0, larg / 4.0), topo + (alt_t + 1.0) / 2.0, p.y + _rng.randf_range(-prof / 4.0, prof / 4.0)), Vector3(1.5 if forja else 0.9, alt_t + (3.0 if forja else 1.0), 1.5 if forja else 0.9), 0.0, Color(0.34, 0.32, 0.31))   # chaminé (a da forja é grossa e alta)
+	var cham_x := p.x + _rng.randf_range(-larg / 4.0, larg / 4.0)
+	var cham_z := p.y + _rng.randf_range(-prof / 4.0, prof / 4.0)
+	var cham_l := 1.5 if forja else 0.9
+	var cham_a := alt_t + (3.0 if forja else 1.0)
+	_peca(pedaco, "caixa", "liso", Vector3(cham_x, topo + (alt_t + 1.0) / 2.0, cham_z), Vector3(cham_l, cham_a, cham_l), 0.0, Color(0.34, 0.32, 0.31))   # chaminé (a da forja é grossa e alta)
+	var cham_topo := topo + (alt_t + 1.0) / 2.0 + cham_a / 2.0
+	_peca(pedaco, "caixa", "liso", Vector3(cham_x, cham_topo + 0.06, cham_z), Vector3(cham_l + 0.26, 0.14, cham_l + 0.26), 0.0, Color(0.44, 0.42, 0.4))   # chapéu de pedra
+	for sc in [-1.0, 1.0]:
+		_peca(pedaco, "caixa", "liso", Vector3(cham_x + sc * cham_l * 0.22, cham_topo + 0.3, cham_z), Vector3(0.26, 0.36, 0.26), 0.0, Color(0.6, 0.32, 0.22))   # potes de barro
+	var cumeeira_l := (larg if cumeeira_em_x else prof) + 1.1
+	_peca(pedaco, "caixa", "liso", Vector3(p.x, topo + alt_t, p.y), Vector3(cumeeira_l if cumeeira_em_x else 0.3, 0.2, 0.3 if cumeeira_em_x else cumeeira_l), 0.0, cor_telhado.darkened(0.3))   # telhas de cumeeira
+	if cumeeira_em_x and _rng_rua.randf() < 0.45:   # água-furtada virada para a rua
+		var zd := p.y + frente * ((prof + 1.0) / 4.0 + 0.25)
+		var yd := topo + alt_t / 2.0
+		_peca(pedaco, "caixa", "liso", Vector3(p.x, yd + 0.25, zd), Vector3(1.3, 1.3, 1.5), 0.0, reboco)
+		_peca(pedaco, "caixa", "liso", Vector3(p.x, yd + 0.4, zd + frente * 0.76), Vector3(0.6, 0.7, 0.04), 0.0, Color(0.17, 0.2, 0.27))
+		_peca(pedaco, "caixa", "liso", Vector3(p.x, yd + 0.02, zd + frente * 0.78), Vector3(0.9, 0.08, 0.14), 0.0, MADEIRA_ESCURA)
+		_peca(pedaco, "prisma", "telhado", Vector3(p.x, yd + 1.25, zd), Vector3(1.7, 0.7, 1.8), 0.0, cor_telhado)
 	var cs := CollisionShape3D.new()
 	var caixa := BoxShape3D.new()
 	caixa.size = Vector3(larg, topo - y + 3.0, prof)

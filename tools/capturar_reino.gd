@@ -12,7 +12,15 @@ func _init() -> void:
 	_rodar.call_deferred()
 
 
+## Com argumentos depois de `--` (ex.: `-- 02 04 rua`), só tira as fotos cujo nome contém um deles (rodada rápida).
 func _foto(nome: String, espera := 3.0) -> void:
+	var filtros := OS.get_cmdline_user_args()
+	var quer := filtros.is_empty()
+	for f in filtros:
+		if nome.contains(f):
+			quer = true
+	if not quer:
+		return
 	await create_timer(espera).timeout
 	RenderingServer.force_draw()
 	var im := root.get_viewport().get_texture().get_image()
