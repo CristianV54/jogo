@@ -342,9 +342,9 @@ func _corte() -> void:
 	for k in 3:   # guarda real perfilada dos dois lados do tapete
 		for lado in [-1.0, 1.0]:
 			_npc("Guarda real", "Guarda do rei", "guarda_imperial", c + Vector2(-6.0 + k * 6.0, lado * 3.6), ["A guarda real não conversa em serviço."])
-	var portao := Vector2(-MundoDados.PENHASCO_EIXOS.x * 0.93 + 4.0, 0.0)
+	var portao := Vector2(-MundoDados.PENHASCO_EIXOS.x * 0.93 + 9.0, 0.0)   # do lado de dentro, logo depois da casa do portão
 	for lado in [-1.0, 1.0]:
-		_npc("Sentinela da cidadela", "Sentinela", "guarda_imperial", portao + Vector2(0.0, lado * 4.6), ["O rei recebe no Salão do Trono: atravesse o pátio e contorne o palácio pelo sul. Arma na bainha."])
+		_npc("Sentinela da cidadela", "Sentinela", "guarda_imperial", portao + Vector2(0.0, lado * 6.5), ["O rei recebe no Salão do Trono: atravesse o pátio e contorne o palácio pelo sul. Arma na bainha."])
 	_npc("Mestre de armas", "Mestre de armas", "dorn", Vector2(_pl(-270), _pl(-120)), ["Treino a guarda real há vinte anos. Daqui de cima dá para ver o reino inteiro."],
 		[{"fazer": "Sword_Attack", "seg": 8.0, "olhar": Vector2(_pl(-300), _pl(-120))}, {"esperar": 4.0, "anim": "Idle", "olhar": Vector2(_pl(-300), _pl(-70))}])
 	_npc("Criada do castelo", "Criada", "cativa", Vector2(_pl(-300), _pl(-40)), ["Levo água do poço para a cozinha do palácio. São muitos degraus."],
