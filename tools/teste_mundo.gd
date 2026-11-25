@@ -24,12 +24,13 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("8 regiões, 28 estradas, 97 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 28 and m.povoados.size() == 97 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
+	marcar("8 regiões, 29 estradas, 105 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 8 and m.estradas.size() == 29 and m.povoados.size() == 105 and m.barreiras.size() == 0, "%d povoados" % m.povoados.size())
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
 		if pv.npcs.is_empty() and m.povoados[id]["tipo"] != "posto_imperial":
 			sem_gente.append(String(id))
+	marcar("O reino tem muralha com 3 portões (sul, oeste, leste)", m.muralha.portoes.size() == 3, str(m.muralha.portoes))
 	marcar("Todo povoado tem gente trabalhando", sem_gente.is_empty(), str(sem_gente))
 	var fazendeiros := get_nodes_in_group("npcs").filter(func(n): return n.papel == "Lavrador").size()
 	marcar("Fazendeiros nos campos (4 ou mais)", fazendeiros >= 4, str(fazendeiros))

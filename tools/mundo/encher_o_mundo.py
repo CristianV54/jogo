@@ -13,6 +13,7 @@ regioes = [(float(a), float(b), float(c)) for a, b, c in re.findall(r'"centro": 
 rios = [V(t) for t in re.findall(r'"fundo": [\d.]+,\s*"pontos": \[(.*?)\]\}', s, flags=re.S)]
 estradas = {i: V(t) for i, t in re.findall(r'\{"id": "(\w+)", "nome": "[^"]+", "a".*?"pontos": \[(.*?)\]\}', s, flags=re.S)}
 povoados = [(float(x), float(z), float(r), t) for t, x, z, r in re.findall(r'"tipo": "(\w+)", "centro": Vector2\((-?[\d.]+), (-?[\d.]+)\), "dir".*?"raio": ([\d.]+)', s)]
+reino = tuple(map(float, re.search(r'REINO := \{"centro": Vector2\((-?[\d.]+), (-?[\d.]+)\), "raio": ([\d.]+)\}', s).groups()))
 print("lido:", len(regioes), "regiões,", len(rios), "rios,", len(estradas), "estradas,", len(povoados), "povoados")
 
 def costa(x, z):   # distância até o mar (sem o ruído fino de 30 m: por isso as folgas abaixo são largas)
@@ -56,6 +57,7 @@ for tipo in ["vila", "posto_imperial", "fazenda", "posto", "cabana", "pescador"]
                 if not (110 < c < 190): continue
             elif c < 260: continue
             if d_regiao(p) < 260 or min(d_linha(p, r) for r in rios) < 110: continue
+            if math.hypot(x - reino[0], z - reino[1]) < reino[2] + 220: continue   # fora da muralha do reino, com folga
             if min(d_linha(p, e) for e in estradas.values()) < RAIO[tipo] + 45: continue
             folga = 620 if tipo == "vila" else 300
             if any(math.hypot(x - q[0], z - q[1]) < (folga if (tipo == "vila" and q[3] == "vila") else 300) for q in todos): continue
@@ -66,7 +68,7 @@ for tipo in ["vila", "posto_imperial", "fazenda", "posto", "cabana", "pescador"]
             print("SEM LUGAR para", nome)
 
 # ---- Estrada da Costa: anel pelas vilas de fora, em trechos de vila a vila
-vilas = [(q[0], q[1], q[2]) for q in todos if q[3] == "vila" and math.hypot(q[0] / ex, q[1] / ez) > 0.56]
+vilas = [(q[0], q[1], q[2]) for q in todos if q[3] == "vila" and math.hypot(q[0] / ex, q[1] / ez) > 0.56]   # só as vilas de fora (bairros do reino não entram)
 vilas.sort(key=lambda q: math.atan2(q[1], q[0]))
 novas_estradas = []
 def livre(pts, a, b):

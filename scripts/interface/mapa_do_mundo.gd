@@ -233,6 +233,19 @@ func _draw() -> void:
 		for trilha in mundo.trilhas:
 			for i in range(0, trilha.size() - 1):
 				draw_dashed_line(mundo_para_tela(trilha[i]), mundo_para_tela(trilha[i + 1]), Color(0.36, 0.24, 0.13, 0.6), 1.3, 5.0)
+	# a muralha do reino: um anel de tinta grossa, aberto nos portões
+	var rc: Vector2 = MundoDados.REINO["centro"]
+	var rr: float = MundoDados.REINO["raio"]
+	for k in 90:
+		var a0 := TAU * k / 90.0
+		var a1 := TAU * (k + 1) / 90.0
+		var m0 := rc + Vector2.from_angle((a0 + a1) / 2.0) * rr
+		var aberto := false
+		for g in mundo.muralha.portoes:
+			if m0.distance_to(g) < 30.0:
+				aberto = true
+		if not aberto:
+			draw_line(mundo_para_tela(rc + Vector2.from_angle(a0) * rr), mundo_para_tela(rc + Vector2.from_angle(a1) * rr), COR_TINTA, clampf(1.6 * zoom, 2.5, 6.0), true)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])

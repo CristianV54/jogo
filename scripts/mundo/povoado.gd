@@ -5,7 +5,9 @@ extends Node3D
 ##   "vila": casas, taverna, ferraria, poço, plantações, curral, taverneiro, ferreiro, fazendeiros e uma criança;
 ##   "cabana": cabana de lenhador, pilha de lenha, cepo e o lenhador cortando;
 ##   "posto": acampamento rebelde com tendas, fogueira e soldados do Vane;
-##   "posto_imperial": estalagem da estrada imperial, carroças, mercador e guardas imperiais.
+##   "posto_imperial": estalagem da estrada imperial, carroças, mercador e guardas imperiais;
+##   "bairro": bairro do reino (dentro da muralha): uma rua com casas dos dois lados, poço, bancos e moradores;
+##   "mercado": praça de mercado do reino: barracas em volta de uma fogueira, carroças, caixotes e mercadores.
 
 const REF := preload("res://scripts/mundo/refugio_do_pinhal.gd")
 
@@ -41,6 +43,10 @@ func montar() -> void:
 			_pescador()
 		"posto":
 			_posto()
+		"bairro":
+			_bairro()
+		"mercado":
+			_mercado()
 		_:
 			_posto_imperial()
 	_placa(_p(-6.0, -float(dados["raio"]) * 0.45), String(dados["nome"]))
@@ -63,6 +69,8 @@ func _paleta() -> Dictionary:
 	match String(dados["tipo"]):
 		"fazenda":   # palha e taipa, madeira escura ou caiada com telha
 			opcoes = [{"parede": Color(0.66, 0.5, 0.34), "telhado": Color(0.86, 0.7, 0.34)}, {"parede": Color(0.5, 0.37, 0.25), "telhado": Color(0.62, 0.5, 0.3)}, {"parede": Color(1.0, 0.96, 0.86), "telhado": Color(0.95, 0.75, 0.55)}]
+		"bairro":    # bairros do reino: reboco claro com telha, cada bairro com o seu tom
+			opcoes = [{"parede": Color(1.0, 0.9, 0.75), "telhado": Color(0.85, 0.5, 0.38)}, {"parede": Color(0.9, 0.86, 0.8), "telhado": Color(0.55, 0.5, 0.58)}, {"parede": Color(0.95, 0.8, 0.62), "telhado": Color(0.6, 0.38, 0.32)}, {"parede": Color(0.82, 0.84, 0.9), "telhado": Color(0.45, 0.5, 0.62)}]
 		"vila":      # blocos de pedra: cinza com ardósia ou arenito quente com telha
 			opcoes = [{"parede": Color(0.82, 0.84, 0.9), "telhado": Color(0.5, 0.5, 0.58)}, {"parede": Color(1.0, 0.88, 0.7), "telhado": Color(1.0, 0.9, 0.85)}, {"parede": Color(0.75, 0.78, 0.76), "telhado": Color(0.62, 0.42, 0.34)}]
 		"cabana":
@@ -283,6 +291,59 @@ func _vila() -> void:
 	_npc("Lia", "Moleca", "mira", _p(8.0, 20.0), PackedStringArray(["Meu pai disse que tem um dragão no Refúgio. É verdade?"]), [])
 	_npc("Mercador Davi", "Mercador de feira", "soldado_rebelde", _p(10.0, 14.0), PackedStringArray(["Compro peles e lã. Vendo sal e notícias."]),
 		[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": _p(0.0, 14.0)}, {"ir": _p(16.0, 14.0), "vel": 1.2}, {"esperar": 5.0, "anim": "Idle", "olhar": _p(0.0, 14.0)}, {"ir": _p(10.0, 14.0), "vel": 1.2}])
+
+
+## Bairro do reino: uma rua de terra com quatro casas de cada lado, uma de frente para a outra, poço no meio, bancos,
+## barris e gente morando. Sem plantação nem curral: é cidade.
+func _bairro() -> void:
+	var frente := atan2(-para_longe.x, -para_longe.y)   # porta olhando para a rua do anel
+	var n := 0
+	for u in [-33.0, -11.0, 11.0, 33.0]:
+		for fila in [[10.0, frente + PI], [36.0, frente]]:   # a fila de perto olha para dentro, a de longe olha para a rua
+			var p := _p(u, float(fila[0]))
+			var casa := ConstrutorCasa.montar(3, 2 + n % 2, REF.ESTILO_PEDRA if n % 3 != 0 else REF.ESTILO_MADEIRA, true, "moradia", _paleta())
+			casa.name = "Casa%d" % n
+			casa.position = Vector3(p.x, _y(p), p.y)
+			casa.rotation.y = float(fila[1])
+			add_child(casa)
+			n += 1
+	VilaRefugio._poco(Vector3(_p(0.0, 23.0).x, 0.0, _p(0.0, 23.0).y))
+	for u in [-22.0, 22.0]:
+		_movel("Bench", _p(u, 23.0), 90.0)
+		_movel("Barrel", _p(u + 2.0, 21.0))
+		_fogueira(_p(u * 1.9, 23.0), 0.4)   # lampiões nas pontas da rua
+	_npc("Moradora do bairro", "Moradora", "tessa", _p(-4.0, 21.0), PackedStringArray(["Dentro da muralha a gente dorme sem medo de lobo. O medo aqui é outro, e usa armadura."]),
+		[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": _p(0.0, 23.0)}, {"ir": _p(-20.0, 23.0), "vel": 1.1}, {"esperar": 4.0, "anim": "Idle", "olhar": _p(-22.0, 23.0)}, {"ir": _p(-4.0, 21.0), "vel": 1.1}])
+	_npc("Morador do bairro", "Morador", "oren", _p(18.0, 25.0), PackedStringArray(["O castelo vê tudo lá de cima. Fale baixo."]),
+		[{"esperar": 7.0, "anim": "Idle", "olhar": _p(22.0, 23.0)}, {"ir": _p(4.0, 25.0), "vel": 1.0}, {"esperar": 5.0, "anim": "Idle_Talking", "olhar": _p(0.0, 23.0)}, {"ir": _p(18.0, 25.0), "vel": 1.0}])
+	_npc("Criança do bairro", "Criança", "mira", _p(6.0, 19.0), PackedStringArray(["Você veio de fora da muralha? Tem dragão lá?"]), [])
+
+
+## Praça de mercado: oito barracas coloridas em volta de uma fogueira, carroças de carga, caixotes, barris e mercadores
+## chamando freguês. É o que cerca o reino de comércio (dentro da muralha e do lado de fora dos portões).
+func _mercado() -> void:
+	var cores := [Color(0.72, 0.2, 0.16), Color(0.85, 0.7, 0.3), Color(0.25, 0.42, 0.62), Color(0.3, 0.52, 0.3), Color(0.62, 0.36, 0.6), Color(0.85, 0.82, 0.74)]
+	var meio := _p(0.0, 22.0)
+	for k in 8:
+		var a := TAU * k / 8.0
+		var q := meio + Vector2(cos(a), sin(a)) * 15.0
+		_tenda(q, cores[k % cores.size()])
+		_movel("Barrel" if k % 2 == 0 else "Bag", q + Vector2(cos(a + 0.5), sin(a + 0.5)) * 3.4)
+	_fogueira(meio, 0.8)
+	_movel("Table_Large", meio + Vector2(4.0, 0.0))
+	_movel("Bench", meio + Vector2(4.0, 2.0), 90.0)
+	for k in 2:   # carroças de carga na beira da praça
+		var q := _p(-26.0 + k * 52.0, 8.0)
+		VilaRefugio._caixa(Vector3(q.x, _y(q) + 0.9, q.y), Vector3(2.2, 0.8, 3.6), VilaRefugio._mat(Color(0.4, 0.28, 0.16)), true, atan2(dir.x, dir.y))
+		VilaRefugio._caixa(Vector3(q.x, _y(q) + 1.6, q.y), Vector3(1.4, 0.9, 1.6), VilaRefugio._mat(Color(0.45, 0.35, 0.2)))
+	var falas := [["Mercador de panos", "Lã, linho e couro curtido. Pago bem por pele de lobo."], ["Mercadora de sal", "Sal, ervas e peixe seco. Sem sal a carne não dura a viagem."],
+		["Mercador de ferragens", "Prego, ferradura e lâmina cega. Afiar é com o ferreiro."], ["Mercadora de frutas", "Maçã do Pomar Alto, colhida ontem. Prove uma."]]
+	var modelos := ["soldado_rebelde", "tessa", "orin", "mira"]
+	for k in 4:
+		var a := TAU * (k * 2) / 8.0
+		var q := meio + Vector2(cos(a), sin(a)) * 11.0
+		_npc(String(falas[k][0]), "Mercador", modelos[k], q, PackedStringArray([String(falas[k][1])]),
+			[{"esperar": 6.0, "anim": "Idle_Talking", "olhar": meio}, {"esperar": 4.0, "anim": "Idle", "olhar": meio + Vector2(cos(a), sin(a)) * 15.0}])
 
 
 ## Pescador: cabana de madeira sobre palafitas, perto da água, com doca, barco, redes e caixas de peixe. A doca sai da

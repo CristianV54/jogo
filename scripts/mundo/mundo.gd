@@ -19,6 +19,7 @@ var povoados: Dictionary = {}      # id -> Dictionary (centro, nome, raio, tipo,
 var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var tubarao: Tubarao
+var muralha: MuralhaDoReino
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
 var capim: CapimDoMundo
@@ -95,7 +96,11 @@ func construir() -> void:
 	_barreiras()
 	progresso.emit("Plantando florestas...")
 	await get_tree().process_frame
-	etapa.call("pontes e mar")
+	muralha = MuralhaDoReino.new()
+	muralha.mundo = self
+	add_child(muralha)
+	muralha.montar()
+	etapa.call("pontes, mar e muralha do reino")
 	_floresta()
 	_horizonte()
 	etapa.call("floresta e mapa")
@@ -615,6 +620,9 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
+			var ao_reino := p.distance_to(MundoDados.REINO["centro"]) - float(MundoDados.REINO["raio"])
+			if absf(ao_reino) < 9.0 or (ao_reino < 0.0 and _rng.randf() < 0.6):
+				continue   # nada nasce encostado na muralha do reino, e dentro dela a mata é rala (é cidade, com árvores de praça)
 			var no_povoado := false
 			for pid in povoados:
 				if p.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) * 1.05:
