@@ -321,3 +321,10 @@ Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não par
 ## Mapa novo: a ilha (24/11/2026, em construção)
 - **`PLACEHOLDER_Tubarao` (PENDÊNCIA, não é modelo final):** o tubarão do mar é só uma barbatana cinza (um prisma) criada em `scripts/criaturas/tubarao.gd`. **Falta o modelo do tubarão.** Candidato achado, ainda não baixado: *Fish Pack Animated* do Quaternius (CC0, mesmo autor dos personagens), https://quaternius.itch.io/lowpoly-animated-fish . Antes de entrar: bancada isolada e estilo conferido.
 - A ilha em si (costa, estradas, rios, biomas) é gerada por código a partir de `scripts/mundo/mundo_dados.gd`; não usa asset novo. Detalhes em `docs/mapa-novo/CONSTRUCAO_v1.md`.
+
+## O reino de Valdoria (25/11/2026)
+- Tudo gerado por código, sem asset novo baixado: muralha (`scripts/mundo/muralha_do_reino.gd`), casas de rua (`casario_do_reino.gd`, usa o `ConstrutorCasa` e o kit de vila já registrado), bairros, mercados, quartel, estábulos e guaritas (tipos novos em `povoado.gd`).
+- **Textura de pedra:** `scripts/mundo/pedra.gd` desenha por código uma parede de cantaria (fiadas, juntas, tom por pedra) e aplica em triplanar nas muralhas e torres do reino, de Valdoria e do Castelo. Estilo conferido em foto de perto (`docs/mapa-novo/reino_v2/6g_...`).
+- Soldados e sentinelas usam `scenes/personagens/guarda_imperial.tscn` como gente (Npc), não como inimigo. Cavalos do estábulo são o `cavalo.glb` já registrado, agora montável em qualquer povoado.
+- Alvos de palha do quartel: dois cilindros (palha e miolo vermelho) num poste; peça simples de cenário, não é modelo final de nada.
+- Plano e estado: `docs/mapa-novo/PLANO-REINO-100.md`. Auditoria: `tools/auditoria_reino.gd`.

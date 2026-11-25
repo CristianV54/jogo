@@ -119,6 +119,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `docs/HISTORIA-E-MISSOES.md` | Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados |
 | `docs/INVENTARIO-DE-DEFEITOS.md` | Inventário de defeitos de 24/11/2026 (lista única, com foto ou medida de cada um; fotos em `docs/inventario/`) |
 | `docs/mapa-novo/construcao_v1/` e `construcao_v2/` | Fotos da ilha construída: v1 = ilha de 4,6 km; v2 = ilha de 7,45 x 5,6 km com o mapa (tecla M) em estilo antigo |
+| `docs/mapa-novo/reino_v2/` | Fotos do reino pronto (19 fotos: portões, ruas, travessa, bairro, mercado, feira, quartel, estábulos, pedra de perto, castelo, aéreas e mapa) |
 | `docs/mapa-novo/reino_v1/` | Fotos do reino grande, primeira versão (muralha, 3 portões, 17 bairros, mercados e feiras) |
 | `docs/mapa-novo/PLANO-REINO-100.md` | Plano aprovado para entregar o reino inteiro (9 blocos com critério de pronto e o que fica de fora) |
 | `docs/mapa-novo/PLANTA_v1.md` | Planta do mapa novo, versão 1: tamanho, lugares, temas e o que fica para depois |
