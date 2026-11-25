@@ -95,7 +95,7 @@ func _livre(p: Vector2, larg: float) -> bool:
 			return false
 	var h0 := mundo.terreno.altura_em(p.x, p.y)
 	for d in [Vector2(5, 0), Vector2(-5, 0), Vector2(0, 5), Vector2(0, -5)]:
-		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.1:   # ladeira da colina passa; paredão do rochedo, não
+		if absf(mundo.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.8:   # ladeira da colina passa; paredão do rochedo, não
 			return false
 	return true
 

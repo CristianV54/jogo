@@ -91,7 +91,7 @@ func _rodar() -> void:
 			_defeito("casa encostada na muralha (casario)", p, "")
 		var h0 := m.terreno.altura_em(p.x, p.y)
 		for d in [Vector2(4, 0), Vector2(-4, 0), Vector2(0, 4), Vector2(0, -4)]:
-			if absf(m.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 0.5:
+			if absf(m.terreno.altura_em(p.x + d.x, p.y + d.y) - h0) > 1.0:   # a cidade é em colina (até ~0,3 m em 4 m); mais de 1 m é paredão do rochedo
 				_defeito("casa em ladeira (casario)", p, "")
 				break
 		for pid in m.povoados:

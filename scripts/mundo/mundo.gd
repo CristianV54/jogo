@@ -723,7 +723,7 @@ func _lavouras() -> void:
 		if lavouras.size() >= 150:
 			break
 		var a := rng.randf() * TAU
-		var p := c + Vector2.from_angle(a) * rng.randf_range(r + 45.0, r + 420.0)
+		var p := c + Vector2.from_angle(a) * rng.randf_range(r + 70.0, r + 420.0)
 		var ml := rng.randf_range(16.0, 30.0)
 		var mp := rng.randf_range(12.0, 22.0)
 		var bom := terreno.distancia_caminho(p.x, p.y) > maxf(ml, mp) + 8.0 and not terreno.na_agua(p.x, p.y, maxf(ml, mp) + 6.0)
@@ -742,16 +742,16 @@ func _lavouras() -> void:
 		var tipo := 0 if rng.randf() < 0.55 else (1 if rng.randf() < 0.6 else 2)
 		var giro := a + PI / 2.0 + rng.randf_range(-0.25, 0.25)
 		lavouras.append([p, ml, mp, giro, tipo])
-		var alt: float = [1.0, 0.5, 0.25][tipo]
+		var alt: float = [0.6, 0.4, 0.2][tipo]
 		listas[tipo].append(Transform3D(Basis(Vector3.UP, giro).scaled_local(Vector3(ml * 2.0, alt + 1.4, mp * 2.0)), Vector3(p.x, h0 + alt / 2.0 - 0.7, p.y)))
-	var cores := [Color(0.86, 0.7, 0.3), Color(0.36, 0.52, 0.24), Color(0.38, 0.27, 0.17)]
+	var cores := [Color(0.7, 0.58, 0.27), Color(0.3, 0.42, 0.2), Color(0.34, 0.25, 0.17)]   # trigo maduro, verdura, terra arada (tons apagados: amarelo vivo parecia tapete)
 	for tipo in 3:
 		var caixa := BoxMesh.new()
 		var m := StandardMaterial3D.new()
 		m.albedo_color = cores[tipo]
 		m.albedo_texture = Fachadas.material("telhado").albedo_texture   # as mesmas fiadas servem de leiras
 		m.uv1_triplanar = true
-		m.uv1_scale = Vector3(6.0, 1.0, 6.0)
+		m.uv1_scale = Vector3(14.0, 1.0, 14.0)   # leiras finas
 		m.roughness = 1.0
 		caixa.material = m
 		var mm := MultiMesh.new()

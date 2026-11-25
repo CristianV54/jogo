@@ -33,7 +33,7 @@ func _rodar() -> void:
 	marcar("O reino tem muralha com 4 portões (sul, oeste, leste, norte)", m.muralha.portoes.size() == 4, str(m.muralha.portoes))
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	var cc := MundoDados.centro("castelo_imperial")
-	marcar("O Castelo fica no alto do rochedo, no centro (30 m acima da cidade)", m.chao_em(cc.x, cc.y) >= 30.0 and m.chao_em(0.0, 400.0) < 1.0, "%.1f m no castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 400.0)])
+	marcar("O Castelo fica no alto do rochedo e a cidade sobe em colina até o pé dele", m.chao_em(cc.x, cc.y) >= 30.0 and m.chao_em(0.0, 400.0) < 4.0 and m.chao_em(0.0, 262.0) > 8.0, "%.1f m no castelo, %.1f m na Rua do Castelo, %.1f m na Rua do Anel" % [m.chao_em(cc.x, cc.y), m.chao_em(0.0, 262.0), m.chao_em(0.0, 400.0)])
 	var rei := false
 	for n in get_nodes_in_group("npcs"):
 		if (n as Npc).nome == "Rei Aldren":

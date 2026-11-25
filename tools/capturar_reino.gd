@@ -89,7 +89,7 @@ func _rodar() -> void:
 	cam.fov = 50.0
 	root.add_child(cam)
 	cam.current = true
-	jogo.clima.definir_hora(17.7)   # pôr do sol, como na referência do Cristian
+	jogo.clima.definir_hora(17.1)   # pôr do sol, como na referência do Cristian
 	cam.fov = 42.0
 	cam.global_position = Vector3(-330, 150, 800)
 	cam.look_at(Vector3(0, 40, 0))
