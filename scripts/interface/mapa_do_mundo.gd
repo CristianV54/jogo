@@ -29,6 +29,7 @@ var centro := Vector2.ZERO     # ponto do mundo no meio da tela
 var _t := 0.0
 var _arrastando := false
 var _arrastou := false
+var _nomes_postos: Array[Rect2] = []   # onde já há nome escrito neste quadro
 
 
 func _ready() -> void:
@@ -139,12 +140,20 @@ func _nome(q: Vector2, texto: String, tamanho: int, cor := COR_TINTA) -> void:
 	var fonte := ThemeDB.fallback_font
 	var larg := fonte.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho).x
 	var pos := q + Vector2(-larg / 2.0, 0.0)
+	var caixa := Rect2(pos + Vector2(0, -tamanho), Vector2(larg, tamanho + 3.0))
+	for outra in _nomes_postos:   # nome em cima de outro nome: este desce para baixo da marca
+		if caixa.intersects(outra):
+			pos.y += tamanho + 22.0
+			caixa.position.y += tamanho + 22.0
+			break
+	_nomes_postos.append(caixa)
 	draw_string_outline(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 5, Color(0.96, 0.92, 0.8, 0.9))
 	draw_string(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
 
 
 func _draw() -> void:
 	var tela := get_viewport_rect().size
+	_nomes_postos.clear()
 	draw_rect(Rect2(Vector2.ZERO, tela), Color(0.13, 0.3, 0.44))   # o mar cobre a tela toda
 	var mundo := Mundo.instancia
 	if mundo == null:

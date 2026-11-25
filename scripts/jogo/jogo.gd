@@ -455,13 +455,13 @@ func _ao_mudar_destino(tem: bool, ponto: Vector2) -> void:
 	_facho_destino = MeshInstance3D.new()
 	_facho_destino.name = "FachoDoDestino"
 	var cil := CylinderMesh.new()
-	cil.top_radius = 1.2
-	cil.bottom_radius = 1.2
+	cil.top_radius = 4.0
+	cil.bottom_radius = 2.0
 	cil.height = 400.0
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.albedo_color = Color(1.0, 0.8, 0.25, 0.45)
+	m.albedo_color = Color(1.0, 0.8, 0.25, 0.6)
 	m.disable_fog = true
 	cil.material = m
 	_facho_destino.mesh = cil
