@@ -71,11 +71,16 @@ func _rodar() -> void:
 	await _foto("04_rua_de_casas", 4.0)
 	_ver(Vector2(60, 108), Vector2(140, 20))             # rua em anel, com a rocha do penhasco de um lado e casas do outro
 	await _foto("05_rua_do_penhasco", 4.0)
-	for item in [["06_quartel_campo_de_treino", "quartel_da_guarda", 2.0], ["07_estabulos_do_reino", "estabulos_do_reino", 14.0], ["08_catedral", "catedral_de_valdoria", 14.0]]   # o último número: recuo da câmera (no quartel há casa logo atrás):
+	for item in [["06_quartel_campo_de_treino", "quartel_da_guarda", 2.0], ["07_estabulos_do_reino", "estabulos_do_reino", 14.0], ["08_catedral", "catedral_de_valdoria", 14.0]]:   # o último número: recuo da câmera (no quartel há casa logo atrás)
 		var pv: Dictionary = m.povoados[item[1]]
 		var longe := Vector2(-(pv["dir"] as Vector2).y, (pv["dir"] as Vector2).x) * float(pv["lado"])
 		_ver((pv["centro"] as Vector2) - longe * float(item[2]), (pv["centro"] as Vector2) + longe * 30.0)
 		await _foto(item[0], 4.0)
+	for item in [["20_vila_campos_altos", "campos_altos", 16.0], ["21_fazenda_imperial", "fazenda_imperial", 16.0], ["22_cabana_do_pescador", "pescador", 14.0]]:   # povoados de fora da muralha
+		var pv2: Dictionary = m.povoados[item[1]]
+		var longe2 := Vector2(-(pv2["dir"] as Vector2).y, (pv2["dir"] as Vector2).x) * float(pv2["lado"])
+		_ver((pv2["centro"] as Vector2) - longe2 * float(item[2]), (pv2["centro"] as Vector2) + longe2 * 30.0)
+		await _foto(item[0], 6.0)
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)
 	_ver(pe + Vector2(16, 6), Vector2(40, 50))           # o pé da rampa, a leste
 	await _foto("09_pe_da_rampa", 4.0)
