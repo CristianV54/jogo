@@ -11,7 +11,7 @@ func _ready() -> void:
 
 
 func disponivel() -> bool:
-	return GerenciadorMissoes.instancia != null and not GerenciadorMissoes.instancia.concluidas.has("C1-M4")
+	return Jogo.historia and GerenciadorMissoes.instancia != null and not GerenciadorMissoes.instancia.concluidas.has("C1-M4")   # sem a história ligada, a Fagulha já anda com o Torin
 
 
 func _ao_acionar() -> void:

@@ -38,5 +38,9 @@ func _caixa(pos: Vector3, tam: Vector3, mat: Material) -> void:
 
 
 func _ao_acionar() -> void:
-	if GerenciadorMissoes.instancia:
+	if GerenciadorMissoes.instancia == null:
+		return
+	if Jogo.historia:
 		GerenciadorMissoes.instancia.ler_quadro()
+	else:   # mundo aberto sem missões: o quadro não oferece serviço
+		GerenciadorMissoes.instancia.aviso.emit("Não há aviso novo no quadro.", 3.0)

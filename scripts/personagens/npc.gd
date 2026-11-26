@@ -91,7 +91,7 @@ func _process(delta: float) -> void:
 
 func _qual_marca() -> String:
 	var m := GerenciadorMissoes.instancia
-	if m == null or morto:
+	if m == null or morto or not Jogo.historia:   # sem a história ligada ninguém mostra "!" nem "?"
 		return ""
 	var meu := nome.to_lower()
 	for id in m.ativas:

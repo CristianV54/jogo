@@ -16,3 +16,5 @@ Alguém aborda o Torin na estrada, tentam assaltar, alguém pede ajuda. Missões
 
 ## História e missões principais
 O Cristian vai pensar. A história antiga está desligada (`Jogo.historia = false`).
+
+**26/11/2026: a montanha dos dragões foi FEITA (primeira versão).** Ver `docs/construcoes/montanha_dos_dragoes.md`: montanha de 240 m com trilha, ninho, 9 dragões e o primeiro dragão domável (Cinza), que se monta e voa.

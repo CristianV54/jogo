@@ -32,6 +32,8 @@ godot --path . --resolution 1280x720          # cena principal: scenes/jogo.tscn
 Teclas: WASD andar, Shift correr, Espaço pular, J golpe, K rolar, I inventário, M mapa, E falar/montar/interagir, F Fagulha voar, Esc solta o mouse.
 Modo Admin (nó `scripts/jogo/admin.gd`): F1 a F6 teleportam para cada região, F9 muda a hora, F10 muda o tempo, F11 liga o Drone (câmera livre sem o Torin).
 
+O jogo salva sozinho a cada 20 segundos e ao fechar a janela, e continua de onde parou na próxima vez (arquivo `jogo_salvo.json` na pasta de dados do Godot; apagar o arquivo recomeça do Refúgio).
+
 Depois de criar um script com `class_name` novo, rode uma vez `godot --headless --path . --import`, senão o Godot não acha a classe.
 
 ## Onde está cada coisa
