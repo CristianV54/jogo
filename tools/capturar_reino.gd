@@ -114,7 +114,8 @@ func _rodar() -> void:
 		olho.look_at(corpo_t.global_position + Vector3(0, 0.3, 0))
 		olho.current = true
 		await _foto(String(tomada[0]), 0.05)
-	jogo.camera.current = true
+	olho.current = false
+	(jogo.camera.find_child("Lente", true, false) as Camera3D).current = true   # devolve a vista à câmera do jogo
 	olho.queue_free()
 	await create_timer(4.0).timeout   # deixa o tubarão pegar e o Torin voltar ao Refúgio antes das outras fotos
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)

@@ -17,6 +17,7 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `scripts/mundo/montanha_dos_dragoes.gd`, `pecas_do_ninho.gd` | A Montanha dos Dragões: ninho, marcos da trilha, arcos de ossos e os dragões. O chão vem de `MundoDados.montanha()`. Ver `docs/construcoes/montanha_dos_dragoes.md`. |
 | `scripts/criaturas/dragao_selvagem.gd`, `domar_dragao.gd` | Dragão selvagem (voando em roda ou pousado) e o gesto de domar com 3 carnes; domado vira a montaria Cinza. |
 | `scripts/jogo/salvar_jogo.gd` | Salvar o jogo: `user://jogo_salvo.json` (lugar, vida, inventário, hora, Cinza domado). Grava a cada 20 s e ao fechar; lê ao abrir. Ferramentas rodadas com `--script` não leem nem gravam. |
+| `scripts/som/sons.gd`, `tools/audio/gerar_sons.py`, `assets/audio/` | O som do jogo: 18 efeitos e 4 laços (vento, mar, grilos, música) gerados por síntese e tocados pela classe `Sons`. Ver `assets/ASSETS.md`, seção Som. |
 | `tools/criaturas/converter_tubarao.py` | Converte o tubarão CC0 de `.blend` para `.glb` com a animação Swim (precisa do módulo `bpy`: `pip install bpy`). |
 | `docs/construcoes/` | Uma pasta e um `.md` por peça (muralha, rua, feira, catedral, cidadela, quartel): critério de pronto, resultado, fotos da bancada (01_...) e de dentro do mundo (20_...), e os pontos fracos anotados para depois. |
 | `tools/bancada_movimento.gd` | BANCADA DE MOVIMENTO: 6 quadros de cada animação de cada ser (vista de lado) e medidas de amplitude, passo e velocidade pedida contra a do jogo. |

@@ -39,7 +39,7 @@ static func criar_modelo() -> Node3D:
 			var mat := malha.get_active_material(i)
 			if mat is StandardMaterial3D:
 				var d := mat.duplicate() as StandardMaterial3D
-				d.albedo_color = Color(0.5, 0.56, 0.64)   # a pintura original é quase branca: escurece para cinza de tubarão
+				d.albedo_color = Color(0.3, 0.35, 0.43)   # a pintura original é quase branca: escurece para cinza de tubarão (no mar, com 0,5 ainda saía claro demais)
 				malha.set_surface_override_material(i, d)
 	var anim := modelo.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if anim and anim.has_animation("Swim"):
