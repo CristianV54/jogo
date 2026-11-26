@@ -96,6 +96,26 @@ func _rodar() -> void:
 		var cab: Array = m._cabeceiras[0]
 		_ver((cab[0] as Vector2) - (cab[1] as Vector2) * 13.0, (cab[0] as Vector2) + (cab[1] as Vector2) * 10.0)
 		await _foto("35_ponte_com_cabeceiras", 5.0)
+	var lg := MundoDados.LAGO_CONGELADO   # as Terras do Gelo: o lago, a neve e a vila
+	_ver(lg + Vector2(-30, 110), lg)
+	await _foto("50_lago_congelado", 6.0)
+	_ver(lg + Vector2(40, 30), lg + Vector2(MundoDados.LAGO_RAIO + 9.0, 6.0))
+	await _foto("51_dragao_do_gelo", 5.0)
+	var vg: Dictionary = m.povoados["vila_geada"]
+	_ver((vg["centro"] as Vector2) + Vector2(0, 26), (vg["centro"] as Vector2) + Vector2(0, -30))
+	await _foto("52_vila_geada", 6.0)
+	_ver(MundoDados.MONTANHA_CENTRO + Vector2(-24, 10), MundoDados.MONTANHA_CENTRO + Vector2(9, 4))
+	await _foto("53_ninho_com_dragoes_novos", 6.0)
+	var mcd := m.povoados["mercado_central"]["no"] as Povoado
+	_ver(Vector2(mcd.balcoes[1].global_position.x, mcd.balcoes[1].global_position.z) + Vector2(0, 9), Vector2(mcd.balcoes[1].global_position.x, mcd.balcoes[1].global_position.z))
+	jogo.jogador.coletar("armadura_de_ferro", 1)
+	jogo.jogador.usar_item("armadura_de_ferro")
+	(mcd.balcoes[2] as Gatilho).ao_usar.call(mcd.balcoes[2])
+	await _foto("54_loja_de_ferragens", 3.0)
+	jogo.fechar_oficio()
+	jogo._alternar_inventario()
+	await _foto("55_inventario", 3.0)
+	jogo._alternar_inventario()
 	# o tubarão: o Torin entra no mar a leste, passa do raso, e a foto sai quando o tubarão já vem (antes de ele chegar)
 	var praia := Vector2(MundoDados.EIXOS_DA_ILHA.x - 40.0, 0.0)
 	while Costa.distancia(praia.x, praia.y) > Tubarao.ATACA_EM - 4.0:

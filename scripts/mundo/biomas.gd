@@ -8,6 +8,7 @@ extends RefCounted
 ##   ferrogris leste e serra do norte: frio, árvores mortas, pedra
 ##   cratera   nordeste: cinza e basalto, árvores queimadas, quase sem mata
 ##   imperio   centro, em volta do reino: campos cuidados, folhosas isoladas
+##   gelo      extremo norte, atrás da Montanha dos Dragões: neve, pinheiros ralos, árvores mortas e rocha azulada
 ##   costa     faixa de praia: arbustos baixos e rochas
 
 const TIPOS := ["pinheiro", "folhosa", "morta", "arbusto"]
@@ -20,11 +21,12 @@ const MISTURA := {
 	"cratera": [0.0, 0.0, 0.88, 0.12],
 	"imperio": [0.0, 0.82, 0.0, 0.18],
 	"costa": [0.0, 0.05, 0.0, 0.95],
+	"gelo": [0.66, 0.0, 0.26, 0.08],
 }
-const DENSIDADE := {"pinhal": 1.0, "bosque": 1.0, "ruptura": 0.8, "ferrogris": 0.55, "cratera": 0.25, "imperio": 0.5, "costa": 0.3}
-const PEDRAS := {"pinhal": 0.03, "bosque": 0.05, "ruptura": 0.05, "ferrogris": 0.18, "cratera": 0.25, "imperio": 0.04, "costa": 0.1}   # chance de uma pedra solta por célula de 7,5 m
+const DENSIDADE := {"pinhal": 1.0, "bosque": 1.0, "ruptura": 0.8, "ferrogris": 0.55, "cratera": 0.25, "imperio": 0.5, "costa": 0.3, "gelo": 0.4}
+const PEDRAS := {"pinhal": 0.03, "bosque": 0.05, "ruptura": 0.05, "ferrogris": 0.18, "cratera": 0.25, "imperio": 0.04, "costa": 0.1, "gelo": 0.2}   # chance de uma pedra solta por célula de 7,5 m
 const COGUMELOS := {"bosque": 0.07, "pinhal": 0.012}   # chance de um grupo de cogumelos por célula
-const TOM_PEDRA := {"pinhal": Color(1, 1, 1), "bosque": Color(0.85, 0.95, 0.85), "ruptura": Color(1, 0.97, 0.9), "ferrogris": Color(0.7, 0.72, 0.8), "cratera": Color(0.42, 0.38, 0.38), "imperio": Color(1.0, 0.97, 0.92), "costa": Color(1.1, 1.05, 0.95)}
+const TOM_PEDRA := {"pinhal": Color(1, 1, 1), "bosque": Color(0.85, 0.95, 0.85), "ruptura": Color(1, 0.97, 0.9), "ferrogris": Color(0.7, 0.72, 0.8), "cratera": Color(0.42, 0.38, 0.38), "imperio": Color(1.0, 0.97, 0.92), "costa": Color(1.1, 1.05, 0.95), "gelo": Color(0.82, 0.9, 1.0)}
 
 
 ## Sementes dos biomas na ilha: [bioma, x, z]. Cada ponto do mundo pertence à semente mais próxima (ver docs/mapa-novo).
@@ -35,6 +37,7 @@ const SEMENTES := [
 	["ruptura", -2430, 0], ["ruptura", -1458, 273], ["ruptura", 1093, 1734], ["ruptura", 1944, 1460], ["ruptura", 1458, 730], ["ruptura", 1093, -638],
 	["ferrogris", 2673, 36], ["ferrogris", -291, -2008], ["ferrogris", 729, -1916], ["ferrogris", -850, -1642],
 	["cratera", 1798, -1314], ["cratera", 2430, -912],
+	["gelo", 150, -2450], ["gelo", -700, -2380], ["gelo", 950, -2330],
 ]
 
 
@@ -72,7 +75,7 @@ static func tipo(bioma: String, r: float) -> int:
 
 
 const COR_CHAO := {"imperio": Color(0.3, 0.45, 0.22), "pinhal": Color(0.26, 0.38, 0.19), "bosque": Color(0.2, 0.34, 0.17),
-	"ruptura": Color(0.36, 0.42, 0.21), "ferrogris": Color(0.3, 0.29, 0.28), "cratera": Color(0.27, 0.18, 0.16)}
+	"ruptura": Color(0.36, 0.42, 0.21), "ferrogris": Color(0.3, 0.29, 0.28), "cratera": Color(0.27, 0.18, 0.16), "gelo": Color(0.6, 0.64, 0.7)}   # o chão é multiplicado na pintura: este cinza-azulado sai como neve
 
 
 ## Cor do chão no ponto: mistura das cores dos biomas vizinhos (quanto mais perto da semente, mais pesa), para a troca ser suave.

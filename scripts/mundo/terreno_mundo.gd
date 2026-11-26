@@ -186,6 +186,9 @@ func _altura_crua(x: float, z: float) -> float:
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
 	if absf(x) < 200.0 and absf(z) < 200.0:   # o penhasco de Valdoria, com a rampa escavada em volta dele
 		h += float(MundoDados.penhasco(x, z)[0])
+	var lago := Vector2(x, z).distance_to(MundoDados.LAGO_CONGELADO)   # o Lago Congelado: uma bacia rasa e plana (o gelo é posto por cima)
+	if lago < MundoDados.LAGO_RAIO + 40.0:
+		h = lerpf(h, 2.0, 1.0 - smoothstep(MundoDados.LAGO_RAIO, MundoDados.LAGO_RAIO + 40.0, lago))
 	if Vector2(x, z).distance_squared_to(MundoDados.MONTANHA_CENTRO) < 400.0 * 400.0:   # a Montanha dos Dragões, com a trilha em espiral
 		h += float(MundoDados.montanha(x, z)[0])
 	var costa := Costa.distancia(x, z)
@@ -223,6 +226,9 @@ func cor_do_mundo(x: float, z: float) -> Color:
 			c = rocha * (0.9 + 0.2 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0))
 			if bool(pen[1]) or float(pen[2]) <= 1.0:
 				c = Color(0.5, 0.48, 0.44)
+	if z < -2000.0 and Biomas.em(x, z) == "gelo":   # neve: branca, com manchas azuladas de gelo e a rocha aparecendo aqui e ali
+		var neve := Color(0.9, 0.93, 0.97).lerp(Color(0.72, 0.82, 0.92), smoothstep(0.1, 0.6, _ruido_fino.get_noise_2d(x * 0.8, z * 0.8)))
+		c = c.lerp(neve, 0.9)
 	if Vector2(x, z).distance_squared_to(MundoDados.MONTANHA_CENTRO) < 400.0 * 400.0:   # a montanha: basalto em camadas, cinza no alto, trilha de terra clara
 		var mon := MundoDados.montanha(x, z)
 		var hm: float = mon[0]

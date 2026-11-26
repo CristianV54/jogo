@@ -23,6 +23,7 @@ var muralha: MuralhaDoReino
 var marcos_de_estrada := 0
 var _cabeceiras: Array = []   # [ponto, sentido para a ponte, meia largura] de cada ponta de ponte
 var montanha: MontanhaDosDragoes
+var gelo: TerrasDoGelo
 var cidadela: Cidadela
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
@@ -106,6 +107,10 @@ func construir() -> void:
 	add_child(muralha)
 	muralha.montar()
 	_beira_das_estradas()
+	gelo = TerrasDoGelo.new()
+	gelo.mundo = self
+	add_child(gelo)
+	gelo.montar()
 	montanha = MontanhaDosDragoes.new()
 	montanha.mundo = self
 	add_child(montanha)
@@ -346,6 +351,8 @@ func _regiao_mais_perto(p: Vector2) -> String:
 func estilo_em(p: Vector3) -> Dictionary:
 	if MundoDados.ate_a_muralha(p.x, p.z) < 120.0:   # Valdoria: ar limpo e dourado, para a cidadela se ver de qualquer rua
 		return {"neblina": Color(0.8, 0.85, 0.9), "densidade": 0.0009, "sol": Color(1.0, 0.93, 0.8), "energia": 1.25, "ambiente": 1.0, "topo": Color(0.26, 0.48, 0.84), "horizonte": Color(0.7, 0.82, 0.93)}   # céu azul (com o horizonte bege o céu inteiro ficava cor de areia)
+	if p.z < -2080.0 and Biomas.em(p.x, p.z) == "gelo":   # as Terras do Gelo: ar frio, branco-azulado, sol pálido
+		return {"neblina": Color(0.86, 0.91, 0.96), "densidade": 0.0022, "sol": Color(0.92, 0.95, 1.0), "energia": 1.05, "ambiente": 1.15, "topo": Color(0.5, 0.64, 0.82), "horizonte": Color(0.88, 0.92, 0.97)}
 	if Vector2(p.x, p.z).distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO + 900.0:   # a Montanha dos Dragões: ar limpo e alaranjado, para o pico se ver de longe
 		return {"neblina": Color(0.86, 0.78, 0.7), "densidade": 0.0007, "sol": Color(1.0, 0.86, 0.7), "energia": 1.2, "ambiente": 1.0, "topo": Color(0.3, 0.42, 0.72), "horizonte": Color(0.9, 0.72, 0.56)}
 	return estilos.get(_regiao_mais_perto(Vector2(p.x, p.z)), {})
@@ -360,6 +367,10 @@ func nome_do_lugar(p: Vector3) -> String:
 	for pid in povoados:
 		if v.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]):
 			return povoados[pid]["nome"]
+	if v.distance_to(MundoDados.LAGO_CONGELADO) < MundoDados.LAGO_RAIO + 10.0:
+		return "Lago Congelado"
+	if p.z < -2080.0 and Biomas.em(p.x, p.z) == "gelo":
+		return "Terras do Gelo"
 	if v.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO:
 		return "Ninho dos Dragões" if v.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_TOPO + 6.0 else "Montanha dos Dragões"
 	if float(MundoDados.penhasco(p.x, p.z)[2]) <= 1.0:
@@ -675,6 +686,8 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
+			if p.distance_to(MundoDados.LAGO_CONGELADO) < MundoDados.LAGO_RAIO + 8.0:
+				continue   # dentro do Lago Congelado não nasce árvore
 			if p.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO and float(MundoDados.montanha(x, z)[0]) > 6.0:
 				continue   # a encosta da Montanha dos Dragões é rocha nua
 			if MundoDados.ate_a_muralha(x, z) < 12.0:

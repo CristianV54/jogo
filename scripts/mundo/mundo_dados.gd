@@ -46,6 +46,8 @@ const ESTRADAS := [
 		"pontos": [Vector2(-1555.2, -1255.3), Vector2(-1846.8, -1533.4), Vector2(-2187, -1606.4), Vector2(-2332.8, -1633.8)]},
 	{"id": "pedras", "nome": "Estrada da Serra", "a": "valdoria", "b": "", "meia": 20.0,
 		"pontos": [Vector2(-1020.6, 365.1), Vector2(-1044.9, -109.5), Vector2(-1020.6, -730.2), Vector2(-729, -1460.4), Vector2(-437.4, -1989.8)]},
+	{"id": "trilha_do_gelo", "nome": "Trilha do Gelo", "a": "", "b": "", "meia": 12.0,
+		"pontos": [Vector2(-437.4, -1989.8), Vector2(-150, -2200), Vector2(250, -2330)]},
 	{"id": "trilha_dos_dragoes", "nome": "Trilha dos Dragões", "a": "", "b": "", "meia": 12.0,
 		"pontos": [Vector2(-729, -1460.4), Vector2(-660, -1490), Vector2(-590, -1500)]},
 	{"id": "ferrogris", "nome": "Estrada de Ferrogris", "a": "valdoria", "b": "fronteira_ferrogris", "meia": 24.0,
@@ -127,6 +129,7 @@ const BARREIRAS := []
 const POVOADOS_LIVRES := [
 	{"id": "campos_altos", "nome": "Vila Campos Altos", "tipo": "vila", "centro": Vector2(-2624.4, -109.5), "dir": Vector2(1, 0), "lado": 1.0, "raio": 80.0, "liga": "campos"},       # só plantação
 	{"id": "nevoa_azul", "nome": "Aldeia Névoa Azul", "tipo": "vila", "centro": Vector2(-2430, -1643), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "nevoa"},          # atrás do Bosque Velado
+	{"id": "vila_geada", "nome": "Vila Geada", "tipo": "vila", "centro": Vector2(250, -2380), "dir": Vector2(1, 0), "lado": -1.0, "raio": 70.0, "liga": "trilha_do_gelo"},   # a vila das Terras do Gelo (nome criado, a aprovar)
 	{"id": "pedras_altas", "nome": "Vila Pedras Altas", "tipo": "vila", "centro": Vector2(-291.6, -2099.3), "dir": Vector2(0, 1), "lado": 1.0, "raio": 70.0, "liga": "pedras"},       # mineiros, na serra
 	{"id": "beira_rio", "nome": "Aldeia Beira-Rio", "tipo": "vila", "centro": Vector2(1846.8, 1843.8), "dir": Vector2(1, 0), "lado": 1.0, "raio": 70.0, "liga": "beira_rio"},          # pescadores, na foz
 	{"id": "pescador", "nome": "Cabana do Pescador", "tipo": "pescador", "centro": Vector2(2089.8, 1935), "dir": Vector2(1, 0), "lado": -1.0, "raio": 22.0, "liga": "beira_rio"},
@@ -332,6 +335,12 @@ static func penhasco(x: float, z: float) -> Array:
 		elif r > 1.0 and t <= deg_to_rad(14.0):
 			h = PENHASCO_ALTURA   # patamar diante do portão da cidadela
 	return [h, via, r]
+
+
+## AS TERRAS DO GELO (pedido do Cristian): o extremo norte da ilha, atrás da Montanha dos Dragões. O bioma "gelo" (ver
+## Biomas) cobre a faixa; aqui ficam o Lago Congelado e a Vila Geada.
+const LAGO_CONGELADO := Vector2(-420.0, -2420.0)
+const LAGO_RAIO := 70.0
 
 
 ## A MONTANHA DOS DRAGÕES (pedido do Cristian): um cone de rocha de 240 m ao norte de Valdoria, com uma trilha em

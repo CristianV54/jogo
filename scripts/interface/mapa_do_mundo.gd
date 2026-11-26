@@ -251,6 +251,7 @@ func _draw() -> void:
 	var mq := mundo_para_tela(MundoDados.MONTANHA_CENTRO)   # a Montanha dos Dragões: o relevo já a desenha; aqui só o ícone e o nome
 	_icone(mq, "dragao", clampf(12.0 + 2.0 * zoom, 14.0, 26.0))
 	_nome(mq + Vector2(0, -clampf(14.0 + 2.0 * zoom, 16.0, 28.0) - 8.0), "MONTANHA DOS DRAGÕES", 15, _fonte_regiao, COR_TEXTO, 2.0)
+	_nome(mundo_para_tela(Vector2(150.0, -2560.0)), "TERRAS DO GELO", 15, _fonte_regiao, COR_TEXTO, 2.0)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])

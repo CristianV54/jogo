@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("6 regiões, 31 estradas, 118 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 31 and m.povoados.size() == 118 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
+	marcar("6 regiões, 32 estradas, 119 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 32 and m.povoados.size() == 119 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
@@ -98,6 +98,12 @@ func _rodar() -> void:
 		if String(nome_p).begins_with("passo_"):
 			passos_depois += int(sons.tocados[nome_p])
 	marcar("Som: 19 efeitos, 4 laços tocando (vento, mar, grilos, música), rugido ao domar, som de pegar item e passos ao andar", sons._amostras.size() == 19 and not sons._amostras.values().has(null) and lacos_tocando == 4 and int(sons.tocados.get("rugido", 0)) == 1 and int(sons.tocados.get("coletar", 0)) >= 1 and passos_depois - passos_antes >= 2, "%d efeitos, %d laços, rugido %d, coletar %d, passos em 2 s: %d" % [sons._amostras.size(), lacos_tocando, int(sons.tocados.get("rugido", 0)), int(sons.tocados.get("coletar", 0)), passos_depois - passos_antes])
+	var lg := MundoDados.LAGO_CONGELADO
+	jogo.jogador.global_position = Vector3(lg.x, m.chao_em(lg.x, lg.y) + 3.0, lg.y)
+	jogo.jogador.velocity = Vector3.ZERO
+	await create_timer(1.5).timeout
+	var no_gelo: float = jogo.jogador.global_position.y - m.chao_em(lg.x, lg.y)
+	marcar("Terras do Gelo: bioma de gelo no norte, lago congelado em que se anda (o Torin fica em cima da placa), 2 dragões e a Vila Geada", Biomas.em(lg.x, lg.y) == "gelo" and no_gelo > 0.1 and no_gelo < 1.2 and m.gelo.dragoes.size() == 2 and m.povoados.has("vila_geada") and m.nome_do_lugar(jogo.jogador.global_position) == "Lago Congelado", "bioma %s, Torin %.2f m acima do fundo, lugar %s" % [Biomas.em(lg.x, lg.y), no_gelo, m.nome_do_lugar(jogo.jogador.global_position)])
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m
