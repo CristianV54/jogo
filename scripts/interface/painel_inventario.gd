@@ -33,7 +33,7 @@ func _ready() -> void:
 	var fundo := ColorRect.new()
 	fundo.color = COR_FUNDO
 	fundo.position = Vector2(270, 100)
-	fundo.size = Vector2(740, 432)
+	fundo.size = Vector2(740, 516)
 	add_child(fundo)
 	var titulo := Label.new()
 	titulo.text = "Inventário"
@@ -100,8 +100,9 @@ func _ready() -> void:
 	_usar.add_theme_color_override("font_disabled_color", Color(0.5, 0.5, 0.5))
 	_usar.pressed.connect(_ao_usar)
 	add_child(_usar)
-	_aviso = _rotulo(Vector2(300, 490), 19, COR_SELECIONADO)
-	_aviso.size = Vector2(440, 28)
+	_aviso = _rotulo(Vector2(780, 500), 19, COR_SELECIONADO)
+	_aviso.size = Vector2(220, 60)
+	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_criar_icones()
 	_atualizar()
 
@@ -147,8 +148,15 @@ func _criar_icones() -> void:
 		var modelo: Node3D = (load(Itens.DADOS[id]["modelo"]) as PackedScene).instantiate()
 		modelo.rotation_degrees.y = -35.0
 		vp.add_child(modelo)
-		cam.position = Vector3(0.05, 0.22, 0.75)
-		cam.look_at_from_position(cam.position, Vector3(0.05, 0.07, 0.0))
+		var caixa := AABB()   # enquadra o modelo, seja do tamanho que for (uma maçã, uma espada, um peitoral)
+		var primeira := true
+		for mi in modelo.find_children("*", "MeshInstance3D", true, false):
+			var c := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb() if (mi as MeshInstance3D).is_inside_tree() else (mi as MeshInstance3D).transform * (mi as MeshInstance3D).get_aabb()
+			caixa = c if primeira else caixa.merge(c)
+			primeira = false
+		var meio := modelo.transform * caixa.get_center() if not modelo.is_inside_tree() else caixa.get_center()
+		var raio := maxf(0.05, caixa.size.length() * 0.5)
+		cam.look_at_from_position(meio + Vector3(0.1, 0.35, 1.0).normalized() * raio * 3.6, meio)
 		_icones[id] = vp.get_texture()
 
 
@@ -206,7 +214,10 @@ func _detalhe() -> void:
 	_nome.text = dados["nome"]
 	_quantidade.text = "Quantidade: %d" % int(_inventario.get(_selecionado, 0))
 	_descricao.text = dados["descricao"]
-	_usar.disabled = int(dados["cura"]) <= 0
+	var comida := int(dados.get("cura", 0)) > 0 or float(dados.get("fome", 0)) > 0.0
+	var equipavel := dados.has("dano") or dados.has("defesa")
+	_usar.disabled = not (comida or equipavel)
+	_usar.text = "Equipar (Enter)" if equipavel else ("Comer (Enter)" if comida else "Usar (Enter)")
 
 
 func _ao_clicar_slot(i: int) -> void:

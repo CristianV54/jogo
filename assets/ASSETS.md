@@ -350,3 +350,10 @@ Baixados do OpenGameArt, todos **CC0**. Entraram só os arquivos de DADOS (FBX, 
 - **Dragão verde-escuro** (`criaturas/dragoes/quaternius/dragao_verde.fbx`): "LowPoly Animated Monsters" do Quaternius, https://opengameart.org/content/lowpoly-animated-monsters. 35 ossos, animações Flying, Attack, Attack2, Death, Hit; usa-se Flying. **Ressalva de estilo:** é de faces chapadas (desenho animado), fora do "3D suave pintado"; por isso só aparece VOANDO, de longe.
 - O dragão domável (Cinza) continua sendo o modelo da Fagulha: é o único com o osso de assento para montar.
 - Baixados e NÃO usados (ficaram fora do projeto): um dragão de gelo e dois outros só em `.blend`, que não abri.
+
+## Itens de ofício e armaduras (26/11/2026)
+
+- **Gerados por `tools/itens/gerar_itens_de_oficio.py`** (Blender como módulo `bpy`; formas simples, sombreado suave; sem licença de terceiros): `itens/moeda`, `itens/minerio_de_ferro`, `itens/lingote_de_ferro`, `itens/madeira`, `itens/pao`, `itens/peixe_assado`, `armas/picareta`, e as armaduras `armaduras/peitoral_de_couro`, `ombreira_de_couro`, `peitoral_de_ferro`, `ombreira_de_ferro`.
+- **Armaduras:** modeladas no espaço do Torin em pose de descanso e vestidas por `Humanoide.vestir()` (peitoral preso ao osso `spine_03`, ombreiras a `upperarm_l/r`, a direita espelhada). Conferidas na bancada `-- armaduras` (sem armadura, couro, ferro; frente, costas, lado), fotos em `docs/validacao/armaduras/`. Não há elmo, perneira nem bota: só peito e ombros.
+- **Armas na mão do Torin:** espada curta, machado, espada longa e katana usam os modelos que já estavam no projeto (nas mãos de NPCs), com os mesmos ajustes de empunhadura. A picareta é item de bolsa (não vai à mão).
+- Regras em `scripts/jogo/itens.gd` (preço, dano, defesa, fome, receitas).

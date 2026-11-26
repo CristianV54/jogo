@@ -18,6 +18,11 @@ Ponto de entrada: [README.md](../README.md) e [CLAUDE.md](../CLAUDE.md). Relato 
 | `scripts/criaturas/dragao_selvagem.gd`, `domar_dragao.gd` | Dragão selvagem (voando em roda ou pousado) e o gesto de domar com 3 carnes; domado vira a montaria Cinza. |
 | `scripts/jogo/salvar_jogo.gd` | Salvar o jogo: `user://jogo_salvo.json` (lugar, vida, inventário, hora, Cinza domado). Grava a cada 20 s e ao fechar; lê ao abrir. Ferramentas rodadas com `--script` não leem nem gravam. |
 | `scripts/som/sons.gd`, `tools/audio/gerar_sons.py`, `assets/audio/` | O som do jogo: 18 efeitos e 4 laços (vento, mar, grilos, música) gerados por síntese e tocados pela classe `Sons`. Ver `assets/ASSETS.md`, seção Som. |
+| `scripts/interface/painel_de_oficio.gd` | Janela de comércio (comprar, vender, pechinchar) e de forja (receitas). O Jogo abre com `abrir_oficio()`. |
+| `scripts/mundo/veio_de_ferro.gd` | Veio de ferro: com picareta na bolsa dá 2 a 3 minérios e descansa 4 minutos. |
+| `scripts/mundo/terras_do_gelo.gd`, `pecas_do_gelo.gd` | As Terras do Gelo (extremo norte): Lago Congelado, cristais, dragões e veios. O bioma "gelo" está em `biomas.gd`; a Vila Geada e a Trilha do Gelo, em `mundo_dados.gd`. |
+| `tools/itens/gerar_itens_de_oficio.py` | Modela moeda, minério, lingote, madeira, pão, peixe, picareta e as armaduras (precisa do módulo `bpy`). |
+| `tools/criaturas/listar_modelo.gd` | Lista tamanho, ossos e animações de um modelo importado (para avaliar modelo novo). |
 | `tools/montar_galeria.py`, `docs/galeria/` | GALERIA: 28 folhas com a foto de tudo o que o jogo tem (personagens, animais, inimigos, tubarão, armas, móveis, natureza, peças de casa, construções, Valdoria, povoados, montanha, ilha e mapa). Refazer: rodar `tools/bancada.gd -- depois`, as bancadas de construção, `capturar_reino`, `capturar_ilha` e `capturar_mapa`, e depois `python3 tools/montar_galeria.py`. |
 | `tools/criaturas/converter_tubarao.py` | Converte o tubarão CC0 de `.blend` para `.glb` com a animação Swim (precisa do módulo `bpy`: `pip install bpy`). |
 | `docs/construcoes/` | Uma pasta e um `.md` por peça (muralha, rua, feira, catedral, cidadela, quartel): critério de pronto, resultado, fotos da bancada (01_...) e de dentro do mundo (20_...), e os pontos fracos anotados para depois. |

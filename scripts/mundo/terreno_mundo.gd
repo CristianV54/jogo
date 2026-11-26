@@ -227,7 +227,7 @@ func cor_do_mundo(x: float, z: float) -> Color:
 			if bool(pen[1]) or float(pen[2]) <= 1.0:
 				c = Color(0.5, 0.48, 0.44)
 	if z < -2000.0 and Biomas.em(x, z) == "gelo":   # neve: branca, com manchas azuladas de gelo e a rocha aparecendo aqui e ali
-		var neve := Color(0.9, 0.93, 0.97).lerp(Color(0.72, 0.82, 0.92), smoothstep(0.1, 0.6, _ruido_fino.get_noise_2d(x * 0.8, z * 0.8)))
+		var neve := Color(0.66, 0.7, 0.78).lerp(Color(0.5, 0.6, 0.74), smoothstep(0.1, 0.6, _ruido_fino.get_noise_2d(x * 0.8, z * 0.8)))   # mais escura que branco puro: ao sol o branco estourava e a neve perdia o relevo
 		c = c.lerp(neve, 0.9)
 	if Vector2(x, z).distance_squared_to(MundoDados.MONTANHA_CENTRO) < 400.0 * 400.0:   # a montanha: basalto em camadas, cinza no alto, trilha de terra clara
 		var mon := MundoDados.montanha(x, z)
