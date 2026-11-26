@@ -26,6 +26,13 @@ func montar() -> void:
 		var fora := (p - c).normalized()
 		var q := p + fora * 6.5
 		(_kit as PecasDoNinho).marco(Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y), i)
+	for i in 10:   # veios de ferro na encosta, do lado de dentro da trilha
+		var tv := 0.06 + i * 0.09
+		var pv := MundoDados.ponto_da_trilha(tv)
+		var qv := pv - (pv - c).normalized() * 7.5
+		var veio := VeioDeFerro.new()
+		veio.position = Vector3(qv.x, mundo.terreno.altura_em(qv.x, qv.y), qv.y)
+		add_child(veio)
 	for t in [0.01, 0.985]:
 		var p := MundoDados.ponto_da_trilha(t)
 		var p2 := MundoDados.ponto_da_trilha(t + 0.004)

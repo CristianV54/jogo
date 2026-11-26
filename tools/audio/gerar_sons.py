@@ -56,6 +56,8 @@ def juntar(partes, total):
     for inicio, som in partes:
         i = int(inicio * SR); s[i:i + len(som)] += som[:len(s) - i]
     return s
+# comer: três mordidas (estalos curtos e abafados)
+gravar('comer', juntar([(i * 0.3, passa_baixa(ruido(0.12), 900 + 200 * i) * cai(0.12, 0.03)) for i in range(3)], 0.95), 0.5)
 gravar('coletar', juntar([(0.0, nota(659.3, 0.3, 0.09)), (0.09, nota(987.8, 0.4, 0.12))], 0.5), 0.6)
 gravar('morte', juntar([(0.0, nota(293.7, 0.9, 0.35)), (0.35, nota(246.9, 0.9, 0.35)), (0.7, nota(196.0, 1.4, 0.5))], 2.2), 0.7)
 gravar('aviso', juntar([(0.0, nota(82.4, 0.5, 0.25, (1, 0.6, 0.4, 0.2))), (0.45, nota(87.3, 0.9, 0.4, (1, 0.6, 0.4, 0.2)))], 1.4), 0.8)

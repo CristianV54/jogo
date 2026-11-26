@@ -80,6 +80,9 @@ func _ready() -> void:
 	jogador.morreu.connect(_ao_morrer)
 	jogador.item_coletado.connect(hud.item_coletado)
 	jogador.inventario_mudou.connect(hud.inventario_mudou)
+	jogador.fome_mudou.connect(hud.definir_fome)
+	hud.oficio.jogador = jogador
+	hud.oficio.fechar_pedido.connect(fechar_oficio)
 	hud.usar_item.connect(_ao_usar_item)
 	hud.fechar_inventario_pedido.connect(_alternar_inventario)
 	hud.definir_vida(jogador.vida, jogador.vida_max)
@@ -144,6 +147,9 @@ func _iniciar_mundo() -> void:
 	else:   # mundo aberto sem história: a Fagulha já é companheira, crescida e montável desde o começo
 		fagulha.definir_fase(3)
 		liberar_fagulha()
+	jogador.coletar("espada_curta", 1)   # o que o Torin leva ao começar: a espada dele, um pão e umas moedas
+	jogador.coletar("pao", 2)
+	jogador.coletar("moeda", 15)
 	if SalvarJogo.ativo():   # continua de onde parou e passa a gravar sozinho
 		if SalvarJogo.carregar(self):
 			hud.mensagem("Jogo carregado.", 3.0)
@@ -523,10 +529,32 @@ func _alternar_inventario() -> void:
 
 
 func _ao_usar_item(item: String) -> void:
+	var dados: Dictionary = Itens.DADOS[item]
 	if jogador.usar_item(item):
-		hud.mensagem("%s: +%d de vida" % [Itens.nome(item), int(Itens.DADOS[item]["cura"])], 1.5)
-	elif int(Itens.DADOS[item]["cura"]) > 0:
-		hud.mensagem("Vida cheia: não precisa comer agora.", 1.5)
+		if dados.has("dano"):
+			hud.mensagem("%s na mão: dano %d" % [Itens.nome(item), int(dados["dano"])], 1.8)
+		elif dados.has("defesa"):
+			hud.mensagem("%s vestida" % Itens.nome(item) if jogador.equipado["armadura"] == item else "%s tirada" % Itens.nome(item), 1.8)
+		else:
+			hud.mensagem("Comeu %s" % Itens.nome(item), 1.5)
+	elif int(dados.get("cura", 0)) > 0 or float(dados.get("fome", 0)) > 0.0:
+		hud.mensagem("Sem fome e com a vida cheia: não precisa comer agora.", 1.8)
+
+
+## Abre o comércio ("loja") ou a forja ("forja"): o Torin para e o mouse aparece para clicar na lista.
+func abrir_oficio(modo: String, oferta: Array, nome: String) -> void:
+	if hud.dialogo_aberto or jogador.morto or hud.inventario_aberto:
+		return
+	hud.oficio.abrir(modo, oferta, nome)
+	jogador.travado = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func fechar_oficio() -> void:
+	hud.oficio.visible = false
+	jogador.travado = false
+	if camera.capturar_mouse:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func interagir() -> void:

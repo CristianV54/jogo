@@ -9,6 +9,8 @@ signal vida_mudou(atual: int, maximo: int)
 signal morreu
 signal item_coletado(item: String, quantidade: int, inventario: Dictionary)
 signal inventario_mudou(inventario: Dictionary)
+signal fome_mudou(atual: float)
+signal equipamento_mudou(equipado: Dictionary)
 signal acertou   # o golpe pegou em alguém (o som do acerto escuta isto)
 
 @export var camera: CameraTerceiraPessoa
@@ -31,6 +33,11 @@ var correndo_forcado := false
 var animacao_atual := ""
 var vida := 100
 var inventario := {}                   # {id do item: quantidade}
+var fome := 100.0                      # 100 = saciado; cai com o tempo (mais correndo); a zero o Torin perde vida
+var equipado := {"arma": "espada_curta", "armadura": ""}
+var defesa := 0.0                      # fração do dano que a armadura tira
+var _t_fome := 0.0
+var _comendo := 0.0
 var travado := false                   # diálogo aberto ou cena especial: não anda nem golpeia
 var morto := false
 var _golpeando := false
@@ -64,6 +71,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_passar_fome(delta)
 	_invulneravel = maxf(0.0, _invulneravel - delta)
 	_reacao = maxf(0.0, _reacao - delta)
 	_saindo = maxf(0.0, _saindo - delta)
@@ -179,7 +187,7 @@ func rolar() -> void:
 
 func _regenerar(delta: float) -> void:
 	_sem_dano += delta
-	if morto or vida >= vida_max or _sem_dano < regeneracao_apos:
+	if morto or vida >= vida_max or _sem_dano < regeneracao_apos or fome < 20.0:   # com muita fome a vida não volta sozinha
 		return
 	_regen += delta
 	if _regen >= 0.5:
@@ -218,7 +226,7 @@ func _acertar() -> void:
 func receber_dano(quantidade: int, _de: Node3D = null) -> void:
 	if morto or _invulneravel > 0.0:
 		return
-	vida = maxi(0, vida - quantidade)
+	vida = maxi(0, vida - maxi(1, int(round(quantidade * (1.0 - defesa)))))
 	_sem_dano = 0.0
 	_invulneravel = 0.7
 	vida_mudou.emit(vida, vida_max)
@@ -252,18 +260,80 @@ func gastar_item(item: String, quantidade: int) -> bool:
 	return true
 
 
-## Usa um item comestível: recupera vida e gasta uma unidade. Devolve false se não deu (sem o item, vida cheia, não comestível).
+## A fome cai sozinha (uns 25 minutos parado para ir de 100 a 0; correndo, o dobro). A zero, o Torin perde 1 de vida a
+## cada 4 segundos, até comer.
+func _passar_fome(delta: float) -> void:
+	if morto:
+		return
+	var antes := int(fome)
+	var gasto := 0.066 * (2.0 if Vector2(velocity.x, velocity.z).length() > velocidade_andando + 1.0 else 1.0)
+	fome = maxf(0.0, fome - gasto * delta)
+	if int(fome) != antes:
+		fome_mudou.emit(fome)
+	if fome <= 0.0:
+		_t_fome += delta
+		if _t_fome >= 4.0:
+			_t_fome = 0.0
+			var d := defesa
+			defesa = 0.0   # fome não é golpe: a armadura não protege
+			receber_dano(1)
+			defesa = d
+	if _comendo > 0.0:
+		_comendo -= delta
+		if _comendo <= 0.0:
+			travado = false
+			animacao_atual = ""
+
+
+## Usa um item da bolsa. Comida: o Torin para, leva a mão à boca (animação Interact) e recupera vida e fome. Arma ou
+## armadura: equipa (ou tira, se já era a equipada). Devolve false se não deu.
 func usar_item(item: String) -> bool:
-	var cura := int(Itens.DADOS.get(item, {}).get("cura", 0))
-	if morto or cura <= 0 or int(inventario.get(item, 0)) <= 0 or vida >= vida_max:
+	var dados: Dictionary = Itens.DADOS.get(item, {})
+	if morto or int(inventario.get(item, 0)) <= 0:
+		return false
+	if dados.has("dano") or dados.has("defesa"):
+		equipar(item)
+		return true
+	var cura := int(dados.get("cura", 0))
+	var mata_fome := float(dados.get("fome", 0))
+	if (cura <= 0 and mata_fome <= 0.0) or (vida >= vida_max and fome >= 99.0) or _comendo > 0.0:
 		return false
 	vida = mini(vida_max, vida + cura)
 	vida_mudou.emit(vida, vida_max)
+	fome = minf(100.0, fome + mata_fome)
+	fome_mudou.emit(fome)
 	inventario[item] = int(inventario[item]) - 1
 	if int(inventario[item]) <= 0:
 		inventario.erase(item)
 	inventario_mudou.emit(inventario)
+	if montaria == null:   # comer leva um instante: o Torin fica parado fazendo o gesto
+		_comendo = 1.1
+		travado = true
+		animacao_atual = "Interact"
+		visual.tocar("Interact", 0.1)
+	get_tree().call_group("sons", "tocar", "comer")
 	return true
+
+
+## Põe na mão a arma (muda o dano do golpe) ou veste a armadura (muda a defesa). Equipar de novo a armadura que já está
+## vestida tira. O item continua na bolsa.
+func equipar(item: String) -> void:
+	var dados: Dictionary = Itens.DADOS.get(item, {})
+	if dados.has("dano"):
+		equipado["arma"] = item
+		dano_golpe = int(dados["dano"])
+		var a: Dictionary = dados["arma"]
+		visual.trocar_arma(load(String(dados["modelo"])), float(a["escala"]), a["giro"], a["deslocamento"], a["empunhadura"])
+	elif dados.has("defesa"):
+		if equipado["armadura"] == item:
+			equipado["armadura"] = ""
+			defesa = 0.0
+			visual.vestir({})
+		else:
+			equipado["armadura"] = item
+			defesa = float(dados["defesa"])
+			visual.vestir(dados["veste"])
+	equipamento_mudou.emit(equipado)
 
 
 func reviver() -> void:

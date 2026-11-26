@@ -7,7 +7,7 @@ signal usar_pedido(item: String)
 signal fechar_pedido
 
 const COLUNAS := 6
-const LINHAS := 4
+const LINHAS := 5
 const TAM_SLOT := 72
 const COR_FUNDO := Color(0.07, 0.065, 0.06, 0.94)
 const COR_SLOT := Color(0.16, 0.15, 0.14, 1.0)

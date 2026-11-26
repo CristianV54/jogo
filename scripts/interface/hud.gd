@@ -22,6 +22,9 @@ var _dialogo_texto: Label
 var _mensagem: Label
 var _inventario_label: Label
 var _painel: PainelInventario
+var oficio: PainelDeOficio      # comércio e forja (o Jogo abre e fecha)
+var _fome_barra: ColorRect
+var _moedas_texto: Label
 var _rastreador: Label
 var _destino_label: Label
 var _relogio: Label
@@ -49,6 +52,10 @@ func _ready() -> void:
 	_vida_fundo = _retangulo(Vector2(24, 24), Vector2(260, 22), COR_FUNDO)
 	_vida_barra = _retangulo(Vector2(26, 26), Vector2(256, 18), COR_VIDA)
 	_vida_texto = _rotulo("Torin", Vector2(30, 48), 18)
+	_retangulo(Vector2(24, 74), Vector2(180, 12), COR_FUNDO)   # fome: barra mais fina, cor de pão
+	_fome_barra = _retangulo(Vector2(26, 76), Vector2(176, 8), Color(0.85, 0.6, 0.25))
+	_rotulo("Fome", Vector2(210, 66), 14)
+	_moedas_texto = _rotulo("Moedas: 0", Vector2(30, 90), 16)
 
 	_chefe_caixa = Control.new()
 	_chefe_caixa.visible = false
@@ -127,6 +134,9 @@ func _ready() -> void:
 	_painel.fechar_pedido.connect(func() -> void: fechar_inventario_pedido.emit())
 	_raiz.add_child(_painel)
 
+	oficio = PainelDeOficio.new()
+	_raiz.add_child(oficio)
+
 	mapa = MapaDoMundo.new()
 	_raiz.add_child(mapa)
 
@@ -159,6 +169,11 @@ func _rotulo(texto: String, pos: Vector2, tamanho_fonte: int) -> Label:
 
 func definir_relogio(texto: String) -> void:
 	_relogio.text = texto
+
+
+func definir_fome(atual: float) -> void:
+	_fome_barra.size.x = 176.0 * clampf(atual / 100.0, 0.0, 1.0)
+	_fome_barra.color = Color(0.85, 0.6, 0.25) if atual > 20.0 else Color(0.85, 0.25, 0.15)   # vermelha quando a fome aperta
 
 
 func definir_vida(atual: int, maximo: int) -> void:
@@ -198,6 +213,7 @@ func inventario_mudou(inventario: Dictionary) -> void:
 		if int(inventario.get(id, 0)) > 0:
 			linhas.append("%s  x%d" % [Itens.nome(id), inventario[id]])
 	_inventario_label.text = "\n".join(linhas)
+	_moedas_texto.text = "Moedas: %d" % int(inventario.get("moeda", 0))
 	_painel.definir(inventario)
 
 

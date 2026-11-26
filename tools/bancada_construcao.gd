@@ -109,6 +109,8 @@ func _rodar() -> void:
 			await _tubarao()
 		"dragoes":
 			await _dragoes()
+		"armaduras":
+			await _armaduras()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -340,3 +342,25 @@ func _dragoes() -> void:
 		await _foto("%s_tres_quartos" % id, Vector3(x + 7, 4.5, 8), Vector3(x, 1.6, 0), Vector3(x - 3.5, 0, 2.0))
 		_conferir("Dragão %s: tem animação tocando" % id, d._anim != null and d._anim.is_playing(), d._anim.current_animation if d._anim else "sem AnimationPlayer")
 		x += 60.0
+
+
+## O Torin vestido: sem nada, com a armadura de couro e com a de ferro, cada uma com uma arma diferente, de frente,
+## de lado e de costas (três bonecos lado a lado; o Torin de régua fica fora do quadro).
+func _armaduras() -> void:
+	var trajes := [["", "espada_curta"], ["armadura_de_couro", "machado"], ["armadura_de_ferro", "katana"]]
+	for k in trajes.size():
+		var boneco := (load("res://scenes/personagens/torin.tscn") as PackedScene).instantiate() as Humanoide
+		root.add_child(boneco)
+		boneco.position = Vector3(k * 1.6 - 1.6, 0, 0)
+		var arma: Dictionary = Itens.DADOS[trajes[k][1]]
+		boneco.trocar_arma(load(String(arma["modelo"])), float(arma["arma"]["escala"]), arma["arma"]["giro"], arma["arma"]["deslocamento"], arma["arma"]["empunhadura"])
+		if trajes[k][0] != "":
+			boneco.vestir(Itens.DADOS[trajes[k][0]]["veste"])
+		boneco.tocar("Idle", 0.0)
+	for i in 20:
+		await process_frame
+	await _foto("01_de_frente", Vector3(0, 1.3, 4.6), Vector3(0, 1.1, 0), Vector3(40, 0, 0))
+	await _foto("02_de_costas", Vector3(0, 1.3, -4.6), Vector3(0, 1.1, 0), Vector3(40, 0, 0))
+	await _foto("03_de_lado", Vector3(5.0, 1.3, 0.6), Vector3(0, 1.1, 0), Vector3(40, 0, 0))
+	await _foto("04_ferro_de_perto", Vector3(2.4, 1.5, 1.6), Vector3(1.6, 1.3, 0), Vector3(40, 0, 0))
+	await _foto("05_couro_de_perto", Vector3(0.8, 1.5, 1.6), Vector3(0, 1.3, 0), Vector3(40, 0, 0))

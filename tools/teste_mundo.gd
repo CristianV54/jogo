@@ -97,7 +97,7 @@ func _rodar() -> void:
 	for nome_p in sons.tocados:
 		if String(nome_p).begins_with("passo_"):
 			passos_depois += int(sons.tocados[nome_p])
-	marcar("Som: 18 efeitos, 4 laços tocando (vento, mar, grilos, música), rugido ao domar, som de pegar item e passos ao andar", sons._amostras.size() == 18 and not sons._amostras.values().has(null) and lacos_tocando == 4 and int(sons.tocados.get("rugido", 0)) == 1 and int(sons.tocados.get("coletar", 0)) >= 1 and passos_depois - passos_antes >= 2, "%d efeitos, %d laços, rugido %d, coletar %d, passos em 2 s: %d" % [sons._amostras.size(), lacos_tocando, int(sons.tocados.get("rugido", 0)), int(sons.tocados.get("coletar", 0)), passos_depois - passos_antes])
+	marcar("Som: 19 efeitos, 4 laços tocando (vento, mar, grilos, música), rugido ao domar, som de pegar item e passos ao andar", sons._amostras.size() == 19 and not sons._amostras.values().has(null) and lacos_tocando == 4 and int(sons.tocados.get("rugido", 0)) == 1 and int(sons.tocados.get("coletar", 0)) >= 1 and passos_depois - passos_antes >= 2, "%d efeitos, %d laços, rugido %d, coletar %d, passos em 2 s: %d" % [sons._amostras.size(), lacos_tocando, int(sons.tocados.get("rugido", 0)), int(sons.tocados.get("coletar", 0)), passos_depois - passos_antes])
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m
@@ -138,11 +138,59 @@ func _rodar() -> void:
 		if a.montaria != null:
 			montaveis += 1
 	marcar("Estábulos do Reino: 4 cavalos que dá para montar", montaveis == 4, str(montaveis))
+	# sobrevivência e ofícios: fome, comer, equipar arma e armadura, comprar, vender, pechinchar, forjar e minerar
+	var j: Jogador = jogo.jogador
+	j.fome = 50.0
+	j._passar_fome(60.0)
+	var caiu := 50.0 - j.fome
+	var paes := int(j.inventario.get("pao", 0))
+	j.fome = 50.0
+	j.usar_item("pao")
+	marcar("Fome: cai com o tempo (uns 4 pontos por minuto parado) e o pão mata 30", caiu > 2.0 and caiu < 9.0 and absf(j.fome - 80.0) < 0.5 and int(j.inventario.get("pao", 0)) == paes - 1 and j.animacao_atual == "Interact", "caiu %.1f em 60 s; depois do pão %.0f; animação %s" % [caiu, j.fome, j.animacao_atual])
+	j._comendo = 0.0
+	j.travado = false
+	j.animacao_atual = ""
+	j.coletar("espada_longa", 1)
+	j.coletar("armadura_de_couro", 1)
+	j.usar_item("espada_longa")
+	j.usar_item("armadura_de_couro")
+	var pecas_vestidas := 0
+	for no_a in j.visual.modelo.find_child("Skeleton3D", true, false).get_children():
+		if String(no_a.name).begins_with("Armadura"):
+			pecas_vestidas += 1
+	j.vida = 100
+	j._invulneravel = 0.0
+	j.receber_dano(10)
+	marcar("Equipar: espada longa dá dano 32; armadura de couro veste 3 peças e tira um quinto do dano", j.dano_golpe == 32 and j.equipado["arma"] == "espada_longa" and pecas_vestidas == 3 and j.vida == 92, "dano %d, %d peças, vida %d depois de um golpe de 10" % [j.dano_golpe, pecas_vestidas, j.vida])
+	j.vida = 100
+	j.vida_mudou.emit(100, 100)
 	var mercado := m.povoados["mercado_central"]["no"] as Povoado
-	jogo.jogador.coletar("couro", 1)
-	var carne_antes := int(jogo.jogador.inventario.get("carne", 0))
-	(mercado.trocas[1] as Gatilho).ao_usar.call(mercado.trocas[1])
-	marcar("Mercado: trocar 1 couro rende 3 carnes", int(jogo.jogador.inventario.get("carne", 0)) == carne_antes + 3 and int(jogo.jogador.inventario.get("couro", 0)) == 0, str(jogo.jogador.inventario))
+	(mercado.balcoes[1] as Gatilho).ao_usar.call(mercado.balcoes[1])   # a mercadora de sal: pão a 4 moedas
+	var loja: PainelDeOficio = jogo.hud.oficio
+	var aberta := loja.visible and j.travado
+	j.inventario["moeda"] = 20
+	j.coletar("couro", 1)
+	var comprou := loja.comprar("pao")
+	var moedas_1 := int(j.inventario["moeda"])
+	var vendeu := loja.vender("couro")
+	var moedas_2 := int(j.inventario["moeda"])
+	var deu := loja.pechinchar(0.1)
+	var barato := loja.preco_de_compra("pao")
+	jogo.fechar_oficio()
+	marcar("Comércio: 4 balcões no mercado; comprar pão custa 4, vender couro rende 4, pechinchar baixa o pão para 4 -> 4 (80%)", mercado.balcoes.size() == 4 and aberta and comprou and moedas_1 == 16 and vendeu and moedas_2 == 20 and deu and barato == 4 and loja.preco_de_compra("espada_longa") == 36 and not loja.visible and not j.travado, "aberta %s; moedas 20 -> %d -> %d; espada longa com desconto %d" % [aberta, moedas_1, moedas_2, loja.preco_de_compra("espada_longa")])
+	(mercado.bigornas[0] as Gatilho).ao_usar.call(mercado.bigornas[0])
+	j.coletar("minerio_de_ferro", 2)
+	var forjou := loja.forjar(0)
+	var sem_material := not loja.forjar(3)
+	jogo.fechar_oficio()
+	var veio: VeioDeFerro = m.montanha.find_children("*", "VeioDeFerro", true, false)[0]
+	var minerio_antes := int(j.inventario.get("minerio_de_ferro", 0))
+	veio.acionar()   # sem picareta: nada
+	var sem_picareta := int(j.inventario.get("minerio_de_ferro", 0)) == minerio_antes
+	j.coletar("picareta", 1)
+	veio.acionar()
+	var tirou := int(j.inventario.get("minerio_de_ferro", 0)) - minerio_antes
+	marcar("Forja e mineração: 2 minérios viram 1 lingote; sem material não forja; o veio só dá ferro com picareta e depois descansa", forjou and int(j.inventario.get("lingote_de_ferro", 0)) == 1 and sem_material and sem_picareta and tirou >= 2 and not veio.disponivel(), "forjou %s, lingotes %d, veio deu %d" % [forjou, int(j.inventario.get("lingote_de_ferro", 0)), tirou])
 	var sentinelas := 0
 	for g in ["guarita_sul", "guarita_oeste", "guarita_leste"]:
 		sentinelas += (m.povoados[g]["no"] as Povoado).npcs.size()

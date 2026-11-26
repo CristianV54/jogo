@@ -9,7 +9,7 @@ extends Node
 ## que saiu, para os testes. Outros sistemas pedem um efeito por grupo: get_tree().call_group("sons", "tocar", "rugido").
 
 const PASTA := "res://assets/audio/"
-const EFEITOS := ["passo_terra_0", "passo_terra_1", "passo_terra_2", "passo_pedra_0", "passo_pedra_1", "passo_pedra_2", "casco", "golpe", "acerto", "dano", "coletar", "morte", "aviso", "asa", "rugido", "passaro_0", "passaro_1", "passaro_2"]
+const EFEITOS := ["passo_terra_0", "passo_terra_1", "passo_terra_2", "passo_pedra_0", "passo_pedra_1", "passo_pedra_2", "casco", "golpe", "acerto", "dano", "coletar", "comer", "morte", "aviso", "asa", "rugido", "passaro_0", "passaro_1", "passaro_2"]
 const LACOS := {"vento": -20.0, "mar": -60.0, "grilos": -60.0, "musica": -17.0}   # volume inicial em dB (-60 = calado)
 
 var jogo: Jogo

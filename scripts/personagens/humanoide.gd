@@ -123,3 +123,41 @@ func equipar_arma(arma: PackedScene, escala_arma: float, giro_graus: Vector3, de
 	anexo.add_child(inst)
 	inst.position = deslocamento - inst.transform.basis * empunhadura
 	return inst
+
+
+## Troca a arma da mão direita (tira a que estava). Devolve o nó novo.
+func trocar_arma(arma: PackedScene, escala_arma: float, giro_graus: Vector3, deslocamento: Vector3, empunhadura := Vector3.ZERO) -> Node3D:
+	var esq: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
+	var velho := esq.get_node_or_null("ArmaMaoDireita")
+	if velho:
+		esq.remove_child(velho)
+		velho.queue_free()
+	arma_escala = escala_arma
+	arma_giro = giro_graus
+	arma_deslocamento = deslocamento
+	arma_empunhadura = empunhadura
+	_arma_mao = equipar_arma(arma, escala_arma, giro_graus, deslocamento, empunhadura)
+	return _arma_mao
+
+
+## Veste (ou tira, com `pecas` vazio) uma armadura. As peças são modeladas no espaço do corpo em pose de descanso; cada
+## uma é presa a um osso e acompanha o movimento: o peito em spine_03, as ombreiras nos braços (a direita, espelhada).
+func vestir(pecas: Dictionary) -> void:
+	var esq: Skeleton3D = modelo.find_child("Skeleton3D", true, false)
+	for velho in esq.get_children():
+		if String(velho.name).begins_with("Armadura"):
+			esq.remove_child(velho)
+			velho.queue_free()
+	for parte in [["peito", "spine_03", 1.0], ["ombro", "upperarm_l", 1.0], ["ombro", "upperarm_r", -1.0]]:
+		if not pecas.has(parte[0]):
+			continue
+		var osso := esq.find_bone(String(parte[1]))
+		if osso < 0:
+			continue
+		var anexo := BoneAttachment3D.new()
+		anexo.name = "Armadura_%s" % String(parte[1])
+		anexo.bone_name = String(parte[1])
+		esq.add_child(anexo)
+		var peca := (load(String(pecas[parte[0]])) as PackedScene).instantiate() as Node3D
+		anexo.add_child(peca)
+		peca.transform = esq.get_bone_global_rest(osso).affine_inverse() * Transform3D(Basis.from_scale(Vector3(float(parte[2]), 1.0, 1.0)), Vector3.ZERO)

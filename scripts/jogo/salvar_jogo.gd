@@ -15,7 +15,7 @@ static func gravar(jogo: Jogo, arquivo := ARQUIVO) -> bool:
 	if jogo.mundo == null or jogo.jogador.morto:
 		return false
 	var p: Vector3 = jogo.jogador.global_position
-	var dados := {"versao": 1, "pos": [p.x, p.y, p.z], "vida": jogo.jogador.vida, "inventario": jogo.jogador.inventario, "hora": jogo.clima.hora, "cinza_domado": false}
+	var dados := {"versao": 1, "pos": [p.x, p.y, p.z], "vida": jogo.jogador.vida, "inventario": jogo.jogador.inventario, "hora": jogo.clima.hora, "cinza_domado": false, "fome": jogo.jogador.fome, "equipado": jogo.jogador.equipado}
 	var cinza: DragaoSelvagem = jogo.mundo.montanha.domavel
 	if cinza and cinza.domado:
 		dados["cinza_domado"] = true
@@ -47,6 +47,13 @@ static func carregar(jogo: Jogo, arquivo := ARQUIVO) -> bool:
 		jogo.jogador.inventario[String(item)] = int(inv[item])
 	jogo.jogador.inventario_mudou.emit(jogo.jogador.inventario)
 	jogo.clima.definir_hora(float(dados.get("hora", 9.0)))
+	jogo.jogador.fome = clampf(float(dados.get("fome", 100.0)), 0.0, 100.0)
+	jogo.jogador.fome_mudou.emit(jogo.jogador.fome)
+	var eq: Dictionary = dados.get("equipado", {})
+	for parte in ["arma", "armadura"]:   # volta a equipar o que estava na mão e no corpo (se ainda está na bolsa)
+		var item := String(eq.get(parte, ""))
+		if item != "" and int(jogo.jogador.inventario.get(item, 0)) > 0 and jogo.jogador.equipado[parte] != item:
+			jogo.jogador.equipar(item)
 	if bool(dados.get("cinza_domado", false)):
 		var cinza: DragaoSelvagem = jogo.mundo.montanha.domavel
 		cinza.domar(false)
