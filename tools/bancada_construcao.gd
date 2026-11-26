@@ -105,6 +105,8 @@ func _rodar() -> void:
 			await _quartel()
 		"acampamento":
 			await _acampamento()
+		"tubarao":
+			await _tubarao()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -303,3 +305,18 @@ func _acampamento() -> void:
 	await _foto("02_tenda_de_perto", Vector3(-1.5, 1.7, 5.5), Vector3(-4, 1.0, 0), Vector3(-6.6, 0, 2.2))
 	await _foto("03_barco_de_perto", Vector3(4.2, 2.0, 4.2), Vector3(1.5, 0.4, 0.5), Vector3(-0.4, 0, 1.6))
 	_conferir("Acampamento: as três peças têm colisão", kit._corpo.get_child_count() == 3, "%d sólidos" % kit._corpo.get_child_count())
+
+
+
+## O tubarão sozinho, fora d'água, com o Torin de régua: de lado, de frente, de costas e de cima, nadando.
+func _tubarao() -> void:
+	var no := Tubarao.criar_modelo()
+	no.position = Vector3(0, 1.4, 0)
+	root.add_child(no)
+	var anim := no.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	_conferir("Tubarão: tem a animação Swim e ela está tocando", anim != null and anim.current_animation == "Swim", str(anim.get_animation_list()) if anim else "sem AnimationPlayer")
+	await _foto("01_de_lado", Vector3(9, 2.0, 0.5), Vector3(0, 1.4, 0.5), Vector3(0, 0, -4.0))
+	await _foto("02_de_frente", Vector3(0, 1.8, 8.5), Vector3(0, 1.4, 0), Vector3(2.6, 0, 1.0))
+	await _foto("03_de_costas", Vector3(0, 2.2, -9.5), Vector3(0, 1.4, 0), Vector3(2.6, 0, -1.0))
+	await _foto("04_de_cima", Vector3(0.01, 10, 0), Vector3(0, 0, 0), Vector3(3.0, 0, 0))
+	await _foto("05_cabeca_ampliada", Vector3(2.6, 2.2, 4.6), Vector3(0, 1.4, 2.0), Vector3(-3.0, 0, 0))

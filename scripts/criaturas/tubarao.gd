@@ -2,13 +2,15 @@ class_name Tubarao
 extends Node3D
 ## O mar em volta da ilha tem dono. No raso junto à praia dá para andar; quem passa do raso é avisado e, se insistir mar
 ## adentro, o tubarão vem e mata. É o limite do mundo (no lugar de uma parede seca na praia).
-## O Jogo liga `aviso` ao HUD. O corpo é um PLACEHOLDER visível (falta o modelo do tubarão: ver assets/ASSETS.md).
+## O Jogo liga `aviso` ao HUD. O corpo é um tubarão-martelo rigado, com a animação Swim (ver assets/ASSETS.md).
 
 signal aviso(texto: String)
 
 const AVISA_EM := -Costa.LARGURA_RASO + 4.0   # distância da costa (negativa = mar) em que o aviso aparece
 const ATACA_EM := -Costa.LARGURA_RASO - 6.0   # dali para fora o tubarão vem
 const VELOCIDADE := 14.0
+const MODELO := preload("res://assets/models/criaturas/tubarao/tubarao.glb")
+const ESCALA := 0.75   # 5,7 m de comprimento
 
 var _corpo: Node3D
 var _avisou := false
@@ -17,19 +19,34 @@ var _cacando := false
 
 func _ready() -> void:
 	_corpo = Node3D.new()
-	_corpo.name = "PLACEHOLDER_Tubarao"
-	var barbatana := MeshInstance3D.new()   # só a barbatana fora d'água: stand-in declarado até entrar o modelo de verdade
-	var prisma := PrismMesh.new()
-	prisma.size = Vector3(1.6, 1.3, 0.12)
-	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.25, 0.28, 0.32)
-	prisma.material = m
-	barbatana.mesh = prisma
-	barbatana.rotation.y = PI / 2.0
-	barbatana.position.y = 0.5
-	_corpo.add_child(barbatana)
+	_corpo.name = "Tubarao"
+	var modelo := criar_modelo()
+	modelo.rotation.y = PI            # look_at aponta o -Z do corpo para o alvo: o modelo vira para lá
+	modelo.position.y = -0.55         # o corpo vai debaixo d'água; só a barbatana das costas corta a superfície
+	_corpo.add_child(modelo)
 	_corpo.visible = false
 	add_child(_corpo)
+
+
+## O tubarão-martelo CC0 (ver assets/ASSETS.md) no tamanho do jogo, cinza-azulado e já nadando. A frente do modelo é +Z.
+static func criar_modelo() -> Node3D:
+	var modelo := MODELO.instantiate() as Node3D
+	modelo.name = "Modelo"
+	modelo.scale = Vector3.ONE * ESCALA
+	for mi in modelo.find_children("*", "MeshInstance3D", true, false):
+		var malha := mi as MeshInstance3D
+		for i in malha.mesh.get_surface_count():
+			var mat := malha.get_active_material(i)
+			if mat is StandardMaterial3D:
+				var d := mat.duplicate() as StandardMaterial3D
+				d.albedo_color = Color(0.5, 0.56, 0.64)   # a pintura original é quase branca: escurece para cinza de tubarão
+				malha.set_surface_override_material(i, d)
+	var anim := modelo.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if anim and anim.has_animation("Swim"):
+		anim.get_animation("Swim").loop_mode = Animation.LOOP_LINEAR
+		anim.play("Swim")
+		anim.speed_scale = 1.6
+	return modelo
 
 
 func _physics_process(delta: float) -> void:
