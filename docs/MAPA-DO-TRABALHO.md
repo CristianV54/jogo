@@ -37,7 +37,27 @@ Ponto de entrada: [CLAUDE.md](../CLAUDE.md) (regras e estado atual) e [README.md
 
 ### Testes de sistemas antigos
 
-ESTADO_DOS_TESTES
+Rodados um por um em 26/11/2026, sem janela, com limite de 10 minutos cada (`godot --headless --path . --script res://tools/<teste>.gd`). Os que falham foram escritos para o mundo em corredor e para a campanha; **não foram revistos para a ilha**. Antes de confiar num deles, ler o que ele confere.
+
+| Teste | Resultado | Leitura |
+|---|---|---|
+| `teste_moveis.gd` | PASSOU (3 de 3) | Vale. |
+| `teste_queda.gd` | PASSOU (2 de 2) | Vale. |
+| `teste_rotinas.gd` | PASSOU (9 de 9) | Vale. |
+| `teste_simulacao.gd` | PASSOU (8 de 8) | Vale. |
+| `teste_inventario.gd` | 20 de 21 nesta rodada | O item que falhou (vida 71 em vez de 70: a vida volta sozinha durante a espera) foi corrigido depois com tolerância; o teste foi atualizado para o jogo de hoje (começa com itens, 30 espaços, fome) e NÃO foi rodado de novo depois da correção. |
+| `teste_solidos.gd` | 19 passaram, não terminou em 10 min | Sem falha vista; precisa de mais tempo para acabar. |
+| `teste_fagulha_ambientes.gd` | 11 passaram, não terminou em 10 min | Idem. |
+| `teste_bordas.gd` | não terminou em 10 min, nenhum resultado | Anda pelos 4 lados de cada região; é lento. Não se sabe se passa. |
+| `teste_sono.gd` | 10 passaram, 2 FALHARAM | "À noite os NPCs deitam na cama: 1 de 7" e a parte de Valdoria (cita a cidade antiga). O primeiro pode ser defeito real: investigar. (`teste_mundo` confere que os trabalhadores se recolhem e isso passa.) |
+| `teste_medo.gd` | 5 passaram, 1 FALHOU | "Com o lobo solto os NPCs entraram nas casas: 0 de 3". Pode ser defeito real: investigar. |
+| `teste_caca.gd` | 3 passaram, 1 FALHOU | "O NPC mordido foge para casa". Já era instável antes da ilha. |
+| `teste_rio.gd` | 1 passou, 2 FALHARAM | Confere uma ponte e um leito em coordenadas do mundo antigo. |
+| `teste_cartaz.gd` | 6 passaram, 2 FALHARAM | Espera cartazes do Solon em Valdoria e na estátua, que saíram com a cidade antiga. |
+| `teste_fagulha.gd` | 4 passaram, 8 FALHARAM | Confere as 3 fases da Fagulha trocadas pelas missões; com a história desligada ela já começa na fase 3. |
+| `teste_montaria_dano.gd` | 2 passaram, 9 FALHARAM, não terminou | Foi feito para rodar COM janela (tira fotos) e procura a primeira vaca do mundo, que na ilha pode estar longe e parada. Golpear animal e montar NÃO estão cobertos por teste hoje. |
+| `teste_camera_casa.gd` | erro: precisa de janela | Tira fotos; rodar com `xvfb-run` e `--rendering-driver opengl3`. |
+| `teste_casas.gd`, `teste_animais_obstaculos.gd` | terminaram sem imprimir PASSOU nem FALHOU | Usam outro formato de saída; ler a saída inteira para julgar. |
 
 ### Todas as ferramentas (primeira linha de comentário de cada uma)
 
@@ -270,6 +290,8 @@ ESTADO_DOS_TESTES
 - Modelos próprios: cervo (usa o do cavalo), arqueiro, guarda imperial e Kaelor (mesmo boneco), chefes.
 
 ### Nunca conferido
+- Golpear animal e montar cavalo ou dragão: o teste antigo (`teste_montaria_dano.gd`) não roda mais; nada confere isso hoje.
+- Se os NPCs ainda dormem na cama e fogem para casa: `teste_sono.gd` e `teste_medo.gd` falham nesses itens (ver a tabela da seção 2).
 - O jogo no Mac do usuário: desempenho, tempo da primeira abertura, cor da água, linha d'água do tubarão.
 - O som: gerado por síntese, testado só por contagem; ninguém ouviu.
 

@@ -137,6 +137,8 @@ docs/        LEIS-DO-JOGO.md, MAPA-DO-TRABALHO.md, HISTORIA-E-MISSOES.md, constr
 
 **Como conferir:** `tools/teste_mundo.gd` (cobre mundo, Valdoria, montanha, gelo, som, salvar, fome, equipar, comércio, forja, mineração), `tools/auditoria_reino.gd`, `tools/capturar_reino.gd`, as bancadas. O estado de cada teste antigo está na tabela de `docs/MAPA-DO-TRABALHO.md`.
 
+**Sem teste que valha hoje:** golpear animal e montar (o teste antigo não roda na ilha), e se os NPCs dormem na cama e fogem para casa (`teste_sono` e `teste_medo` falham nesses itens; pode ser defeito real). Ver a tabela da seção 2 de `docs/MAPA-DO-TRABALHO.md`.
+
 **Nunca conferido:** o jogo no Mac do usuário (desempenho, tempo de abertura, cor da água) e o SOM (este ambiente não tem saída de áudio: os sons foram gerados por síntese e só testados por contagem).
 
 **Código que existe e está desligado ou sem uso** (decisão pendente do usuário, não apagar sem ele pedir):

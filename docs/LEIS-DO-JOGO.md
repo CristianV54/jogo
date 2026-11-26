@@ -10,7 +10,7 @@ Regras que o jogo nunca pode quebrar, cada uma com o teste que a confere HOJE. E
 | Todo povoado tem gente trabalhando; há fazendeiros nos campos e fauna solta | `teste_mundo` |
 | Lobo e javali não nascem dentro de fazenda ou vila; ninguém nasce dentro d'água | `teste_mundo` |
 | À noite e na tempestade os trabalhadores se recolhem; de manhã voltam | `teste_mundo` |
-| A beirada de uma região nunca é um degrau: entra-se andando por qualquer lado | `teste_bordas` |
+| A beirada de uma região nunca é um degrau: entra-se andando por qualquer lado | `teste_bordas` (não terminou em 10 min em 26/11: não se sabe se passa) |
 | Cair do mundo não mata: o Torin volta ao último chão firme | `teste_queda` |
 
 ## Valdoria
@@ -49,6 +49,15 @@ Regras que o jogo nunca pode quebrar, cada uma com o teste que a confere HOJE. E
 |---|---|
 | Criatura nova ou alterada é fotografada sozinha, com o Torin de régua, antes de entrar no jogo | `tools/bancada.gd`, `tools/bancada_construcao.gd -- dragoes`, `-- tubarao` |
 | Peça de construção nova passa pela bancada e tem critério de pronto escrito | `tools/bancada_construcao.gd`, `docs/construcoes/<peca>.md` |
+
+## Leis sem teste que valha hoje
+
+| Lei | Situação |
+|---|---|
+| Golpe do Torin tira vida de animal e de inimigo; monta-se e desmonta-se cavalo e dragão | `teste_montaria_dano` foi feito para o mundo antigo e com janela: falha. Sem cobertura. |
+| NPC dorme na própria cama à noite; NPC foge de monstro para dentro de casa | `teste_sono` e `teste_medo` falham nesses itens (podem ser defeito real). |
+| O cavalo montado não atravessa parede; monstro não entra em casa | `teste_simulacao` PASSA (8 de 8). |
+| As rotinas de trabalho dos NPCs | `teste_rotinas` PASSA (9 de 9). |
 
 ## Como rodar
 

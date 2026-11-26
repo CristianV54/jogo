@@ -1,5 +1,5 @@
 extends SceneTree
-## A beirada de cada região não pode ser um degrau: o Torin entra andando em cada uma das 8 regiões pelos 4 lados (meio do lado e a
+## A beirada de cada região não pode ser um degrau: o Torin entra andando em cada uma das regiões do mundo pelos 4 lados (meio do lado e a
 ## 1/4 e 3/4 dele), saindo de 18 m fora, por 9 s. Falha se ele parar na linha da borda (foi a trava de x=-160 na entrada do Refúgio).
 ## Parar antes ou depois da borda não conta: aí é árvore, rio, serra ou muro.   godot --headless --path . --script res://tools/teste_bordas.gd
 var jogo: Jogo

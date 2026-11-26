@@ -1,7 +1,8 @@
 class_name Mundo
 extends Node3D
-## O mundo contínuo: as 8 regiões já construídas postas lado a lado, ligadas por estradas, com rios, pontes, florestas,
-## barreiras de história, povoados e fazendas no caminho. Sem portais: dá para ir de qualquer região a outra a pé.
+## O MUNDO: a ilha inteira (planta em MundoDados). Constrói, nesta ordem, as 6 regiões antigas (cada uma é uma cena posta
+## no seu lugar), o chão em blocos, a costa, as pontes, a beira das estradas, a muralha e a cidadela de Valdoria, a
+## Montanha dos Dragões, as Terras do Gelo, a mata, os povoados, o casario, a fauna e o capim. Vai-se a qualquer lugar a pé.
 ## As áreas continuam com as próprias coordenadas locais (cada uma é um nó posto na sua posição do mundo).
 
 signal progresso(texto: String)

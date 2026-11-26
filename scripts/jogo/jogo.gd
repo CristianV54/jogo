@@ -1,7 +1,8 @@
 class_name Jogo
 extends Node3D
-## Cena principal: mantém o jogador, o Fagulha, a câmera e a interface, e troca a área do mundo.
-## Progresso: cada chefe derrotado liberta o caminho para o próximo. Dá para jogar do início ao fim sem sair daqui.
+## Cena principal: mantém o jogador, a Fagulha, a câmera, a interface, o clima e o som; constrói o Mundo; trata a tecla E
+## (falar, montar, usar), o inventário, o mapa, o comércio e a forja, e o salvar. As partes de chefes, requisitos e
+## missões são da campanha antiga, DESLIGADA por `historia = false` (ver CLAUDE.md, Estado atual).
 
 const AREAS := {
 	"refugio_do_pinhal": "res://scenes/areas/refugio_do_pinhal.tscn",
