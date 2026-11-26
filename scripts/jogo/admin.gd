@@ -1,11 +1,11 @@
 class_name Admin
 extends Node
 ## Ferramentas de teste e auditoria, separadas do jogo normal (nó filho do Jogo; não toca no gameplay):
-##   F1 a F8   teleporte para cada região (Torin, ou o Drone se estiver ligado), ignorando os bloqueios da história
+##   F1 a F6   teleporte para cada região (Torin, ou o Drone se estiver ligado), ignorando os bloqueios da história
 ##   F9        hora: 6h, 12h, 18h, 22h      F10  tempo: limpo, nublado, chuva, tempestade
 ##   F11       liga e desliga o Drone (câmera livre)
 
-const REGIOES := ["refugio_do_pinhal", "pomar_alto", "bosque_velado", "acampamento_ruptura", "fronteira_ferrogris", "cratera_ignis", "valdoria", "castelo_imperial"]
+const REGIOES := ["refugio_do_pinhal", "pomar_alto", "bosque_velado", "acampamento_ruptura", "fronteira_ferrogris", "cratera_ignis"]
 const HORAS := [6.0, 12.0, 18.0, 22.0]
 
 var jogo: Node

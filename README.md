@@ -30,7 +30,7 @@ godot --path . --resolution 1280x720          # cena principal: scenes/jogo.tscn
 ```
 
 Teclas: WASD andar, Shift correr, Espaço pular, J golpe, K rolar, I inventário, M mapa, E falar/montar/interagir, F Fagulha voar, Esc solta o mouse.
-Modo Admin (nó `scripts/jogo/admin.gd`): F1 a F8 teleportam para cada região, F9 muda a hora, F10 muda o tempo, F11 liga o Drone (câmera livre sem o Torin).
+Modo Admin (nó `scripts/jogo/admin.gd`): F1 a F6 teleportam para cada região, F9 muda a hora, F10 muda o tempo, F11 liga o Drone (câmera livre sem o Torin).
 
 Depois de criar um script com `class_name` novo, rode uma vez `godot --headless --path . --import`, senão o Godot não acha a classe.
 

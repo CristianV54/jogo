@@ -10,21 +10,16 @@ const AREAS := {
 	"bosque_velado": "res://scenes/areas/bosque_velado.tscn",
 	"fronteira_ferrogris": "res://scenes/areas/fronteira_ferrogris.tscn",
 	"cratera_ignis": "res://scenes/areas/cratera_ignis.tscn",
-	"valdoria": "res://scenes/areas/valdoria.tscn",
-	"castelo_imperial": "res://scenes/areas/castelo_imperial.tscn",
 }
 ## Quem guarda cada passagem: para entrar na área, é preciso ter derrotado o chefe indicado.
 const REQUISITOS := {
 	"acampamento_ruptura": "gorath",
 	"cratera_ignis": "kaelor",
-	"valdoria": "ignis_maw",
 }
 ## Missão que precisa estar concluída para o Halk abrir a passagem.
-const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1", "valdoria": "C4-M4", "castelo_imperial": "C5-M1"}
+const REQUISITOS_MISSAO := {"bosque_velado": "C1-M4", "fronteira_ferrogris": "C3-M1"}
 const MENSAGEM_REQUISITO := {
 	"bosque_velado": "Halk barra o portão: termine os serviços do Refúgio primeiro (Resgate nas Sombras do Pinhal).",
-	"castelo_imperial": "A escadaria do castelo está guardada pela elite imperial: cumpra Portões e Ruas de Valdoria (mercado, suprimentos, guarda de elite).",
-	"valdoria": "A estrada para Valdoria só abre com a lâmina final: leve o minério vulcânico e a escama à Brenn (A Lâmina Forjada no Fogo).",
 	"fronteira_ferrogris": "A ponte está quebrada e o vau é vigiado. Resolva o que ficou pendente com o Vane e a Brenn (A Quebra do Juramento).",
 }
 const NOMES_DOS_CHEFES := {"gorath": "Brutamontes Gorath", "kaelor": "General Kaelor", "ignis_maw": "Ignis-Maw", "vane": "Vane", "solon": "Imperador Solon"}

@@ -3,14 +3,13 @@ extends PecasDeConstrucao
 ## Peças da Montanha dos Dragões: o ninho do topo (roda de pedras em pé, ossada, ovos, brasa), os marcos de pedra da
 ## trilha e o arco de ossos que marca o começo e o fim dela. Bancada: tools/bancada_construcao.gd -- ninho.
 
-const ROCHA := Color(0.32, 0.3, 0.29)
-const ROCHA_CLARA := Color(0.46, 0.43, 0.4)
+const ROCHA := Color(0.22, 0.2, 0.2)
+const ROCHA_CLARA := Color(0.33, 0.29, 0.27)
 const OSSO := Color(0.86, 0.82, 0.72)
 const BRASA := Color(1.0, 0.5, 0.15)
 
 
-func _eh_pedra(cor: Color) -> bool:
-	return cor.is_equal_approx(ROCHA) or cor.is_equal_approx(ROCHA_CLARA)
+## Aqui a rocha é bruta: cor lisa, sem o desenho de cantaria das muralhas (por isso nenhuma cor é "pedra").
 
 
 ## Peça inclinada: caixa (ou outra malha) com giro em Y e depois tombada em X e em Z.

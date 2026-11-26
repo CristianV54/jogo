@@ -29,7 +29,7 @@ func _r() -> void:
 			achou = (npc as Npc).falas.size() >= 2
 		_m("NPC %s existe com falas" % n, achou)
 	var solon_no_mundo := 0
-	for nome in ["refugio_do_pinhal", "pomar_alto", "bosque_velado", "fronteira_ferrogris", "cratera_ignis", "valdoria"]:
+	for nome in ["refugio_do_pinhal", "pomar_alto", "bosque_velado", "fronteira_ferrogris", "cratera_ignis"]:
 		for x in get_nodes_in_group("interagiveis"):
 			if x is Cartaz and jogo.mundo.regioes[nome].is_ancestor_of(x) and (x as Cartaz).linhas.any(func(l: String) -> bool: return l.contains("Solon") or l.contains("SOLON") or l.contains("Imperador")):
 				solon_no_mundo += 1

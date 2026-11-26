@@ -46,7 +46,6 @@ func _ready() -> void:
 	_novo_spawn("Principal", Vector3(0, altura_em(0, 130), 130), Vector3(0, 0, 90))
 	_novo_spawn("DeValdoria", Vector3(0, altura_em(0, -138), -138), Vector3(0, 0, 0))
 	_portal(Vector3(0, altura_em(0, 142), 142), "fronteira_ferrogris", "DaCratera", 16.0)
-	_portal(Vector3(0, altura_em(0, -146), -146), "valdoria", "Entrada", 14.0)
 	var m := GerenciadorMissoes.instancia
 	if m:
 		m.missao_concluida.connect(_ao_missao_concluida)

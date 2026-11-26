@@ -76,6 +76,7 @@ func _rodar() -> void:
 	var leu := SalvarJogo.carregar(jogo, "user://teste_de_salvar.json")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://teste_de_salvar.json"))
 	marcar("Salvar e carregar: volta o lugar e o inventário", gravou and leu and jogo.jogador.global_position.distance_to(onde_antes) < 1.5 and int(jogo.jogador.inventario.get("couro", 0)) == 2, "gravou %s, leu %s, a %.1f m" % [gravou, leu, jogo.jogador.global_position.distance_to(onde_antes)])
+	jogo.jogador.gastar_item("couro", 2)   # devolve o inventário como estava, para os testes seguintes
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m

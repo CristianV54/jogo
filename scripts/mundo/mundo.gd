@@ -346,6 +346,8 @@ func _regiao_mais_perto(p: Vector2) -> String:
 func estilo_em(p: Vector3) -> Dictionary:
 	if MundoDados.ate_a_muralha(p.x, p.z) < 120.0:   # Valdoria: ar limpo e dourado, para a cidadela se ver de qualquer rua
 		return {"neblina": Color(0.8, 0.85, 0.9), "densidade": 0.0009, "sol": Color(1.0, 0.93, 0.8), "energia": 1.25, "ambiente": 1.0, "topo": Color(0.26, 0.48, 0.84), "horizonte": Color(0.7, 0.82, 0.93)}   # céu azul (com o horizonte bege o céu inteiro ficava cor de areia)
+	if Vector2(p.x, p.z).distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO + 900.0:   # a Montanha dos Dragões: ar limpo e alaranjado, para o pico se ver de longe
+		return {"neblina": Color(0.86, 0.78, 0.7), "densidade": 0.0007, "sol": Color(1.0, 0.86, 0.7), "energia": 1.2, "ambiente": 1.0, "topo": Color(0.3, 0.42, 0.72), "horizonte": Color(0.9, 0.72, 0.56)}
 	return estilos.get(_regiao_mais_perto(Vector2(p.x, p.z)), {})
 
 
