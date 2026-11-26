@@ -45,7 +45,7 @@ Rodados um por um em 26/11/2026, sem janela, com limite de 10 minutos cada (`god
 | `teste_queda.gd` | PASSOU (2 de 2) | Vale. |
 | `teste_rotinas.gd` | PASSOU (9 de 9) | Vale. |
 | `teste_simulacao.gd` | PASSOU (8 de 8) | Vale. |
-| `teste_inventario.gd` | 20 de 21 nesta rodada | O item que falhou (vida 71 em vez de 70: a vida volta sozinha durante a espera) foi corrigido depois com tolerância; o teste foi atualizado para o jogo de hoje (começa com itens, 30 espaços, fome) e NÃO foi rodado de novo depois da correção. |
+| `teste_inventario.gd` | PASSOU (rodado de novo no fim do dia, sem falha) | Vale. Foi atualizado em 26/11 para o jogo de hoje (começa com itens, 30 espaços, fome). |
 | `teste_solidos.gd` | 19 passaram, não terminou em 10 min | Sem falha vista; precisa de mais tempo para acabar. |
 | `teste_fagulha_ambientes.gd` | 11 passaram, não terminou em 10 min | Idem. |
 | `teste_bordas.gd` | não terminou em 10 min, nenhum resultado | Anda pelos 4 lados de cada região; é lento. Não se sabe se passa. |
