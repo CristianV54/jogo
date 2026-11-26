@@ -1,41 +1,65 @@
 # Leis do jogo (Reino de Cinzas)
 
-Regras que o jogo nunca pode quebrar. Cada uma aponta para o teste que a confere; erro novo apontado pelo Cristian vira uma lei nova aqui e um teste.
-Rodar tudo: ver "Suíte completa" no fim.
+Regras que o jogo nunca pode quebrar, cada uma com o teste que a confere HOJE. Erro novo apontado pelo usuário vira uma lei nova aqui e um teste. Refeito em 26/11/2026: as leis da campanha antiga e do mundo em corredor saíram junto com os testes delas (o texto antigo está no histórico do git).
+
+## O mundo
 
 | Lei | Teste |
 |---|---|
-| Não existe ponto jogável sem piso; ninguém cai do mundo | `drone_auditoria` (grade de 6 m), `auditoria_buracos`, `teste_queda` |
+| O mundo tem 6 regiões, 32 estradas e 119 povoados, sem barreira nenhuma | `teste_mundo` |
+| Todo povoado tem gente trabalhando; há fazendeiros nos campos e fauna solta | `teste_mundo` |
+| Lobo e javali não nascem dentro de fazenda ou vila; ninguém nasce dentro d'água | `teste_mundo` |
+| À noite e na tempestade os trabalhadores se recolhem; de manhã voltam | `teste_mundo` |
 | A beirada de uma região nunca é um degrau: entra-se andando por qualquer lado | `teste_bordas` |
-| Nenhum desnível de terreno passa de 45° (6 m em 6 m) | `drone_auditoria` |
-| A água nunca fica pendurada sobre chão mais baixo; margem acima da água | `drone_auditoria` (categoria "água no ar") |
-| Todo rio termina em outro rio, no mar ou numa borda de região; pontas livres afinam | `drone_auditoria` (rio sem começo ou fim) |
-| Toda ponte termina no chão nas duas pontas | `drone_auditoria` |
-| As barreiras fechadas selam a história; abertas ligam as 8 regiões e os 21 povoados | `auditoria_cercos` |
-| Nenhum ser (NPC, bicho, inimigo) flutua, fica enterrado ou dentro de parede | `drone_auditoria`, `auditoria_logica` |
-| Quem anda sem física usa `Mundo.chao_em` (chão da região, não do mundo) | `drone_auditoria` |
-| Toda casa tem telhado, porta, colisão e cama (se é moradia) | `drone_auditoria`, `auditoria_logica` |
-| Nenhuma construção sobre outra; nada solto dentro de campo ou casa | `auditoria_logica` |
-| O cavalo montado tem corpo e não atravessa parede | `teste_simulacao` |
-| Monstro não entra em casa e só golpeia quem está à frente e sem parede entre os dois | `teste_simulacao` |
-| NPC dorme na própria cama à noite e na chuva, acorda de manhã; cama é solta depois do susto | `teste_sono`, `teste_medo` |
-| NPC foge de monstro (também parado perto), para longe dele, e volta quando passa | `teste_medo` |
-| As 20 missões estão em cadeia, concluem por evento real e cada objetivo tem fonte no mundo | `teste_cadeia`, `teste_marco3` a `7`, `teste_missoes_dados` |
-| As 5 barreiras abrem só com a missão ou o chefe certo | `teste_missoes_dados`, `auditoria_cercos` |
-| O Fagulha tem 3 fases (tamanho, cor, voo, ataque, montaria) trocadas pelas missões | `teste_fagulha` |
-| Solon aparece em cartazes antes do Castelo | `teste_cartaz` |
-| 60 fps nos pontos típicos (Refúgio, estrada, mata, aldeias, Valdoria, tempestade) | `perfil_aberto` |
+| Cair do mundo não mata: o Torin volta ao último chão firme | `teste_queda` |
 
-## Suíte completa
-```
-godot --headless --path . --script res://tools/<teste>.gd
-teste_fagulha teste_missoes teste_cadeia teste_marco3..7 teste_mundo teste_simulacao teste_medo teste_sono
-teste_cartaz teste_rio teste_queda teste_rotinas teste_missoes_dados auditoria_mundo auditoria_portais
-auditoria_continua auditoria_cercos auditoria_buracos auditoria_logica
-godot --headless --path . --script res://tools/drone_auditoria.gd -- <etapa>   # relatório em docs/auditoria/
-godot --path . --resolution 1280x720 --script res://tools/drone_fotos.gd -- <etapa>   # fotos das 8 regiões
-```
-Testes que já falhavam no baseline (não são regressões): `teste_solidos`, `teste_montaria_dano` (balão de protesto do NPC). Aviso falso conhecido: bigorna da forja em `auditoria_logica`.
+## Valdoria
 
-## Teclas de teste (nó Admin, fora do gameplay)
-F1 a F8 teleportam às regiões, F9 troca a hora, F10 o tempo, F11 liga o Drone (câmera livre: WASD, Espaço, C, Shift, mouse).
+| Lei | Teste |
+|---|---|
+| Muralha com 3 portões de passagem livre, 24 torres ou mais e escadas para o caminho de ronda | `teste_mundo`, bancada `muralha` |
+| Dentro da muralha não há inimigo | `teste_mundo` |
+| 500 casas ou mais; nenhuma em cima de rua, de outra casa ou encostada na muralha; ninguém dentro de parede | `teste_mundo`, `auditoria_reino` |
+| Sobe-se a pé a rampa do penhasco até a cidadela; o rei está no Salão do Trono | `teste_mundo` |
+| Quartel com soldados que são gente (não inimigos); estábulos com 4 cavalos montáveis; sentinelas nos portões | `teste_mundo` |
+
+## Montanha dos Dragões e Terras do Gelo
+
+| Lei | Teste |
+|---|---|
+| Sobe-se a pé do pé da montanha ao ninho, sem degrau maior que 0,9 m | `teste_mundo` |
+| O dragão do ninho só se doma com 3 carnes e vira montaria que voa | `teste_mundo` |
+| Anda-se em cima do Lago Congelado (o Torin não afunda na placa) | `teste_mundo` |
+
+## O jogador
+
+| Lei | Teste |
+|---|---|
+| A fome cai com o tempo; comida mata a fome; a zero, tira vida | `teste_mundo` |
+| Equipar arma muda o dano; armadura aparece no corpo e tira dano | `teste_mundo`, bancada `armaduras` |
+| Comprar custa o preço, vender rende metade, pechinchar só uma vez por visita | `teste_mundo` |
+| Forjar gasta o material da receita; sem material não forja; o veio só dá ferro com picareta | `teste_mundo` |
+| Salvar e carregar devolve o lugar e a bolsa | `teste_mundo` |
+| Os sons carregam, os laços tocam e os efeitos saem na hora certa | `teste_mundo` (por contagem; ninguém ouviu) |
+| O inventário abre com I, trava o jogador, mostra ícone e quantidade, come e equipa | `teste_inventario` |
+
+## Criaturas e construções novas
+
+| Lei | Como conferir |
+|---|---|
+| Criatura nova ou alterada é fotografada sozinha, com o Torin de régua, antes de entrar no jogo | `tools/bancada.gd`, `tools/bancada_construcao.gd -- dragoes`, `-- tubarao` |
+| Peça de construção nova passa pela bancada e tem critério de pronto escrito | `tools/bancada_construcao.gd`, `docs/construcoes/<peca>.md` |
+
+## Como rodar
+
+```bash
+godot --headless --path . --script res://tools/teste_mundo.gd
+godot --headless --path . --script res://tools/auditoria_reino.gd
+godot --headless --path . --script res://tools/<outro_teste>.gd
+```
+
+O estado de cada teste (passa, falha, não termina) em 26/11/2026 está na seção 2 de `docs/MAPA-DO-TRABALHO.md`.
+
+## Teclas de teste (nó Admin, fora do jogo normal)
+
+F1 a F6 teleportam às 6 regiões, F9 troca a hora, F10 o tempo, F11 liga a câmera livre (WASD, Espaço, C, Shift, mouse).

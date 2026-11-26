@@ -36,7 +36,10 @@ func tecla(k: Key) -> void:
 func foto(nome: String) -> void:
 	for i in 4:
 		await process_frame
-	root.get_viewport().get_texture().get_image().save_png("tools/capturas/inv_" + nome + ".png")
+	var im := root.get_viewport().get_texture().get_image()
+	if im == null:   # rodando sem janela (--headless) não há imagem: o teste segue sem a foto
+		return
+	im.save_png("tools/capturas/inv_" + nome + ".png")
 	print("FOTO ", nome)
 
 
@@ -46,7 +49,10 @@ func _rodar() -> void:
 	await esperar(1.5)
 	var hud: Hud = jogo.hud
 	var painel: PainelInventario = hud._painel
-	marcar("Inventário começa vazio e fechado", jog.inventario.is_empty() and not hud.inventario_aberto and not painel.visible)
+	marcar("Começa com a espada curta, 2 pães e 15 moedas, e o painel fechado", int(jog.inventario.get("espada_curta", 0)) == 1 and int(jog.inventario.get("pao", 0)) == 2 and int(jog.inventario.get("moeda", 0)) == 15 and not hud.inventario_aberto and not painel.visible, str(jog.inventario))
+	jog.inventario.clear()   # daqui em diante o teste usa só o que ele mesmo põe na bolsa, sem fome
+	jog.inventario_mudou.emit(jog.inventario)
+	jog.fome = 100.0
 
 	jog.coletar("carne", 3)
 	jog.coletar("couro", 2)
@@ -69,7 +75,7 @@ func _rodar() -> void:
 	for i in painel._slots.size():
 		if painel._id_do_slot[i] != "":
 			ocupados += 1
-	marcar("4 espaços ocupados, resto vazio", ocupados == 4 and painel._slots.size() == 24, "%d ocupados de %d" % [ocupados, painel._slots.size()])
+	marcar("4 espaços ocupados, resto vazio", ocupados == 4 and painel._slots.size() == 30, "%d ocupados de %d" % [ocupados, painel._slots.size()])
 	var icone: TextureRect = painel._slots[0].get_node("Icone")
 	marcar("Espaço da carne tem ícone", icone.texture != null)
 	marcar("Selecionado de início é a carne", painel._selecionado == "carne" and painel._nome.text == "Carne", painel._nome.text)
@@ -85,16 +91,18 @@ func _rodar() -> void:
 	await esperar(0.2)
 	marcar("Carne comestível: botão Usar ligado", not painel._usar.disabled)
 	await tecla(KEY_ENTER)
-	marcar("Enter come a carne: vida 50 -> 70", jog.vida == 70, "vida %d" % jog.vida)
+	marcar("Enter come a carne: vida 50 -> 70 (até 72: a vida também volta sozinha enquanto o teste espera)", jog.vida >= 70 and jog.vida <= 72, "vida %d" % jog.vida)
 	marcar("Carne x3 -> x2", int(jog.inventario.get("carne", 0)) == 2, str(jog.inventario))
 	marcar("Painel e lista mostram a quantidade nova", painel._quantidade.text == "Quantidade: 2" and hud._inventario_label.text.contains("Carne  x2"), painel._quantidade.text)
 	jog.vida = 95
+	jog._comendo = 0.0   # o gesto de comer leva um instante; o teste não espera por ele
 	painel._usar.pressed.emit()   # clique no botão Usar
 	await esperar(0.2)
 	marcar("Comer perto do limite: vida sobe só até 100", jog.vida == 100, "vida %d" % jog.vida)
+	jog._comendo = 0.0
 	painel._usar.pressed.emit()
 	await esperar(0.2)
-	marcar("Com vida cheia não gasta a carne", int(jog.inventario.get("carne", 0)) == 0 + 1, str(jog.inventario))
+	marcar("Com vida cheia e sem fome não gasta a carne", int(jog.inventario.get("carne", 0)) == 0 + 1, str(jog.inventario))
 	await foto("depois_de_comer")
 
 	await tecla(KEY_ESCAPE)
@@ -104,8 +112,10 @@ func _rodar() -> void:
 	await tecla(KEY_I)
 	marcar("I fecha", not hud.inventario_aberto and not jog.travado)
 
+	jog._comendo = 0.0
 	jog.usar_item("carne")
 	jog.vida = 40
+	jog._comendo = 0.0
 	jog.usar_item("carne")
 	await esperar(0.2)
 	marcar("Comer o último esvazia o espaço", not jog.inventario.has("carne"), str(jog.inventario))

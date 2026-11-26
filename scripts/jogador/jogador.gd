@@ -38,6 +38,7 @@ var equipado := {"arma": "espada_curta", "armadura": ""}
 var defesa := 0.0                      # fração do dano que a armadura tira
 var _t_fome := 0.0
 var _comendo := 0.0
+var _travou_para_comer := false   # o gesto de comer só destrava o Torin se foi ele que travou (com o inventário aberto, quem trava é a janela)
 var travado := false                   # diálogo aberto ou cena especial: não anda nem golpeia
 var morto := false
 var _golpeando := false
@@ -281,7 +282,8 @@ func _passar_fome(delta: float) -> void:
 	if _comendo > 0.0:
 		_comendo -= delta
 		if _comendo <= 0.0:
-			travado = false
+			if _travou_para_comer:
+				travado = false
 			animacao_atual = ""
 
 
@@ -308,6 +310,7 @@ func usar_item(item: String) -> bool:
 	inventario_mudou.emit(inventario)
 	if montaria == null:   # comer leva um instante: o Torin fica parado fazendo o gesto
 		_comendo = 1.1
+		_travou_para_comer = not travado
 		travado = true
 		animacao_atual = "Interact"
 		visual.tocar("Interact", 0.1)
