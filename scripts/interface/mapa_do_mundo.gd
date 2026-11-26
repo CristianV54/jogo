@@ -250,7 +250,7 @@ func _draw() -> void:
 	_nome(rq + Vector2(0, -clampf(18.0 + 4.0 * zoom, 22.0, 46.0)), "VALDORIA", 26, _fonte_regiao, COR_TEXTO, 5.0)
 	var mq := mundo_para_tela(MundoDados.MONTANHA_CENTRO)   # a Montanha dos Dragões: o relevo já a desenha; aqui só o ícone e o nome
 	_icone(mq, "dragao", clampf(12.0 + 2.0 * zoom, 14.0, 26.0))
-	_nome(mq + Vector2(0, clampf(18.0 + 3.0 * zoom, 22.0, 40.0) + 14.0), "MONTANHA DOS DRAGÕES", 15, _fonte_regiao, COR_TEXTO, 2.0)
+	_nome(mq + Vector2(0, -clampf(14.0 + 2.0 * zoom, 16.0, 28.0) - 8.0), "MONTANHA DOS DRAGÕES", 15, _fonte_regiao, COR_TEXTO, 2.0)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])
@@ -294,7 +294,7 @@ func _draw() -> void:
 	draw_line(Vector2(0, 44), Vector2(tela.x, 44), COR_ACENTO, 1.5)
 	draw_string(_fonte_regiao, Vector2(24, 30), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, COR_ACENTO)
 	var onde := "Você está em: " + mundo.nome_do_lugar(jog.global_position) if jog else ""
-	draw_string(_fonte_vila, Vector2(230, 29), onde, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COR_TEXTO)
+	draw_string(_fonte_vila, Vector2(40.0 + _fonte_regiao.get_string_size("MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x, 29), onde, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COR_TEXTO)
 	draw_rect(Rect2(Vector2(0, tela.y - 46), Vector2(tela.x, 46)), Color(0.05, 0.05, 0.07, 0.82))
 	draw_line(Vector2(0, tela.y - 46), Vector2(tela.x, tela.y - 46), COR_ACENTO, 1.5)
 	var x_leg := 24.0   # legenda dos ícones
@@ -317,11 +317,12 @@ func _draw() -> void:
 	var rotulo := ("%d km" % int(metros / 1000.0)) if metros >= 1000.0 else ("%d m" % int(metros))
 	draw_string_outline(_fonte_vila, b + Vector2(0, 20.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color(0, 0, 0, 0.7))
 	draw_string(_fonte_vila, b + Vector2(0, 20.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TEXTO)
-	var ajuda := "roda do mouse: zoom    arrastar: mover    clique: marcar destino    botão direito: tirar a marca    M: fechar"
-	if tem_destino and jog:
-		ajuda = "Destino a %d m.    " % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino)) + ajuda
+	var ajuda := "roda: zoom    arrastar: mover    clique: marcar destino    botão direito: tirar a marca    M: fechar"   # na faixa de cima, à direita
 	var larg_ajuda := _fonte_vila.get_string_size(ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	draw_string(_fonte_vila, Vector2(tela.x - larg_ajuda - 24.0, tela.y - 17), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.76))
+	draw_string(_fonte_vila, Vector2(tela.x - larg_ajuda - 24.0, 28), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.76))
+	if tem_destino and jog:   # na faixa de baixo, à direita: a distância até o destino marcado
+		var falta := "Destino marcado a %d m" % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino))
+		draw_string(_fonte_regiao, Vector2(tela.x - _fonte_regiao.get_string_size(falta, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x - 24.0, tela.y - 17), falta, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, COR_ACENTO)
 
 
 ## Ícone do mapa: disco escuro com borda dourada e o desenho claro dentro. `r` é o raio do disco.
