@@ -20,6 +20,8 @@ var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var tubarao: Tubarao
 var muralha: MuralhaDoReino
+var marcos_de_estrada := 0
+var _cabeceiras: Array = []   # [ponto, sentido para a ponte, meia largura] de cada ponta de ponte
 var montanha: MontanhaDosDragoes
 var cidadela: Cidadela
 var trilhas: Array[PackedVector2Array] = []
@@ -103,6 +105,7 @@ func construir() -> void:
 	muralha.mundo = self
 	add_child(muralha)
 	muralha.montar()
+	_beira_das_estradas()
 	montanha = MontanhaDosDragoes.new()
 	montanha.mundo = self
 	add_child(montanha)
@@ -420,6 +423,48 @@ func _em_alguma_area(p: Vector2) -> bool:
 	return false
 
 
+## O que fica à beira das estradas: cabeceiras de pedra com lampião em cada ponta de ponte, um marco de pedra a cada
+## 240 m e, a cada 4 marcos, um pouso (banco, lampião de poste e carga) para quem viaja.
+func _beira_das_estradas() -> void:
+	var kit := PecasDaRua.new()
+	kit.name = "BeiraDasEstradas"
+	add_child(kit)
+	for c in _cabeceiras:
+		var q: Vector2 = c[0]
+		kit.cabeceira_de_ponte(Vector3(q.x, terreno.altura_em(q.x, q.y), q.y), c[1], float(c[2]))
+	for e in MundoDados.ESTRADAS:
+		var est: PackedVector2Array = estradas[e["id"]]
+		var andado := 120.0
+		var n := 0
+		for i in range(est.size() - 1):
+			var trecho := est[i].distance_to(est[i + 1])
+			var dir := (est[i + 1] - est[i]).normalized()
+			var lado := Vector2(-dir.y, dir.x)
+			while andado < trecho:
+				var q := est[i] + dir * andado + lado * 5.2
+				andado += 240.0
+				var livre := MundoDados.ate_a_muralha(q.x, q.y) > 40.0 and not _em_alguma_area(q) and not terreno.na_agua(q.x, q.y, 6.0) and Costa.distancia(q.x, q.y) > 30.0
+				for pid in povoados:
+					if q.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]) + 12.0:
+						livre = false
+				if not livre:
+					continue
+				var chao := Vector3(q.x, terreno.altura_em(q.x, q.y), q.y)
+				kit.marco_de_estrada(chao, atan2(dir.x, dir.y) + PI / 2.0)
+				marcos_de_estrada += 1
+				n += 1
+				if n % 4 == 0:
+					var b := q + dir * 3.0 + lado * 1.2
+					kit.banco(Vector3(b.x, terreno.altura_em(b.x, b.y), b.y), -lado)
+					var l := q - dir * 2.5
+					kit.lampiao_de_poste(Vector3(l.x, terreno.altura_em(l.x, l.y), l.y), -lado)
+					var cg := q + dir * 6.0 + lado * 0.8
+					kit.carga(Vector3(cg.x, terreno.altura_em(cg.x, cg.y), cg.y), dir, 2, n)
+			andado -= trecho
+	kit.fechar()
+	print("Mundo: ", marcos_de_estrada, " marcos de estrada e ", _cabeceiras.size(), " cabeceiras de ponte")
+
+
 ## Pontes onde uma estrada cruza um rio do mundo (fora das áreas).
 func _pontes() -> void:
 	for e in MundoDados.ESTRADAS:
@@ -444,6 +489,8 @@ func _pontes() -> void:
 					var ponte := PonteDeMadeira.new()
 					add_child(ponte)
 					ponte.ligar(Vector3(a.x, terreno.altura_em(a.x, a.y), a.y), Vector3(b.x, terreno.altura_em(b.x, b.y), b.y))
+					_cabeceiras.append([a, dir, ponte.largura / 2.0])
+					_cabeceiras.append([b, -dir, ponte.largura / 2.0])
 					feito = true
 					break
 

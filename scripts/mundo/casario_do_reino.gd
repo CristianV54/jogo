@@ -211,6 +211,7 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int, frente: float) -> v
 	var at := PISO + 0.3
 	for lado_j in [-1.0, 1.0]:
 		_janela(pedaco, Vector3(p.x + lado_j * 0.32 * larg, y + 0.56 * at, zf), 0.125 * larg, 0.3 * at, frente, veneziana, de_pedra)
+		_janela(pedaco, Vector3(p.x + lado_j * 0.32 * larg, y + 0.56 * at, p.y - frente * prof / 2.0), 0.125 * larg, 0.3 * at, -frente, veneziana, de_pedra)   # os fundos também têm janela em relevo
 	var porta_l := 0.14 * larg   # a porta: folha de tábuas, ombreiras e verga em relevo, aldrava
 	_peca(pedaco, "caixa", "liso", Vector3(p.x, y + 1.1, zf + frente * 0.03), Vector3(porta_l, 2.2, 0.08), 0.0, Color(0.42, 0.28, 0.16) * _rng_rua.randf_range(0.75, 1.1))
 	for k in 3:
@@ -246,6 +247,7 @@ func _casa(p: Vector2, larg: float, prof: float, pisos: int, frente: float) -> v
 		for fiada in 2:   # as seis janelas do sobrado, em relevo na fachada da rua
 			for coluna_j in [-0.336, 0.0, 0.332]:
 				_janela(pedaco, Vector3(p.x + coluna_j * (larg + 0.4), topo + 0.22 + alt * (0.75 - 0.5 * fiada), p.y + frente * (prof + 0.4) / 2.0), 0.1 * (larg + 0.4), alt * 0.2, frente, veneziana, false)
+				_janela(pedaco, Vector3(p.x + coluna_j * (larg + 0.4), topo + 0.22 + alt * (0.75 - 0.5 * fiada), p.y - frente * (prof + 0.4) / 2.0), 0.1 * (larg + 0.4), alt * 0.2, -frente, veneziana, false)
 		for andar in pisos - 1:   # janelas dos andares de cima (a pintura do sobrado tem 2 fiadas de 3)
 			for coluna in [-0.336, 0.0, 0.332]:
 				for lado in [-1.0, 1.0]:

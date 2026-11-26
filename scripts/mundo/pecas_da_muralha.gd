@@ -190,8 +190,17 @@ func portao(g: Vector3, fora: Vector2) -> void:
 		_caixa(pano + f3 * 0.02 + Vector3(0, 11.0, 0), Vector3(0.1, 8.0, 0.5), giro, Color(0.92, 0.9, 0.82), false)
 		_caixa(pano + f3 * 0.02 + Vector3(0, 13.4, 0), Vector3(0.1, 1.1, 1.1), giro + PI / 4.0, Color(0.85, 0.72, 0.3), false)
 		var bra: Vector3 = g + lado * s * (VAO / 2.0 + 1.5) - f3 * (fundo / 2.0 + 1.6)
-		_cilindro(bra + Vector3(0, 0.6, 0), 0.5, 1.2, COR_SOCO)
-		_caixa(bra + Vector3(0, 1.45, 0), Vector3(0.7, 0.5, 0.7), 0.0, Color(1.0, 0.55, 0.15), false, true)
+		# braseiro: pedestal de pedra, três pés de ferro, bacia e a chama em línguas (laranja por fora, amarela por dentro)
+		_cilindro(bra + Vector3(0, 0.3, 0), 0.55, 0.6, COR_SOCO)
+		for k in 3:
+			var ab := TAU * k / 3.0
+			_peca("caixa", ferro, Transform3D((Basis(Vector3.UP, -ab) * Basis(Vector3.BACK, 0.25)).scaled_local(Vector3(0.07, 0.9, 0.07)), bra + Vector3(cos(ab) * 0.3, 1.0, sin(ab) * 0.3)))
+		_cilindro(bra + Vector3(0, 1.5, 0), 0.55, 0.22, ferro)
+		_cilindro(bra + Vector3(0, 1.6, 0), 0.47, 0.08, Color(0.25, 0.1, 0.05))
+		for k in 4:
+			var af := TAU * k / 4.0 + 0.4
+			_peca("piramide", Color(1.0, 0.5, 0.12), Transform3D(Basis(Vector3.UP, af).scaled_local(Vector3(0.34, 0.75 + 0.2 * (k % 2), 0.34)), bra + Vector3(cos(af) * 0.17, 2.0 + 0.1 * (k % 2), sin(af) * 0.17)), true)
+		_peca("piramide", Color(1.0, 0.85, 0.35), Transform3D(Basis.from_scale(Vector3(0.3, 1.1, 0.3)), bra + Vector3(0, 2.15, 0)), true)
 
 
 ## O arco da passagem: os dois cantos de pedra entre a imposta (3,5 m) e o fecho (8 m), cortados em meio círculo.

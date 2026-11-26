@@ -12,7 +12,7 @@ const ESCURA := Color(0.6, 0.58, 0.54)
 const ARDOSIA := Color(0.26, 0.3, 0.44)
 const CHUMBO := Color(0.12, 0.12, 0.14)
 const OURO := Color(0.9, 0.75, 0.3)
-const VIDROS := [Color(0.85, 0.2, 0.18), Color(0.2, 0.4, 0.9), Color(0.95, 0.75, 0.2), Color(0.25, 0.7, 0.4), Color(0.65, 0.3, 0.8)]
+const VIDROS := [Color(0.62, 0.12, 0.14), Color(0.14, 0.26, 0.62), Color(0.8, 0.6, 0.18), Color(0.16, 0.45, 0.3), Color(0.42, 0.18, 0.52)]   # tons de joia, não de giz
 const LATERAL := Basis.IDENTITY                # parede que corre ao longo de l; a normal é ±w
 const FACHADA := Basis(Vector3(0, 0, -1), Vector3(0, 1, 0), Vector3(1, 0, 0))   # parede que corre ao longo de w; a normal é ±l
 
@@ -68,6 +68,8 @@ func _vitral(centro: Vector3, r: Basis, s: float, larg: float, alt: float, semen
 			_na_parede(centro, r, s, Vector3((i - 0.5) * larg / 2.0, (j + 0.5) * alt / 4.0, 0.2), Vector3(larg / 2.0 - 0.08, alt / 4.0 - 0.08, 0.08), VIDROS[(semente + i + j * 2) % VIDROS.size()], true)
 	_na_parede(centro, r, s, Vector3(0, alt + larg * 0.4, 0.2), Vector3(larg - 0.1, larg * 0.8, 0.08), VIDROS[(semente + 3) % VIDROS.size()], true, "prisma")
 	_na_parede(centro, r, s, Vector3(0, alt / 2.0, 0.19), Vector3(larg, alt, 0.06), CHUMBO)
+	for j in 4:   # um losango claro no meio de cada fiada, como medalhão do vitral
+		_em(centro + r * Vector3(0, (j + 0.5) * alt / 4.0, 0.25 * s), Vector3(larg * 0.32, larg * 0.32, 0.05), Color(0.95, 0.88, 0.6), false, true, r * Basis(Vector3.BACK, PI / 4.0))
 	vitrais += 1
 
 

@@ -318,3 +318,24 @@ func tenda(p: Vector3, frente: Vector2, cor: Color) -> void:
 	_no_conjunto(p, giro, Vector3(0, 2.26, 0), Vector3(0.09, 0.09, 4.1), pau)
 	_no_conjunto(p, giro, Vector3(0, 0.04, 2.6), Vector3(1.0, 0.06, 1.3), Color(0.45, 0.36, 0.26))   # esteira na porta
 	_solido(p + Vector3(0, 1.0, 0), Vector3(3.0, 2.0, 3.4), giro)
+
+
+## Marco de estrada: pedra lavrada de um metro e pouco, de topo arredondado, com uma faixa azul do reino pintada.
+func marco_de_estrada(p: Vector3, giro: float) -> void:
+	_caixa(p + Vector3(0, 0.1, 0), Vector3(0.7, 0.3, 0.6), giro, LAJE, false)
+	_caixa(p + Vector3(0, 0.7, 0), Vector3(0.46, 1.0, 0.34), giro, MEIO_FIO, true)
+	_peca("cilindro", MEIO_FIO, Transform3D((Basis(Vector3.UP, giro) * Basis(Vector3.RIGHT, PI / 2.0)).scaled_local(Vector3(0.46, 0.34, 0.46)), p + Vector3(0, 1.2, 0)))
+	_caixa(p + Vector3(0, 0.95, 0), Vector3(0.48, 0.12, 0.36), giro, Color(0.14, 0.2, 0.5), false)
+
+
+## Cabeceira de ponte: de cada lado da estrada um pilar de pedra com capitel e um lampião em cima. `frente` aponta para a ponte.
+func cabeceira_de_ponte(p: Vector3, frente: Vector2, meia_largura: float) -> void:
+	var giro := atan2(frente.x, frente.y)
+	var lado := Vector3(frente.y, 0.0, -frente.x)
+	for s in [-1.0, 1.0]:
+		var q: Vector3 = p + lado * s * (meia_largura + 0.5)
+		_caixa(q + Vector3(0, 0.6, 0), Vector3(0.9, 2.2, 0.9), giro, MEIO_FIO, true)
+		_caixa(q + Vector3(0, 0.1, 0), Vector3(1.2, 1.2, 1.2), giro, LAJE, false)
+		_caixa(q + Vector3(0, 1.78, 0), Vector3(1.1, 0.16, 1.1), giro, LAJE, false)
+		_caixa(q + Vector3(0, 1.98, 0), Vector3(0.05, 0.26, 0.05), giro, FERRO, false)
+		_lanterna(q + Vector3(0, 2.3, 0))

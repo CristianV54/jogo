@@ -92,6 +92,10 @@ func _rodar() -> void:
 	await _foto("33_ninho_e_dragao_domavel", 6.0)
 	_ver(mc + Vector2(20, -22), mc + Vector2(-13, -9))
 	await _foto("34_ninho_ovos_e_ossada", 5.0)
+	if not m._cabeceiras.is_empty():   # uma ponte com as cabeceiras de pedra
+		var cab: Array = m._cabeceiras[0]
+		_ver((cab[0] as Vector2) - (cab[1] as Vector2) * 13.0, (cab[0] as Vector2) + (cab[1] as Vector2) * 10.0)
+		await _foto("35_ponte_com_cabeceiras", 5.0)
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)
 	_ver(pe + Vector2(16, 6), Vector2(40, 50))           # o pé da rampa, a leste
 	await _foto("09_pe_da_rampa", 4.0)
