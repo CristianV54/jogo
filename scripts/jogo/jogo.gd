@@ -143,6 +143,22 @@ func _iniciar_mundo() -> void:
 	else:   # mundo aberto sem história: a Fagulha já é companheira, crescida e montável desde o começo
 		fagulha.definir_fase(3)
 		liberar_fagulha()
+	if SalvarJogo.ativo():   # continua de onde parou e passa a gravar sozinho
+		if SalvarJogo.carregar(self):
+			hud.mensagem("Jogo carregado.", 3.0)
+		var relogio := Timer.new()
+		relogio.name = "SalvarSozinho"
+		relogio.wait_time = 20.0
+		relogio.autostart = true
+		relogio.timeout.connect(func() -> void:
+			if not _trocando:
+				SalvarJogo.gravar(self))
+		add_child(relogio)
+
+
+func _notification(o_que: int) -> void:
+	if o_que == NOTIFICATION_WM_CLOSE_REQUEST and SalvarJogo.ativo() and not _trocando:
+		SalvarJogo.gravar(self)
 
 
 ## O que abre cada barreira de história do mundo.

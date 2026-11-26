@@ -24,7 +24,7 @@ func _rodar() -> void:
 		await create_timer(0.3).timeout
 	var m: Mundo = jogo.mundo
 	print("  mundo construído em %.1f s" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	marcar("6 regiões, 30 estradas, 118 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 30 and m.povoados.size() == 118 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
+	marcar("6 regiões, 31 estradas, 118 povoados, nenhuma barreira (mundo aberto)", m.regioes.size() == 6 and m.estradas.size() == 31 and m.povoados.size() == 118 and m.barreiras.size() == 0, "%d regiões, %d estradas, %d povoados" % [m.regioes.size(), m.estradas.size(), m.povoados.size()])
 	var sem_gente: Array[String] = []
 	for id in m.povoados:
 		var pv: Povoado = m.povoados[id]["no"]
@@ -41,6 +41,41 @@ func _rodar() -> void:
 		if not bate.is_empty() and not (bate["collider"] is CharacterBody3D):
 			fechados.append("%s em %s" % [bate["collider"].name, g])
 	marcar("Muralha do kit novo: 24 torres ou mais, 6 escadas ou mais e os 3 portões com a passagem livre", m.muralha.torres >= 24 and m.muralha.escadas >= 6 and fechados.is_empty(), "%d torres, %d escadas, fechados: %s" % [m.muralha.torres, m.muralha.escadas, fechados])
+	# a Montanha dos Dragões: altura, trilha que se sobe a pé, dragões, domar com carne e salvar/carregar
+	var mc := MundoDados.MONTANHA_CENTRO
+	var pe_m := MundoDados.ponto_da_trilha(0.0)
+	var sobe: float = m.chao_em(mc.x, mc.y) - m.chao_em(pe_m.x, pe_m.y)
+	var pior_m := 0.0
+	var antes_m: float = m.chao_em(pe_m.x, pe_m.y)
+	for i in range(1, 1201):   # andando pelo eixo da trilha, a cada ~2 m
+		var q := MundoDados.ponto_da_trilha(i / 1200.0)
+		var hq: float = m.chao_em(q.x, q.y)
+		pior_m = maxf(pior_m, absf(hq - antes_m))
+		antes_m = hq
+	marcar("Montanha dos Dragões: 200 m ou mais do pé ao ninho e trilha sem degrau maior que 0,9 m", sobe >= 200.0 and pior_m < 0.9, "sobe %.0f m; maior degrau %.2f m" % [sobe, pior_m])
+	var cinza: DragaoSelvagem = m.montanha.domavel
+	var voando := 0
+	for dr in m.montanha.dragoes:
+		if dr.voando:
+			voando += 1
+	var gesto := cinza.get_node("Domar") as DomarDragao
+	gesto.acionar()   # sem carne: nada acontece
+	var sem_carne := not cinza.domado
+	jogo.jogador.coletar("carne", 3)
+	gesto.acionar()
+	if not jogo._cena.is_empty():
+		jogo._cena.clear()
+		jogo.hud.fechar_dialogo()
+		jogo.jogador.travado = false
+	marcar("Dragões: 8 ou mais na montanha (5 voando), e o do ninho só se doma com 3 carnes e vira montaria que voa", m.montanha.dragoes.size() >= 9 and voando == 5 and sem_carne and cinza.domado and cinza.montaria != null and cinza.montaria.voa and int(jogo.jogador.inventario.get("carne", 0)) == 0, "%d dragões, %d voando, domado %s" % [m.montanha.dragoes.size(), voando, cinza.domado])
+	var onde_antes: Vector3 = jogo.jogador.global_position
+	jogo.jogador.coletar("couro", 2)
+	var gravou := SalvarJogo.gravar(jogo, "user://teste_de_salvar.json")
+	jogo.jogador.gastar_item("couro", 2)
+	jogo.jogador.global_position = onde_antes + Vector3(40, 0, 0)
+	var leu := SalvarJogo.carregar(jogo, "user://teste_de_salvar.json")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://teste_de_salvar.json"))
+	marcar("Salvar e carregar: volta o lugar e o inventário", gravou and leu and jogo.jogador.global_position.distance_to(onde_antes) < 1.5 and int(jogo.jogador.inventario.get("couro", 0)) == 2, "gravou %s, leu %s, a %.1f m" % [gravou, leu, jogo.jogador.global_position.distance_to(onde_antes)])
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m

@@ -46,6 +46,8 @@ const ESTRADAS := [
 		"pontos": [Vector2(-1555.2, -1255.3), Vector2(-1846.8, -1533.4), Vector2(-2187, -1606.4), Vector2(-2332.8, -1633.8)]},
 	{"id": "pedras", "nome": "Estrada da Serra", "a": "valdoria", "b": "", "meia": 20.0,
 		"pontos": [Vector2(-1020.6, 365.1), Vector2(-1044.9, -109.5), Vector2(-1020.6, -730.2), Vector2(-729, -1460.4), Vector2(-437.4, -1989.8)]},
+	{"id": "trilha_dos_dragoes", "nome": "Trilha dos Dragões", "a": "", "b": "", "meia": 12.0,
+		"pontos": [Vector2(-729, -1460.4), Vector2(-660, -1490), Vector2(-590, -1500)]},
 	{"id": "ferrogris", "nome": "Estrada de Ferrogris", "a": "valdoria", "b": "fronteira_ferrogris", "meia": 24.0,
 		"pontos": [Vector2(129, -45), Vector2(294, -45), Vector2(520, -10), Vector2(820, 300), Vector2(1093.5, 547.7), Vector2(1822.5, 419.9), Vector2(2430, 383.4), Vector2(2673, 191.5)]},
 	{"id": "cratera", "nome": "Estrada Queimada", "a": "valdoria", "b": "cratera_ignis", "meia": 20.0,
@@ -330,6 +332,55 @@ static func penhasco(x: float, z: float) -> Array:
 		elif r > 1.0 and t <= deg_to_rad(14.0):
 			h = PENHASCO_ALTURA   # patamar diante do portão da cidadela
 	return [h, via, r]
+
+
+## A MONTANHA DOS DRAGÕES (pedido do Cristian): um cone de rocha de 240 m ao norte de Valdoria, com uma trilha em
+## espiral (volta e meia, ~12% de subida) do pé, a oeste, até o platô do ninho no topo. É onde se doma o primeiro dragão.
+const MONTANHA_CENTRO := Vector2(-200.0, -1500.0)
+const MONTANHA_RAIO := 380.0
+const MONTANHA_TOPO := 42.0      # raio do platô do ninho
+const MONTANHA_ALTURA := 240.0
+const MONTANHA_VOLTAS := 1.5
+static var _ruido_da_montanha: FastNoiseLite
+
+
+## Fração da subida (0 no pé, 1 no topo) -> altura da encosta ali.
+static func _perfil_da_montanha(t: float) -> float:
+	return MONTANHA_ALTURA * pow(clampf(t, 0.0, 1.0), 1.15)
+
+
+## Ponto do eixo da trilha: `t` de 0 (pé, a oeste) a 1 (borda do platô).
+static func ponto_da_trilha(t: float) -> Vector2:
+	var a := TAU * MONTANHA_VOLTAS * t
+	var r := MONTANHA_RAIO - t * (MONTANHA_RAIO - MONTANHA_TOPO)
+	return MONTANHA_CENTRO + Vector2(-cos(a), sin(a)) * r
+
+
+## A montanha: devolve [altura do chão acima do terreno, é piso da trilha?, distância ao centro].
+static func montanha(x: float, z: float) -> Array:
+	var v := Vector2(x, z) - MONTANHA_CENTRO
+	var d := v.length()
+	if d > MONTANHA_RAIO + 14.0:
+		return [0.0, false, d]
+	if _ruido_da_montanha == null:
+		_ruido_da_montanha = FastNoiseLite.new()
+		_ruido_da_montanha.seed = 77
+		_ruido_da_montanha.frequency = 0.02
+	var t := clampf((MONTANHA_RAIO - d) / (MONTANHA_RAIO - MONTANHA_TOPO), 0.0, 1.0)
+	var h := _perfil_da_montanha(t)
+	h += _ruido_da_montanha.get_noise_2d(x, z) * 22.0 * t * (1.0 - t) * 4.0   # cristas e grotas na encosta (nada no pé nem no platô)
+	h = maxf(h, 0.0)
+	var volta := fposmod(atan2(v.y, -v.x), TAU) / TAU   # 0 a oeste, crescendo no sentido da trilha
+	var k := roundf(MONTANHA_VOLTAS * t - volta)
+	var tp := (k + volta) / MONTANHA_VOLTAS
+	var trilha := false
+	if tp >= -0.02 and tp <= 1.0:
+		var rp := MONTANHA_RAIO - tp * (MONTANHA_RAIO - MONTANHA_TOPO)
+		var fora := absf(d - rp)
+		if fora < 13.0:
+			h = lerpf(h, _perfil_da_montanha(tp), 1.0 - smoothstep(5.5, 13.0, fora))
+			trilha = fora < 5.5
+	return [h, trilha, d]
 
 
 ## Altura do chão da região acima do nível do reino (só o Castelo fica no alto de um morro).

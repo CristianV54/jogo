@@ -20,6 +20,7 @@ var fauna: FaunaDoMundo
 var _paredes: StaticBody3D
 var tubarao: Tubarao
 var muralha: MuralhaDoReino
+var montanha: MontanhaDosDragoes
 var cidadela: Cidadela
 var trilhas: Array[PackedVector2Array] = []
 var arvores: ColisoresDeArvores
@@ -102,6 +103,10 @@ func construir() -> void:
 	muralha.mundo = self
 	add_child(muralha)
 	muralha.montar()
+	montanha = MontanhaDosDragoes.new()
+	montanha.mundo = self
+	add_child(montanha)
+	montanha.montar()
 	etapa.call("pontes, mar e muralha do reino")
 	_floresta()
 	_horizonte()
@@ -350,6 +355,8 @@ func nome_do_lugar(p: Vector3) -> String:
 	for pid in povoados:
 		if v.distance_to(povoados[pid]["centro"]) < float(povoados[pid]["raio"]):
 			return povoados[pid]["nome"]
+	if v.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO:
+		return "Ninho dos Dragões" if v.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_TOPO + 6.0 else "Montanha dos Dragões"
 	if float(MundoDados.penhasco(p.x, p.z)[2]) <= 1.0:
 		return "Cidadela de Valdoria"
 	if MundoDados.ate_a_muralha(p.x, p.z) < 0.0:
@@ -619,6 +626,8 @@ func _floresta() -> void:
 			var p := Vector2(x, z)
 			if _em_alguma_area(p) or terreno.na_agua(x, z, 3.0) or terreno.distancia_caminho(x, z) < 7.0 or Costa.distancia(x, z) < 14.0:
 				continue
+			if p.distance_to(MundoDados.MONTANHA_CENTRO) < MundoDados.MONTANHA_RAIO and float(MundoDados.montanha(x, z)[0]) > 6.0:
+				continue   # a encosta da Montanha dos Dragões é rocha nua
 			if MundoDados.ate_a_muralha(x, z) < 12.0:
 				continue   # dentro da muralha do reino (e encostado nela) não nasce mata: é cidade, casa colada em casa
 			var no_povoado := false

@@ -186,6 +186,8 @@ func _altura_crua(x: float, z: float) -> float:
 		h = lerpf(h, h_eixo, 1.0 - smoothstep(2.5, 7.0, melhor))
 	if absf(x) < 200.0 and absf(z) < 200.0:   # o penhasco de Valdoria, com a rampa escavada em volta dele
 		h += float(MundoDados.penhasco(x, z)[0])
+	if Vector2(x, z).distance_squared_to(MundoDados.MONTANHA_CENTRO) < 400.0 * 400.0:   # a Montanha dos Dragões, com a trilha em espiral
+		h += float(MundoDados.montanha(x, z)[0])
 	var costa := Costa.distancia(x, z)
 	if costa < 70.0:   # a terra se achata até a praia (0,6 m), desce para um raso onde dá para andar (água pela canela) e, 30 m mar adentro, afunda
 		h = lerpf(h, 0.6, smoothstep(70.0, 30.0, costa))
@@ -221,6 +223,16 @@ func cor_do_mundo(x: float, z: float) -> Color:
 			c = rocha * (0.9 + 0.2 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0))
 			if bool(pen[1]) or float(pen[2]) <= 1.0:
 				c = Color(0.5, 0.48, 0.44)
+	if Vector2(x, z).distance_squared_to(MundoDados.MONTANHA_CENTRO) < 400.0 * 400.0:   # a montanha: basalto em camadas, cinza no alto, trilha de terra clara
+		var mon := MundoDados.montanha(x, z)
+		var hm: float = mon[0]
+		if hm > 1.5:
+			var faixa := int(hm / 14.0)
+			var rocha_m: Color = [Color(0.3, 0.28, 0.27), Color(0.36, 0.33, 0.3), Color(0.26, 0.25, 0.26), Color(0.4, 0.34, 0.3)][faixa % 4]
+			rocha_m = rocha_m.lerp(Color(0.62, 0.6, 0.58), smoothstep(150.0, 235.0, hm) * 0.8)   # cinza de dragão cobrindo o alto
+			c = c.lerp(rocha_m * (0.9 + 0.2 * _ruido_fino.get_noise_2d(x * 3.0, z * 3.0)), smoothstep(1.5, 9.0, hm))
+		if bool(mon[1]):
+			c = Color(0.5, 0.43, 0.34)
 	return c   # dentro da muralha o chão é de cidade (terra batida e pedra), inclusive na beirada das regiões
 
 

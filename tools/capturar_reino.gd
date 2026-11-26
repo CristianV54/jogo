@@ -81,6 +81,17 @@ func _rodar() -> void:
 		var longe2 := Vector2(-(pv2["dir"] as Vector2).y, (pv2["dir"] as Vector2).x) * float(pv2["lado"])
 		_ver((pv2["centro"] as Vector2) - longe2 * float(item[2]), (pv2["centro"] as Vector2) + longe2 * 30.0)
 		await _foto(item[0], 6.0)
+	var mc := MundoDados.MONTANHA_CENTRO   # a Montanha dos Dragões: de longe, na trilha e no ninho
+	_ver(mc + Vector2(-620, 60), mc)
+	await _foto("30_montanha_de_longe", 6.0)
+	_ver(MundoDados.ponto_da_trilha(0.004), MundoDados.ponto_da_trilha(0.03))
+	await _foto("31_pe_da_trilha", 5.0)
+	_ver(MundoDados.ponto_da_trilha(0.5), MundoDados.ponto_da_trilha(0.53))
+	await _foto("32_meio_da_trilha", 5.0)
+	_ver(mc + Vector2(-24, 10), mc + Vector2(9, 4))
+	await _foto("33_ninho_e_dragao_domavel", 6.0)
+	_ver(mc + Vector2(20, -22), mc + Vector2(-13, -9))
+	await _foto("34_ninho_ovos_e_ossada", 5.0)
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)
 	_ver(pe + Vector2(16, 6), Vector2(40, 50))           # o pé da rampa, a leste
 	await _foto("09_pe_da_rampa", 4.0)
