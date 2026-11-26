@@ -79,6 +79,7 @@ func domar(avisar := true) -> void:
 	montaria.camera_distancia = 12.0 * tamanho
 	add_child(montaria)
 	if avisar:
+		get_tree().call_group("sons", "tocar", "rugido")
 		var jogo := get_tree().get_first_node_in_group("jogo")
 		if jogo:
 			jogo.cena_dialogo([["Narrador", "O dragão cheira a carne, come devagar e baixa a cabeça até a altura da sua mão."], ["Narrador", "Você domou o seu primeiro dragão. O nome dele é Cinza. Chegue perto e aperte E para montar."]])

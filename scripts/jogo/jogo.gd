@@ -41,6 +41,7 @@ var _dialogo_npc: Npc
 var _dialogo_indice := 0
 var _trocando := false
 var clima: Clima
+var sons: Sons
 var mundo: Mundo
 var _lugar := ""
 var _t_lugar := 0.0
@@ -118,6 +119,11 @@ func _iniciar_mundo() -> void:
 	await mundo.construir()
 	hud.mensagem("", 0.01)
 	mundo.tubarao.aviso.connect(func(texto: String) -> void: hud.mensagem(texto, 3.0))
+	sons = Sons.new()   # o som entra quando o mundo já existe (ele observa o jogador, o clima e a costa)
+	sons.name = "Sons"
+	sons.jogo = self
+	add_child(sons)
+	mundo.tubarao.aviso.connect(func(_texto: String) -> void: sons.tocar("aviso"))
 	hud.mapa.destino_mudou.connect(_ao_mudar_destino)
 	for id in mundo.regioes:
 		var a: AreaBase = mundo.regioes[id]

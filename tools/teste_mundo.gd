@@ -77,6 +77,27 @@ func _rodar() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://teste_de_salvar.json"))
 	marcar("Salvar e carregar: volta o lugar e o inventário", gravou and leu and jogo.jogador.global_position.distance_to(onde_antes) < 1.5 and int(jogo.jogador.inventario.get("couro", 0)) == 2, "gravou %s, leu %s, a %.1f m" % [gravou, leu, jogo.jogador.global_position.distance_to(onde_antes)])
 	jogo.jogador.gastar_item("couro", 2)   # devolve o inventário como estava, para os testes seguintes
+	# som: os 18 efeitos e os 4 laços carregados e tocando; domar rugiu; pegar item tocou; passos saem quando o Torin anda
+	var sons: Sons = jogo.sons
+	var lacos_tocando := 0
+	for nome_l in sons._lacos:
+		if (sons._lacos[nome_l] as AudioStreamPlayer).playing and ((sons._lacos[nome_l] as AudioStreamPlayer).stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD:
+			lacos_tocando += 1
+	var passos_antes := 0
+	for nome_p in sons.tocados:
+		if String(nome_p).begins_with("passo_"):
+			passos_antes += int(sons.tocados[nome_p])
+	var onde_som: Vector3 = jogo.jogador.global_position
+	jogo.jogador.entrada_forcada = Vector2(0, -1)
+	await create_timer(2.0).timeout
+	jogo.jogador.entrada_forcada = Vector2.ZERO
+	jogo.jogador.global_position = onde_som   # volta para onde estava, para os testes seguintes
+	jogo.jogador.velocity = Vector3.ZERO
+	var passos_depois := 0
+	for nome_p in sons.tocados:
+		if String(nome_p).begins_with("passo_"):
+			passos_depois += int(sons.tocados[nome_p])
+	marcar("Som: 18 efeitos, 4 laços tocando (vento, mar, grilos, música), rugido ao domar, som de pegar item e passos ao andar", sons._amostras.size() == 18 and not sons._amostras.values().has(null) and lacos_tocando == 4 and int(sons.tocados.get("rugido", 0)) == 1 and int(sons.tocados.get("coletar", 0)) >= 1 and passos_depois - passos_antes >= 2, "%d efeitos, %d laços, rugido %d, coletar %d, passos em 2 s: %d" % [sons._amostras.size(), lacos_tocando, int(sons.tocados.get("rugido", 0)), int(sons.tocados.get("coletar", 0)), passos_depois - passos_antes])
 	marcar("História desligada: nenhuma missão ativa e a Fagulha já acompanha o Torin", not Jogo.historia and jogo.missoes.ativas.is_empty() and jogo.fagulha_livre, str(jogo.missoes.ativas))
 	marcar("Penhasco no centro: 64 m no topo e chão plano na praça", absf(m.chao_em(0.0, 0.0) - MundoDados.PENHASCO_ALTURA) < 0.5 and absf(m.chao_em(0.0, 150.0)) < 0.5, "%.1f m no topo, %.1f m na praça" % [m.chao_em(0.0, 0.0), m.chao_em(0.0, 150.0)])
 	# a rampa: do pé (leste) até o portão da cidadela (oeste), andando pelo meio dela, sem degrau maior que 0,7 m a cada 2 m

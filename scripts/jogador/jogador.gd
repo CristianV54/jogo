@@ -9,6 +9,7 @@ signal vida_mudou(atual: int, maximo: int)
 signal morreu
 signal item_coletado(item: String, quantidade: int, inventario: Dictionary)
 signal inventario_mudou(inventario: Dictionary)
+signal acertou   # o golpe pegou em alguém (o som do acerto escuta isto)
 
 @export var camera: CameraTerceiraPessoa
 @export var velocidade_andando := 4.0
@@ -189,6 +190,7 @@ func _regenerar(delta: float) -> void:
 
 func _acertar() -> void:
 	var frente := -global_transform.basis.z
+	var pegou := false
 	for no in get_tree().get_nodes_in_group("inimigos"):
 		var ini: Inimigo = no as Inimigo
 		if ini == null or ini.estado == Inimigo.Estado.MORTO:
@@ -198,6 +200,7 @@ func _acertar() -> void:
 		var raio := alcance_golpe + ini.raio_colisao
 		if d.length() <= raio and (d.length() < 0.5 or frente.dot(d.normalized()) > 0.1):
 			ini.receber_dano(dano_golpe, self)
+			pegou = true
 	for no in get_tree().get_nodes_in_group("atingiveis"):   # animais e pessoas: reagem ao golpe
 		var alvo := no as Node3D
 		if alvo == null or no.get("morto") == true:
@@ -207,6 +210,9 @@ func _acertar() -> void:
 		var raio2 := alcance_golpe + float(no.get("raio_colisao"))
 		if d2.length() <= raio2 and (d2.length() < 0.5 or frente.dot(d2.normalized()) > 0.1):
 			no.receber_dano(dano_golpe, self)
+			pegou = true
+	if pegou:
+		acertou.emit()
 
 
 func receber_dano(quantidade: int, _de: Node3D = null) -> void:

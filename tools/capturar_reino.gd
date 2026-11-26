@@ -102,7 +102,20 @@ func _rodar() -> void:
 		praia.x += 4.0
 	_ver(praia, praia + Vector2(60, 0))
 	jogo.jogador.global_position.y = Costa.NIVEL_MAR + 0.6
-	await _foto("40_tubarao_no_mar", 1.3)
+	var olho := Camera3D.new()   # câmera solta, fora d'água, apontada para o tubarão (a do jogo afunda junto com o Torin)
+	olho.far = 2000.0
+	root.add_child(olho)
+	var corpo_t: Node3D = m.tubarao._corpo
+	for tomada in [["40_tubarao_no_mar_de_lado", Vector3(7, 2.2, 9), 0.9], ["41_tubarao_no_mar_de_cima", Vector3(1.5, 9, 3), 0.5], ["42_tubarao_no_mar_de_frente", Vector3(-9, 1.6, 1.5), 0.4]]:
+		await create_timer(float(tomada[2])).timeout
+		if not corpo_t.visible:
+			print("AVISO: o tubarão não está visível na tomada ", tomada[0])
+		olho.global_position = corpo_t.global_position + (tomada[1] as Vector3)
+		olho.look_at(corpo_t.global_position + Vector3(0, 0.3, 0))
+		olho.current = true
+		await _foto(String(tomada[0]), 0.05)
+	jogo.camera.current = true
+	olho.queue_free()
 	await create_timer(4.0).timeout   # deixa o tubarão pegar e o Torin voltar ao Refúgio antes das outras fotos
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)
 	_ver(pe + Vector2(16, 6), Vector2(40, 50))           # o pé da rampa, a leste
