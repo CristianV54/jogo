@@ -257,7 +257,7 @@ func _draw() -> void:
 		draw_colored_polygon(pts, Color(0.5, 0.44, 0.38))
 		draw_colored_polygon(PackedVector2Array([base + Vector2(0, -alto), base + Vector2(alto * 0.55, 0), base + Vector2(alto * 0.12, 0)]), Color(0.36, 0.31, 0.27))
 		draw_polyline(pts, COR_TINTA, 2.0, true)
-	_nome(mq + Vector2(0, -mr - 8.0), "Montanha dos Dragões", 17, _fonte_regiao, COR_TINTA, 3.0)
+	_nome(mq + Vector2(0, mr * 0.35 + 16.0), "Montanha dos Dragões", 17, _fonte_regiao, COR_TINTA, 3.0)   # por baixo dos picos: em cima batia no nome da Vila Pedras Altas
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])

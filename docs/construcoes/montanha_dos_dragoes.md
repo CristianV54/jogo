@@ -16,11 +16,11 @@
 ## Resultado (26/11/2026)
 
 - `teste_mundo`: os itens 1 a 4 passam (sobe 245 m; 9 dragões, 5 voando; domar testado sem carne e com carne).
-- Fotos em `docs/construcoes/montanha/`. Na primeira rodada a montanha não se via de longe (névoa do pinhal) e as pedras do ninho saíam com desenho de muro; foram corrigidos o ar em volta dela (`Mundo.estilo_em`) e a rocha do ninho.
+- Fotos em `docs/construcoes/montanha/`. Na primeira rodada a montanha não se via de longe (névoa do pinhal) e as pedras do ninho saíam com desenho de muro; foram corrigidos o ar em volta dela (`Mundo.estilo_em`) e a rocha do ninho, e fotografados de novo (30_ e 33_).
 
 ## Pontos fracos anotados
 
 - Os dragões selvagens só voam em círculo ou ficam parados: não atacam nem reagem ao Torin.
 - Cinza, depois de domado, fica onde o Torin desmonta (não segue como a Fagulha).
 - A encosta é lisa de perto (cor por faixas, sem pedras soltas nem vegetação de altitude).
-- O mapa da tecla M ainda não desenha a montanha.
+- O mapa da tecla M desenha a montanha (foto `36_no_mapa.jpg`); depois da foto o nome desceu para baixo dos picos (batia no nome da Vila Pedras Altas) e essa posição nova não foi fotografada.

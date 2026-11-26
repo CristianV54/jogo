@@ -96,6 +96,14 @@ func _rodar() -> void:
 		var cab: Array = m._cabeceiras[0]
 		_ver((cab[0] as Vector2) - (cab[1] as Vector2) * 13.0, (cab[0] as Vector2) + (cab[1] as Vector2) * 10.0)
 		await _foto("35_ponte_com_cabeceiras", 5.0)
+	# o tubarão: o Torin entra no mar a leste, passa do raso, e a foto sai quando o tubarão já vem (antes de ele chegar)
+	var praia := Vector2(MundoDados.EIXOS_DA_ILHA.x - 40.0, 0.0)
+	while Costa.distancia(praia.x, praia.y) > Tubarao.ATACA_EM - 4.0:
+		praia.x += 4.0
+	_ver(praia, praia + Vector2(60, 0))
+	jogo.jogador.global_position.y = Costa.NIVEL_MAR + 0.6
+	await _foto("40_tubarao_no_mar", 1.3)
+	await create_timer(4.0).timeout   # deixa o tubarão pegar e o Torin voltar ao Refúgio antes das outras fotos
 	var pe := Vector2(-cos(MundoDados.RAMPA_TS) * e.x * 1.5, sin(MundoDados.RAMPA_TS) * e.y * 1.5)
 	_ver(pe + Vector2(16, 6), Vector2(40, 50))           # o pé da rampa, a leste
 	await _foto("09_pe_da_rampa", 4.0)
