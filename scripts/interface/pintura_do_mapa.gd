@@ -1,7 +1,8 @@
 class_name PinturaDoMapa
 extends RefCounted
-## Pinta a imagem do mapa do mundo (tecla M) no estilo de mapa antigo desenhado à mão: papel envelhecido, cada bioma com um
-## tom leve de aquarela, a mata desenhada árvore por árvore (pinheiro no pinhal e no bosque, copa redonda nos campos, tronco
+## Pinta a imagem do mapa do mundo (tecla M) como mapa de JOGO: cores vivas do chão de cada bioma, RELEVO sombreado (o
+## penhasco de Valdoria e a Montanha dos Dragões saltam), mar em três fundos com espuma na praia, mata como mancha
+## escura com a árvore desenhada por cima (pinheiro no pinhal e no bosque, copa redonda nos campos, tronco
 ## seco nas terras frias e queimadas), serras de traço nas terras de pedra e o mar em azul desbotado.
 ## É pintada uma vez, quando o mundo é construído. Rios, estradas, costa e nomes são traçados por cima pelo MapaDoMundo
 ## (em vetor, para ficarem nítidos com qualquer zoom).
@@ -12,28 +13,47 @@ const TINTA := Color(0.22, 0.15, 0.09)
 
 
 ## `mata` = quantas árvores há em cada célula de `celula` metros (grade gw x gh sobre MundoDados.LIMITES).
-static func pintar(mata: PackedFloat32Array, gw: int, gh: int, celula: float) -> ImageTexture:
+## `altura` devolve a altura do chão em (x, z): com ela o mapa ganha RELEVO (sombra de morro, como nos mapas de jogo).
+static func pintar(mata: PackedFloat32Array, gw: int, gh: int, celula: float, altura: Callable) -> ImageTexture:
 	var lim := MundoDados.LIMITES
 	var grao := FastNoiseLite.new()
 	grao.seed = 77
 	grao.frequency = 0.004
 	grao.fractal_octaves = 3
+	var alturas := PackedFloat32Array()
+	alturas.resize(gw * gh)
+	for gz in gh:
+		for gx in gw:
+			alturas[gz * gw + gx] = float(altura.call(lim.position.x + gx * celula, lim.position.y + gz * celula))
 	var base := Image.create(gw, gh, false, Image.FORMAT_RGBA8)
+	var sol := Vector3(-0.55, 0.62, -0.56).normalized()   # luz de noroeste, a convenção dos mapas de relevo
 	for gz in gh:
 		for gx in gw:
 			var wx := lim.position.x + gx * celula
 			var wz := lim.position.y + gz * celula
 			var costa := Costa.distancia(wx, wz)
-			var mancha := grao.get_noise_2d(wx, wz) * 0.05 * smoothstep(-300.0, -60.0, costa)   # o papel não é liso (no mar aberto a cor é uma só, igual ao fundo da tela)
+			var mancha := grao.get_noise_2d(wx, wz) * 0.04
 			var cor: Color
-			if costa < 0.0:   # mar: azul desbotado, mais claro junto à praia
-				cor = Color(0.68, 0.76, 0.72).lerp(Color(0.5, 0.62, 0.64), smoothstep(0.0, -260.0, costa))
+			if costa < 0.0:   # mar: turquesa no raso, azul fundo e escuro mar adentro
+				cor = Color(0.36, 0.66, 0.68).lerp(Color(0.13, 0.33, 0.47), smoothstep(0.0, -140.0, costa))
+				cor = cor.lerp(Color(0.07, 0.18, 0.3), smoothstep(-140.0, -900.0, costa))
+				cor = cor.lerp(Color(0.85, 0.93, 0.9), smoothstep(-14.0, 0.0, costa) * 0.7)   # espuma na beira
+				mancha *= 0.5
 			else:
 				var chao := Biomas.cor_do_chao(wx, wz, 0.5)
-				var aquarela := Color(chao.r * 1.7 + 0.12, chao.g * 1.55 + 0.12, chao.b * 1.5 + 0.08)
-				cor = PAPEL.lerp(aquarela, 0.45)
-				cor = cor.lerp(Color(0.93, 0.87, 0.7), smoothstep(40.0, 5.0, costa))   # areia clara na beira
-			base.set_pixel(gx, gz, Color(cor.r + mancha, cor.g + mancha, cor.b + mancha * 0.8))
+				cor = Color(chao.r * 1.45 + 0.1, chao.g * 1.4 + 0.1, chao.b * 1.3 + 0.06)   # a cor do chão do jogo, mais viva e clara
+				var n := mata[gz * gw + gx]
+				cor = cor.lerp(Color(0.16, 0.3, 0.17), clampf(n / 5.0, 0.0, 0.55))            # mata fechada lê-se como mancha escura
+				var h := alturas[gz * gw + gx]
+				cor = cor.lerp(Color(0.52, 0.47, 0.42), smoothstep(14.0, 60.0, h))             # rocha nos altos
+				cor = cor.lerp(Color(0.86, 0.84, 0.82), smoothstep(150.0, 240.0, h))           # cinza clara no pico
+				var hx := alturas[gz * gw + mini(gx + 1, gw - 1)] - alturas[gz * gw + maxi(gx - 1, 0)]
+				var hz := alturas[mini(gz + 1, gh - 1) * gw + gx] - alturas[maxi(gz - 1, 0) * gw + gx]
+				var normal := Vector3(-hx, 2.0 * celula * 0.35, -hz).normalized()                # relevo exagerado para ler de longe
+				var luz := clampf(normal.dot(sol) / sol.y, 0.45, 1.5)
+				cor = Color(cor.r * luz, cor.g * luz, cor.b * luz)
+				cor = cor.lerp(Color(0.93, 0.87, 0.68), smoothstep(34.0, 4.0, costa))            # praia
+			base.set_pixel(gx, gz, Color(clampf(cor.r + mancha, 0.0, 1.0), clampf(cor.g + mancha, 0.0, 1.0), clampf(cor.b + mancha, 0.0, 1.0)))
 	base.resize(gw * AMPLIA, gh * AMPLIA, Image.INTERPOLATE_CUBIC)
 	var selos := {"pinheiro": _pinheiro(), "copa": _copa(), "seca": _seca(), "serra": _serra()}
 	var rng := RandomNumberGenerator.new()

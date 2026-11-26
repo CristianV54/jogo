@@ -722,7 +722,7 @@ func _floresta() -> void:
 					var q := Vector2(x, z) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2))
 					var e := _rng.randf_range(0.8, 1.6)
 					(tiles[kk] as Array).append(Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(e, e, e)), Vector3(q.x, terreno.altura_em(q.x, q.y) - 0.02, q.y)))
-	mapa_floresta = PinturaDoMapa.pintar(mata, gw, gh, 20.0)
+	mapa_floresta = PinturaDoMapa.pintar(mata, gw, gh, 20.0, terreno.altura_em)
 	var malhas := [FabricaNatureza.pinheiro(), FabricaNatureza.folhosa(), FabricaNatureza.morta(), FabricaNatureza.arbusto(2.0), FabricaNatureza.pedra(5.0), FabricaNatureza.cogumelo()]
 	var mat := FabricaNatureza.material()
 	var total := 0

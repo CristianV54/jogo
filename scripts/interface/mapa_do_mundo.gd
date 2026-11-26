@@ -1,6 +1,7 @@
 class_name MapaDoMundo
 extends Control
-## Mapa do mundo (tecla M): a ilha inteira na tela, em estilo de mapa antigo desenhado (ver PinturaDoMapa). Interativo:
+## Mapa do mundo (tecla M): a ilha inteira na tela, como mapa de jogo (relevo pintado, ícones, letra clara; ver
+## PinturaDoMapa). De longe o mapa é limpo: capital, regiões, montanha e os ícones das vilas. Interativo:
 ##   roda do mouse (ou + e -) aproxima e afasta; arrastar com o botão esquerdo move o mapa;
 ##   clique marca o destino (bandeira); clique na bandeira ou botão direito tira a marca.
 ## Como num mapa de verdade, os nomes aparecem por importância: de longe só o reino, as cidades e as vilas grandes;
@@ -19,7 +20,9 @@ const REGIAO_DA_MISSAO := {
 const COR_ACENTO := Color(0.95, 0.72, 0.2)
 const COR_TINTA := Color(0.16, 0.1, 0.06)
 const ZOOM_MAX := 8.0
+const ZOOM_NOMES_DE_VILA := 1.7    # de longe só os ícones; os nomes das vilas (e os ícones dos lugares pequenos) aparecem ao aproximar
 const ZOOM_NOMES_PEQUENOS := 3.0   # a partir deste zoom aparecem os nomes de fazendas, postos e cabanas
+const COR_TEXTO := Color(0.98, 0.95, 0.86)   # letra clara com contorno escuro: lê-se em cima de qualquer cor do mapa
 
 var alvo := ""                 # região da missão ativa
 var tem_destino := false
@@ -153,11 +156,11 @@ func _nome(q: Vector2, texto: String, tamanho: int, fonte: Font, cor := COR_TINT
 			break
 	_nomes_postos.append(caixa)
 	if entre_letras <= 0.0:
-		draw_string_outline(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 4, Color(0.9, 0.84, 0.68, 0.85))
+		draw_string_outline(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 6, Color(0.04, 0.04, 0.06, 0.9))
 		draw_string(fonte, pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
 		return
 	for letra in texto:   # letras espaçadas, como nos nomes de região de mapa antigo
-		draw_string_outline(fonte, pos, letra, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 4, Color(0.9, 0.84, 0.68, 0.85))
+		draw_string_outline(fonte, pos, letra, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, 6, Color(0.04, 0.04, 0.06, 0.9))
 		draw_string(fonte, pos, letra, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho, cor)
 		pos.x += fonte.get_string_size(letra, HORIZONTAL_ALIGNMENT_LEFT, -1, tamanho).x + entre_letras
 
@@ -206,34 +209,34 @@ func _draw() -> void:
 	var esc := _escala()
 	if mundo.mapa_floresta:
 		draw_texture_rect(mundo.mapa_floresta, Rect2(mundo_para_tela(lim.position), lim.size * esc), false)
-	# costa: linha de tinta e, mar adentro, linhas cada vez mais fracas (as "ondas" dos mapas antigos)
-	var meio := lim.get_center()
-	for onda in [[1.045, 0.12], [1.028, 0.2], [1.013, 0.32]]:
-		var pts := PackedVector2Array()
-		for p in _costa:
-			pts.append(mundo_para_tela(meio + (p - meio) * float(onda[0])))
-		draw_polyline(pts, Color(0.2, 0.3, 0.34, float(onda[1])), 1.2, true)
-	var praia := PackedVector2Array()
+	var praia := PackedVector2Array()   # a linha da costa: um filete claro (espuma) com contorno escuro fino
 	for p in _costa:
 		praia.append(mundo_para_tela(p))
-	draw_polyline(praia, Color(COR_TINTA.r, COR_TINTA.g, COR_TINTA.b, 0.85), 2.0, true)
-	for r in mundo.terreno.rios:   # rios: azul de aquarela com a margem em tinta
+	draw_polyline(praia, Color(0.05, 0.12, 0.18, 0.55), 3.5, true)
+	draw_polyline(praia, Color(0.95, 0.97, 0.92, 0.8), 1.4, true)
+	for r in mundo.terreno.rios:   # rios: azul vivo com margem escura
 		var pts := PackedVector2Array()
 		for p in r["pontos"]:
 			pts.append(mundo_para_tela(p))
-		var larg := clampf(float(r["largura"]) * esc * 1.6, 2.0, 14.0)
-		draw_polyline(pts, Color(0.22, 0.3, 0.36, 0.7), larg + 1.6, true)
-		draw_polyline(pts, Color(0.56, 0.7, 0.74), larg, true)
-	for id in mundo.estradas:      # estradas principais: traço fino de tinta
+		var larg := clampf(float(r["largura"]) * esc * 1.6, 2.5, 14.0)
+		draw_polyline(pts, Color(0.06, 0.2, 0.32, 0.8), larg + 2.0, true)
+		draw_polyline(pts, Color(0.38, 0.68, 0.82), larg, true)
+	for id in mundo.estradas:      # estradas: faixa clara com borda escura, como nos mapas de jogo
 		var pts := PackedVector2Array()
 		for p in mundo.estradas[id]:
 			pts.append(mundo_para_tela(p))
-		draw_polyline(pts, Color(0.36, 0.24, 0.13, 0.8), clampf(0.9 * zoom, 1.4, 3.5), true)
+		var le := clampf(1.3 * zoom, 2.2, 6.0)
+		draw_polyline(pts, Color(0.2, 0.13, 0.07, 0.75), le + 2.0, true)
+		draw_polyline(pts, Color(0.9, 0.8, 0.56), le, true)
 	if zoom >= ZOOM_NOMES_PEQUENOS:   # trilhas até as fazendas e cabanas: tracejadas, só de perto
 		for trilha in mundo.trilhas:
 			for i in range(0, trilha.size() - 1):
-				draw_dashed_line(mundo_para_tela(trilha[i]), mundo_para_tela(trilha[i + 1]), Color(0.36, 0.24, 0.13, 0.6), 1.3, 5.0)
-	# o reino de Valdoria: a muralha em tinta grossa (aberta nos portões), o penhasco e o nome
+				draw_dashed_line(mundo_para_tela(trilha[i]), mundo_para_tela(trilha[i + 1]), Color(0.92, 0.84, 0.62, 0.8), 1.6, 5.0)
+	# o reino de Valdoria: mancha de cidade, muralha (aberta nos portões) e o castelo no meio
+	var cidade := PackedVector2Array()
+	for k in 60:
+		cidade.append(mundo_para_tela(MundoDados.ponto_da_muralha(TAU * k / 60.0)))
+	draw_colored_polygon(cidade, Color(0.74, 0.62, 0.5, 0.9))
 	for k in 120:
 		var m0 := MundoDados.ponto_da_muralha(TAU * (k + 0.5) / 120.0)
 		var aberto := false
@@ -241,79 +244,116 @@ func _draw() -> void:
 			if m0.distance_to(g) < 16.0:
 				aberto = true
 		if not aberto:
-			draw_line(mundo_para_tela(MundoDados.ponto_da_muralha(TAU * k / 120.0)), mundo_para_tela(MundoDados.ponto_da_muralha(TAU * (k + 1) / 120.0)), COR_TINTA, clampf(1.6 * zoom, 2.5, 6.0), true)
+			draw_line(mundo_para_tela(MundoDados.ponto_da_muralha(TAU * k / 120.0)), mundo_para_tela(MundoDados.ponto_da_muralha(TAU * (k + 1) / 120.0)), Color(0.18, 0.14, 0.12), clampf(1.6 * zoom, 2.5, 6.0), true)
 	var rq := mundo_para_tela(Vector2.ZERO)
-	draw_circle(rq, clampf(60.0 * esc, 5.0, 60.0), Color(0.5, 0.47, 0.43))
-	draw_rect(Rect2(rq - Vector2(6, 6), Vector2(12, 12)), COR_TINTA)
-	draw_rect(Rect2(rq - Vector2(4, 4), Vector2(8, 8)), Color(0.62, 0.14, 0.1))
-	_nome(rq + Vector2(0, -clampf(60.0 * esc, 5.0, 60.0) - 8.0), "VALDORIA", 22, _fonte_regiao, COR_TINTA, 4.0)
-	# a Montanha dos Dragões, desenhada como nos mapas antigos: três picos em tinta, o do meio maior, e o nome
-	var mq := mundo_para_tela(MundoDados.MONTANHA_CENTRO)
-	var mr := clampf(MundoDados.MONTANHA_RAIO * esc, 14.0, 400.0)
-	for pico in [[-0.55, 0.62], [0.55, 0.7], [0.0, 1.0]]:
-		var base := mq + Vector2(float(pico[0]) * mr, mr * 0.35)
-		var alto := float(pico[1]) * mr
-		var pts := PackedVector2Array([base + Vector2(-alto * 0.55, 0), base + Vector2(0, -alto), base + Vector2(alto * 0.55, 0)])
-		draw_colored_polygon(pts, Color(0.5, 0.44, 0.38))
-		draw_colored_polygon(PackedVector2Array([base + Vector2(0, -alto), base + Vector2(alto * 0.55, 0), base + Vector2(alto * 0.12, 0)]), Color(0.36, 0.31, 0.27))
-		draw_polyline(pts, COR_TINTA, 2.0, true)
-	_nome(mq + Vector2(0, mr * 0.35 + 16.0), "Montanha dos Dragões", 17, _fonte_regiao, COR_TINTA, 3.0)   # por baixo dos picos: em cima batia no nome da Vila Pedras Altas
+	_icone(rq, "castelo", clampf(14.0 + 3.0 * zoom, 16.0, 34.0))
+	_nome(rq + Vector2(0, -clampf(18.0 + 4.0 * zoom, 22.0, 46.0)), "VALDORIA", 26, _fonte_regiao, COR_TEXTO, 5.0)
+	var mq := mundo_para_tela(MundoDados.MONTANHA_CENTRO)   # a Montanha dos Dragões: o relevo já a desenha; aqui só o ícone e o nome
+	_icone(mq, "dragao", clampf(12.0 + 2.0 * zoom, 14.0, 26.0))
+	_nome(mq + Vector2(0, clampf(18.0 + 3.0 * zoom, 22.0, 40.0) + 14.0), "MONTANHA DOS DRAGÕES", 15, _fonte_regiao, COR_TEXTO, 2.0)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])
-		if String(pv.get("tipo", "")) == "vila":   # vila: marca redonda e nome em itálico, sempre
-			draw_circle(q, 4.5, COR_TINTA)
-			draw_circle(q, 3.0, Color(0.72, 0.24, 0.14))
-			_nome(q + Vector2(0, -8), String(pv.get("nome", "")), 14, _fonte_vila)
-		else:                                        # lugar pequeno: um ponto; o nome só de perto
-			draw_circle(q, 2.0, Color(COR_TINTA.r, COR_TINTA.g, COR_TINTA.b, 0.8))
+		var tipo := String(pv.get("tipo", ""))
+		if MundoDados.ate_a_muralha((pv["centro"] as Vector2).x, (pv["centro"] as Vector2).y) < 30.0:
+			continue   # praças de dentro da cidade: o castelo já marca Valdoria
+		if tipo == "vila":   # vila: ícone de casa sempre; o nome só quando se aproxima (de longe o mapa fica limpo)
+			_icone(q, "vila", 9.0 if zoom < ZOOM_NOMES_DE_VILA else 11.0)
+			if zoom >= ZOOM_NOMES_DE_VILA:
+				_nome(q + Vector2(0, -15), String(pv.get("nome", "")), 14, _fonte_vila, COR_TEXTO)
+		elif zoom >= ZOOM_NOMES_DE_VILA:   # lugares pequenos: aparecem ao aproximar, cada tipo com o seu ícone
+			_icone(q, {"fazenda": "fazenda", "lavoura": "fazenda", "posto": "tenda", "posto_imperial": "bandeira", "pescador": "peixe", "cabana": "cabana"}.get(tipo, "ponto"), 7.0)
 			if zoom >= ZOOM_NOMES_PEQUENOS:
-				_nome(q + Vector2(0, -6), String(pv.get("nome", "")), 12, _fonte_vila, Color(0.3, 0.2, 0.12))
-	for id in MundoDados.REGIOES:   # cidades e lugares grandes: marca maior e nome em maiúsculas espaçadas
+				_nome(q + Vector2(0, -12), String(pv.get("nome", "")), 12, _fonte_vila, Color(0.92, 0.9, 0.82))
+	for id in MundoDados.REGIOES:   # as seis regiões: escudo e nome em maiúsculas
 		var q := mundo_para_tela(MundoDados.centro(id))
-		var capital := false   # a capital (Valdoria) não é região: é desenhada à parte, com a muralha
-		var r := 8.0 if capital else 5.5
-		draw_rect(Rect2(q - Vector2(r, r), Vector2(r, r) * 2.0), COR_TINTA)
-		draw_rect(Rect2(q - Vector2(r - 2, r - 2), Vector2(r - 2, r - 2) * 2.0), Color(0.62, 0.14, 0.1) if capital else Color(0.86, 0.78, 0.6))
+		_icone(q, "escudo", 12.0)
 		if id == alvo:   # a missão ativa fica aqui
-			draw_arc(q, r + 7.0 + sin(_t * 4.0) * 2.0, 0.0, TAU, 32, COR_ACENTO, 2.5)
-		_nome(q + Vector2(0, -r - 7), String(MundoDados.REGIOES[id]["nome"]).to_upper(), 22 if capital else 15, _fonte_regiao, COR_TINTA, 4.0 if capital else 2.0)
-	if tem_destino:   # bandeira do destino
+			draw_arc(q, 20.0 + sin(_t * 4.0) * 2.0, 0.0, TAU, 32, COR_ACENTO, 2.5)
+		_nome(q + Vector2(0, -19), String(MundoDados.REGIOES[id]["nome"]).to_upper(), 15, _fonte_regiao, COR_TEXTO, 2.0)
+	if tem_destino:   # destino: alfinete vermelho com anel que pulsa
 		var q := mundo_para_tela(destino)
-		draw_line(q, q + Vector2(0, -22), COR_TINTA, 2.5)
-		draw_colored_polygon(PackedVector2Array([q + Vector2(1, -22), q + Vector2(17, -17), q + Vector2(1, -11)]), Color(0.8, 0.14, 0.1))
-		draw_circle(q, 3.0, COR_TINTA)
+		draw_arc(q, 12.0 + sin(_t * 5.0) * 3.0, 0.0, TAU, 28, Color(1.0, 0.3, 0.2, 0.8), 2.0, true)
+		draw_colored_polygon(PackedVector2Array([q, q + Vector2(-8, -20), q + Vector2(8, -20)]), Color(0.1, 0.06, 0.05))
+		draw_circle(q + Vector2(0, -22), 10.0, Color(0.1, 0.06, 0.05))
+		draw_circle(q + Vector2(0, -22), 7.5, Color(0.9, 0.2, 0.14))
+		draw_circle(q + Vector2(0, -22), 3.0, Color(1, 1, 1))
 	var jog := get_tree().get_first_node_in_group("jogador") as Node3D
-	if jog:   # o Torin: seta apontando para onde ele olha
+	if jog:   # o Torin: seta amarela apontando para onde ele olha, com um anel que pulsa
 		var pj := Vector2(jog.global_position.x, jog.global_position.z)
 		var q := mundo_para_tela(pj)
 		if tem_destino:
-			draw_dashed_line(q, mundo_para_tela(destino), Color(0.8, 0.14, 0.1, 0.85), 2.0, 8.0)
+			draw_dashed_line(q, mundo_para_tela(destino), Color(1.0, 0.85, 0.3, 0.9), 2.5, 9.0)
 		var f := Vector2(-sin(jog.global_rotation.y), -cos(jog.global_rotation.y))
 		var lado := Vector2(-f.y, f.x)
-		draw_colored_polygon(PackedVector2Array([q + f * 13.0, q - f * 7.0 + lado * 8.0, q - f * 7.0 - lado * 8.0]), COR_TINTA)
-		draw_colored_polygon(PackedVector2Array([q + f * 10.0, q - f * 5.0 + lado * 5.5, q - f * 5.0 - lado * 5.5]), Color(0.95, 0.9, 0.78))
-	# moldura: filete duplo de tinta e uma faixa de papel embaixo para a escala e a ajuda
-	draw_rect(Rect2(Vector2(0, tela.y - 46), Vector2(tela.x, 46)), Color(0.87, 0.8, 0.63, 0.92))
-	draw_line(Vector2(0, tela.y - 46), Vector2(tela.x, tela.y - 46), COR_TINTA, 1.5)
-	draw_rect(Rect2(Vector2(8, 8), tela - Vector2(16, 16)), COR_TINTA, false, 3.0)
-	draw_rect(Rect2(Vector2(14, 14), tela - Vector2(28, 28)), Color(COR_TINTA.r, COR_TINTA.g, COR_TINTA.b, 0.6), false, 1.0)
-	# rosa dos ventos, escala e ajuda (discretas, nos cantos)
-	var n := Vector2(tela.x - 64, 78)
-	draw_arc(n, 22.0, 0.0, TAU, 40, COR_TINTA, 1.5, true)
-	draw_colored_polygon(PackedVector2Array([n + Vector2(0, -30), n + Vector2(6, 0), n + Vector2(-6, 0)]), COR_TINTA)
-	draw_colored_polygon(PackedVector2Array([n + Vector2(0, 30), n + Vector2(6, 0), n + Vector2(-6, 0)]), Color(0.86, 0.78, 0.6))
-	draw_polyline(PackedVector2Array([n + Vector2(0, 30), n + Vector2(6, 0), n + Vector2(-6, 0), n + Vector2(0, 30)]), COR_TINTA, 1.2, true)
-	draw_string(_fonte_regiao, n + Vector2(-6, -36), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, COR_TINTA)
+		draw_arc(q, 17.0 + sin(_t * 3.0) * 3.0, 0.0, TAU, 32, Color(1.0, 0.85, 0.3, 0.55), 2.0, true)
+		draw_colored_polygon(PackedVector2Array([q + f * 15.0, q - f * 8.0 + lado * 9.0, q - f * 3.0, q - f * 8.0 - lado * 9.0]), Color(0.08, 0.06, 0.04))
+		draw_colored_polygon(PackedVector2Array([q + f * 11.5, q - f * 5.5 + lado * 6.0, q - f * 2.0, q - f * 5.5 - lado * 6.0]), COR_ACENTO)
+	# moldura de jogo: faixas escuras em cima (título) e embaixo (legenda, escala e ajuda)
+	draw_rect(Rect2(Vector2.ZERO, Vector2(tela.x, 44)), Color(0.05, 0.05, 0.07, 0.82))
+	draw_line(Vector2(0, 44), Vector2(tela.x, 44), COR_ACENTO, 1.5)
+	draw_string(_fonte_regiao, Vector2(24, 30), "MAPA DO MUNDO", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, COR_ACENTO)
+	var onde := "Você está em: " + mundo.nome_do_lugar(jog.global_position) if jog else ""
+	draw_string(_fonte_vila, Vector2(230, 29), onde, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COR_TEXTO)
+	draw_rect(Rect2(Vector2(0, tela.y - 46), Vector2(tela.x, 46)), Color(0.05, 0.05, 0.07, 0.82))
+	draw_line(Vector2(0, tela.y - 46), Vector2(tela.x, tela.y - 46), COR_ACENTO, 1.5)
+	var x_leg := 24.0   # legenda dos ícones
+	for item in [["castelo", "Capital"], ["escudo", "Região"], ["vila", "Vila"], ["fazenda", "Fazenda"], ["tenda", "Posto"], ["peixe", "Pescador"], ["dragao", "Dragões"]]:
+		_icone(Vector2(x_leg + 9.0, tela.y - 23), String(item[0]), 8.0)
+		draw_string(_fonte_vila, Vector2(x_leg + 24.0, tela.y - 17), String(item[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TEXTO)
+		x_leg += 34.0 + _fonte_vila.get_string_size(String(item[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	# rosa dos ventos e escala
+	var n := Vector2(tela.x - 60, 104)
+	draw_circle(n, 30.0, Color(0.05, 0.05, 0.07, 0.6))
+	draw_arc(n, 30.0, 0.0, TAU, 40, COR_ACENTO, 1.5, true)
+	draw_colored_polygon(PackedVector2Array([n + Vector2(0, -24), n + Vector2(6, 0), n + Vector2(-6, 0)]), Color(0.9, 0.2, 0.14))
+	draw_colored_polygon(PackedVector2Array([n + Vector2(0, 24), n + Vector2(6, 0), n + Vector2(-6, 0)]), COR_TEXTO)
+	draw_string(_fonte_regiao, n + Vector2(-6, -34), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COR_TEXTO)
 	var metros := 1000.0 if zoom < 2.5 else (250.0 if zoom < 6.0 else 100.0)
-	var b := Vector2(40, tela.y - 20)
-	draw_line(b, b + Vector2(metros * esc, 0), COR_TINTA, 3.0)
-	draw_line(b + Vector2(0, -5), b + Vector2(0, 5), COR_TINTA, 2.0)
-	draw_line(b + Vector2(metros * esc, -5), b + Vector2(metros * esc, 5), COR_TINTA, 2.0)
+	var b := Vector2(tela.x - 60.0 - metros * esc, 150.0 + 14.0)
+	draw_line(b, b + Vector2(metros * esc, 0), COR_TEXTO, 3.0)
+	draw_line(b + Vector2(0, -5), b + Vector2(0, 5), COR_TEXTO, 2.0)
+	draw_line(b + Vector2(metros * esc, -5), b + Vector2(metros * esc, 5), COR_TEXTO, 2.0)
 	var rotulo := ("%d km" % int(metros / 1000.0)) if metros >= 1000.0 else ("%d m" % int(metros))
-	draw_string(_fonte_vila, b + Vector2(metros * esc + 10.0, 5.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, COR_TINTA)
+	draw_string_outline(_fonte_vila, b + Vector2(0, 20.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color(0, 0, 0, 0.7))
+	draw_string(_fonte_vila, b + Vector2(0, 20.0), rotulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TEXTO)
 	var ajuda := "roda do mouse: zoom    arrastar: mover    clique: marcar destino    botão direito: tirar a marca    M: fechar"
 	if tem_destino and jog:
 		ajuda = "Destino a %d m.    " % int(Vector2(jog.global_position.x, jog.global_position.z).distance_to(destino)) + ajuda
-	var larg_ajuda := _fonte_vila.get_string_size(ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-	draw_string(_fonte_vila, Vector2(tela.x - larg_ajuda - 40.0, tela.y - 16), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COR_TINTA)
+	var larg_ajuda := _fonte_vila.get_string_size(ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	draw_string(_fonte_vila, Vector2(tela.x - larg_ajuda - 24.0, tela.y - 17), ajuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.76))
+
+
+## Ícone do mapa: disco escuro com borda dourada e o desenho claro dentro. `r` é o raio do disco.
+func _icone(q: Vector2, qual: String, r: float) -> void:
+	draw_circle(q, r + 1.5, COR_ACENTO if qual in ["castelo", "dragao"] else Color(0.95, 0.92, 0.82))
+	draw_circle(q, r, Color(0.5, 0.1, 0.08) if qual == "castelo" else (Color(0.35, 0.12, 0.4) if qual == "dragao" else Color(0.1, 0.1, 0.13)))
+	var c := Color(0.98, 0.95, 0.86)
+	var u := r * 0.11   # unidade do desenho
+	match qual:
+		"castelo":   # três torres com ameias e o portão
+			for dx in [-5.0, 0.0, 5.0]:
+				var alto := 7.0 if dx == 0.0 else 5.0
+				draw_rect(Rect2(q + Vector2((dx - 1.5) * u, -alto * u + 2.0 * u), Vector2(3.0 * u, alto * u + 2.0 * u)), c)
+			draw_rect(Rect2(q + Vector2(-5.0 * u, 0.5 * u), Vector2(10.0 * u, 3.5 * u)), c)
+			draw_rect(Rect2(q + Vector2(-1.0 * u, 1.6 * u), Vector2(2.0 * u, 2.4 * u)), Color(0.5, 0.1, 0.08))
+		"escudo":
+			draw_colored_polygon(PackedVector2Array([q + Vector2(-5, -5) * u, q + Vector2(5, -5) * u, q + Vector2(5, 1) * u, q + Vector2(0, 6) * u, q + Vector2(-5, 1) * u]), c)
+		"vila", "cabana":   # casa: telhado e parede
+			draw_colored_polygon(PackedVector2Array([q + Vector2(-6, -1) * u, q + Vector2(0, -6) * u, q + Vector2(6, -1) * u]), c)
+			draw_rect(Rect2(q + Vector2(-4, -1) * u, Vector2(8, 6) * u), c)
+		"fazenda":   # três riscos de plantação
+			for dx in [-4.0, 0.0, 4.0]:
+				draw_line(q + Vector2(dx, 5) * u, q + Vector2(dx, -5) * u, c, maxf(1.5, 1.6 * u))
+		"tenda":
+			draw_colored_polygon(PackedVector2Array([q + Vector2(-6, 5) * u, q + Vector2(0, -6) * u, q + Vector2(6, 5) * u]), c)
+		"bandeira":
+			draw_line(q + Vector2(-3, 6) * u, q + Vector2(-3, -6) * u, c, maxf(1.5, 1.4 * u))
+			draw_colored_polygon(PackedVector2Array([q + Vector2(-3, -6) * u, q + Vector2(6, -3) * u, q + Vector2(-3, 0) * u]), c)
+		"peixe":
+			draw_colored_polygon(PackedVector2Array([q + Vector2(-6, 0) * u, q + Vector2(-1, -4) * u, q + Vector2(3, 0) * u, q + Vector2(-1, 4) * u]), c)
+			draw_colored_polygon(PackedVector2Array([q + Vector2(2, 0) * u, q + Vector2(7, -4) * u, q + Vector2(7, 4) * u]), c)
+		"dragao":   # asas abertas em V e a cabeça
+			draw_colored_polygon(PackedVector2Array([q + Vector2(0, 3) * u, q + Vector2(-8, -5) * u, q + Vector2(-3, -1) * u, q + Vector2(0, -6) * u, q + Vector2(3, -1) * u, q + Vector2(8, -5) * u]), c)
+		_:
+			draw_circle(q, r * 0.35, c)
