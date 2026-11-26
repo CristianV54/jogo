@@ -4,9 +4,19 @@ extends Node3D
 ## Dois jeitos de viver: VOANDO em roda de um ponto (sobe e desce, inclina na curva) ou POUSADO numa pedra, parado.
 ## O pousado pode ser `domavel`: com 3 carnes o Torin ganha a confiança dele (ver DomarDragao) e ele vira montaria.
 
-const MODELO := preload("res://assets/models/criaturas/fagulha/fagulha.glb")
+## Os modelos de dragão do jogo (ver assets/ASSETS.md). `escala`: multiplicador para o modelo ficar no tamanho do jogo
+## com tamanho = 1 (cada arquivo vem numa unidade diferente). `sobe`: metros para os pés tocarem o chão.
+## `voo` e `parado`: nomes das animações no arquivo (vazio = não tem; fica na pose do arquivo).
+const MODELOS := {
+	"fagulha": {"cena": "res://assets/models/criaturas/fagulha/fagulha.glb", "escala": 1.0, "sobe": 0.0, "voo": "Fly", "parado": "Idle"},
+	"verde": {"cena": "res://assets/models/criaturas/dragoes/quaternius/dragao_verde.fbx", "escala": 1.6, "sobe": 0.0, "voo": "DragonArmature|Dragon_Flying", "parado": "DragonArmature|Dragon_Flying"},
+	"terra": {"cena": "res://assets/models/criaturas/dragoes/terra/dragao_da_terra.fbx", "escala": 0.45, "sobe": 0.0, "voo": "", "parado": "", "textura": "res://assets/models/criaturas/dragoes/terra/SbowbgGs.png"},
+	"espinhos": {"cena": "res://assets/models/criaturas/dragoes/cethiel/dragon.dae", "escala": 5.2, "sobe": 1.82, "voo": "", "parado": "parado", "anim_parado": "res://assets/models/criaturas/dragoes/cethiel/dragon_idle.dae"},
+	"espinhos_negro": {"cena": "res://assets/models/criaturas/dragoes/cethiel/dragon.dae", "escala": 5.2, "sobe": 1.82, "voo": "", "parado": "parado", "anim_parado": "res://assets/models/criaturas/dragoes/cethiel/dragon_idle.dae", "textura": "res://assets/models/criaturas/dragoes/cethiel/dragon_black.png"},
+}
 
 var nome := "Dragão selvagem"
+var modelo := "fagulha"
 var cor := Color(1, 1, 1)
 var tamanho := 1.0
 var voando := false
@@ -23,20 +33,37 @@ var _t := 0.0
 
 func _ready() -> void:
 	add_to_group("dragoes")
-	var modelo := MODELO.instantiate() as Node3D
-	modelo.name = "Modelo"
-	modelo.scale = Vector3.ONE * tamanho
-	add_child(modelo)
-	_anim = modelo.find_child("AnimationPlayer", true, false)
-	for mi in modelo.find_children("*", "MeshInstance3D", true, false):
+	var ficha: Dictionary = MODELOS[modelo]
+	var no := (load(String(ficha["cena"])) as PackedScene).instantiate() as Node3D
+	no.name = "Modelo"
+	add_child(no)
+	no.scale = Vector3.ONE * tamanho * float(ficha["escala"])
+	no.position.y = float(ficha["sobe"]) * tamanho
+	_anim = no.find_child("AnimationPlayer", true, false)
+	for mi in no.find_children("*", "MeshInstance3D", true, false):
 		var malha := mi as MeshInstance3D
 		for i in malha.mesh.get_surface_count():
 			var mat := malha.get_active_material(i)
 			if mat is StandardMaterial3D:
 				var d := mat.duplicate() as StandardMaterial3D
 				d.albedo_color = (mat as StandardMaterial3D).albedo_color * cor
+				if ficha.has("textura"):   # o arquivo veio sem a pintura ligada, ou esta é outra pele do mesmo modelo
+					d.albedo_texture = load(String(ficha["textura"]))
+					d.albedo_color = cor
 				malha.set_surface_override_material(i, d)
-	_tocar("Fly" if voando else "Idle")
+	if ficha.has("anim_parado"):   # a animação vem num arquivo à parte, com o mesmo esqueleto: junta-se ao modelo
+		var fonte := (load(String(ficha["anim_parado"])) as PackedScene).instantiate()
+		var ap_fonte := fonte.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		if ap_fonte and ap_fonte.get_animation_list().size() > 0:
+			var biblioteca := AnimationLibrary.new()
+			biblioteca.add_animation("parado", ap_fonte.get_animation(ap_fonte.get_animation_list()[0]).duplicate())
+			_anim = AnimationPlayer.new()
+			_anim.name = "Animacoes"
+			no.add_child(_anim)
+			_anim.root_node = NodePath("..")
+			_anim.add_animation_library("", biblioteca)
+		fonte.free()
+	_tocar(String(ficha["voo"]) if voando else String(ficha["parado"]))
 	if domavel:
 		var domar_no := DomarDragao.new()
 		domar_no.name = "Domar"
@@ -47,7 +74,8 @@ func _ready() -> void:
 
 
 func _tocar(animacao: String) -> void:
-	if _anim and _anim.has_animation(animacao) and _anim.current_animation != animacao:
+	if _anim and animacao != "" and _anim.has_animation(animacao) and _anim.current_animation != animacao:
+		_anim.get_animation(animacao).loop_mode = Animation.LOOP_LINEAR
 		_anim.play(animacao, 0.3)
 
 

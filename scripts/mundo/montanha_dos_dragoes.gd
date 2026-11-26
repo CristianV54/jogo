@@ -1,7 +1,7 @@
 class_name MontanhaDosDragoes
 extends Node3D
 ## O que há na Montanha dos Dragões (o chão é do terreno, ver MundoDados.montanha): o NINHO no platô do topo (roda de
-## pedras, ossos, ovos e brasa), dragões selvagens voando em volta do pico e pousados nas pedras, o dragão DOMÁVEL no
+## pedras, ossos, ovos e brasa), dragões selvagens de CINCO modelos diferentes voando em volta do pico e pousados nas pedras, o dragão DOMÁVEL no
 ## ninho, marcos de pedra ao longo da trilha e a placa no pé dela.
 
 var mundo: Mundo
@@ -36,7 +36,8 @@ func montar() -> void:
 	for k in 5:
 		var d := DragaoSelvagem.new()
 		d.voando = true
-		d.cor = cores[k]
+		d.modelo = ["fagulha", "verde", "fagulha", "verde", "fagulha"][k]   # dois modelos diferentes no céu
+		d.cor = cores[k] if d.modelo == "fagulha" else Color(1, 1, 1)
 		d.tamanho = [1.6, 2.2, 1.3, 2.8, 1.8][k]
 		d.centro = ninho + Vector3(0, [30.0, 55.0, -40.0, 85.0, -90.0][k], 0)
 		d.raio = [90.0, 150.0, 220.0, 120.0, 330.0][k]
@@ -47,8 +48,8 @@ func montar() -> void:
 		var a := TAU * (k + 0.2) / 3.0
 		var q := c + Vector2(cos(a), sin(a)) * (MundoDados.MONTANHA_TOPO - 9.0)
 		var d := DragaoSelvagem.new()
-		d.cor = cores[5 + k]
-		d.tamanho = [1.5, 2.0, 1.2][k]
+		d.modelo = ["espinhos", "terra", "espinhos_negro"][k]   # três modelos diferentes pousados em roda do ninho
+		d.tamanho = [1.0, 0.8, 1.25][k]
 		_por(d, Vector3(q.x, mundo.terreno.altura_em(q.x, q.y), q.y))
 		d.rotation.y = atan2(c.x - q.x, c.y - q.y)   # olhando para o meio do ninho
 	domavel = DragaoSelvagem.new()

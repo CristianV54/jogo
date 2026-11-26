@@ -107,6 +107,8 @@ func _rodar() -> void:
 			await _acampamento()
 		"tubarao":
 			await _tubarao()
+		"dragoes":
+			await _dragoes()
 		_:
 			print("peça desconhecida: ", peca)
 	print("RESULTADO ", "TUDO PASSOU" if falhas == 0 else "HA %d FALHAS" % falhas)
@@ -320,3 +322,21 @@ func _tubarao() -> void:
 	await _foto("03_de_costas", Vector3(0, 2.2, -9.5), Vector3(0, 1.4, 0), Vector3(2.6, 0, -1.0))
 	await _foto("04_de_cima", Vector3(0.01, 10, 0), Vector3(0, 0, 0), Vector3(3.0, 0, 0))
 	await _foto("05_cabeca_ampliada", Vector3(2.6, 2.2, 4.6), Vector3(0, 1.4, 2.0), Vector3(-3.0, 0, 0))
+
+
+## Os modelos de dragão (e o morcego), cada um sozinho com o Torin de régua: de lado, de frente e de três quartos.
+func _dragoes() -> void:
+	var x := 0.0
+	for id in DragaoSelvagem.MODELOS:
+		var d := DragaoSelvagem.new()
+		d.modelo = String(id)
+		d.tamanho = 1.0
+		root.add_child(d)
+		d.position = Vector3(x, 0.0, 0.0)
+		for i in 12:
+			await process_frame
+		await _foto("%s_de_lado" % id, Vector3(x + 11, 2.6, 0.5), Vector3(x, 1.8, 0.0), Vector3(x, 0, -5.0))
+		await _foto("%s_de_frente" % id, Vector3(x, 2.4, 11), Vector3(x, 1.8, 0), Vector3(x + 4.0, 0, 1.0))
+		await _foto("%s_tres_quartos" % id, Vector3(x + 7, 4.5, 8), Vector3(x, 1.6, 0), Vector3(x - 3.5, 0, 2.0))
+		_conferir("Dragão %s: tem animação tocando" % id, d._anim != null and d._anim.is_playing(), d._anim.current_animation if d._anim else "sem AnimationPlayer")
+		x += 60.0

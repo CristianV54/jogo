@@ -340,3 +340,13 @@ Pedida pelo Cristian depois do Marco 7: casas sem teto, plantação que não par
 
 - **`assets/audio/*.wav` (22 arquivos, 4 MB):** todos GERADOS por síntese em `tools/audio/gerar_sons.py` (numpy; nada baixado, sem licença de terceiros). 22050 Hz, mono, 16 bits. Efeitos: `passo_terra_0..2`, `passo_pedra_0..2`, `casco`, `golpe`, `acerto`, `dano`, `coletar`, `morte`, `aviso`, `asa`, `rugido`, `passaro_0..2`. Laços (o fim é misturado com o começo; salto na emenda medido abaixo de 0,005): `vento`, `mar`, `grilos`, `musica` (alaúde dedilhado sobre pedal grave, em ré dórico, 58 s).
 - **Quem toca:** `scripts/som/sons.gd` (classe `Sons`, filho do `Jogo`), que só observa o jogador, o clima e a costa. Conferido por teste em `tools/teste_mundo.gd` (carregam, os laços tocam, passos saem ao andar, rugido ao domar). **Ninguém OUVIU ainda:** este ambiente não tem saída de áudio; volume, timbre e gosto precisam ser conferidos no Mac.
+
+## Dragões novos (26/11/2026, pedido do usuário: "quero modelos de dragões diferentes")
+
+Baixados do OpenGameArt, todos **CC0**. Entraram só os arquivos de DADOS (FBX, DAE, PNG), importados direto pelo Godot; os `.blend` dos pacotes não foram abertos. Tabela de uso em `DragaoSelvagem.MODELOS` (`scripts/criaturas/dragao_selvagem.gd`); bancada `tools/bancada_construcao.gd -- dragoes`, fotos em `docs/validacao/dragoes/`.
+
+- **Dragão de espinhos** (`criaturas/dragoes/cethiel/dragon.dae`, peles `dragon.png` azul e `dragon_black.png` negra): "Cethiel's Dragon 3D", https://opengameart.org/content/cethiels-dragon-3d. 1490 vértices, 32 ossos, textura pintada. A animação parada vem de `dragon_idle.dae` e é juntada ao modelo no código. Estilo conferido: pintado, combina com o jogo. Vieram também `dragon_walk.dae` e `dragon_attack.dae`, ainda SEM uso.
+- **Dragão dourado** (`criaturas/dragoes/terra/dragao_da_terra.fbx` + `SbowbgGs.png`): "Earth Dragon - Lowpoly", https://opengameart.org/content/earth-dragon-lowpoly. 19,5 mil vértices, 82 ossos, SEM animação (fica na pose do arquivo, pousado). A pintura é ligada no código (o FBX não a traz ligada).
+- **Dragão verde-escuro** (`criaturas/dragoes/quaternius/dragao_verde.fbx`): "LowPoly Animated Monsters" do Quaternius, https://opengameart.org/content/lowpoly-animated-monsters. 35 ossos, animações Flying, Attack, Attack2, Death, Hit; usa-se Flying. **Ressalva de estilo:** é de faces chapadas (desenho animado), fora do "3D suave pintado"; por isso só aparece VOANDO, de longe.
+- O dragão domável (Cinza) continua sendo o modelo da Fagulha: é o único com o osso de assento para montar.
+- Baixados e NÃO usados (ficaram fora do projeto): um dragão de gelo e dois outros só em `.blend`, que não abri.
