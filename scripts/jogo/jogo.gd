@@ -171,7 +171,7 @@ func ir_para(destino: String, spawn: String, forcar := false) -> void:
 	if _trocando:
 		return
 	if forcar:
-		pass   # teleporte de teste (teclas F1 a F8): ignora os requisitos da história
+		pass   # teleporte de teste (teclas F1 a F6): ignora os requisitos da história
 	elif REQUISITOS.has(destino) and not derrotados.has(REQUISITOS[destino]):
 		hud.mensagem("Caminho bloqueado: derrote %s antes." % NOMES_DOS_CHEFES[REQUISITOS[destino]], 2.5)
 		_empurrar_para_tras()

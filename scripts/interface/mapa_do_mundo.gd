@@ -247,6 +247,17 @@ func _draw() -> void:
 	draw_rect(Rect2(rq - Vector2(6, 6), Vector2(12, 12)), COR_TINTA)
 	draw_rect(Rect2(rq - Vector2(4, 4), Vector2(8, 8)), Color(0.62, 0.14, 0.1))
 	_nome(rq + Vector2(0, -clampf(60.0 * esc, 5.0, 60.0) - 8.0), "VALDORIA", 22, _fonte_regiao, COR_TINTA, 4.0)
+	# a Montanha dos Dragões, desenhada como nos mapas antigos: três picos em tinta, o do meio maior, e o nome
+	var mq := mundo_para_tela(MundoDados.MONTANHA_CENTRO)
+	var mr := clampf(MundoDados.MONTANHA_RAIO * esc, 14.0, 400.0)
+	for pico in [[-0.55, 0.62], [0.55, 0.7], [0.0, 1.0]]:
+		var base := mq + Vector2(float(pico[0]) * mr, mr * 0.35)
+		var alto := float(pico[1]) * mr
+		var pts := PackedVector2Array([base + Vector2(-alto * 0.55, 0), base + Vector2(0, -alto), base + Vector2(alto * 0.55, 0)])
+		draw_colored_polygon(pts, Color(0.5, 0.44, 0.38))
+		draw_colored_polygon(PackedVector2Array([base + Vector2(0, -alto), base + Vector2(alto * 0.55, 0), base + Vector2(alto * 0.12, 0)]), Color(0.36, 0.31, 0.27))
+		draw_polyline(pts, COR_TINTA, 2.0, true)
+	_nome(mq + Vector2(0, -mr - 8.0), "Montanha dos Dragões", 17, _fonte_regiao, COR_TINTA, 3.0)
 	for pid in mundo.povoados:
 		var pv: Dictionary = mundo.povoados[pid]
 		var q := mundo_para_tela(pv["centro"])
