@@ -1,5 +1,7 @@
 # Plano: o reino de Valdoria pronto
 
+> **Situação em 26/11/2026:** este plano foi executado. O que cada peça de Valdoria é hoje, com fotos e pontos fracos, está em `docs/construcoes/`. Este arquivo continua valendo como registro das decisões do usuário e da lista de nomes criados; os trechos sobre "como construir" descrevem a versão de 25/11, antes dos kits de peças.
+
 Aprovado pelo Cristian em 25/11/2026 ("faz, aprovado, monta o plano") e ampliado no mesmo dia com as decisões dele:
 **rei como NPC; tirar a história e as missões; castelo lá em cima e o povo morando embaixo; muralha normal de castelo
 (sem a muralha interna da cidade velha); os nomes eu posso criar.** Trabalho contínuo, sem aprovação etapa por etapa.

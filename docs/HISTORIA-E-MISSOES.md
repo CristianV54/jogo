@@ -1,5 +1,7 @@
 # Reino de Cinzas (Sangue e Escamas): história, missões, cidades e povoados
 
+> **Situação em 26/11/2026:** esta é a campanha ANTIGA. Está desligada no jogo (`Jogo.historia = false`) a pedido do usuário, que vai pensar numa história nova. O mundo mudou desde que este documento foi escrito: virou uma ilha aberta, e a Valdoria e o Castelo Imperial descritos aqui (Capítulo V) não existem mais. Serve como referência de personagens, falas e ideias.
+
 Documento para você ajustar. Tudo aqui foi tirado do jogo como está hoje (catálogo de missões lido do código, NPCs e falas lidos das cenas). Onde algo ainda **não existe**, está marcado como LACUNA. O título oficial é Reino de Cinzas (Sangue e Escamas é o subtítulo). Nomes menores são provisórios.
 
 ## 1. A história

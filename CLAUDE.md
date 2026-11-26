@@ -7,7 +7,13 @@ Idioma de trabalho: português do Brasil. Explicar arquitetura em linguagem dire
 
 ## Comece por aqui (para quem abre este repositório pela primeira vez)
 
-Leia `README.md`, depois `docs/SESSAO-2026-11-23.md` (o que foi feito, os erros e o que falta; **estado atual: NÃO MERGE**) e `docs/MAPA-DO-TRABALHO.md` (índice de ferramentas, documentos e pendências). Fotos dos ajustes: `docs/ajustes/`.
+1. Este arquivo inteiro: as regras de trabalho e, no fim, o **Estado atual** (o que o jogo é hoje).
+2. `README.md`: como rodar, as teclas e onde está cada coisa.
+3. `docs/MAPA-DO-TRABALHO.md`: índice de cada script, ferramenta e documento, os testes que valem e a lista de pendências.
+4. `docs/LEIS-DO-JOGO.md`: o que nunca pode quebrar e o teste de cada lei.
+5. `assets/ASSETS.md`: origem e licença de cada modelo e som.
+
+`docs/historico/` guarda os registros das fases anteriores (ver `docs/historico/LEIA.md`); eles citam coisas que não existem mais e **não** descrevem o jogo de hoje.
 
 ## Fundação (aprovada)
 
@@ -19,6 +25,8 @@ Leia `README.md`, depois `docs/SESSAO-2026-11-23.md` (o que foi feito, os erros 
 - **Referências de tom (só inspiração, nunca cópia de personagem, cena ou nome):** lealdade e ruptura de bando (Red Dead Redemption 2), vínculo com dragão (Como Treinar o Seu Dragão), evolução e território (ARK), combate e chefes (God of War, Ne Zha 2).
 
 ## História
+
+Esta é a história aprovada no começo do projeto. A campanha que a contava está DESLIGADA a pedido do usuário, que vai pensar numa história nova (ver Estado atual).
 
 - **Mundo:** o Império de Drakkar caça e acorrenta os dragões antigos com artefatos de ferro negro para alimentar uma máquina de guerra. Os dragões não são monstros irracionais: são enlouquecidos e escravizados pelos obeliscos e pelos generais do Império.
 - **Protagonista:** Torin, jovem comum, sem título nem linhagem, criado como batedor e lenhador num bando de exilados na fronteira selvagem.
@@ -42,9 +50,11 @@ Leia `README.md`, depois `docs/SESSAO-2026-11-23.md` (o que foi feito, os erros 
 
 Mudou um nome? Atualizar aqui e varrer o projeto inteiro. Nomes de outros lugares, bestas comuns e NPCs menores ainda não foram definidos: propor e aprovar antes de usar.
 
-## Leis do jogo e auditoria
+## Leis do jogo e conferência
 
-Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo: as regras que nunca podem ser quebradas e o teste de cada uma. A varredura do mundo todo sem o Torin é `tools/drone_auditoria.gd` (relatórios em `docs/auditoria/`, um por etapa). Branch de trabalho da reconstrução: `reconstrucao` (baseline na tag `baseline-reconstrucao`, ver `BASELINE.md`). Nunca declarar uma etapa pronta por uma foto só: rodar a suíte inteira e a varredura.
+Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo. Depois de qualquer mudança no mundo, rodar `tools/teste_mundo.gd` e `tools/auditoria_reino.gd` e fotografar o que mudou com `tools/capturar_reino.gd -- <filtro>`. Peça nova de construção ou criatura nova passa primeiro pela bancada (`tools/bancada_construcao.gd`, `tools/bancada.gd`). Nunca declarar pronto por uma foto só.
+
+Branch de trabalho: `claude/brave-wozniak-fu9kif`. O branch `reconstrucao` e a tag `baseline-reconstrucao` são o ponto de partida antigo (ver `docs/historico/BASELINE.md`).
 
 ## Regras de trabalho
 
@@ -89,45 +99,59 @@ Ler `docs/LEIS-DO-JOGO.md` antes de mexer no mundo: as regras que nunca podem se
 - Trabalho que toca vários arquivos: plano primeiro, esperar aprovação.
 - Se existir mais de uma interpretação do pedido, apresentar todas. Nunca escolher em silêncio.
 
-## Estrutura prevista (criada só quando o bloco precisar)
+## Como o usuário quer trabalhar (decisões dele, em ordem; a mais nova vale)
+
+- Não é engenheiro: responder em português do Brasil, curto, com prova (foto, número, saída de teste).
+- 25/11: prioridade é o jogo ficar BONITO; desempenho e tempo de carregamento ficam para depois.
+- 25/11: construir tudo primeiro e atacar os pontos fracos depois; não parar para aprovar peça por peça. Os pontos fracos ficam anotados em `docs/construcoes/<peca>.md`. A bancada continua obrigatória antes de a peça entrar no mundo.
+- 25/11: ficar só o que o jogo usa, com os arquivos organizados.
+- 26/11: não quer atualização no meio do trabalho nem mensagem longa; quer "pronto" ou "não pronto", e que eu olhe as fotos. Só dizer "pronto" e "pode baixar" quando estiver de verdade.
+- Pode criar nomes (ficam marcados "a aprovar"). Baixar modelo: ele autorizou para o tubarão e para os dragões; para outro tipo de asset, pedir de novo.
+- A história e as missões estão desligadas a pedido dele; ele vai pensar numa história nova.
+
+## Estrutura do projeto
 
 ```
-ReinoDeCinzas/
-  CLAUDE.md
-  project.godot
-  assets/
-    ASSETS.md
-    models/{personagens,criaturas,armas,cenario}/
-    audio/
-  scenes/
-  scripts/
-  docs/
+CLAUDE.md, README.md, project.godot
+assets/      modelos (.glb, .gltf, .fbx, .dae), animações, sons; ASSETS.md registra a origem de cada um
+scenes/      jogo.tscn (cena principal), areas/ (as 6 regiões antigas), personagens/, inimigos/, criaturas/, jogador/, teste/casa_teste.tscn
+scripts/     um sistema por pasta: jogo, jogador, camera, personagens, criaturas, inimigos, interface, som, mundo, missoes, importacao
+tools/       testes, auditoria, bancadas, ferramentas de foto e geradores (audio/, criaturas/, itens/, mundo/, personagens/, fagulha/)
+docs/        LEIS-DO-JOGO.md, MAPA-DO-TRABALHO.md, HISTORIA-E-MISSOES.md, construcoes/, galeria/, mapa-novo/, validacao/, auditoria/, historico/
 ```
 
-## Estado atual
+## Estado atual (26/11/2026)
 
-- Fundação, história e nomes aprovados. Godot e Blender conferidos.
-- Projeto Godot criado na raiz (`project.godot`). Primeiro asset validado: `assets/models/criaturas/fagulha/fagulha.glb` (movimento base: Walk, Run, Idle, Fly em loop). Detalhes e pendências em `assets/ASSETS.md`. Ferramentas em `tools/fagulha/`, evidências em `docs/validacao/fagulha/`.
-- `wip/` (laboratório antigo) foi APAGADO em 25/11/2026 a pedido do usuário; está no histórico do git.
-- Referências de anatomia (só leitura, nunca copiar a malha): dragões em `/Volumes/Extreme SSD/JOGO/modelos-3d/baixados_usuario/dragoes/` e em `~/Downloads`.
-- A cena de teste antiga (`scenes/teste/cena_teste.tscn`) e o teste dela foram apagados em 25/11/2026; a cena principal é `scenes/jogo.tscn`.
-- Fase A concluída: Torin, Vane e Brenn são humanoides reais (pacotes CC0 do Quaternius: base, trajes, animações), com o mesmo esqueleto de 65 ossos e 43 animações compartilhadas. O `PLACEHOLDER_Torin` foi substituído. Registro em `assets/ASSETS.md`; geração em `tools/personagens/`.
-- Fases B a D (21/11/2026): mundo jogável de ponta a ponta. `scenes/jogo.tscn` é a cena principal (jogador, Fagulha, câmera, interface); as áreas ficam em `scenes/areas/`; inimigos em `scenes/inimigos/`. Teste de jogada completa: `godot --path . --resolution 1280x720 --script res://tools/teste_jogo.gd` (evidências em `docs/validacao/jogo/`).
-- NPCs menores propostos por mim (não aprovados antes): Orin (vigia), Tessa (cozinheira), Dorn (lenhador), Mira (caçadora). Criaturas comuns: Lobo-cinza e Javali Couraçado (ver `assets/ASSETS.md`) e Filhote de Asa.
-- Animais (21/11/2026): vaca, cavalo, ovelha, porco e cão povoam o Refúgio (`scripts/criaturas/animal_vila.gd`, gerados por `tools/criaturas/gerar_animais.py`). Faltam galinha, cervo, urso, coelho, aves, peixes, aranha, wyvern e cão de guerra.
-- Lobo e javali têm silhueta própria (versão 1, ver `assets/ASSETS.md`).
-- Interiores com móveis reais (Fantasy Props MegaKit, CC0), dano em animais e NPCs, montaria no cavalo e no Fagulha (E para montar; no dragão, Espaço sobe e C desce). Testes: `tools/teste_montaria_dano.gd` e `tools/teste_moveis.gd`.
-- Drops (carne, couro, lã, presa) com inventário, pelagens variadas, fogo que queima, portas que abrem e fecham, chão com capim e flores, cavalo que pula e animação de montar (ver `assets/ASSETS.md`). Teste: `tools/teste_montaria_dano.gd`.
-- Inventário do jogador (tecla I): grade com ícones, descrição e uso (carne cura 20). Teste: `tools/teste_inventario.gd`.
-- Colisão de seres vivos (animais, pessoas, Fagulha) e peças do cenário: ver `assets/ASSETS.md`. Testes só quando a mudança pedir e uma vez (o usuário reclamou de demora).
-- NPCs com rotinas de trabalho (ferreiro, lenhador, cozinheira, vigia, caçadora, líder): ver `assets/ASSETS.md`.
-- Campanha por marcos segundo a Bíblia expandida (ver `assets/ASSETS.md`, seção Campanha). Marcos 1 (missões), 2 (Refúgio como vila), 3 (Pomar Alto, C1-M2 a M4, Fagulha ferida), 4 (Bosque Velado e Mina, C2-M1 a M4) 5 (Acampamento da Ruptura e Fortaleza de Ferrogris, C3-M1 a M4) 6 (Cratera de Ignis, C4-M1 a M4) e 7 (Valdoria e o Castelo Imperial, C5-M1 a M4, com epílogo) feitos: a campanha principal está jogável do início ao fim. Auditoria do mundo feita em 22/11 (ver `assets/ASSETS.md`, seção Auditoria): rodar `tools/auditoria_mundo.gd`, `tools/auditoria_portais.gd` e `tools/teste_cadeia.gd` ao fim de cada marco; mapa do mundo na tecla M. Rios e vales escavados no terreno com pontes (ver `assets/ASSETS.md`, seção Vales e rios). Mundo contínuo sem portais (regiões ligadas por estradas, rios, pontes, povoados e fazendas), clima com dia e noite, tempestade e NPCs com horário (ver seção Mundo contínuo). Ao fim de cada marco rodar também `tools/auditoria_continua.gd` e `tools/teste_mundo.gd`. Mundo aberto (cristas de rocha com vão só nas barreiras, 21 povoados, NPCs que fogem de monstros): ver `assets/ASSETS.md`, seção Mundo aberto; rodar também `tools/auditoria_cercos.gd`, `tools/auditoria_buracos.gd`, `tools/auditoria_logica.gd` (construção sobre construção, coisa dentro de campo, casa flutuando, gente na parede, porta bloqueada) e `tools/teste_medo.gd`. Regra de layout (pesquisada): casas e quintal junto à estrada, campo atrás da casa com cerca no eixo do próprio campo e portão para o quintal, feno junto ao celeiro, bebedouro dentro do curral, espantalho no meio do campo. Pendências gerais: sons de verdade, ciclo do dia, salvar/checkpoints, evolução do Fagulha, modelos próprios para os chefes.
-- Próximo: dar uso a couro/lã/presa (forja da Brenn, vender), salvar o inventário, corpo de lobo mais magro, dar silhueta própria aos chefes, mais golpes e animações de combate, interface com arte, interiores, mais regiões e a cidade de Valdoria de verdade.
-- 22 e 23/11/2026 (estabilização e correções visuais): relatório e erros em `docs/SESSAO-2026-11-23.md`. Criados `tools/bancada.gd` (fotografa cada item num mundo plano), `scripts/criaturas/olhos.gd` (olhos de 11 espécies), `tools/percurso_real.gd` (agente que anda do Refúgio ao Castelo; **reprovado**, trava em x=-160). Lobo girado e reduzido. Abertos: textura e animação dos animais, mapa aberto (o usuário mandou uma referência ainda não localizada), árvores, drops, vilas, `teste_caca` instável. A recomendação de merge foi retirada.
-- 24 e 25/11/2026 (RUMO NOVO, pedido pelo usuário): o jogo virou MUNDO ABERTO numa ilha de 7,45 x 5,6 km (medida do mapa de Red Dead Redemption 2), cercada de mar com tubarão (`scripts/criaturas/tubarao.gd`, ainda `PLACEHOLDER_Tubarao`). Sem serras nem barreiras. Reino de Valdoria no centro com muralha de 1,1 km, 4 portões, bairros, mercados, quartel, estábulos e ~390 casas de rua. 117 povoados, 52 estradas. Mapa da tecla M interativo, em estilo de mapa antigo (`scripts/interface/mapa_do_mundo.gd` e `pintura_do_mapa.gd`). O chão do mundo é feito em blocos e fica em cache em `user://` (primeira carga depois de mexer na planta: vários minutos). Planta em `scripts/mundo/mundo_dados.gd`; povoados sorteados e Estrada da Costa por `tools/mundo/encher_o_mundo.py`. Ler `docs/mapa-novo/PLANO-REINO-100.md`. Depois de mexer no mundo rodar `tools/teste_mundo.gd` e `tools/auditoria_reino.gd`; fotos com `tools/capturar_reino.gd`, `capturar_mapa.gd` e `capturar_ilha.gd`. A história e as missões antigas continuam ligadas e serão repensadas pelo usuário; NOMES de bairros, mercados e povoados novos são provisórios (a aprovar). As auditorias antigas do corredor (portais, cercos, contínua, percurso real) ainda NÃO foram revistas para a ilha.
-- 25/11/2026 (VALDORIA, estado atual): o reino foi refeito na planta e nas proporções do "Reino de Aethelgard" que o usuário tinha feito em blocos (referência dele, só composição; o estilo continua o do jogo). Penhasco de 64 m no centro (`MundoDados.penhasco`), rampa em volta dele (leste -> face sul -> portão da cidadela a oeste), cidadela branca com 28 torres e Salão do Trono com o Rei Aldren (`scripts/mundo/cidadela.gd`), muralha oval irregular com 3 portões (`muralha_do_reino.gd`), casario em faixas (`casario_do_reino.gd`, casas em MultiMesh com fachadas pintadas de `fachadas.gd`; não se entra nelas), calçamento de pedra (`calcamento_do_reino.gd`), fonte, lampiões e jardins (`vida_das_ruas.gd`), praças como povoados (mercado, quartel, estábulos, catedral, guaritas, lavouras). As regiões antigas `valdoria` e `castelo_imperial` SAÍRAM do mundo (as cenas continuam no projeto). A HISTÓRIA e as missões estão DESLIGADAS por `Jogo.historia = false` (pedido do usuário); os testes antigos da campanha ligam a chave, e os que passavam por Valdoria e pelo Castelo deixaram de valer. Nomes novos foram criados com autorização dele (lista em `docs/mapa-novo/PLANO-REINO-100.md`). Conferir sempre com `tools/teste_mundo.gd`, `tools/auditoria_reino.gd` e `tools/capturar_reino.gd` (fotos em `docs/mapa-novo/reino_v4/`).
-- 26/11/2026: o usuário pediu para ANOTAR, para fazer depois: **uma montanha gigante com dragões, onde o Torin vai domar e montar o primeiro dragão**. Ainda não começou; registro em `docs/mapa-novo/IDEIAS-DO-CRISTIAN.md`. E mudou o método das construções (ver "Construções: uma peça por vez, em bancada"): ordem combinada muralha -> rua -> casa.
-- 25/11/2026 (CONSTRUÇÕES e LIMPEZA): o usuário mudou de novo o ritmo: **construir tudo primeiro e atacar os pontos fracos depois** (não parar para aprovar peça por peça; os fracos ficam anotados em `docs/construcoes/*.md`). Kits novos em `scripts/mundo/`: `pecas_de_construcao.gd` (base), `pecas_da_muralha.gd`, `pecas_da_rua.gd` (calçada, lampiões, placas, barraca, carroça) e `catedral.gd`; a casa do casario ganhou relevo. Cada um tem bancada em `tools/bancada_construcao.gd -- muralha|rua|feira|catedral`. E pediu para **ficar só o que o jogo usa, com os arquivos organizados**: saíram `wip/`, 69 ferramentas antigas e duas cenas de teste (lista em `docs/MAPA-DO-TRABALHO.md`). Por isso as ferramentas citadas acima que não existem mais (`auditoria_mundo`, `auditoria_portais`, `auditoria_continua`, `auditoria_cercos`, `auditoria_buracos`, `auditoria_logica`, `teste_cadeia`, `teste_jogo`, `teste_cena`, `percurso_real`, `capturar_*` antigos) NÃO devem ser procuradas: hoje confere-se com `tools/teste_mundo.gd`, `tools/auditoria_reino.gd`, `tools/capturar_reino.gd` (aceita filtro: `-- 02_ 08_`) e as bancadas. AINDA NÃO saiu (toca muitos arquivos, precisa de plano): o código da história e das missões (`scripts/missoes/`, partes de `scripts/jogo/jogo.gd`) e as cenas `scenes/areas/valdoria.tscn` e `castelo_imperial.tscn`, que o jogo não mostra mais.
-- 26/11/2026 (PEDIDO: "faz tudo, só me fala quando terminar"): o usuário NÃO quer atualizações no meio do trabalho nem mensagens longas: quer só "pronto / não pronto", resumido, e que eu olhe as fotos. Feito nesta rodada: **Montanha dos Dragões** (`MundoDados.montanha`, `montanha_dos_dragoes.gd`, `dragao_selvagem.gd`, `domar_dragao.gd`; o dragão domável chama-se Cinza, nome a aprovar), **salvar o jogo** (`scripts/jogo/salvar_jogo.gd`), **tubarão de verdade** (modelo CC0 baixado com autorização, ver `assets/ASSETS.md`), povoados e postos com peças do kit, marcos e pousos de estrada, cabeceiras de ponte, e os pontos fracos do braseiro, dos vitrais e dos fundos das casas. Saíram as áreas antigas `valdoria` e `castelo_imperial` (cenas e scripts). **O código das missões NÃO saiu**: as seis regiões antigas dependem dele (chefes, eventos, avisos na tela usam `GerenciadorMissoes`); tirar é reescrever essas regiões e fica para quando o usuário decidir a história nova. Com `Jogo.historia = false` o jogador não vê mais resto de missão (sem "!" nos NPCs, quadro de avisos vazio, sem "alimentar o dragão ferido"). O chão do mundo foi recalculado por causa da montanha (primeira abertura no Mac: vários minutos). Falta: som, conferir no Mac, história nova.
-- 26/11/2026 (SOM e TUBARÃO NA ÁGUA, pedido do usuário depois de eu dizer "pode baixar" cedo demais: ele só quer ouvir "pronto" quando estiver pronto de verdade): **som** em `scripts/som/sons.gd` com 22 arquivos gerados por `tools/audio/gerar_sons.py` (passos, espada, acerto, dano, coleta, morte, asa, rugido, aviso, vento, mar, grilos, pássaros, música); testado por contagem em `tools/teste_mundo.gd`, mas NINGUÉM OUVIU (aqui não há saída de áudio). Tubarão fotografado dentro do mar (`docs/validacao/tubarao/`). Continua faltando: tirar o código das missões, conferir no Mac (som, água, desempenho), história nova.
-- 26/11/2026 (SOBREVIVÊNCIA, OFÍCIOS, DRAGÕES NOVOS, GELO, MAPA; pedido "faz tudo aí"): **mapa** refeito como mapa de jogo (`docs/construcoes/mapa.md`). **Fome** e comer com gesto, **armas** (espada curta, machado, espada longa, katana) e **armaduras** de couro e de ferro que aparecem no corpo (`Jogador.equipar`, `Humanoide.vestir`), **moedas** e **comércio com pechincha** nos balcões, **forja** nas bigornas e **mineração** de ferro com picareta (`scripts/jogo/itens.gd`, `painel_de_oficio.gd`, `veio_de_ferro.gd`, `Povoado._balcao/_bigorna/_veio`). **Dragões de 3 modelos novos** CC0 (`DragaoSelvagem.MODELOS`; só os arquivos de dados FBX/DAE entraram; `.blend` baixado NÃO se abre: o sistema bloqueia). **Terras do Gelo** no extremo norte (bioma "gelo", Lago Congelado, Vila Geada, nomes a aprovar). Tudo coberto por `tools/teste_mundo.gd`. Ainda NÃO existe: nadar, cortar árvore, lança, elmo/perneira, neve caindo, dragões que atacam. O `_troca` antigo do mercado saiu (virou balcão).
+**O que o jogo é hoje:** mundo aberto em 3ª pessoa numa ilha de 7,45 x 5,6 km cercada de mar. Sem história: `Jogo.historia = false`. O Torin começa no Refúgio do Pinhal com a espada curta, 2 pães e 15 moedas, e a Fagulha já o acompanha crescida e montável.
+
+**O mundo** (planta em `scripts/mundo/mundo_dados.gd`; quem constrói é `scripts/mundo/mundo.gd`):
+- 6 regiões antigas (cenas em `scenes/areas/`): Refúgio do Pinhal, Pomar Alto, Bosque Velado, Acampamento da Ruptura, Fortaleza de Ferrogris, Cratera de Ignis.
+- Valdoria no centro: muralha com 27 torres e 3 portões (`muralha_do_reino.gd`, kit `pecas_da_muralha.gd`), 610 casas com rua (`casario_do_reino.gd`, `pecas_da_rua.gd`), praça do mercado, catedral (`catedral.gd`), quartel, estábulos, cidadela no penhasco de 64 m com o Rei Aldren (`cidadela.gd`).
+- 119 povoados (vilas, fazendas, cabanas, pescadores, postos; `povoado.gd`), 32 estradas com marcos e pousos, pontes com cabeceiras.
+- Montanha dos Dragões (240 m, trilha em espiral, ninho, 9 dragões de 4 modelos; o cinza do ninho doma-se com 3 carnes e vira a montaria Cinza).
+- Terras do Gelo no extremo norte (bioma "gelo", Lago Congelado, Vila Geada).
+- Mar com tubarão (mata quem passa do raso).
+- O chão é feito em blocos e fica em cache em `user://chao_do_mundo_<hash>.bin`. Mexer em `mundo_dados.gd`, `terreno_mundo.gd`, `terreno.gd`, `costa.gd` ou `biomas.gd` recalcula tudo (aqui, ~7 a 10 minutos); com cache a carga leva ~3 a 4 minutos neste ambiente.
+
+**O que o jogador faz:** andar, correr, pular, rolar, golpear (um golpe só), montar cavalo, Fagulha e Cinza (os dragões voam), caçar e pegar itens, comer (há FOME: cai com o tempo, a zero tira vida), equipar arma (espada curta, machado, espada longa, katana) e armadura (couro, ferro; aparecem no corpo), comprar, vender e pechinchar nos balcões, forjar nas bigornas, minerar ferro com picareta, abrir o mapa (M) e marcar destino, inventário (I). O jogo salva sozinho (`scripts/jogo/salvar_jogo.gd`) e tem som (`scripts/som/sons.gd`).
+
+**Como conferir:** `tools/teste_mundo.gd` (cobre mundo, Valdoria, montanha, gelo, som, salvar, fome, equipar, comércio, forja, mineração), `tools/auditoria_reino.gd`, `tools/capturar_reino.gd`, as bancadas. O estado de cada teste antigo está na tabela de `docs/MAPA-DO-TRABALHO.md`.
+
+**Nunca conferido:** o jogo no Mac do usuário (desempenho, tempo de abertura, cor da água) e o SOM (este ambiente não tem saída de áudio: os sons foram gerados por síntese e só testados por contagem).
+
+**Código que existe e está desligado ou sem uso** (decisão pendente do usuário, não apagar sem ele pedir):
+- A campanha antiga: `scripts/missoes/` e as partes de missão nas 6 regiões e em `scripts/jogo/jogo.gd`. As regiões dependem de `GerenciadorMissoes` para chefes, eventos e avisos na tela; tirar é reescrever essas regiões. As missões do Capítulo V citam Valdoria e o Castelo antigos, que saíram: a campanha não é mais jogável até o fim.
+- `docs/HISTORIA-E-MISSOES.md` descreve essa campanha antiga.
+- Animações `dragon_walk.dae` e `dragon_attack.dae` do dragão de espinhos: instaladas, sem uso.
+
+**Não existe ainda:** nadar (o Torin anda no fundo do mar), cortar árvore, lança, elmo e perneira, neve caindo, dragões que atacam ou reagem, minimapa, mais de um golpe, bloqueio, arco, história nova. Modelo próprio para cervo (usa o do cavalo), arqueiro/guarda/Kaelor (mesmo boneco) e chefes.
+
+**Nomes criados por mim, a aprovar pelo usuário:** Rei Aldren, Conselheiro Meren, o dragão Cinza, Vila Geada, Lago Congelado, Terras do Gelo, Trilha dos Dragões, Trilha do Gelo, e os nomes de bairros, mercados e povoados da ilha (lista em `docs/mapa-novo/PLANO-REINO-100.md`).
+
+**Armadilhas deste ambiente (contêiner sem placa de vídeo):**
+- Classe nova (`class_name`): rodar `godot --headless --path . --import` e depois SEMPRE `git checkout -- assets/animations/ual/ual1_biblioteca.res` (a importação mexe nesse arquivo).
+- Fotos: `xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --resolution 1280x720 --script res://tools/<x>.gd`. A cor do céu e da água não é confiável aqui.
+- Não editar script enquanto uma sequência de testes roda em segundo plano (cada etapa recarrega os scripts).
+- `:=` com valor vindo de Array ou laço sem tipo dá "Cannot infer the type": declarar o tipo.
+- Arquivo `.blend` baixado da internet NÃO se abre (o sistema bloqueia). Modelos baixados entram por FBX, DAE ou glTF, importados pelo Godot.
+- `tools/bancada.gd` grava em `/Users/faresrames/Desktop/ajustes` quando essa pasta existe, senão em `tools/capturas/bancada`.
