@@ -4,7 +4,8 @@ extends SceneTree
 ##   godot --path . --resolution 1280x720 --script res://tools/bancada.gd -- antes [filtro]
 ##   godot --path . --resolution 1280x720 --script res://tools/bancada.gd -- depois [filtro]
 ## `filtro` é um pedaço do nome (ex.: lobo) para refazer só alguns itens. Sem filtro faz todos.
-const SAIDA := "/Users/faresrames/Desktop/ajustes"
+## No Mac do usuário as fotos vão para a Mesa; em qualquer outra máquina, para tools/capturas/bancada dentro do projeto.
+static var SAIDA := "/Users/faresrames/Desktop/ajustes" if DirAccess.dir_exists_absolute("/Users/faresrames/Desktop") else ProjectSettings.globalize_path("res://tools/capturas/bancada")
 const LARG := 560
 const ALT := 420
 
