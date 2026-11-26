@@ -122,6 +122,8 @@ func _construir(k: Vector2i) -> MultiMeshInstance3D:
 			continue
 		if MundoDados.ate_a_muralha(p.x, p.y) < 1.0:
 			continue   # dentro da muralha do reino o chão é calçado de pedra: não cresce capim
+		if p.y < -2000.0 and (p.distance_to(MundoDados.LAGO_CONGELADO) < MundoDados.LAGO_RAIO + 4.0 or Biomas.em(p.x, p.y) == "gelo"):
+			continue   # nas Terras do Gelo o chão é neve e o lago é gelo: sem capim
 		var y := mundo.chao_em(p.x, p.y)   # altura no MUNDO (o Castelo fica no alto: a altura de dentro da região não serve aqui)
 		var s := rng.randf_range(0.5, 1.1)   # moita de 15 a 55 cm: bem abaixo do joelho do Torin
 		var base := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.5), s))

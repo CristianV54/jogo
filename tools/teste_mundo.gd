@@ -216,11 +216,13 @@ func _rodar() -> void:
 					lobos_em_fazenda += 1
 	marcar("Lobos e javalis não nascem dentro de fazenda ou vila", lobos_em_fazenda == 0, str(lobos_em_fazenda))
 	var na_agua := 0
+	var quem_na_agua: Array[String] = []
 	for no in get_nodes_in_group("atingiveis"):
 		var p3: Vector3 = no.global_position
 		if m.regiao_em(p3) == "" and m.terreno.na_agua(p3.x, p3.z, 0.0):
 			na_agua += 1
-	marcar("Ninguém nasceu dentro d'água nos corredores", na_agua == 0, str(na_agua))
+			quem_na_agua.append("%s em (%d, %d)" % [no.name, int(p3.x), int(p3.z)])
+	marcar("Ninguém nasceu dentro d'água nos corredores", na_agua == 0, str(quem_na_agua))
 	# horário: noite -> vão para casa; dia -> voltam ao trabalho
 	var clima: Clima = jogo.clima
 	clima.congelado = true

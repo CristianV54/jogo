@@ -2,7 +2,7 @@ class_name PecasDoGelo
 extends PecasDeConstrucao
 ## Peças das Terras do Gelo: a placa do Lago Congelado e os cristais de gelo. Bancada: tools/bancada_construcao.gd -- gelo.
 
-const GELO := Color(0.62, 0.8, 0.92)
+const GELO := Color(0.7, 0.88, 0.98)
 const GELO_CLARO := Color(0.86, 0.94, 1.0)
 const RACHADURA := Color(0.3, 0.45, 0.6)
 

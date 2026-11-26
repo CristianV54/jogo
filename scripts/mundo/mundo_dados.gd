@@ -339,7 +339,7 @@ static func penhasco(x: float, z: float) -> Array:
 
 ## AS TERRAS DO GELO (pedido do Cristian): o extremo norte da ilha, atrás da Montanha dos Dragões. O bioma "gelo" (ver
 ## Biomas) cobre a faixa; aqui ficam o Lago Congelado e a Vila Geada.
-const LAGO_CONGELADO := Vector2(-420.0, -2420.0)
+const LAGO_CONGELADO := Vector2(-130.0, -2360.0)   # entre a Vila Pedras Altas e a Vila Geada, longe de fazenda e de estrada
 const LAGO_RAIO := 70.0
 
 
